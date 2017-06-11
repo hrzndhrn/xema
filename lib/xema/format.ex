@@ -8,6 +8,8 @@ defmodule Xema.Format do
     hostname: ~r/^(?:[^0-9][a-z0-9]+(?:(?:\-|\.)[a-z0-9]+)*)$/i,
     ipv4: ~r/^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$/,
     json_pointer: ~r/^\/.*$/
+    # uri_reference:
+    # ~r/^(([^:/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?/
   }
 
   @spec validate(atom, String.t) :: :ok | {:error, any}
