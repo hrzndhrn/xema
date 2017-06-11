@@ -75,12 +75,41 @@ defmodule Xema.StringTest do
     schema = Xema.create(:string, pattern: regex)
 
     assert schema.type == :string
-    assert schema.properties == %Xema.String{pattern: ~r/^.+match.+$/}
+    assert schema.properties == %Xema.String{pattern: regex}
 
     assert is_valid?(schema, "a match a")
     refute is_valid?(schema, "a to a")
 
     assert validate(schema, "a match a") == :ok
     assert validate(schema, "a to a") == {:error, {:pattern, regex}}
+  end
+
+  test "string schema with pattern, min length and max length" do
+    regex = ~r/^.+b.+$/
+    schema = Xema.create(:string, pattern: regex, min_length: 3, max_length: 4)
+
+    assert schema.type == :string
+    assert schema.properties == %Xema.String{
+      min_length: 3,
+      max_length: 4,
+      pattern: regex
+    }
+
+    refute is_valid?(schema, "a")
+    refute is_valid?(schema, "ab")
+    assert is_valid?(schema, "abc")
+    refute is_valid?(schema, "axc")
+    assert is_valid?(schema, "abcd")
+    refute is_valid?(schema, "axcd")
+    refute is_valid?(schema, "abcde")
+    refute is_valid?(schema, "axcde")
+
+    assert validate(schema, "a") == {:error, {:min_length, 3}}
+    assert validate(schema, "ab") == {:error, {:min_length, 3}}
+    assert validate(schema, "abc") == :ok
+    assert validate(schema, "axc") == {:error, {:pattern, regex}}
+    assert validate(schema, "abcd") == :ok
+    assert validate(schema, "axcd") == {:error, {:pattern, regex}}
+    assert validate(schema, "abcde") == {:error, {:max_length, 4}}
   end
 end
