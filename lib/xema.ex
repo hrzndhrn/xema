@@ -1,5 +1,5 @@
 defmodule Xema do
-  @doc """
+  @moduledoc """
   Xema ...
   """
 
@@ -17,16 +17,26 @@ defmodule Xema do
   }
 
   @callback is_valid?(%Xema{}, any) :: boolean
+  @callback validate(%Xema{}, any) :: :ok | {:error, any}
   @callback properties(any) :: struct
 
-  def create(), do: %Xema{}
-  def create(:string, properties \\ []) do
-    %Xema{type: :string, properties: Xema.String.properties(properties)}
-  end
+  def create, do: %Xema{}
 
   for {type, xmodule} <- Map.to_list(@types) do
+    def create(unquote(type)), do: create(unquote(type), [])
+    def create(unquote(type), properties) do
+      %Xema{
+        type: unquote(type),
+        properties: unquote(xmodule).properties(properties)
+      }
+    end
+
     def is_valid?(%Xema{type: unquote(type)} = schema, value) do
-      unquote(xmodule).is_valid?(schema, value)
+      unquote(xmodule).is_valid?(schema.properties, value)
+    end
+
+    def validate(%Xema{type: unquote(type)} = schema, value) do
+      unquote(xmodule).validate(schema.properties, value)
     end
   end
 end
