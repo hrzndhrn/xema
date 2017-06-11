@@ -3,14 +3,20 @@ defmodule Xema.Enum do
   TODO
   """
 
+  defstruct list: []
+
   @behaviour Xema
 
   @spec properties(list) :: nil
-  def properties(_), do: nil
+  def properties(properties), do: struct(%Xema.Enum{}, properties)
 
-  @spec is_valid?(nil, any) :: boolean
-  def is_valid?(_, _), do: false
+  @spec is_valid?(%Xema{}, any) :: boolean
+  def is_valid?(%Xema.Enum{list: list}, item), do: Enum.member?(list, item)
 
-  @spec validate(nil, any) :: :ok | {:error, any}
-  def validate(_, _), do: {:error, :not_implemented}
+  @spec validate(%Xema{}, any) :: :ok | {:error, any}
+  def validate(%Xema.Enum{list: list}, item) do
+    if Enum.member?(list, item),
+      do: :ok,
+      else: {:error, %{enum: list}}
+  end
 end

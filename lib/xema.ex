@@ -13,6 +13,8 @@ defmodule Xema do
     object: Xema.Object,
     array: Xema.Array,
     number: Xema.Number,
+    integer: Xema.Integer,
+    float: Xema.Float,
     string: Xema.String,
     enum: Xema.Enum
   }

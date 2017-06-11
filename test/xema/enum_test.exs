@@ -4,7 +4,7 @@ defmodule Xema.EnumTest do
 
   import Xema, only: [is_valid?: 2, validate: 2]
 
-  test "any schema" do
+  test "enum schema" do
     list = ["a", 1]
     schema = Xema.create(:enum, list: list)
 
@@ -18,9 +18,9 @@ defmodule Xema.EnumTest do
     refute is_valid?(schema, %{bla: 1})
 
     assert validate(schema, "a") == :ok
-    assert validate(schema, "b") == {:error, {:enum, list}}
+    assert validate(schema, "b") == {:error, %{enum: list}}
     assert validate(schema, 1) == :ok
-    assert validate(schema, 2) == {:error, {:enum, list}}
-    assert validate(schema, %{bla: 1}) == {:error, {:enum, list}}
+    assert validate(schema, 2) == {:error, %{enum: list}}
+    assert validate(schema, %{bla: 1}) == {:error, %{enum: list}}
   end
 end

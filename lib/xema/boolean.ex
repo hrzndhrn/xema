@@ -16,5 +16,5 @@ defmodule Xema.Boolean do
   @spec validate(nil, any) :: :ok | {:error, any}
   def validate(_, true), do: :ok
   def validate(_, false), do: :ok
-  def validate(_, _), do: {:error, :boolean}
+  def validate(_, _), do: {:error, %{type: :boolean}}
 end

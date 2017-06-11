@@ -14,5 +14,5 @@ defmodule Xema.Null do
 
   @spec validate(nil, any) :: :ok | {:error, any}
   def validate(_properties, nil), do: :ok
-  def validate(_properties, _value), do: {:error, :null}
+  def validate(_properties, _value), do: {:error, %{type: :null}}
 end

@@ -4,7 +4,7 @@ defmodule Xema.BooleanTest do
 
   import Xema, only: [is_valid?: 2, validate: 2]
 
-  test "any schema" do
+  test "boolean schema" do
     schema = Xema.create(:boolean)
 
     assert schema.type == :boolean
@@ -18,6 +18,6 @@ defmodule Xema.BooleanTest do
 
     assert validate(schema, true) == :ok
     assert validate(schema, false) == :ok
-    assert validate(schema, %{bla: 1}) == {:error, :boolean}
+    assert validate(schema, %{bla: 1}) == {:error, %{type: :boolean}}
   end
 end

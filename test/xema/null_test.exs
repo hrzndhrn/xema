@@ -4,7 +4,7 @@ defmodule Xema.NullTest do
 
   import Xema, only: [is_valid?: 2, validate: 2]
 
-  test "any schema" do
+  test "null schema" do
     schema = Xema.create(:null)
 
     assert schema.type == :null
@@ -15,7 +15,7 @@ defmodule Xema.NullTest do
     refute is_valid?(schema, %{bla: 1})
 
     assert validate(schema, nil) == :ok
-    assert validate(schema, 1) == {:error, :null}
-    assert validate(schema, %{bla: 1}) == {:error, :null}
+    assert validate(schema, 1) == {:error, %{type: :null}}
+    assert validate(schema, %{bla: 1}) == {:error, %{type: :null}}
   end
 end
