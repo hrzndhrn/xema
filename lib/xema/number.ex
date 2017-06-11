@@ -74,8 +74,6 @@ defmodule Xema.Number do
     do: if multiple_of?(number, multiple_of),
           do: :ok,
           else: {:error, %{multiple_of: multiple_of}}
-  defp multiple_of?(a, b) when is_integer(a) and is_integer(b),
-    do: rem(a, b) == 0
   defp multiple_of?(a, b) do
     x = a / b
     x - Float.floor(x) == 0
