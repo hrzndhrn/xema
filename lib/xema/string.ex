@@ -3,11 +3,14 @@ defmodule Xema.String do
   TODO
   """
 
+  alias Xema.Format
+
   @behaviour Xema
 
   defstruct max_length: nil,
             min_length: nil,
-            pattern: nil
+            pattern: nil,
+            format: nil
 
   @spec properties(list) :: %Xema{}
   def properties([]), do: %Xema.String{}
@@ -23,6 +26,7 @@ defmodule Xema.String do
          :ok <- min_length?(properties.min_length, length),
          :ok <- max_length?(properties.max_length, length),
          :ok <- pattern?(properties.pattern, string),
+         :ok <- format?(properties.format, string),
       do: :ok
   end
 
@@ -50,4 +54,8 @@ defmodule Xema.String do
     do: if Regex.match?(pattern, string),
           do: :ok,
           else: {:error, {:pattern, pattern}}
+
+  defp format?(nil, _string), do: :ok
+
+  defp format?(format, string), do: Format.validate(format, string)
 end
