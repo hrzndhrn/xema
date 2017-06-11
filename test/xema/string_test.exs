@@ -112,4 +112,11 @@ defmodule Xema.StringTest do
     assert validate(schema, "axcd") == {:error, {:pattern, regex}}
     assert validate(schema, "abcde") == {:error, {:max_length, 4}}
   end
+
+  test "string schema with format 'email'" do
+    schema = Xema.create(:string, format: :email)
+
+    assert schema.type == :string
+    assert schema.properties == %Xema.String{format: :email}
+  end
 end
