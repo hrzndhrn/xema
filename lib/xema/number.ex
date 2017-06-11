@@ -3,6 +3,8 @@ defmodule Xema.Number do
   TODO
   """
 
+  alias Xema.Helper
+
   @behaviour Xema
 
   defstruct minimum: nil,
@@ -31,24 +33,10 @@ defmodule Xema.Number do
           do: :ok,
           else: {:error, %{type: :number}}
 
-  defp minimum?(%Xema.Number{minimum: nil}, _number), do: :ok
   defp minimum?(
-    %Xema.Number{minimum: minimum, exclusive_minimum: true},
+    %Xema.Number{minimum: minimum, exclusive_minimum: exclusive_minimum},
     number
-  ) do
-    cond do
-      number > minimum ->
-        :ok
-      number == minimum ->
-        {:error, %{minimum: minimum, exclusive_minimum: true}}
-      true ->
-        {:error, %{minimum: minimum}}
-    end
-  end
-  defp minimum?(%Xema.Number{minimum: minimum}, number),
-    do: if number >= minimum,
-          do: :ok,
-          else: {:error, %{minimum: minimum}}
+  ), do: Helper.Number.minimum?(minimum, exclusive_minimum, number)
 
   defp maximum?(%Xema.Number{maximum: nil}, _number), do: :ok
   defp maximum?(
