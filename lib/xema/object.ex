@@ -5,9 +5,12 @@ defmodule Xema.Object do
 
   @behaviour Xema
 
+  @spec properties(list) :: nil
   def properties(_), do: nil
 
-  def is_valid?(_, _), do: false
+  @spec is_valid?(nil, any) :: boolean
+  def is_valid?(_, _), do: true
 
-  def validate(_, _), do: {:error, :not_implemented}
+  @spec validate(nil, any) :: :ok | {:error, any}
+  def validate(_, _), do: :ok
 end

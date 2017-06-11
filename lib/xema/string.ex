@@ -9,12 +9,14 @@ defmodule Xema.String do
             min_length: nil,
             pattern: nil
 
+  @spec properties(list) :: %Xema{}
   def properties([]), do: %Xema.String{}
-
   def properties(properties), do: struct(Xema.String, properties)
 
+  @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(properties, string), do: validate(properties, string) == :ok
 
+  @spec validate(%Xema{}, any) :: :ok | {:error, any}
   def validate(properties, string) do
     with :ok <- type?(string),
          length <- String.length(string),

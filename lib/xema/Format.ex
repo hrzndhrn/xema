@@ -7,7 +7,9 @@ defmodule Xema.Format do
     email: ~r/.+@.*\..+/
   }
 
+  @spec match?(atom, String.t) :: boolean
   def match?(format, string), do: Regex.match?(@formats[format], string)
 
-  def member?(format), do: Map.has_key?(@fromats, format)
+  @spec member?(atom) :: boolean
+  def member?(format), do: Map.has_key?(@formats, format)
 end
