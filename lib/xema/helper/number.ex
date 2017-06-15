@@ -3,48 +3,42 @@ defmodule Xema.Helper.Number do
   TODO
   """
 
-  def minimum?(nil, nil, _number), do: :ok
-  def minimum?(minimum, true, number) do
-    cond do
-      number > minimum ->
-        :ok
-      number == minimum ->
-        {:error, %{minimum: minimum, exclusive_minimum: true}}
-      true ->
-        {:error, %{minimum: minimum}}
-    end
-  end
-  def minimum?(minimum, nil, number),
-    do: if number >= minimum,
-          do: :ok,
-          else: {:error, %{minimum: minimum}}
+  def minimum?(minimum, _exclusive, number)
+    when number > minimum,
+    do: :ok
+  def minimum?(minimum, nil, number)
+    when number == minimum,
+    do: :ok
+  def minimum?(minimum, false, number)
+    when number == minimum,
+    do: :ok
+  def minimum?(minimum, true, number)
+    when number == minimum,
+    do: {:error, %{minimum: minimum, exclusive_minimum: true}}
+  def minimum?(minimum, _exclusive, _number),
+    do: {:error, %{minimum: minimum}}
 
-  defp maximum?(%Xema.Number{maximum: nil}, _number), do: :ok
-  defp maximum?(
-    %Xema.Number{maximum: maximum, exclusive_maximum: true},
-    number
-  ) do
-    cond do
-      number < maximum ->
-        :ok
-      number == maximum ->
-        {:error, %{maximum: maximum, exclusive_maximum: true}}
-      true ->
-        {:error, %{maximum: maximum}}
-    end
-  end
-  defp maximum?(%Xema.Number{maximum: maximum}, number),
-    do: if number <= maximum,
-          do: :ok,
-          else: {:error, %{maximum: maximum}}
+  def maximum?(maximum, _exclusive, number)
+    when number < maximum,
+    do: :ok
+  def maximum?(maximum, nil, number)
+    when number == maximum,
+    do: :ok
+  def maximum?(maximum, false, number)
+    when number == maximum,
+    do: :ok
+  def maximum?(maximum, true, number)
+    when number == maximum,
+    do: {:error, %{maximum: maximum, exclusive_maximum: true}}
+  def maximum?(maximum, _exclusive, _number),
+    do: {:error, %{maximum: maximum}}
 
-  defp multiple_of?(%Xema.Number{multiple_of: nil}, _number), do: :ok
-  defp multiple_of?(%Xema.Number{multiple_of: multiple_of}, number),
-    do: if multiple_of?(number, multiple_of),
+  def multiple_of?(multiple_of, number),
+    do: if _multiple_of?(multiple_of, number),
           do: :ok,
           else: {:error, %{multiple_of: multiple_of}}
-  defp multiple_of?(a, b) do
-    x = a / b
+  defp _multiple_of?(a, b) do
+    x = b / a
     x - Float.floor(x) == 0
   end
 end
