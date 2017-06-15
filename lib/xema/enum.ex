@@ -8,7 +8,7 @@ defmodule Xema.Enum do
   @behaviour Xema
 
   @spec properties(list) :: nil
-  def properties(properties), do: struct(%Xema.Enum{}, properties)
+  def properties(list), do: %Xema.Enum{list: list}
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(%Xema.Enum{list: list}, item), do: Enum.member?(list, item)

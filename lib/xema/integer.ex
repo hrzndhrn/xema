@@ -9,7 +9,8 @@ defmodule Xema.Integer do
             maximum: nil,
             exclusive_maximum: nil,
             exclusive_minimum: nil,
-            multiple_of: nil
+            multiple_of: nil,
+            enum: nil
 
   alias Xema.Integer
   alias Xema.Validator.Number, as: Validator

@@ -6,7 +6,7 @@ defmodule Xema.EnumTest do
 
   test "enum schema" do
     list = ["a", 1]
-    schema = Xema.create(:enum, list: list)
+    schema = Xema.create(:enum, list)
 
     assert schema.type == :enum
     assert schema.properties == %Xema.Enum{list: list}
