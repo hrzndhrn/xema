@@ -11,6 +11,7 @@ defmodule Xema.IntegerTest do
     assert schema.type == :integer
     assert schema.properties == %Xema.Integer{}
 
+    assert validate(schema, 1) == :ok
     assert is_valid?(schema, 1)
     refute is_valid?(schema, 1.1)
     refute is_valid?(schema, "1")

@@ -3,9 +3,6 @@ defmodule Xema.Integer do
   TODO
   """
 
-  alias Xema.Helper.Number, as: Integer
-  #use Xema.Helper.Number
-
   @behaviour Xema
 
   defstruct minimum: nil,
@@ -14,8 +11,11 @@ defmodule Xema.Integer do
             exclusive_minimum: nil,
             multiple_of: nil
 
+  alias Xema.Integer
+  alias Xema.Validator.Number, as: Validator
+
   @spec properties(list) :: nil
-  def properties(properties), do: struct(%Xema.Integer{}, properties)
+  def properties(properties), do: struct(%Integer{}, properties)
 
   @spec is_valid?(nil, any) :: boolean
   def is_valid?(properties, number), do: validate(properties, number) == :ok
@@ -32,20 +32,19 @@ defmodule Xema.Integer do
   defp type?(number) when is_integer(number), do: :ok
   defp type?(_number), do: {:error, %{type: :integer}}
 
-  # defp minimum?(%Xema.Integer{minimum: nil}, _number), do: :ok
-  defp minimum?(%{minimum: nil}, _number), do: :ok
+  defp minimum?(%Integer{minimum: nil}, _number), do: :ok
   defp minimum?(
-    %{minimum: minimum, exclusive_minimum: exclusive_minimum},
+    %Xema.Integer{minimum: minimum, exclusive_minimum: exclusive_minimum},
     number
-  ), do: Integer.minimum?(minimum, exclusive_minimum, number)
+  ), do: Validator.minimum?(minimum, exclusive_minimum, number)
 
-  defp maximum?(%{maximum: nil}, _number), do: :ok
+  defp maximum?(%Integer{maximum: nil}, _number), do: :ok
   defp maximum?(
-    %{maximum: maximum, exclusive_maximum: exclusive_maximum},
+    %Xema.Integer{maximum: maximum, exclusive_maximum: exclusive_maximum},
     number
-  ), do: Integer.maximum?(maximum, exclusive_maximum, number)
+  ), do: Validator.maximum?(maximum, exclusive_maximum, number)
 
-  defp multiple_of?(%{multiple_of: nil}, _number), do: :ok
-  defp multiple_of?(%{multiple_of: multiple_of}, number),
-    do: Integer.multiple_of?(multiple_of, number)
+  defp multiple_of?(%Xema.Integer{multiple_of: nil}, _number), do: :ok
+  defp multiple_of?(%Xema.Integer{multiple_of: multiple_of}, number),
+    do: Validator.multiple_of?(multiple_of, number)
 end

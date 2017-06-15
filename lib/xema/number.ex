@@ -3,7 +3,8 @@ defmodule Xema.Number do
   TODO
   """
 
-  alias Xema.Helper
+  alias Xema.Number
+  alias Xema.Validator.Number, as: Validator
 
   @behaviour Xema
 
@@ -14,7 +15,7 @@ defmodule Xema.Number do
             multiple_of: nil
 
   @spec properties(list) :: nil
-  def properties(properties), do: struct(%Xema.Number{}, properties)
+  def properties(properties), do: struct(%Number{}, properties)
 
   @spec is_valid?(nil, any) :: boolean
   def is_valid?(properties, number), do: validate(properties, number) == :ok
@@ -29,23 +30,23 @@ defmodule Xema.Number do
   end
 
   defp type?(number)
-    when is_integer(number) or is_float(number),
+    when is_number(number),
     do: :ok
   defp type?(_number), do: {:error, %{type: :number}}
 
-  defp minimum?(%Xema.Number{minimum: nil}, _number), do: :ok
+  defp minimum?(%Number{minimum: nil}, _number), do: :ok
   defp minimum?(
     %Xema.Number{minimum: minimum, exclusive_minimum: exclusive_minimum},
     number
-  ), do: Helper.Number.minimum?(minimum, exclusive_minimum, number)
+  ), do: Validator.minimum?(minimum, exclusive_minimum, number)
 
-  defp maximum?(%Xema.Number{maximum: nil}, _number), do: :ok
+  defp maximum?(%Number{maximum: nil}, _number), do: :ok
   defp maximum?(
     %Xema.Number{maximum: maximum, exclusive_maximum: exclusive_maximum},
     number
-  ), do: Helper.Number.maximum?(maximum, exclusive_maximum, number)
+  ), do: Validator.maximum?(maximum, exclusive_maximum, number)
 
-  defp multiple_of?(%Xema.Number{multiple_of: nil}, number), do: :ok
-  defp multiple_of?(%Xema.Number{multiple_of: multiple_of}, number),
-    do: Helper.Number.multiple_of?(multiple_of, number)
+  defp multiple_of?(%Number{multiple_of: nil}, _number), do: :ok
+  defp multiple_of?(%Number{multiple_of: multiple_of}, number),
+    do: Validator.multiple_of?(multiple_of, number)
 end
