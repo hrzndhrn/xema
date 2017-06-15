@@ -28,11 +28,12 @@ defmodule Xema.Number do
       do: :ok
   end
 
-  defp type?(number),
-    do: if is_integer(number) || is_float(number),
-          do: :ok,
-          else: {:error, %{type: :number}}
+  defp type?(number)
+    when is_integer(number) or is_float(number),
+    do: :ok
+  defp type?(_number), do: {:error, %{type: :number}}
 
+  defp minimum?(%Xema.Number{minimum: nil}, _number), do: :ok
   defp minimum?(
     %Xema.Number{minimum: minimum, exclusive_minimum: exclusive_minimum},
     number
@@ -40,30 +41,11 @@ defmodule Xema.Number do
 
   defp maximum?(%Xema.Number{maximum: nil}, _number), do: :ok
   defp maximum?(
-    %Xema.Number{maximum: maximum, exclusive_maximum: true},
+    %Xema.Number{maximum: maximum, exclusive_maximum: exclusive_maximum},
     number
-  ) do
-    cond do
-      number < maximum ->
-        :ok
-      number == maximum ->
-        {:error, %{maximum: maximum, exclusive_maximum: true}}
-      true ->
-        {:error, %{maximum: maximum}}
-    end
-  end
-  defp maximum?(%Xema.Number{maximum: maximum}, number),
-    do: if number <= maximum,
-          do: :ok,
-          else: {:error, %{maximum: maximum}}
+  ), do: Helper.Number.maximum?(maximum, exclusive_maximum, number)
 
-  defp multiple_of?(%Xema.Number{multiple_of: nil}, _number), do: :ok
+  defp multiple_of?(%Xema.Number{multiple_of: nil}, number), do: :ok
   defp multiple_of?(%Xema.Number{multiple_of: multiple_of}, number),
-    do: if multiple_of?(number, multiple_of),
-          do: :ok,
-          else: {:error, %{multiple_of: multiple_of}}
-  defp multiple_of?(a, b) do
-    x = a / b
-    x - Float.floor(x) == 0
-  end
+    do: Helper.Number.multiple_of?(multiple_of, number)
 end
