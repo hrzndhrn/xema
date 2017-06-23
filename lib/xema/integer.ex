@@ -27,6 +27,7 @@ defmodule Xema.Integer do
          :ok <- minimum?(properties, number),
          :ok <- maximum?(properties, number),
          :ok <- multiple_of?(properties, number),
+         :ok <- enum?(properties, number),
       do: :ok
   end
 
@@ -48,4 +49,8 @@ defmodule Xema.Integer do
   defp multiple_of?(%Xema.Integer{multiple_of: nil}, _number), do: :ok
   defp multiple_of?(%Xema.Integer{multiple_of: multiple_of}, number),
     do: Validator.multiple_of?(multiple_of, number)
+
+  defp enum?(%Xema.Integer{enum: nil}, _number), do: :ok
+  defp enum?(%Xema.Integer{enum: enum}, number),
+    do: Xema.validate(enum, number)
 end
