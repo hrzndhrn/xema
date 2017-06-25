@@ -13,7 +13,9 @@ defmodule Xema.Integer do
             enum: nil
 
   alias Xema.Integer
-  alias Xema.Validator.Number, as: Validator
+
+  use Xema.Enum
+  use Xema.Validator.Number
 
   @spec properties(list) :: nil
   def properties(properties), do: struct(%Integer{}, properties)
@@ -33,24 +35,4 @@ defmodule Xema.Integer do
 
   defp type?(number) when is_integer(number), do: :ok
   defp type?(_number), do: {:error, %{type: :integer}}
-
-  defp minimum?(%Integer{minimum: nil}, _number), do: :ok
-  defp minimum?(
-    %Xema.Integer{minimum: minimum, exclusive_minimum: exclusive_minimum},
-    number
-  ), do: Validator.minimum?(minimum, exclusive_minimum, number)
-
-  defp maximum?(%Integer{maximum: nil}, _number), do: :ok
-  defp maximum?(
-    %Xema.Integer{maximum: maximum, exclusive_maximum: exclusive_maximum},
-    number
-  ), do: Validator.maximum?(maximum, exclusive_maximum, number)
-
-  defp multiple_of?(%Xema.Integer{multiple_of: nil}, _number), do: :ok
-  defp multiple_of?(%Xema.Integer{multiple_of: multiple_of}, number),
-    do: Validator.multiple_of?(multiple_of, number)
-
-  defp enum?(%Xema.Integer{enum: nil}, _number), do: :ok
-  defp enum?(%Xema.Integer{enum: enum}, number),
-    do: Xema.validate(enum, number)
 end
