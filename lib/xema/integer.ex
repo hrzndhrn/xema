@@ -20,10 +20,10 @@ defmodule Xema.Integer do
   @spec properties(list) :: nil
   def properties(properties), do: struct(%Integer{}, properties)
 
-  @spec is_valid?(nil, any) :: boolean
+  @spec is_valid?(%Integer{}, any) :: boolean
   def is_valid?(properties, number), do: validate(properties, number) == :ok
 
-  @spec validate(nil, any) :: :ok | {:error, any}
+  @spec validate(%Integer{}, any) :: :ok | {:error, any}
   def validate(properties, number) do
     with :ok <- type?(number),
          :ok <- minimum?(properties, number),

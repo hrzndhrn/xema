@@ -3,6 +3,14 @@ defmodule Xema.Enum do
   TODO
   """
 
+  defmacro __using__(_) do
+    quote do
+      defp enum?(%{enum: nil}, _value), do: :ok
+      defp enum?(%{enum: enum}, value),
+        do: Xema.validate(enum, value)
+    end
+  end
+
   defstruct list: []
 
   @behaviour Xema
@@ -18,13 +26,5 @@ defmodule Xema.Enum do
     if Enum.member?(list, item),
       do: :ok,
       else: {:error, %{enum: list}}
-  end
-
-  defmacro __using__(_) do
-    quote do
-      defp enum?(%{enum: nil}, _value), do: :ok
-      defp enum?(%{enum: enum}, value),
-        do: Xema.validate(enum, value)
-    end
   end
 end

@@ -8,7 +8,7 @@ defmodule Xema.AnyTest do
     schema = Xema.create()
 
     assert schema.type == :any
-    assert schema.properties == nil
+    assert schema.properties.enum == nil
 
     assert is_valid?(schema, "foo")
     assert is_valid?(schema, 1)
