@@ -9,7 +9,7 @@ defmodule Xema.IntegerTest do
     schema = Xema.create(:integer)
 
     assert schema.type == :integer
-    assert schema.properties == %Xema.Integer{}
+    assert schema.keywords == %Xema.Integer{}
 
     assert validate(schema, 1) == :ok
     assert is_valid?(schema, 1)
@@ -29,7 +29,7 @@ defmodule Xema.IntegerTest do
     schema = Xema.create(:integer, minimum: 2)
 
     assert schema.type == :integer
-    assert schema.properties == %Xema.Integer{minimum: 2}
+    assert schema.keywords == %Xema.Integer{minimum: 2}
 
     refute is_valid?(schema, 1)
     assert is_valid?(schema, 2)
@@ -46,7 +46,7 @@ defmodule Xema.IntegerTest do
     schema = Xema.create(:integer, minimum: 2, exclusive_minimum: true)
 
     assert schema.type == :integer
-    assert schema.properties == %Xema.Integer{
+    assert schema.keywords == %Xema.Integer{
       minimum: 2,
       exclusive_minimum: true
     }
@@ -67,7 +67,7 @@ defmodule Xema.IntegerTest do
     schema = Xema.create(:integer, maximum: 2)
 
     assert schema.type == :integer
-    assert schema.properties == %Xema.Integer{
+    assert schema.keywords == %Xema.Integer{
       maximum: 2,
       exclusive_maximum: nil
     }
@@ -87,7 +87,7 @@ defmodule Xema.IntegerTest do
     schema = Xema.create(:integer, maximum: 2, exclusive_maximum: true)
 
     assert schema.type == :integer
-    assert schema.properties == %Xema.Integer{
+    assert schema.keywords == %Xema.Integer{
       maximum: 2,
       exclusive_maximum: true
     }
@@ -108,7 +108,7 @@ defmodule Xema.IntegerTest do
     schema = Xema.create(:integer, multiple_of: 2)
 
     assert schema.type == :integer
-    assert schema.properties == %Xema.Integer{multiple_of: 2}
+    assert schema.keywords == %Xema.Integer{multiple_of: 2}
 
     assert is_valid?(schema, 2)
     refute is_valid?(schema, 3)

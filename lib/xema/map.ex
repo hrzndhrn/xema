@@ -10,18 +10,18 @@ defmodule Xema.Map do
 
   alias Xema.Map
 
-  @spec properties(list) :: %Map{}
-  def properties(properties), do: struct(%Map{}, properties)
+  @spec keywords(list) :: %Map{}
+  def keywords(keywords), do: struct(%Map{}, keywords)
 
   @spec is_valid?(%Map{}, any) :: boolean
-  def is_valid?(properties, map), do: validate(properties, map) == :ok
+  def is_valid?(keywords, map), do: validate(keywords, map) == :ok
 
   @spec validate(%Map{}, any) :: :ok | {:error, atom, any}
-  def validate(properties, map) do
-    with :ok <- type(properties, map),
+  def validate(keywords, map) do
+    with :ok <- type(keywords, map),
       do: :ok
   end
 
-  defp type(_properties, map) when is_map(map), do: :ok
-  defp type(properties, _map), do: {:error, :wrong_type, %{type: properties.as}}
+  defp type(_keywords, map) when is_map(map), do: :ok
+  defp type(keywords, _map), do: {:error, :wrong_type, %{type: keywords.as}}
 end

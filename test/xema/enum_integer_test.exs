@@ -12,9 +12,9 @@ defmodule Xema.EnumIntegerTest do
     %{schema: schema, enum: enum, list: list}
   end
 
-  test "type and properties", %{schema: schema, enum: enum} do
+  test "type and keywords", %{schema: schema, enum: enum} do
     assert schema.type == :integer
-    assert schema.properties.enum == enum
+    assert schema.keywords.enum == enum
   end
 
   describe "validate/2" do

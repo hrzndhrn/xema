@@ -9,7 +9,7 @@ defmodule Xema.EnumTest do
     schema = Xema.create(:enum, list)
 
     assert schema.type == :enum
-    assert schema.properties == %Xema.Enum{list: list}
+    assert schema.keywords == %Xema.Enum{list: list}
 
     assert is_valid?(schema, "a")
     refute is_valid?(schema, "b")

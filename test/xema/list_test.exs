@@ -21,9 +21,9 @@ defmodule Xema.ListTest do
     }
   end
 
-  test "type and properties", schemas do
+  test "type and keywords", schemas do
     assert schemas.array.type == :list
-    assert schemas.array.properties == %List{items: nil}
+    assert schemas.array.keywords == %List{items: nil}
 
     assert schemas.length.type == :list
   end

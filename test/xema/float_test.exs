@@ -8,7 +8,7 @@ defmodule Xema.FloatTest do
     schema = Xema.create(:float, minimum: 1.2)
 
     assert schema.type == :float
-    assert schema.properties == %Xema.Float{minimum: 1.2}
+    assert schema.keywords == %Xema.Float{minimum: 1.2}
 
     refute is_valid?(schema, 1.1)
     assert is_valid?(schema, 1.2)
@@ -25,7 +25,7 @@ defmodule Xema.FloatTest do
     schema = Xema.create(:float, minimum: 1.2, exclusive_minimum: true)
 
     assert schema.type == :float
-    assert schema.properties == %Xema.Float{
+    assert schema.keywords == %Xema.Float{
       minimum: 1.2,
       exclusive_minimum: true
     }
@@ -46,7 +46,7 @@ defmodule Xema.FloatTest do
     schema = Xema.create(:float, maximum: 1.2)
 
     assert schema.type == :float
-    assert schema.properties == %Xema.Float{
+    assert schema.keywords == %Xema.Float{
       maximum: 1.2,
       exclusive_maximum: nil
     }
@@ -66,7 +66,7 @@ defmodule Xema.FloatTest do
     schema = Xema.create(:float, maximum: 1.2, exclusive_maximum: true)
 
     assert schema.type == :float
-    assert schema.properties == %Xema.Float{
+    assert schema.keywords == %Xema.Float{
       maximum: 1.2,
       exclusive_maximum: true
     }
@@ -87,7 +87,7 @@ defmodule Xema.FloatTest do
     schema = Xema.create(:float, multiple_of: 1.1)
 
     assert schema.type == :float
-    assert schema.properties == %Xema.Float{multiple_of: 1.1}
+    assert schema.keywords == %Xema.Float{multiple_of: 1.1}
 
     assert is_valid?(schema, 2.2)
     refute is_valid?(schema, 3.1)

@@ -17,19 +17,19 @@ defmodule Xema.Integer do
   use Xema.Enum
   use Xema.Validator.Number
 
-  @spec properties(list) :: nil
-  def properties(properties), do: struct(%Integer{}, properties)
+  @spec keywords(list) :: nil
+  def keywords(keywords), do: struct(%Integer{}, keywords)
 
   @spec is_valid?(%Integer{}, any) :: boolean
-  def is_valid?(properties, number), do: validate(properties, number) == :ok
+  def is_valid?(keywords, number), do: validate(keywords, number) == :ok
 
   @spec validate(%Integer{}, any) :: :ok | {:error, any}
-  def validate(properties, number) do
+  def validate(keywords, number) do
     with :ok <- type(number),
-         :ok <- minimum(properties, number),
-         :ok <- maximum(properties, number),
-         :ok <- multiple_of(properties, number),
-         :ok <- enum(properties, number),
+         :ok <- minimum(keywords, number),
+         :ok <- maximum(keywords, number),
+         :ok <- multiple_of(keywords, number),
+         :ok <- enum(keywords, number),
       do: :ok
   end
 

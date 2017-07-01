@@ -5,8 +5,8 @@ defmodule Xema.Boolean do
 
   @behaviour Xema
 
-  @spec properties(list) :: nil
-  def properties(_), do: nil
+  @spec keywords(list) :: nil
+  def keywords(_), do: nil
 
   @spec is_valid?(nil, any) :: boolean
   def is_valid?(_, true), do: true

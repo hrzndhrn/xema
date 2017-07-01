@@ -14,12 +14,12 @@ defmodule Xema.MapTest do
     }
   end
 
-  test "type and properties", schemas do
+  test "type and keywords", schemas do
     assert schemas.map.type == :map
-    assert schemas.map.properties == %Map{}
+    assert schemas.map.keywords == %Map{}
 
     assert schemas.object.type == :map
-    assert schemas.object.properties.as == :object
+    assert schemas.object.keywords.as == :object
   end
 
   describe "validate/2" do

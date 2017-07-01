@@ -14,37 +14,37 @@ defmodule Xema.List do
 
   alias Xema.List
 
-  @spec properties(list) :: %List{}
-  def properties(properties), do: struct(%List{}, properties)
+  @spec keywords(list) :: %List{}
+  def keywords(keywords), do: struct(%List{}, keywords)
 
   @spec is_valid?(%List{}, any) :: boolean
-  def is_valid?(properties, list), do: validate(properties, list) == :ok
+  def is_valid?(keywords, list), do: validate(keywords, list) == :ok
 
   @spec validate(%List{}, any) :: :ok | {:error, atom, any}
-  def validate(properties, list) do
-    with :ok <- type(properties, list),
-         :ok <- min_items(properties, list),
-         :ok <- max_items(properties, list),
-         :ok <- items(properties, list),
-         :ok <- unique(properties, list),
+  def validate(keywords, list) do
+    with :ok <- type(keywords, list),
+         :ok <- min_items(keywords, list),
+         :ok <- max_items(keywords, list),
+         :ok <- items(keywords, list),
+         :ok <- unique(keywords, list),
       do: :ok
   end
 
-  defp type(_properties, list) when is_list(list), do: :ok
-  defp type(properties, _list),
-    do: {:error, :wrong_type, %{type: properties.as}}
+  defp type(_keywords, list) when is_list(list), do: :ok
+  defp type(keywords, _list),
+    do: {:error, :wrong_type, %{type: keywords.as}}
 
   defp min_items(%List{min_items: nil}, _list), do: :ok
   defp min_items(%List{min_items: min_items}, list)
     when length(list) < min_items,
     do: {:error, %{min_items: min_items}}
-  defp min_items(_properties, _list), do: :ok
+  defp min_items(_keywords, _list), do: :ok
 
   defp max_items(%List{max_items: nil}, _list), do: :ok
   defp max_items(%List{max_items: max_items}, list)
     when length(list) > max_items,
     do: {:error, %{max_items: max_items}}
-  defp max_items(_properties, _list), do: :ok
+  defp max_items(_keywords, _list), do: :ok
 
   defp unique(%List{unique_items: nil}, _list), do: :ok
   defp unique(%List{unique_items: true}, list) do

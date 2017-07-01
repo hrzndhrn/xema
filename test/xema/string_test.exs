@@ -8,7 +8,7 @@ defmodule Xema.StringTest do
     schema = Xema.create(:string)
 
     assert schema.type == :string
-    assert schema.properties == %Xema.String{
+    assert schema.keywords == %Xema.String{
       max_length: nil,
       min_length: nil,
       pattern: nil
@@ -31,7 +31,7 @@ defmodule Xema.StringTest do
     schema = Xema.create(:string, min_length: 5)
 
     assert schema.type == :string
-    assert schema.properties == %Xema.String{max_length: nil, min_length: 5}
+    assert schema.keywords == %Xema.String{max_length: nil, min_length: 5}
 
     refute is_valid?(schema, "foo")
     assert is_valid?(schema, "foofoo")
@@ -44,7 +44,7 @@ defmodule Xema.StringTest do
     schema = Xema.create(:string, max_length: 5)
 
     assert schema.type == :string
-    assert schema.properties == %Xema.String{max_length: 5, min_length: nil}
+    assert schema.keywords == %Xema.String{max_length: 5, min_length: nil}
 
     assert is_valid?(schema, "foo")
     refute is_valid?(schema, "foofoo")
@@ -57,7 +57,7 @@ defmodule Xema.StringTest do
     schema = Xema.create(:string, min_length: 2, max_length: 3)
 
     assert schema.type == :string
-    assert schema.properties == %Xema.String{min_length: 2, max_length: 3}
+    assert schema.keywords == %Xema.String{min_length: 2, max_length: 3}
 
     refute is_valid?(schema, "a")
     assert is_valid?(schema, "ab")
@@ -75,7 +75,7 @@ defmodule Xema.StringTest do
     schema = Xema.create(:string, pattern: regex)
 
     assert schema.type == :string
-    assert schema.properties == %Xema.String{pattern: regex}
+    assert schema.keywords == %Xema.String{pattern: regex}
 
     assert is_valid?(schema, "a match?? a")
     refute is_valid?(schema, "a to a")
@@ -89,7 +89,7 @@ defmodule Xema.StringTest do
     schema = Xema.create(:string, pattern: regex, min_length: 3, max_length: 4)
 
     assert schema.type == :string
-    assert schema.properties == %Xema.String{
+    assert schema.keywords == %Xema.String{
       min_length: 3,
       max_length: 4,
       pattern: regex
@@ -125,7 +125,7 @@ defmodule Xema.StringTest do
       schema = Xema.create(:string, format: :email)
 
       assert schema.type == :string
-      assert schema.properties == %Xema.String{format: :email}
+      assert schema.keywords == %Xema.String{format: :email}
 
       assert is_valid?(schema, "test@mars.net")
       refute is_valid?(schema, "not an email")
@@ -135,7 +135,7 @@ defmodule Xema.StringTest do
       schema = Xema.create(:string, format: :hostname)
 
       assert schema.type == :string
-      assert schema.properties == %Xema.String{format: :hostname}
+      assert schema.keywords == %Xema.String{format: :hostname}
 
       assert is_valid?(schema, "localhost")
       assert is_valid?(schema, "elixirforum.com")
@@ -147,7 +147,7 @@ defmodule Xema.StringTest do
       schema = Xema.create(:string, format: :ipv4)
 
       assert schema.type == :string
-      assert schema.properties == %Xema.String{format: :ipv4}
+      assert schema.keywords == %Xema.String{format: :ipv4}
 
       assert is_valid?(schema, "127.0.0.1")
       assert is_valid?(schema, "192.168.0.1/3")
@@ -159,7 +159,7 @@ defmodule Xema.StringTest do
       schema = Xema.create(:string, format: :ipv6)
 
       assert schema.type == :string
-      assert schema.properties == %Xema.String{format: :ipv6}
+      assert schema.keywords == %Xema.String{format: :ipv6}
 
       assert is_valid?(schema, "::0")
       assert is_valid?(schema, "::10")

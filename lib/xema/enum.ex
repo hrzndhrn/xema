@@ -15,8 +15,8 @@ defmodule Xema.Enum do
 
   @behaviour Xema
 
-  @spec properties(list) :: nil
-  def properties(list), do: %Xema.Enum{list: list}
+  @spec keywords(list) :: nil
+  def keywords(list), do: %Xema.Enum{list: list}
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(%Xema.Enum{list: list}, item), do: Enum.member?(list, item)

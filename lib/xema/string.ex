@@ -12,21 +12,21 @@ defmodule Xema.String do
             pattern: nil,
             format: nil
 
-  @spec properties(list) :: %Xema{}
-  def properties([]), do: %Xema.String{}
-  def properties(properties), do: struct(Xema.String, properties)
+  @spec keywords(list) :: %Xema{}
+  def keywords([]), do: %Xema.String{}
+  def keywords(keywords), do: struct(Xema.String, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
-  def is_valid?(properties, string), do: validate(properties, string) == :ok
+  def is_valid?(keywords, string), do: validate(keywords, string) == :ok
 
   @spec validate(%Xema{}, any) :: :ok | {:error, any}
-  def validate(properties, string) do
+  def validate(keywords, string) do
     with :ok <- type(string),
          length <- String.length(string),
-         :ok <- min_length(properties.min_length, length),
-         :ok <- max_length(properties.max_length, length),
-         :ok <- pattern(properties.pattern, string),
-         :ok <- format(properties.format, string),
+         :ok <- min_length(keywords.min_length, length),
+         :ok <- max_length(keywords.max_length, length),
+         :ok <- pattern(keywords.pattern, string),
+         :ok <- format(keywords.format, string),
       do: :ok
   end
 

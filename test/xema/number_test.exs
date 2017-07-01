@@ -9,7 +9,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{}
+      assert schema.keywords == %Xema.Number{}
 
       assert is_valid?(schema, 1)
       assert is_valid?(schema, 1.1)
@@ -27,7 +27,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, minimum: 2)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{minimum: 2}
+      assert schema.keywords == %Xema.Number{minimum: 2}
 
       refute is_valid?(schema, 1)
       assert is_valid?(schema, 2)
@@ -44,7 +44,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, minimum: 2, exclusive_minimum: true)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{
+      assert schema.keywords == %Xema.Number{
         minimum: 2,
         exclusive_minimum: true
       }
@@ -65,7 +65,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, maximum: 2)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{
+      assert schema.keywords == %Xema.Number{
         maximum: 2,
         exclusive_maximum: nil
       }
@@ -85,7 +85,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, maximum: 2, exclusive_maximum: true)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{
+      assert schema.keywords == %Xema.Number{
         maximum: 2,
         exclusive_maximum: true
       }
@@ -106,7 +106,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, multiple_of: 2)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{multiple_of: 2}
+      assert schema.keywords == %Xema.Number{multiple_of: 2}
 
       assert is_valid?(schema, 2)
       refute is_valid?(schema, 3)
@@ -125,7 +125,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, minimum: 1.2)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{minimum: 1.2}
+      assert schema.keywords == %Xema.Number{minimum: 1.2}
 
       refute is_valid?(schema, 1.1)
       assert is_valid?(schema, 1.2)
@@ -142,7 +142,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, minimum: 1.2, exclusive_minimum: true)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{
+      assert schema.keywords == %Xema.Number{
         minimum: 1.2,
         exclusive_minimum: true
       }
@@ -163,7 +163,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, maximum: 1.2)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{
+      assert schema.keywords == %Xema.Number{
         maximum: 1.2,
         exclusive_maximum: nil
       }
@@ -183,7 +183,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, maximum: 1.2, exclusive_maximum: true)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{
+      assert schema.keywords == %Xema.Number{
         maximum: 1.2,
         exclusive_maximum: true
       }
@@ -204,7 +204,7 @@ defmodule Xema.NumberTest do
       schema = Xema.create(:number, multiple_of: 1.1)
 
       assert schema.type == :number
-      assert schema.properties == %Xema.Number{multiple_of: 1.1}
+      assert schema.keywords == %Xema.Number{multiple_of: 1.1}
 
       assert is_valid?(schema, 2.2)
       refute is_valid?(schema, 3.1)

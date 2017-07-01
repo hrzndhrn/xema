@@ -5,14 +5,14 @@ defmodule Xema.Nil do
 
   @behaviour Xema
 
-  @spec properties(list) :: nil
-  def properties(_), do: nil
+  @spec keywords(list) :: nil
+  def keywords(_), do: nil
 
   @spec is_valid?(nil, any) :: boolean
-  def is_valid?(_properties, nil), do: true
-  def is_valid?(_properties, _), do: false
+  def is_valid?(_keywords, nil), do: true
+  def is_valid?(_keywords, _), do: false
 
   @spec validate(nil, any) :: :ok | {:error, any}
-  def validate(_properties, nil), do: :ok
-  def validate(_properties, _value), do: {:error, %{type: :nil}}
+  def validate(_keywords, nil), do: :ok
+  def validate(_keywords, _value), do: {:error, %{type: :nil}}
 end

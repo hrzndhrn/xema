@@ -11,15 +11,15 @@ defmodule Xema.Any do
 
   use Xema.Enum
 
-  @spec properties(list) :: nil
-  def properties(properties), do: struct(%Any{}, properties)
+  @spec keywords(list) :: nil
+  def keywords(keywords), do: struct(%Any{}, keywords)
 
   @spec is_valid?(%Any{}, any) :: boolean
-  def is_valid?(properties, value), do: validate(properties, value) == :ok
+  def is_valid?(keywords, value), do: validate(keywords, value) == :ok
 
   @spec validate(%Any{}, any) :: :ok | {:error, any}
-  def validate(properties, value) do
-    with :ok <- enum(properties, value),
+  def validate(keywords, value) do
+    with :ok <- enum(keywords, value),
       do: :ok
   end
 end

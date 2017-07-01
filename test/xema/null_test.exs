@@ -8,7 +8,7 @@ defmodule Xema.NullTest do
     schema = Xema.create(:null)
 
     assert schema.type == :null
-    assert schema.properties == nil
+    assert schema.keywords == nil
 
     assert is_valid?(schema, nil)
     refute is_valid?(schema, 1)
