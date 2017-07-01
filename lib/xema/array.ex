@@ -59,6 +59,7 @@ defmodule Xema.Array do
 
   defp items_tuple([], [], _at), do: :ok
   defp items_tuple(_, [], at), do: {:error, :missing_value, %{at: at}}
+  defp items_tuple([], _, at), do: {:error, :extra_value, %{at: at}}
   defp items_tuple([schema|schemas], [item|list], at) do
     case Xema.validate(schema, item) do
       :ok -> items_tuple(schemas, list, at + 1)
