@@ -8,6 +8,7 @@ defmodule Xema.Array do
   defstruct items: nil,
             min_items: nil,
             max_items: nil,
+            additional_items: false,
             as: :array
 
   alias Xema.Array
@@ -43,9 +44,9 @@ defmodule Xema.Array do
   defp max_items(_properties, _list), do: :ok
 
   defp items(%Array{items: nil}, _list), do: :ok
-  defp items(%Array{items: items}, list)
+  defp items(%Array{items: items, additional_items: additional_items}, list)
     when is_list(items),
-    do: items_tuple(items, list, 0)
+    do: items_tuple(items, additional_items, list, 0)
   defp items(%Array{items: items}, list) do
     items_list(items, list, 0)
   end
@@ -58,12 +59,15 @@ defmodule Xema.Array do
     end
   end
 
-  defp items_tuple([], [], _at), do: :ok
-  defp items_tuple(_, [], at), do: {:error, :missing_value, %{at: at}}
-  defp items_tuple([], _, at), do: {:error, :extra_value, %{at: at}}
-  defp items_tuple([schema|schemas], [item|list], at) do
+  defp items_tuple([], _additonal_items, [], _at), do: :ok
+  defp items_tuple(_schemas, _additonal_items, [], at),
+    do: {:error, :missing_value, %{at: at}}
+  defp items_tuple([], true, _additonal_items, at),
+    do: {:error, :extra_value, %{at: at}}
+  defp items_tuple([], false, _additonal_items, _at), do: :ok
+  defp items_tuple([schema|schemas], additional_items, [item|list], at) do
     case Xema.validate(schema, item) do
-      :ok -> items_tuple(schemas, list, at + 1)
+      :ok -> items_tuple(schemas, additional_items, list, at + 1)
       error -> {:error, :nested, %{at: at, error: error}}
     end
   end

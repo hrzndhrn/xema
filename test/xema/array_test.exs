@@ -12,7 +12,11 @@ defmodule Xema.ArrayTest do
       length: Xema.create(:array, min_items: 2, max_items: 3),
       integers: Xema.create(:array, items: Xema.create(:integer)),
       tuple: Xema.create(:array, items: [Xema.create(:string),
-                                         Xema.create(:integer)])
+                                         Xema.create(:integer)]),
+      tuple_add: Xema.create(:array,
+                             additional_items: true,
+                             items: [Xema.create(:string),
+                                     Xema.create(:integer)])
     }
   end
 
@@ -77,7 +81,10 @@ defmodule Xema.ArrayTest do
       assert validate(schema, ["a"]) == expected
     end
 
-    test "tuple with too many values", %{tuple: schema} do
+    test "tuple with more values", %{tuple: schema},
+      do: assert validate(schema, ["a", 2, "too many"]) == :ok
+
+    test "tuple with too many values", %{tuple_add: schema} do
       expected = {:error, :extra_value, %{at: 2}}
       assert validate(schema, ["a", 2, "too many"]) == expected
     end
