@@ -5,12 +5,23 @@ defmodule Xema.Map do
 
   @behaviour Xema
 
-  @spec properties(list) :: nil
-  def properties(_), do: nil
+  defstruct as: :map,
+            string_keys: false
 
-  @spec is_valid?(nil, any) :: boolean
-  def is_valid?(_, _), do: true
+  alias Xema.Map
 
-  @spec validate(nil, any) :: :ok | {:error, any}
-  def validate(_, _), do: :ok
+  @spec properties(list) :: %Map{}
+  def properties(properties), do: struct(%Map{}, properties)
+
+  @spec is_valid?(%Map{}, any) :: boolean
+  def is_valid?(properties, map), do: validate(properties, map) == :ok
+
+  @spec validate(%Map{}, any) :: :ok | {:error, atom, any}
+  def validate(properties, map) do
+    with :ok <- type(properties, map),
+      do: :ok
+  end
+
+  defp type(_properties, map) when is_map(map), do: :ok
+  defp type(properties, _map), do: {:error, :wrong_type, %{type: properties.as}}
 end

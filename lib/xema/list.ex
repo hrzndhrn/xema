@@ -15,7 +15,7 @@ defmodule Xema.List do
   alias Xema.List
 
   @spec properties(list) :: %List{}
-  def properties(properties), do: struct(%Xema.List{}, properties)
+  def properties(properties), do: struct(%List{}, properties)
 
   @spec is_valid?(%List{}, any) :: boolean
   def is_valid?(properties, list), do: validate(properties, list) == :ok
