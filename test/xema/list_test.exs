@@ -35,8 +35,10 @@ defmodule Xema.ListTest do
     test "with an list of different types", %{array: schema},
       do: assert validate(schema, [1, "bla", 3.4]) == :ok
 
-    test "with different type", %{array: schema},
-      do: assert validate(schema, "not an array") == {:error, %{type: :list}}
+    test "with different type", %{array: schema} do
+      expected = {:error, :wrong_type, %{type: :list}}
+      assert validate(schema, "not an array") == expected
+    end
 
     test "to short list", %{length: schema},
       do: assert validate(schema, [1]) == {:error, %{min_items: 2}}

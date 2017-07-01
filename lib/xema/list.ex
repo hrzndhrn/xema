@@ -20,7 +20,7 @@ defmodule Xema.List do
   @spec is_valid?(%List{}, any) :: boolean
   def is_valid?(properties, list), do: validate(properties, list) == :ok
 
-  @spec validate(%List{}, any) :: :ok | {:error, any}
+  @spec validate(%List{}, any) :: :ok | {:error, atom, any}
   def validate(properties, list) do
     with :ok <- type(properties, list),
          :ok <- min_items(properties, list),
@@ -31,7 +31,8 @@ defmodule Xema.List do
   end
 
   defp type(_properties, list) when is_list(list), do: :ok
-  defp type(properties, _list), do: {:error, %{type: properties.as}}
+  defp type(properties, _list),
+    do: {:error, :wrong_type, %{type: properties.as}}
 
   defp min_items(%List{min_items: nil}, _list), do: :ok
   defp min_items(%List{min_items: min_items}, list)
