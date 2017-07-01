@@ -9,6 +9,7 @@ defmodule Xema.Array do
             min_items: nil,
             max_items: nil,
             additional_items: false,
+            unique_items: nil,
             as: :array
 
   alias Xema.Array
@@ -25,6 +26,7 @@ defmodule Xema.Array do
          :ok <- min_items(properties, list),
          :ok <- max_items(properties, list),
          :ok <- items(properties, list),
+         :ok <- unique(properties, list),
       do: :ok
   end
 
@@ -42,6 +44,22 @@ defmodule Xema.Array do
     when length(list) > max_items,
     do: {:error, %{max_items: max_items}}
   defp max_items(_properties, _list), do: :ok
+
+  defp unique(%Array{unique_items: nil}, _list), do: :ok
+  defp unique(%Array{unique_items: true}, list) do
+    if is_unique?(list),
+      do: :ok,
+      else: {:error, :not_unique, %{}}
+  end
+
+  defp is_unique?(list, set \\ %{})
+  defp is_unique?([], _), do: true
+  defp is_unique?([h|t], set) do
+    case set do
+      %{^h => true} -> false
+      _ -> is_unique?(t, Map.put(set, h, true))
+    end
+  end
 
   defp items(%Array{items: nil}, _list), do: :ok
   defp items(%Array{items: items, additional_items: additional_items}, list)

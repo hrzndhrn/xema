@@ -9,6 +9,7 @@ defmodule Xema.ArrayTest do
   setup do
     %{
       array: Xema.create(:array),
+      unique: Xema.create(:array, unique_items: true),
       length: Xema.create(:array, min_items: 2, max_items: 3),
       integers: Xema.create(:array, items: Xema.create(:integer)),
       tuple: Xema.create(:array, items: [Xema.create(:string),
@@ -87,6 +88,14 @@ defmodule Xema.ArrayTest do
     test "tuple with too many values", %{tuple_add: schema} do
       expected = {:error, :extra_value, %{at: 2}}
       assert validate(schema, ["a", 2, "too many"]) == expected
+    end
+
+    test "list with unique items", %{unique: schema},
+      do: assert validate(schema, [1, 2, 3]) == :ok
+
+    test "list with none unique items", %{unique: schema} do
+      expected = {:error, :not_unique, %{}}
+      assert validate(schema, [1, 2, 2]) == expected
     end
   end
 end
