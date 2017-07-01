@@ -1,4 +1,4 @@
-defmodule Xema.Object do
+defmodule Xema.Map do
   @moduledoc """
   TODO
   """

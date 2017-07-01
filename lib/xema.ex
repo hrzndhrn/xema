@@ -10,7 +10,7 @@ defmodule Xema do
     null: Xema.Null,
     nil: Xema.Nil,
     boolean: Xema.Boolean,
-    object: Xema.Object,
+    map: Xema.Map,
     list: Xema.List,
     number: Xema.Number,
     integer: Xema.Integer,
