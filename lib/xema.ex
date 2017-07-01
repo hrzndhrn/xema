@@ -11,7 +11,7 @@ defmodule Xema do
     nil: Xema.Nil,
     boolean: Xema.Boolean,
     object: Xema.Object,
-    array: Xema.Array,
+    list: Xema.List,
     number: Xema.Number,
     integer: Xema.Integer,
     float: Xema.Float,
