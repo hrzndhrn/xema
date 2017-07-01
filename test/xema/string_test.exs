@@ -21,10 +21,10 @@ defmodule Xema.StringTest do
     refute is_valid?(schema, :atom)
 
     assert validate(schema, "foo") == :ok
-    assert validate(schema, 1) == {:error, %{type: :string}}
-    assert validate(schema, []) == {:error, %{type: :string}}
-    assert validate(schema, %{}) == {:error, %{type: :string}}
-    assert validate(schema, :atom) == {:error, %{type: :string}}
+    assert validate(schema, 1) == {:error, :wrong_type, %{type: :string}}
+    assert validate(schema, []) == {:error, :wrong_type, %{type: :string}}
+    assert validate(schema, %{}) == {:error, :wrong_type, %{type: :string}}
+    assert validate(schema, :atom) == {:error, :wrong_type, %{type: :string}}
   end
 
   test "string schema with min length" do

@@ -32,7 +32,7 @@ defmodule Xema.String do
 
   defp type?(string) when is_binary(string), do: :ok
 
-  defp type?(_string), do: {:error, %{type: :string}}
+  defp type?(_string), do: {:error, :wrong_type, %{type: :string}}
 
   defp min_length?(nil, _length), do: :ok
 

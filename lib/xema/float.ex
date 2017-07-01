@@ -34,5 +34,5 @@ defmodule Xema.Float do
   end
 
   defp type?(number) when is_float(number), do: :ok
-  defp type?(_number), do: {:error, %{type: :float}}
+  defp type?(_number), do: {:error, :wrong_type, %{type: :float}}
 end

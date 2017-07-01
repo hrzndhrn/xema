@@ -34,5 +34,5 @@ defmodule Xema.Number do
   end
 
   defp type?(number) when is_number(number), do: :ok
-  defp type?(_number), do: {:error, %{type: :number}}
+  defp type?(_number), do: {:error, :wrong_type, %{type: :number}}
 end

@@ -15,10 +15,10 @@ defmodule Xema.FloatTest do
     assert is_valid?(schema, 1.3)
     refute is_valid?(schema, "1")
 
-    assert validate(schema, 1.1) == {:error, %{minimum: 1.2}}
+    assert validate(schema, 1.1) == {:error, :too_small, %{minimum: 1.2}}
     assert validate(schema, 1.2) == :ok
     assert validate(schema, 1.3) == :ok
-    assert validate(schema, "1") == {:error, %{type: :float}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :float}}
   end
 
   test "number schema with minimum and exclusive minimum" do
@@ -35,11 +35,11 @@ defmodule Xema.FloatTest do
     assert is_valid?(schema, 1.3)
     refute is_valid?(schema, "1")
 
-    assert validate(schema, 1.1) == {:error, %{minimum: 1.2}}
+    assert validate(schema, 1.1) == {:error, :too_small, %{minimum: 1.2}}
     assert validate(schema, 1.2) ==
-      {:error, %{minimum: 1.2, exclusive_minimum: true}}
+      {:error, :too_small, %{minimum: 1.2, exclusive_minimum: true}}
     assert validate(schema, 1.3) == :ok
-    assert validate(schema, "1") == {:error, %{type: :float}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :float}}
   end
 
   test "number schema with maximum" do
@@ -58,8 +58,8 @@ defmodule Xema.FloatTest do
 
     assert validate(schema, 1.1) == :ok
     assert validate(schema, 1.2) == :ok
-    assert validate(schema, 1.3) == {:error, %{maximum: 1.2}}
-    assert validate(schema, "1") == {:error, %{type: :float}}
+    assert validate(schema, 1.3) == {:error, :too_big, %{maximum: 1.2}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :float}}
   end
 
   test "number schema with maximum and exclusie maximum" do
@@ -78,9 +78,9 @@ defmodule Xema.FloatTest do
 
     assert validate(schema, 1.1) == :ok
     assert validate(schema, 1.2) ==
-      {:error, %{maximum: 1.2, exclusive_maximum: true}}
-    assert validate(schema, 1.3) == {:error, %{maximum: 1.2}}
-    assert validate(schema, "1.1") == {:error, %{type: :float}}
+      {:error, :too_big, %{maximum: 1.2, exclusive_maximum: true}}
+    assert validate(schema, 1.3) == {:error, :too_big, %{maximum: 1.2}}
+    assert validate(schema, "1.1") == {:error, :wrong_type, %{type: :float}}
   end
 
   test "number schema with multiple of" do
@@ -95,9 +95,9 @@ defmodule Xema.FloatTest do
     refute is_valid?(schema, "4.4")
 
     assert validate(schema, 2.2) == :ok
-    assert validate(schema, 3.1) == {:error, %{multiple_of: 1.1}}
-    assert validate(schema, 31) == {:error, %{type: :float}}
+    assert validate(schema, 3.1) == {:error, :not_multiple, %{multiple_of: 1.1}}
+    assert validate(schema, 31) == {:error, :wrong_type, %{type: :float}}
     assert validate(schema, 4.4) == :ok
-    assert validate(schema, "4.4") == {:error, %{type: :float}}
+    assert validate(schema, "4.4") == {:error, :wrong_type, %{type: :float}}
   end
 end

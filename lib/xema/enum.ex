@@ -25,6 +25,6 @@ defmodule Xema.Enum do
   def validate(%Xema.Enum{list: list}, item) do
     if Enum.member?(list, item),
       do: :ok,
-      else: {:error, %{enum: list}}
+      else: {:error, :not_in_enum, %{enum: list}}
   end
 end

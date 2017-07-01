@@ -18,9 +18,10 @@ defmodule Xema.IntegerTest do
     refute is_valid?(schema, %{bla: 1})
 
     assert validate(schema, 1) == :ok
-    assert validate(schema, 1.1) == {:error, %{type: :integer}}
-    assert validate(schema, "1") == {:error, %{type: :integer}}
-    assert validate(schema, %{bla: 1}) == {:error, %{type: :integer}}
+    assert validate(schema, 1.1) == {:error, :wrong_type, %{type: :integer}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :integer}}
+    assert validate(schema, %{bla: 1}) ==
+      {:error, :wrong_type, %{type: :integer}}
   end
 
   @tag :minimum
@@ -35,10 +36,10 @@ defmodule Xema.IntegerTest do
     assert is_valid?(schema, 3)
     refute is_valid?(schema, "1")
 
-    assert validate(schema, 1) == {:error, %{minimum: 2}}
+    assert validate(schema, 1) == {:error, :too_small, %{minimum: 2}}
     assert validate(schema, 2) == :ok
     assert validate(schema, 3) == :ok
-    assert validate(schema, "1") == {:error, %{type: :integer}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :integer}}
   end
 
   test "integer schema with minimum and exclusive minimum" do
@@ -55,11 +56,11 @@ defmodule Xema.IntegerTest do
     assert is_valid?(schema, 3)
     refute is_valid?(schema, "1")
 
-    assert validate(schema, 1) == {:error, %{minimum: 2}}
+    assert validate(schema, 1) == {:error, :too_small, %{minimum: 2}}
     assert validate(schema, 2) ==
-      {:error, %{minimum: 2, exclusive_minimum: true}}
+      {:error, :too_small, %{minimum: 2, exclusive_minimum: true}}
     assert validate(schema, 3) == :ok
-    assert validate(schema, "1") == {:error, %{type: :integer}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :integer}}
   end
 
   test "integer schema with maximum" do
@@ -78,8 +79,8 @@ defmodule Xema.IntegerTest do
 
     assert validate(schema, 1) == :ok
     assert validate(schema, 2) == :ok
-    assert validate(schema, 3) == {:error, %{maximum: 2}}
-    assert validate(schema, "1") == {:error, %{type: :integer}}
+    assert validate(schema, 3) == {:error, :too_big, %{maximum: 2}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :integer}}
   end
 
   test "integer schema with maximum and exclusie maximum" do
@@ -98,9 +99,9 @@ defmodule Xema.IntegerTest do
 
     assert validate(schema, 1) == :ok
     assert validate(schema, 2) ==
-      {:error, %{maximum: 2, exclusive_maximum: true}}
-    assert validate(schema, 3) == {:error, %{maximum: 2}}
-    assert validate(schema, "1") == {:error, %{type: :integer}}
+      {:error, :too_big, %{maximum: 2, exclusive_maximum: true}}
+    assert validate(schema, 3) == {:error, :too_big, %{maximum: 2}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :integer}}
   end
 
   test "integer schema with multiple of" do
@@ -115,8 +116,8 @@ defmodule Xema.IntegerTest do
     refute is_valid?(schema, "1")
 
     assert validate(schema, 2) == :ok
-    assert validate(schema, 3) == {:error, %{multiple_of: 2}}
+    assert validate(schema, 3) == {:error, :not_multiple, %{multiple_of: 2}}
     assert validate(schema, 4) == :ok
-    assert validate(schema, "1") == {:error, %{type: :integer}}
+    assert validate(schema, "1") == {:error, :wrong_type, %{type: :integer}}
   end
 end

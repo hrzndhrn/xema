@@ -34,5 +34,5 @@ defmodule Xema.Integer do
   end
 
   defp type?(number) when is_integer(number), do: :ok
-  defp type?(_number), do: {:error, %{type: :integer}}
+  defp type?(_number), do: {:error, :wrong_type, %{type: :integer}}
 end
