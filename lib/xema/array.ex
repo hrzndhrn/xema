@@ -7,7 +7,8 @@ defmodule Xema.Array do
 
   defstruct items: nil,
             min_items: nil,
-            max_items: nil
+            max_items: nil,
+            as: :array
 
   alias Xema.Array
 
@@ -19,15 +20,15 @@ defmodule Xema.Array do
 
   @spec validate(%Array{}, any) :: :ok | {:error, any}
   def validate(properties, list) do
-    with :ok <- type(list),
+    with :ok <- type(properties, list),
          :ok <- min_items(properties, list),
          :ok <- max_items(properties, list),
          :ok <- items(properties, list),
       do: :ok
   end
 
-  defp type(list) when is_list(list), do: :ok
-  defp type(_), do: {:error, %{type: :array}}
+  defp type(_properties, list) when is_list(list), do: :ok
+  defp type(properties, _list), do: {:error, %{type: properties.as}}
 
   defp min_items(%Array{min_items: nil}, _list), do: :ok
   defp min_items(%Array{min_items: min_items}, list)
