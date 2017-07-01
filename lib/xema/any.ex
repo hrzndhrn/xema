@@ -19,7 +19,7 @@ defmodule Xema.Any do
 
   @spec validate(%Any{}, any) :: :ok | {:error, any}
   def validate(properties, value) do
-    with :ok <- enum?(properties, value),
+    with :ok <- enum(properties, value),
       do: :ok
   end
 end

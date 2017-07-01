@@ -31,7 +31,7 @@ defmodule Xema.EnumIntegerTest do
       do: assert validate(schema, 2) == :ok
   end
 
-  describe "is_valid/2" do
+  describe "is_valid?/2" do
     test "with a string", %{schema: schema},
       do: refute is_valid?(schema, "a")
 

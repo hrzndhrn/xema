@@ -71,16 +71,16 @@ defmodule Xema.StringTest do
   end
 
   test "string schema with pattern" do
-    regex = ~r/^.+match.+$/
+    regex = ~r/^.+match??.+$/
     schema = Xema.create(:string, pattern: regex)
 
     assert schema.type == :string
     assert schema.properties == %Xema.String{pattern: regex}
 
-    assert is_valid?(schema, "a match a")
+    assert is_valid?(schema, "a match?? a")
     refute is_valid?(schema, "a to a")
 
-    assert validate(schema, "a match a") == :ok
+    assert validate(schema, "a match?? a") == :ok
     assert validate(schema, "a to a") == {:error, %{pattern: regex}}
   end
 

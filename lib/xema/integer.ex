@@ -25,14 +25,14 @@ defmodule Xema.Integer do
 
   @spec validate(%Integer{}, any) :: :ok | {:error, any}
   def validate(properties, number) do
-    with :ok <- type?(number),
-         :ok <- minimum?(properties, number),
-         :ok <- maximum?(properties, number),
-         :ok <- multiple_of?(properties, number),
-         :ok <- enum?(properties, number),
+    with :ok <- type(number),
+         :ok <- minimum(properties, number),
+         :ok <- maximum(properties, number),
+         :ok <- multiple_of(properties, number),
+         :ok <- enum(properties, number),
       do: :ok
   end
 
-  defp type?(number) when is_integer(number), do: :ok
-  defp type?(_number), do: {:error, :wrong_type, %{type: :integer}}
+  defp type(number) when is_integer(number), do: :ok
+  defp type(_number), do: {:error, :wrong_type, %{type: :integer}}
 end
