@@ -55,7 +55,7 @@ defmodule Xema.ListTest do
     test "integer items with invalid list", %{integers: schema} do
       expected = {
         :error,
-        :nested,
+        :invalid_item,
         %{
           at: 2,
           error: {:error, :wrong_type, %{type: :integer}}
@@ -70,7 +70,7 @@ defmodule Xema.ListTest do
     test "tuple with invalid values", %{tuple: schema} do
       expected = {
         :error,
-        :nested,
+        :invalid_item,
         %{
           at: 0,
           error: {:error, :wrong_type, %{type: :string}}
@@ -99,5 +99,13 @@ defmodule Xema.ListTest do
       expected = {:error, :not_unique, %{}}
       assert validate(schema, [1, 2, 2]) == expected
     end
+  end
+
+  describe "is_valid?/2" do
+    test "with an list of different types", %{array: schema},
+      do: assert is_valid?(schema, [1, "bla", 3.4])
+
+    test "with different type", %{array: schema},
+      do: refute is_valid?(schema, "not an array")
   end
 end

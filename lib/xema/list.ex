@@ -74,7 +74,7 @@ defmodule Xema.List do
   defp items_list(schema, [item|list], at) do
     case Xema.validate(schema, item) do
       :ok -> items_list(schema, list, at + 1)
-      error -> {:error, :nested, %{at: at, error: error}}
+      error -> {:error, :invalid_item, %{at: at, error: error}}
     end
   end
 
@@ -87,7 +87,7 @@ defmodule Xema.List do
   defp items_tuple([schema|schemas], additional_items, [item|list], at) do
     case Xema.validate(schema, item) do
       :ok -> items_tuple(schemas, additional_items, list, at + 1)
-      error -> {:error, :nested, %{at: at, error: error}}
+      error -> {:error, :invalid_item, %{at: at, error: error}}
     end
   end
 end
