@@ -6,8 +6,9 @@ defmodule Xema.Map do
   @behaviour Xema
 
   defstruct as: :map,
-            string_keys: false,
-            properties: nil
+            properties: nil,
+            min_properties: nil,
+            max_properties: nil
 
   @spec keywords(list) :: %Xema.Map{}
   def keywords(keywords), do: struct(%Xema.Map{}, keywords)
@@ -19,6 +20,7 @@ defmodule Xema.Map do
   def validate(keywords, map) do
     with :ok <- type(keywords, map),
          :ok <- properties(keywords, map),
+         :ok <- size(keywords, map),
       do: :ok
   end
 
@@ -55,4 +57,16 @@ defmodule Xema.Map do
       _ -> {:erro, :mixed_map}
     end
   end
+
+  defp size(%Xema.Map{min_properties: nil, max_properties: nil}, _map), do: :ok
+  defp size(%Xema.Map{min_properties: min, max_properties: max}, map),
+    do: do_size(length(Map.keys(map)), min, max)
+
+  defp do_size(len, min, _max)
+    when not is_nil(min) and len < min,
+    do: {:error, :too_less_properties, %{min_properties: min}}
+  defp do_size(len, _min, max)
+    when not is_nil(max) and len > max,
+    do: {:error, :too_many_properties, %{max_properties: max}}
+  defp do_size(_len, _min, _max), do: :ok
 end

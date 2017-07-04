@@ -10,6 +10,9 @@ defmodule Xema.MapTest do
     %{
       map: Xema.create(:map),
       object: Xema.create(:map, as: :object),
+      min: Xema.create(:map, min_properties: 2),
+      max: Xema.create(:map, max_properties: 3),
+      min_max: Xema.create(:map, min_properties: 2, max_properties: 3),
       props: Xema.create(
         :map,
         properties: %{
@@ -56,6 +59,36 @@ defmodule Xema.MapTest do
       assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
     end
 
+    test "min_properties with too less properties", %{min: schema} do
+      expected = {:error, :too_less_properties, %{min_properties: 2}}
+      assert validate(schema, %{a: 1}) == expected
+    end
+
+    test "min_properties with propper properties", %{min: schema},
+      do: assert validate(schema, %{a: 1, b: 2}) == :ok
+
+    test "max_properties with propper properties", %{max: schema},
+      do: assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
+
+    test "max_properties with too many properties", %{max: schema} do
+      expected = {:error, :too_many_properties, %{max_properties: 3}}
+      assert validate(schema, %{a: 1, b: 2, c: 3, d: 4}) == expected
+    end
+
+    test "min/max_properties with too less properties", %{min_max: schema} do
+      expected = {:error, :too_less_properties, %{min_properties: 2}}
+      assert validate(schema, %{a: 1}) == expected
+    end
+
+    test "min/max_properties propper properties", %{min_max: schema} do
+      assert validate(schema, %{a: 1, b: 2}) == :ok
+      assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
+    end
+
+    test "min/max_properties with too many properties", %{min_max: schema} do
+      expected = {:error, :too_many_properties, %{max_properties: 3}}
+      assert validate(schema, %{a: 1, b: 2, c: 3, d: 4}) == expected
+    end
   end
 
   describe "is_valid/2" do
