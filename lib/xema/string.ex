@@ -5,12 +5,17 @@ defmodule Xema.String do
 
   alias Xema.Format
 
+  import Xema.Error
+
   @behaviour Xema
 
-  defstruct max_length: nil,
-            min_length: nil,
-            pattern: nil,
-            format: nil
+  defstruct [
+    :max_length,
+    :min_length,
+    :pattern,
+    :format,
+    as: :string
+  ]
 
   @spec keywords(list) :: %Xema{}
   def keywords([]), do: %Xema.String{}
@@ -19,9 +24,9 @@ defmodule Xema.String do
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(keywords, string), do: validate(keywords, string) == :ok
 
-  @spec validate(%Xema{}, any) :: :ok | {:error, any}
+  @spec validate(%Xema{}, any) :: :ok | {:error, map}
   def validate(keywords, string) do
-    with :ok <- type(string),
+    with :ok <- type(keywords, string),
          length <- String.length(string),
          :ok <- min_length(keywords.min_length, length),
          :ok <- max_length(keywords.max_length, length),
@@ -30,30 +35,30 @@ defmodule Xema.String do
       do: :ok
   end
 
-  defp type(string) when is_binary(string), do: :ok
+  defp type(_keywords, string) when is_binary(string), do: :ok
 
-  defp type(_string), do: {:error, :wrong_type, %{type: :string}}
+  defp type(keywords, _string), do: error(:wrong_type, %{type: keywords.as})
 
   defp min_length(nil, _length), do: :ok
 
   defp min_length(min_length, length),
     do: if length >= min_length,
           do: :ok,
-          else: {:error, %{min_length: min_length}}
+          else: error(:too_short, %{min_length: min_length})
 
   defp max_length(nil, _length), do: :ok
 
   defp max_length(max_length, length),
     do: if length <= max_length,
           do: :ok,
-          else: {:error, %{max_length: max_length}}
+          else: error(:too_long, %{max_length: max_length})
 
   defp pattern(nil, _string), do: :ok
 
   defp pattern(pattern, string),
     do: if Regex.match?(pattern, string),
           do: :ok,
-          else: {:error, %{pattern: pattern}}
+          else: error(:no_match, %{pattern: pattern})
 
   defp format(nil, _string), do: :ok
 

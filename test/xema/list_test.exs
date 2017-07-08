@@ -73,7 +73,7 @@ defmodule Xema.ListTest do
         :invalid_item,
         %{
           at: 0,
-          error: {:error, :wrong_type, %{type: :string}}
+          error: {:error, %{reason: :wrong_type, type: :string}}
         }
       }
       assert validate(schema, [2, "a"]) == expected
