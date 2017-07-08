@@ -25,6 +25,12 @@ defmodule Xema do
 
   def create, do: create(:any)
 
+  def type(schema) do
+    if schema.keywords.as != nil,
+      do: schema.keywords.as,
+      else: schema.type
+  end
+
   for {type, xmodule} <- Map.to_list(@types) do
     @spec create(unquote(type)) :: %Xema{}
     def create(unquote(type)), do: create(unquote(type), [])

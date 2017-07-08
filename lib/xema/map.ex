@@ -8,7 +8,8 @@ defmodule Xema.Map do
   defstruct as: :map,
             properties: nil,
             min_properties: nil,
-            max_properties: nil
+            max_properties: nil,
+            additonal_properties: nil
 
   @spec keywords(list) :: %Xema.Map{}
   def keywords(keywords), do: struct(%Xema.Map{}, keywords)
@@ -21,6 +22,7 @@ defmodule Xema.Map do
     with :ok <- type(keywords, map),
          :ok <- properties(keywords, map),
          :ok <- size(keywords, map),
+         :ok <- additonal_properties(keywords, map),
       do: :ok
   end
 
@@ -69,4 +71,38 @@ defmodule Xema.Map do
     when not is_nil(max) and len > max,
     do: {:error, :too_many_properties, %{max_properties: max}}
   defp do_size(_len, _min, _max), do: :ok
+
+  defp additonal_properties(%Xema.Map{additonal_properties: nil}, _map), do: :ok
+  defp additonal_properties(
+    %Xema.Map{additonal_properties: false, properties: properties},
+    map
+  ) do
+    map_keys = map
+               |> Map.keys
+               |> MapSet.new
+
+    prop_keys = properties
+                |> Map.keys
+                |> MapSet.new
+
+    add_keys = map_keys
+               |> MapSet.difference(prop_keys)
+               |> MapSet.to_list
+
+    IO.puts "----"
+    IO.inspect map_keys
+    IO.inspect prop_keys
+    if Enum.empty?(add_keys) do
+      :ok
+    else
+      {
+        :error,
+        %{
+          type: :no_additional_properties_allowed,
+          additonal_properties: add_keys
+        }
+      }
+    end
+
+  end
 end
