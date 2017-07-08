@@ -55,8 +55,8 @@ defmodule Xema.Map do
   defp validate_property(schema, property, value) do
     case Xema.validate(schema, value) do
       :ok -> :ok
-      {:error, _, _} = error ->
-        error(:invalid_property, property: property, error: error)
+      {:error, reason} ->
+        error(:invalid_property, property: property, error: reason)
     end
   end
 

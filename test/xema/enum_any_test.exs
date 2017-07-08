@@ -22,19 +22,22 @@ defmodule Xema.EnumAnyTest do
       do: assert validate(schema, "a") == :ok
 
     test "with a string that's not in the enum", %{schema: schema, list: list},
-      do: assert validate(schema, "z") == {:error, :not_in_enum, %{enum: list}}
+      do: assert validate(schema, "z") ==
+        {:error, %{reason: :not_in_enum, enum: list}}
 
     test "with an integer that's in the enum", %{schema: schema},
       do: assert validate(schema, 1) == :ok
 
     test "with an integer that's not in the enum", %{schema: schema, list: list},
-      do: assert validate(schema, 7) == {:error, :not_in_enum, %{enum: list}}
+      do: assert validate(schema, 7) ==
+        {:error, %{reason: :not_in_enum, enum: list}}
 
     test "with a float that's in the enum", %{schema: schema},
       do: assert validate(schema, 1.1) == :ok
 
     test "with a float that's not in the enum", %{schema: schema, list: list},
-      do: assert validate(schema, 1.5) == {:error, :not_in_enum, %{enum: list}}
+      do: assert validate(schema, 1.5) ==
+        {:error, %{reason: :not_in_enum, enum: list}}
   end
 
   describe "is_valid?/2" do

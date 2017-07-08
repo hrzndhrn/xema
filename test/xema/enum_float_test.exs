@@ -19,13 +19,16 @@ defmodule Xema.EnumFloatTest do
 
   describe "validate/2" do
     test "with a string", %{schema: schema},
-      do: assert validate(schema, "a") == {:error, :wrong_type, %{type: :float}}
+      do: assert validate(schema, "a") ==
+        {:error, %{reason: :wrong_type, type: :float}}
 
     test "with a integer thats in the enum", %{schema: schema},
-      do: assert validate(schema, 1) == {:error, :wrong_type, %{type: :float}}
+      do: assert validate(schema, 1) ==
+        {:error, %{reason: :wrong_type, type: :float}}
 
     test "with a float thats not in the enum", %{schema: schema, list: list},
-      do: assert validate(schema, 1.5) == {:error, :not_in_enum, %{enum: list}}
+      do: assert validate(schema, 1.5) ==
+        {:error, %{reason: :not_in_enum, enum: list}}
 
     test "with a float thats in the enum", %{schema: schema},
       do: assert validate(schema, 1.2) == :ok

@@ -3,6 +3,8 @@ defmodule Xema.Number do
   TODO
   """
 
+  import Xema.Error
+
   @behaviour Xema
 
   defstruct minimum: nil,
@@ -23,7 +25,7 @@ defmodule Xema.Number do
   @spec is_valid?(nil, any) :: boolean
   def is_valid?(keywords, number), do: validate(keywords, number) == :ok
 
-  @spec validate(nil, any) :: :ok | {:error, any}
+  @spec validate(nil, any) :: :ok | {:error, map}
   def validate(keywords, number) do
     with :ok <- type(number),
          :ok <- minimum(keywords, number),
@@ -34,5 +36,5 @@ defmodule Xema.Number do
   end
 
   defp type(number) when is_number(number), do: :ok
-  defp type(_number), do: {:error, :wrong_type, %{type: :number}}
+  defp type(_number), do: error(:wrong_type, type: :number)
 end

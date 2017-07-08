@@ -19,13 +19,16 @@ defmodule Xema.EnumIntegerTest do
 
   describe "validate/2" do
     test "with a string", %{schema: schema},
-      do: assert validate(schema, "a") == {:error, :wrong_type, %{type: :integer}}
+      do: assert validate(schema, "a") ==
+        {:error, %{reason: :wrong_type, type: :integer}}
 
     test "with a float", %{schema: schema},
-      do: assert validate(schema, 2.3) == {:error, :wrong_type, %{type: :integer}}
+      do: assert validate(schema, 2.3) ==
+        {:error, %{reason: :wrong_type, type: :integer}}
 
     test "with a integer thats not in the enum", %{schema: schema, list: list},
-      do: assert validate(schema, 5) == {:error, :not_in_enum, %{enum: list}}
+      do: assert validate(schema, 5) ==
+        {:error, %{reason: :not_in_enum, enum: list}}
 
     test "with a integer thats in the enum", %{schema: schema},
       do: assert validate(schema, 2) == :ok

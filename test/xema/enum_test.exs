@@ -18,9 +18,12 @@ defmodule Xema.EnumTest do
     refute is_valid?(schema, %{bla: 1})
 
     assert validate(schema, "a") == :ok
-    assert validate(schema, "b") == {:error, :not_in_enum, %{enum: list}}
+    assert validate(schema, "b") ==
+      {:error, %{reason: :not_in_enum, enum: list}}
     assert validate(schema, 1) == :ok
-    assert validate(schema, 2) == {:error, :not_in_enum, %{enum: list}}
-    assert validate(schema, %{bla: 1}) == {:error, :not_in_enum, %{enum: list}}
+    assert validate(schema, 2) ==
+      {:error, %{reason: :not_in_enum, enum: list}}
+    assert validate(schema, %{bla: 1}) ==
+      {:error, %{reason: :not_in_enum, enum: list}}
   end
 end

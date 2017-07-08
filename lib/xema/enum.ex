@@ -11,6 +11,8 @@ defmodule Xema.Enum do
     end
   end
 
+  import Xema.Error
+
   defstruct list: []
 
   @behaviour Xema
@@ -21,10 +23,10 @@ defmodule Xema.Enum do
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(%Xema.Enum{list: list}, item), do: Enum.member?(list, item)
 
-  @spec validate(%Xema{}, any) :: :ok | {:error, any}
+  @spec validate(%Xema{}, any) :: :ok | {:error, map}
   def validate(%Xema.Enum{list: list}, item) do
     if Enum.member?(list, item),
       do: :ok,
-      else: {:error, :not_in_enum, %{enum: list}}
+      else: error(:not_in_enum, enum: list)
   end
 end

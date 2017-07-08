@@ -3,14 +3,18 @@ defmodule Xema.List do
   TODO
   """
 
+  import Xema.Error
+
   @behaviour Xema
 
-  defstruct items: nil,
-            min_items: nil,
-            max_items: nil,
-            additional_items: false,
-            unique_items: nil,
-            as: :list
+  defstruct [
+    :items,
+    :min_items,
+    :max_items,
+    :unique_items,
+    additional_items: false,
+    as: :list
+  ]
 
   alias Xema.List
 
@@ -20,7 +24,7 @@ defmodule Xema.List do
   @spec is_valid?(%List{}, any) :: boolean
   def is_valid?(keywords, list), do: validate(keywords, list) == :ok
 
-  @spec validate(%List{}, any) :: :ok | {:error, atom, any}
+  @spec validate(%List{}, any) :: :ok | {:error, map}
   def validate(keywords, list) do
     with :ok <- type(keywords, list),
          :ok <- min_items(keywords, list),
@@ -32,25 +36,25 @@ defmodule Xema.List do
 
   defp type(_keywords, list) when is_list(list), do: :ok
   defp type(keywords, _list),
-    do: {:error, :wrong_type, %{type: keywords.as}}
+    do: error(:wrong_type, type: keywords.as)
 
   defp min_items(%List{min_items: nil}, _list), do: :ok
   defp min_items(%List{min_items: min_items}, list)
     when length(list) < min_items,
-    do: {:error, %{min_items: min_items}}
+    do: error(:too_less_items, min_items: min_items)
   defp min_items(_keywords, _list), do: :ok
 
   defp max_items(%List{max_items: nil}, _list), do: :ok
   defp max_items(%List{max_items: max_items}, list)
     when length(list) > max_items,
-    do: {:error, %{max_items: max_items}}
+    do: error(:too_many_items, max_items: max_items)
   defp max_items(_keywords, _list), do: :ok
 
   defp unique(%List{unique_items: nil}, _list), do: :ok
   defp unique(%List{unique_items: true}, list) do
     if is_unique?(list),
       do: :ok,
-      else: {:error, :not_unique, %{}}
+      else: error(:not_unique)
   end
 
   defp is_unique?(list, set \\ %{})
@@ -74,20 +78,20 @@ defmodule Xema.List do
   defp items_list(schema, [item|list], at) do
     case Xema.validate(schema, item) do
       :ok -> items_list(schema, list, at + 1)
-      error -> {:error, :invalid_item, %{at: at, error: error}}
+      {:error, reason} -> error(:invalid_item, at: at, error: reason)
     end
   end
 
   defp items_tuple([], _additonal_items, [], _at), do: :ok
   defp items_tuple(_schemas, _additonal_items, [], at),
-    do: {:error, :missing_value, %{at: at}}
+    do: error(:missing_value, at: at)
   defp items_tuple([], true, _additonal_items, at),
-    do: {:error, :extra_value, %{at: at}}
+    do: error(:extra_value, at: at)
   defp items_tuple([], false, _additonal_items, _at), do: :ok
   defp items_tuple([schema|schemas], additional_items, [item|list], at) do
     case Xema.validate(schema, item) do
       :ok -> items_tuple(schemas, additional_items, list, at + 1)
-      error -> {:error, :invalid_item, %{at: at, error: error}}
+      {:error, reason} -> error(:invalid_item, at: at, error: reason)
     end
   end
 end

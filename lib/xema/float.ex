@@ -3,6 +3,8 @@ defmodule Xema.Float do
   TODO
   """
 
+  import Xema.Error
+
   @behaviour Xema
 
   defstruct minimum: nil,
@@ -23,7 +25,7 @@ defmodule Xema.Float do
   @spec is_valid?(nil, any) :: boolean
   def is_valid?(keywords, number), do: validate(keywords, number) == :ok
 
-  @spec validate(nil, any) :: :ok | {:error, any}
+  @spec validate(nil, any) :: :ok | {:error, map}
   def validate(keywords, number) do
     with :ok <- type(number),
          :ok <- minimum(keywords, number),
@@ -34,5 +36,5 @@ defmodule Xema.Float do
   end
 
   defp type(number) when is_float(number), do: :ok
-  defp type(_number), do: {:error, :wrong_type, %{type: :float}}
+  defp type(_number), do: error(:wrong_type, type: :float)
 end

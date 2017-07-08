@@ -1,6 +1,6 @@
 defmodule Xema.Error do
 
-  def error(reason, info) do
+  def error(reason, info \\ []) do
     info =
       info
       |> Enum.into(%{})

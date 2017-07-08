@@ -67,7 +67,7 @@ defmodule Xema.MapTest do
     expected = {:error, %{
       reason: :invalid_property,
       property: :foo,
-      error: {:error, :wrong_type, %{type: :number}}
+      error: %{reason: :wrong_type, type: :number}
     }}
     assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
   end
