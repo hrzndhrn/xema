@@ -5,11 +5,13 @@ defmodule Xema.Map do
 
   @behaviour Xema
 
-  defstruct as: :map,
-            properties: nil,
-            min_properties: nil,
-            max_properties: nil,
-            additonal_properties: nil
+  defstruct [
+    :additonal_properties,
+    :max_properties,
+    :min_properties,
+    :properties,
+    as: :map
+  ]
 
   @spec keywords(list) :: %Xema.Map{}
   def keywords(keywords), do: struct(%Xema.Map{}, keywords)
@@ -77,31 +79,19 @@ defmodule Xema.Map do
     %Xema.Map{additonal_properties: false, properties: properties},
     map
   ) do
-    map_keys = map
+    add_keys = map
                |> Map.keys
                |> MapSet.new
-
-    prop_keys = properties
-                |> Map.keys
-                |> MapSet.new
-
-    add_keys = map_keys
-               |> MapSet.difference(prop_keys)
+               |> MapSet.difference(properties |> Map.keys |> MapSet.new)
                |> MapSet.to_list
 
-    IO.puts "----"
-    IO.inspect map_keys
-    IO.inspect prop_keys
     if Enum.empty?(add_keys) do
       :ok
     else
-      {
-        :error,
-        %{
-          type: :no_additional_properties_allowed,
-          additonal_properties: add_keys
-        }
-      }
+      {:error, %{
+        reason: :no_additional_properties_allowed,
+        additonal_properties: add_keys
+      }}
     end
 
   end

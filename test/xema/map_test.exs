@@ -114,7 +114,7 @@ defmodule Xema.MapTest do
       expected = {
         :error,
         %{
-          type: :no_additional_properties_allowed,
+          reason: :no_additional_properties_allowed,
           additonal_properties: [:add]
         }
       }
