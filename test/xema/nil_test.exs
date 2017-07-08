@@ -4,18 +4,42 @@ defmodule Xema.NilTest do
 
   import Xema, only: [is_valid?: 2, validate: 2]
 
-  test "nil schema" do
-    schema = Xema.create(:nil)
+  setup do
+    %{
+      as_nil: Xema.create(:nil),
+      as_null: Xema.create(:nil, as: :null)
+    }
+  end
 
-    assert schema.type == :nil
-    assert schema.keywords == nil
+  test "type", schemas do
+    assert schemas.as_nil.type == :nil
+    assert Xema.type(schemas.as_nil) == :nil
 
-    assert is_valid?(schema, nil)
-    refute is_valid?(schema, 1)
-    refute is_valid?(schema, %{bla: 1})
+    assert schemas.as_null.type == :nil
+    assert Xema.type(schemas.as_null) == :null
+  end
 
-    assert validate(schema, nil) == :ok
-    assert validate(schema, 1) == {:error, %{type: :nil}}
-    assert validate(schema, %{bla: 1}) == {:error, %{type: :nil}}
+  describe "validate nil schema" do
+    test "with nil", %{as_nil: schema},
+      do: assert validate(schema, nil) == :ok
+
+    test "with 1", %{as_nil: schema} do
+      assert validate(schema, 1) == {:error, %{reason: :wrong_type, type: :nil}}
+    end
+  end
+
+  describe "validate null schema" do
+    test "with 1", %{as_null: schema} do
+      expected = {:error, %{reason: :wrong_type, type: :null}}
+      assert validate(schema, 1) == expected
+    end
+  end
+
+  describe "check validation of null schema" do
+    test "with nil", %{as_nil: schema},
+      do: assert is_valid?(schema, nil)
+
+    test "with 1", %{as_nil: schema},
+      do: refute is_valid?(schema, 1)
   end
 end
