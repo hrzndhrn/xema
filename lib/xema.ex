@@ -7,7 +7,6 @@ defmodule Xema do
 
   @types %{
     any: Xema.Any,
-    null: Xema.Null,
     nil: Xema.Nil,
     boolean: Xema.Boolean,
     map: Xema.Map,
