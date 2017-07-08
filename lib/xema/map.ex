@@ -3,6 +3,8 @@ defmodule Xema.Map do
   TODO
   """
 
+  import Xema.Error
+
   @behaviour Xema
 
   defstruct [
@@ -19,7 +21,7 @@ defmodule Xema.Map do
   @spec is_valid?(%Xema.Map{}, any) :: boolean
   def is_valid?(keywords, map), do: validate(keywords, map) == :ok
 
-  @spec validate(%Xema.Map{}, any) :: :ok | {:error, atom, any}
+  @spec validate(%Xema.Map{}, any) :: :ok | {:error, map}
   def validate(keywords, map) do
     with :ok <- type(keywords, map),
          :ok <- properties(keywords, map),
@@ -29,7 +31,12 @@ defmodule Xema.Map do
   end
 
   defp type(_keywords, map) when is_map(map), do: :ok
-  defp type(keywords, _map), do: {:error, :wrong_type, %{type: keywords.as}}
+  defp type(keywords, _map) do
+    {:error, %{
+      reason: :wrong_type,
+      type: keywords.as
+    }}
+  end
 
   defp properties(%Xema.Map{properties: nil}, _map), do: :ok
   defp properties(%Xema.Map{properties: properties}, map) do
@@ -44,12 +51,12 @@ defmodule Xema.Map do
     end
   end
 
-  defp validate_property(_schema, _propertey, nil), do: :ok
+  defp validate_property(_schema, _property, nil), do: :ok
   defp validate_property(schema, property, value) do
     case Xema.validate(schema, value) do
       :ok -> :ok
       {:error, _, _} = error ->
-        {:error, :invalid_property, %{property: property, error: error}}
+        error(:invalid_property, property: property, error: error)
     end
   end
 
@@ -68,10 +75,10 @@ defmodule Xema.Map do
 
   defp do_size(len, min, _max)
     when not is_nil(min) and len < min,
-    do: {:error, :too_less_properties, %{min_properties: min}}
+    do: error(:too_less_properties, min_properties: min)
   defp do_size(len, _min, max)
     when not is_nil(max) and len > max,
-    do: {:error, :too_many_properties, %{max_properties: max}}
+    do: error(:too_many_properties, max_properties: max)
   defp do_size(_len, _min, _max), do: :ok
 
   defp additonal_properties(%Xema.Map{additonal_properties: nil}, _map), do: :ok
@@ -88,11 +95,7 @@ defmodule Xema.Map do
     if Enum.empty?(add_keys) do
       :ok
     else
-      {:error, %{
-        reason: :no_additional_properties_allowed,
-        additonal_properties: add_keys
-      }}
+      error(:no_additional_properties_allowed, additonal_properties: add_keys)
     end
-
   end
 end

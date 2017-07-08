@@ -51,12 +51,12 @@ defmodule Xema.MapTest do
     do: assert validate(schema, %{}) == :ok
 
   test "map with a string", %{map: schema} do
-    expected = {:error, :wrong_type, %{type: :map}}
+    expected = {:error, %{reason: :wrong_type, type: :map}}
     assert validate(schema, "foo") == expected
   end
 
   test "object with a string", %{object: schema} do
-    expected = {:error, :wrong_type, %{type: :object}}
+    expected = {:error, %{reason: :wrong_type, type: :object}}
     assert validate(schema, "foo") == expected
   end
 
@@ -64,19 +64,16 @@ defmodule Xema.MapTest do
     do: assert validate(schema, %{foo: 2, bar: "bar"}) == :ok
 
   test "properties with invalid values", %{props: schema} do
-    expected = {
-      :error,
-      :invalid_property,
-      %{
-        property: :foo,
-        error: {:error, :wrong_type, %{type: :number}}
-      }
-    }
+    expected = {:error, %{
+      reason: :invalid_property,
+      property: :foo,
+      error: {:error, :wrong_type, %{type: :number}}
+    }}
     assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
   end
 
   test "min_properties with too less properties", %{min: schema} do
-    expected = {:error, :too_less_properties, %{min_properties: 2}}
+    expected = {:error, %{reason: :too_less_properties, min_properties: 2}}
     assert validate(schema, %{a: 1}) == expected
   end
 
@@ -87,12 +84,12 @@ defmodule Xema.MapTest do
     do: assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
 
   test "max_properties with too many properties", %{max: schema} do
-    expected = {:error, :too_many_properties, %{max_properties: 3}}
+    expected = {:error, %{reason: :too_many_properties, max_properties: 3}}
     assert validate(schema, %{a: 1, b: 2, c: 3, d: 4}) == expected
   end
 
   test "min/max_properties with too less properties", %{min_max: schema} do
-    expected = {:error, :too_less_properties, %{min_properties: 2}}
+    expected = {:error, %{reason: :too_less_properties, min_properties: 2}}
     assert validate(schema, %{a: 1}) == expected
   end
 
@@ -102,7 +99,7 @@ defmodule Xema.MapTest do
   end
 
   test "min/max_properties with too many properties", %{min_max: schema} do
-    expected = {:error, :too_many_properties, %{max_properties: 3}}
+    expected = {:error, %{reason: :too_many_properties, max_properties: 3}}
     assert validate(schema, %{a: 1, b: 2, c: 3, d: 4}) == expected
   end
 
@@ -111,13 +108,10 @@ defmodule Xema.MapTest do
       do: assert validate(schema, %{foo: 1}) == :ok
 
     test "with additonal property", %{no_add: schema} do
-      expected = {
-        :error,
-        %{
-          reason: :no_additional_properties_allowed,
-          additonal_properties: [:add]
-        }
-      }
+      expected = {:error, %{
+        reason: :no_additional_properties_allowed,
+        additonal_properties: [:add]
+      }}
       assert validate(schema, %{add: 1}) == expected
     end
   end
