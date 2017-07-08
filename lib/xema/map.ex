@@ -86,16 +86,19 @@ defmodule Xema.Map do
     %Xema.Map{additonal_properties: false, properties: properties},
     map
   ) do
-    add_keys = map
-               |> Map.keys
-               |> MapSet.new
-               |> MapSet.difference(properties |> Map.keys |> MapSet.new)
-               |> MapSet.to_list
+    additional_properties =
+      map
+      |> Map.keys
+      |> MapSet.new
+      |> MapSet.difference(properties |> Map.keys |> MapSet.new)
+      |> MapSet.to_list
 
-    if Enum.empty?(add_keys) do
+    if Enum.empty?(additional_properties) do
       :ok
     else
-      error(:no_additional_properties_allowed, additonal_properties: add_keys)
+      error(
+        :no_additional_properties_allowed,
+        additonal_properties: additional_properties)
     end
   end
 end
