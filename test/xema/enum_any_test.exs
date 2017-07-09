@@ -6,15 +6,14 @@ defmodule Xema.EnumAnyTest do
 
   setup do
     list = [1, 1.1, "a"]
-    enum = Xema.create(:enum, list)
-    schema = Xema.create(:any, enum: enum)
+    schema = Xema.create(:any, enum: list)
 
-    %{schema: schema, enum: enum, list: list}
+    %{schema: schema, list: list}
   end
 
-  test "type and keywords", %{schema: schema, enum: enum} do
+  test "type and keywords", %{schema: schema, list: list} do
     assert schema.type == :any
-    assert schema.keywords.enum == enum
+    assert schema.keywords.enum == list
   end
 
   describe "validate/2" do

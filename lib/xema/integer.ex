@@ -3,7 +3,7 @@ defmodule Xema.Integer do
   TODO
   """
 
-  use Xema.Enum
+  use Xema.Validator.Enum
   use Xema.Validator.Number
 
   import Xema.Error

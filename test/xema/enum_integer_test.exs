@@ -6,15 +6,14 @@ defmodule Xema.EnumIntegerTest do
 
   setup do
     list = [1, 2, 2.3]
-    enum = Xema.create(:enum, list)
-    schema = Xema.create(:integer, enum: enum)
+    schema = Xema.create(:integer, enum: list)
 
-    %{schema: schema, enum: enum, list: list}
+    %{schema: schema, list: list}
   end
 
-  test "type and keywords", %{schema: schema, enum: enum} do
+  test "type and keywords", %{schema: schema, list: list} do
     assert schema.type == :integer
-    assert schema.keywords.enum == enum
+    assert schema.keywords.enum == list
   end
 
   describe "validate/2" do

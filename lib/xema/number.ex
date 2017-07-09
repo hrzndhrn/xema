@@ -3,7 +3,12 @@ defmodule Xema.Number do
   TODO
   """
 
+  use Xema.Validator.Enum
+  use Xema.Validator.Number
+
   import Xema.Error
+
+  alias Xema.Number, as: Num
 
   @behaviour Xema
 
@@ -13,11 +18,6 @@ defmodule Xema.Number do
             exclusive_minimum: nil,
             multiple_of: nil,
             enum: nil
-
-  alias Xema.Number, as: Num
-
-  use Xema.Enum
-  use Xema.Validator.Number
 
   @spec keywords(keyword) :: %Xema{}
   def keywords(keywords), do: struct(%Num{}, keywords)

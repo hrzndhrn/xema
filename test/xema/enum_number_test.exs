@@ -6,15 +6,14 @@ defmodule Xema.EnumNumberTest do
 
   setup do
     list = [1, 1.1, 1.2]
-    enum = Xema.create(:enum, list)
-    schema = Xema.create(:number, enum: enum)
+    schema = Xema.create(:number, enum: list)
 
-    %{schema: schema, enum: enum, list: list}
+    %{schema: schema, list: list}
   end
 
-  test "type and keywords", %{schema: schema, enum: enum} do
+  test "type and keywords", %{schema: schema, list: list} do
     assert schema.type == :number
-    assert schema.keywords.enum == enum
+    assert schema.keywords.enum == list
   end
 
   describe "validate/2" do

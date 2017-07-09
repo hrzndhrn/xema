@@ -14,8 +14,7 @@ defmodule Xema do
     number: Xema.Number,
     integer: Xema.Integer,
     float: Xema.Float,
-    string: Xema.String,
-    enum: Xema.Enum
+    string: Xema.String
   }
 
   @callback is_valid?(%Xema{}, any) :: boolean
