@@ -19,7 +19,7 @@ defmodule Xema do
 
   @callback is_valid?(%Xema{}, any) :: boolean
   @callback validate(%Xema{}, any) :: :ok | {:error, any}
-  @callback keywords(any) :: %Xema{}
+  @callback keywords(keyword) :: struct
 
   @spec type(%Xema{}) :: atom
   def type(schema) do
@@ -42,12 +42,12 @@ defmodule Xema do
 
     @spec is_valid?(%Xema{type: unquote(type)}, any) :: boolean
     def is_valid?(%Xema{type: unquote(type)} = schema, value) do
-      unquote(xema_module).is_valid?(schema.keywords, value)
+      unquote(xema_module).is_valid?(schema, value)
     end
 
     @spec validate(%Xema{type: unquote(type)}, any) :: :ok | {:error, any}
     def validate(%Xema{type: unquote(type)} = schema, value) do
-      unquote(xema_module).validate(schema.keywords, value)
+      unquote(xema_module).validate(schema, value)
     end
   end
 end

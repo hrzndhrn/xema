@@ -22,10 +22,10 @@ defmodule Xema.String do
   def keywords(keywords), do: struct(Xema.String, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
-  def is_valid?(keywords, string), do: validate(keywords, string) == :ok
+  def is_valid?(xema, string), do: validate(xema, string) == :ok
 
   @spec validate(%Xema{}, any) :: :ok | {:error, map}
-  def validate(keywords, string) do
+  def validate(%Xema{keywords: keywords}, string) do
     with :ok <- type(keywords, string),
          length <- String.length(string),
          :ok <- min_length(keywords.min_length, length),

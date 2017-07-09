@@ -7,8 +7,8 @@ defmodule Xema.Validator.Enum do
 
   defmacro __using__(_) do
     quote do
-      defp enum(%__module__{enum: nil}, _value), do: :ok
-      defp enum(%__module__{enum: enum}, value) do
+      defp enum(%{enum: nil}, _value), do: :ok
+      defp enum(%{enum: enum}, value) do
         if Enum.member?(enum, value),
           do: :ok,
           else: error(:not_in_enum, enum: enum)

@@ -17,14 +17,14 @@ defmodule Xema.Integer do
             multiple_of: nil,
             enum: nil
 
-  @spec keywords(keyword) :: %Xema{}
+  @spec keywords(keyword) :: %Xema.Integer{}
   def keywords(keywords), do: struct(%Xema.Integer{}, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
-  def is_valid?(keywords, number), do: validate(keywords, number) == :ok
+  def is_valid?(xema, number), do: validate(xema, number) == :ok
 
   @spec validate(%Xema{}, any) :: :ok | {:error, map}
-  def validate(keywords, number) do
+  def validate(%Xema{keywords: keywords}, number) do
     with :ok <- type(number),
          :ok <- minimum(keywords, number),
          :ok <- maximum(keywords, number),

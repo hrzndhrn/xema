@@ -7,16 +7,16 @@ defmodule Xema.Any do
 
   @behaviour Xema
 
-  defstruct enum: nil
+  defstruct [:enum]
 
-  @spec keywords(keyword) :: %Xema{}
+  @spec keywords(keyword) :: %Xema.Any{}
   def keywords(keywords), do: struct(%Xema.Any{}, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
-  def is_valid?(keywords, value), do: validate(keywords, value) == :ok
+  def is_valid?(schema, value), do: validate(schema, value) == :ok
 
   @spec validate(%Xema{}, any) :: :ok | {:error, any}
-  def validate(keywords, value) do
+  def validate(%Xema{keywords: keywords}, value) do
     with :ok <- enum(keywords, value),
       do: :ok
   end

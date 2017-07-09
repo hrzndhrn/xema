@@ -8,8 +8,6 @@ defmodule Xema.Number do
 
   import Xema.Error
 
-  alias Xema.Number, as: Num
-
   @behaviour Xema
 
   defstruct minimum: nil,
@@ -19,14 +17,14 @@ defmodule Xema.Number do
             multiple_of: nil,
             enum: nil
 
-  @spec keywords(keyword) :: %Xema{}
-  def keywords(keywords), do: struct(%Num{}, keywords)
+  @spec keywords(keyword) :: %Xema.Number{}
+  def keywords(keywords), do: struct(%Xema.Number{}, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
-  def is_valid?(keywords, number), do: validate(keywords, number) == :ok
+  def is_valid?(xema, number), do: validate(xema, number) == :ok
 
   @spec validate(%Xema{}, any) :: :ok | {:error, map}
-  def validate(keywords, number) do
+  def validate(%Xema{keywords: keywords}, number) do
     with :ok <- type(number),
          :ok <- minimum(keywords, number),
          :ok <- maximum(keywords, number),
