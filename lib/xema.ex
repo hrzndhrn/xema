@@ -18,19 +18,18 @@ defmodule Xema do
     enum: Xema.Enum
   }
 
-  @callback is_valid?(%Xema{} | nil, any) :: boolean
-  @callback validate(%Xema{} | nil, any) :: :ok | {:error, any}
-  @callback keywords(any) :: %Xema{} | nil
+  @callback is_valid?(%Xema{}, any) :: boolean
+  @callback validate(%Xema{}, any) :: :ok | {:error, any}
+  @callback keywords(any) :: %Xema{}
 
-  def create, do: create(:any)
-
+  @spec type(%Xema{}) :: atom
   def type(schema) do
     if schema.keywords.as != nil,
       do: schema.keywords.as,
       else: schema.type
   end
 
-  for {type, xmodule} <- Map.to_list(@types) do
+  for {type, xema_module} <- Map.to_list(@types) do
     @spec create(unquote(type)) :: %Xema{}
     def create(unquote(type)), do: create(unquote(type), [])
 
@@ -38,18 +37,18 @@ defmodule Xema do
     def create(unquote(type), keywords) do
       %Xema{
         type: unquote(type),
-        keywords: unquote(xmodule).keywords(keywords)
+        keywords: unquote(xema_module).keywords(keywords)
       }
     end
 
     @spec is_valid?(%Xema{type: unquote(type)}, any) :: boolean
     def is_valid?(%Xema{type: unquote(type)} = schema, value) do
-      unquote(xmodule).is_valid?(schema.keywords, value)
+      unquote(xema_module).is_valid?(schema.keywords, value)
     end
 
     @spec validate(%Xema{type: unquote(type)}, any) :: :ok | {:error, any}
     def validate(%Xema{type: unquote(type)} = schema, value) do
-      unquote(xmodule).validate(schema.keywords, value)
+      unquote(xema_module).validate(schema.keywords, value)
     end
   end
 end

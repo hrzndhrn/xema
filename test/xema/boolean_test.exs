@@ -8,7 +8,7 @@ defmodule Xema.BooleanTest do
     schema = Xema.create(:boolean)
 
     assert schema.type == :boolean
-    assert schema.keywords == nil
+    assert schema.keywords == %Xema.Boolean{}
 
     assert is_valid?(schema, true)
     assert is_valid?(schema, false)

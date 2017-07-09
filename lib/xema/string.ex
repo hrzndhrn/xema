@@ -37,28 +37,28 @@ defmodule Xema.String do
 
   defp type(_keywords, string) when is_binary(string), do: :ok
 
-  defp type(keywords, _string), do: error(:wrong_type, %{type: keywords.as})
+  defp type(keywords, _string), do: error(:wrong_type, type: keywords.as)
 
   defp min_length(nil, _length), do: :ok
 
   defp min_length(min_length, length),
     do: if length >= min_length,
           do: :ok,
-          else: error(:too_short, %{min_length: min_length})
+          else: error(:too_short, min_length: min_length)
 
   defp max_length(nil, _length), do: :ok
 
   defp max_length(max_length, length),
     do: if length <= max_length,
           do: :ok,
-          else: error(:too_long, %{max_length: max_length})
+          else: error(:too_long, max_length: max_length)
 
   defp pattern(nil, _string), do: :ok
 
   defp pattern(pattern, string),
     do: if Regex.match?(pattern, string),
           do: :ok,
-          else: error(:no_match, %{pattern: pattern})
+          else: error(:no_match, pattern: pattern)
 
   defp format(nil, _string), do: :ok
 

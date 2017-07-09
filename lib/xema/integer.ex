@@ -3,6 +3,9 @@ defmodule Xema.Integer do
   TODO
   """
 
+  use Xema.Enum
+  use Xema.Validator.Number
+
   import Xema.Error
 
   @behaviour Xema
@@ -14,18 +17,13 @@ defmodule Xema.Integer do
             multiple_of: nil,
             enum: nil
 
-  alias Xema.Integer
+  @spec keywords(keyword) :: %Xema{}
+  def keywords(keywords), do: struct(%Xema.Integer{}, keywords)
 
-  use Xema.Enum
-  use Xema.Validator.Number
-
-  @spec keywords(list) :: nil
-  def keywords(keywords), do: struct(%Integer{}, keywords)
-
-  @spec is_valid?(%Integer{}, any) :: boolean
+  @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(keywords, number), do: validate(keywords, number) == :ok
 
-  @spec validate(%Integer{}, any) :: :ok | {:error, map}
+  @spec validate(%Xema{}, any) :: :ok | {:error, map}
   def validate(keywords, number) do
     with :ok <- type(number),
          :ok <- minimum(keywords, number),

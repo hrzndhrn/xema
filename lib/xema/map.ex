@@ -15,13 +15,13 @@ defmodule Xema.Map do
     as: :map
   ]
 
-  @spec keywords(list) :: %Xema.Map{}
+  @spec keywords(keyword) :: %Xema{}
   def keywords(keywords), do: struct(%Xema.Map{}, keywords)
 
-  @spec is_valid?(%Xema.Map{}, any) :: boolean
+  @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(keywords, map), do: validate(keywords, map) == :ok
 
-  @spec validate(%Xema.Map{}, any) :: :ok | {:error, map}
+  @spec validate(%Xema{}, any) :: :ok | {:error, map}
   def validate(keywords, map) do
     with :ok <- type(keywords, map),
          :ok <- properties(keywords, map),

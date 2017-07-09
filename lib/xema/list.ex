@@ -16,15 +16,13 @@ defmodule Xema.List do
     as: :list
   ]
 
-  alias Xema.List
+  @spec keywords(list) :: %Xema{}
+  def keywords(keywords), do: struct(%Xema.List{}, keywords)
 
-  @spec keywords(list) :: %List{}
-  def keywords(keywords), do: struct(%List{}, keywords)
-
-  @spec is_valid?(%List{}, any) :: boolean
+  @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(keywords, list), do: validate(keywords, list) == :ok
 
-  @spec validate(%List{}, any) :: :ok | {:error, map}
+  @spec validate(%Xema{}, any) :: :ok | {:error, map}
   def validate(keywords, list) do
     with :ok <- type(keywords, list),
          :ok <- min_items(keywords, list),
@@ -38,20 +36,20 @@ defmodule Xema.List do
   defp type(keywords, _list),
     do: error(:wrong_type, type: keywords.as)
 
-  defp min_items(%List{min_items: nil}, _list), do: :ok
-  defp min_items(%List{min_items: min_items}, list)
+  defp min_items(%Xema.List{min_items: nil}, _list), do: :ok
+  defp min_items(%Xema.List{min_items: min_items}, list)
     when length(list) < min_items,
     do: error(:too_less_items, min_items: min_items)
   defp min_items(_keywords, _list), do: :ok
 
-  defp max_items(%List{max_items: nil}, _list), do: :ok
-  defp max_items(%List{max_items: max_items}, list)
+  defp max_items(%Xema.List{max_items: nil}, _list), do: :ok
+  defp max_items(%Xema.List{max_items: max_items}, list)
     when length(list) > max_items,
     do: error(:too_many_items, max_items: max_items)
   defp max_items(_keywords, _list), do: :ok
 
-  defp unique(%List{unique_items: nil}, _list), do: :ok
-  defp unique(%List{unique_items: true}, list) do
+  defp unique(%Xema.List{unique_items: nil}, _list), do: :ok
+  defp unique(%Xema.List{unique_items: true}, list) do
     if is_unique?(list),
       do: :ok,
       else: error(:not_unique)
@@ -66,11 +64,11 @@ defmodule Xema.List do
     end
   end
 
-  defp items(%List{items: nil}, _list), do: :ok
-  defp items(%List{items: items, additional_items: additional_items}, list)
+  defp items(%Xema.List{items: nil}, _list), do: :ok
+  defp items(%Xema.List{items: items, additional_items: additional_items}, list)
     when is_list(items),
     do: items_tuple(items, additional_items, list, 0)
-  defp items(%List{items: items}, list) do
+  defp items(%Xema.List{items: items}, list) do
     items_list(items, list, 0)
   end
 

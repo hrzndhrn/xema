@@ -19,13 +19,13 @@ defmodule Xema.Number do
   use Xema.Enum
   use Xema.Validator.Number
 
-  @spec keywords(list) :: nil
+  @spec keywords(keyword) :: %Xema{}
   def keywords(keywords), do: struct(%Num{}, keywords)
 
-  @spec is_valid?(nil, any) :: boolean
+  @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(keywords, number), do: validate(keywords, number) == :ok
 
-  @spec validate(nil, any) :: :ok | {:error, map}
+  @spec validate(%Xema{}, any) :: :ok | {:error, map}
   def validate(keywords, number) do
     with :ok <- type(number),
          :ok <- minimum(keywords, number),

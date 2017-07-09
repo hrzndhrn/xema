@@ -3,30 +3,31 @@ defmodule Xema.Enum do
   TODO
   """
 
+  import Xema.Error
+
+  @behaviour Xema
+
+  defstruct list: []
+
   defmacro __using__(_) do
     quote do
-      defp enum(%{enum: nil}, _value), do: :ok
-      defp enum(%{enum: enum}, value),
+      defp enum(%__module__{enum: nil}, _value), do: :ok
+      defp enum(%__module__{enum: enum}, value),
         do: Xema.validate(enum, value)
     end
   end
 
-  import Xema.Error
-
-  defstruct list: []
-
-  @behaviour Xema
-
-  @spec keywords(list) :: nil
+  @spec keywords(keyword) :: %Xema{}
   def keywords(list), do: %Xema.Enum{list: list}
 
   @spec is_valid?(%Xema{}, any) :: boolean
-  def is_valid?(%Xema.Enum{list: list}, item), do: Enum.member?(list, item)
+  def is_valid?(enum, item),
+    do: Enum.member?(enum.list, item)
 
   @spec validate(%Xema{}, any) :: :ok | {:error, map}
-  def validate(%Xema.Enum{list: list}, item) do
-    if Enum.member?(list, item),
+  def validate(enum, item) do
+    if Enum.member?(enum.list, item),
       do: :ok,
-      else: error(:not_in_enum, enum: list)
+      else: error(:not_in_enum, enum: enum.list)
   end
 end

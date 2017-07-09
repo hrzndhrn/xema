@@ -3,7 +3,7 @@ defmodule Xema.Error do
   TODO
   """
 
-  @spec error(atom, keyword()) :: {:error, map}
+  @spec error(atom, keyword) :: {:error, map}
   def error(reason, info \\ []) do
     info =
       info

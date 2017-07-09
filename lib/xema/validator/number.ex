@@ -27,6 +27,7 @@ defmodule Xema.Validator.Number do
     end
   end
 
+  @spec minimum(number, boolean, number) :: {:error, map}
   def minimum(minimum, _exclusive, number)
     when number > minimum,
     do: :ok
@@ -39,6 +40,7 @@ defmodule Xema.Validator.Number do
   def minimum(minimum, _exclusive, _number),
     do: error(:too_small, minimum: minimum)
 
+  @spec maximum(number, boolean, number) :: {:error, map}
   def maximum(maximum, _exclusive, number)
     when number < maximum,
     do: :ok
@@ -51,6 +53,7 @@ defmodule Xema.Validator.Number do
   def maximum(maximum, _exclusive, _number),
     do: error(:too_big, maximum: maximum)
 
+  @spec multiple_of(number, number) :: :ok | {:error, map}
   def multiple_of(multiple_of, number) do
     x = number / multiple_of
     if x - Float.floor(x) == 0,

@@ -5,7 +5,7 @@ defmodule Xema.AnyTest do
   import Xema, only: [is_valid?: 2, validate: 2]
 
   test "any schema" do
-    schema = Xema.create()
+    schema = Xema.create(:any)
 
     assert schema.type == :any
     assert schema.keywords.enum == nil

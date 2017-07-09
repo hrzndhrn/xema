@@ -5,6 +5,9 @@ defmodule Xema.Float do
 
   import Xema.Error
 
+  use Xema.Enum
+  use Xema.Validator.Number
+
   @behaviour Xema
 
   defstruct minimum: nil,
@@ -14,18 +17,13 @@ defmodule Xema.Float do
             multiple_of: nil,
             enum: nil
 
-  alias Xema.Float
+  @spec keywords(keyword) :: %Xema{}
+  def keywords(keywords), do: struct(%Xema.Float{}, keywords)
 
-  use Xema.Enum
-  use Xema.Validator.Number
-
-  @spec keywords(list) :: nil
-  def keywords(keywords), do: struct(%Float{}, keywords)
-
-  @spec is_valid?(nil, any) :: boolean
+  @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(keywords, number), do: validate(keywords, number) == :ok
 
-  @spec validate(nil, any) :: :ok | {:error, map}
+  @spec validate(%Xema{}, any) :: :ok | {:error, map}
   def validate(keywords, number) do
     with :ok <- type(number),
          :ok <- minimum(keywords, number),

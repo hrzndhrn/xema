@@ -3,21 +3,19 @@ defmodule Xema.Any do
   TODO
   """
 
+  use Xema.Enum
+
   @behaviour Xema
 
   defstruct enum: nil
 
-  alias Xema.Any
+  @spec keywords(keyword) :: %Xema{}
+  def keywords(keywords), do: struct(%Xema.Any{}, keywords)
 
-  use Xema.Enum
-
-  @spec keywords(list) :: nil
-  def keywords(keywords), do: struct(%Any{}, keywords)
-
-  @spec is_valid?(%Any{}, any) :: boolean
+  @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(keywords, value), do: validate(keywords, value) == :ok
 
-  @spec validate(%Any{}, any) :: :ok | {:error, any}
+  @spec validate(%Xema{}, any) :: :ok | {:error, any}
   def validate(keywords, value) do
     with :ok <- enum(keywords, value),
       do: :ok
