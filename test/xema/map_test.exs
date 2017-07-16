@@ -190,12 +190,28 @@ defmodule Xema.MapTest do
   end
 
   describe "schema with pattern properties" do
+    @tag :only
     test "with propper map", %{pattern: schema},
       do: assert validate(schema, %{i_0: 0, i_1: 1, s_X: "six"}) == :ok
 
     test "with wrong value", %{pattern: schema} do
-      expected = {:error, %{reason: :invalid_property, property: :i_0}}
+      expected = {:error, %{
+        reason: :invalid_property, 
+        property: :i_0, 
+        error: %{
+          reason: :wrong_type, 
+          type: :number
+        }
+      }}
       assert validate(schema, %{i_0: "bla"}) == expected
+    end
+
+    test "with addition property", %{pattern: schema} do 
+      expected = {:error, %{
+        reason: :no_additional_properties_allowed,
+        additional_properties: [:add]
+      }}
+      assert validate(schema, %{i_0: 0, add: 1}) == expected
     end
   end
 

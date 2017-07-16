@@ -34,7 +34,8 @@ defmodule Xema.Map do
          :ok <- size(keywords, map),
          :ok <- required(keywords, map),
          {:ok, map} <- properties(keywords, map),
-         :ok <- additional_properties(keywords, map),
+         {:ok, map} <- patterns(keywords, map),
+         :ok <- additionals(keywords, map),
       do: :ok
   end
 
@@ -46,25 +47,25 @@ defmodule Xema.Map do
     }}
   end
 
-  defp properties(%Xema.Map{properties: nil}, _map), do: :ok
-  defp properties(%Xema.Map{properties: properties}, map) do
-    validate_properties(Map.to_list(properties), map)
+  defp properties(%Xema.Map{properties: nil}, map), do: {:ok, map}
+  defp properties(%Xema.Map{properties: props}, map) do
+    do_properties(Map.to_list(props), map)
   end
 
-  defp validate_properties([], map), do: {:ok, map}
-  defp validate_properties([{property, schema}|properties], map) do
-    case validate_property(schema, property, get_value(map, property)) do
-      :ok -> validate_properties(properties, Map.delete(map, property))
+  defp do_properties([], map), do: {:ok, map}
+  defp do_properties([{prop, schema}|props], map) do
+    case do_property(schema, prop, get_value(map, prop)) do
+      :ok -> do_properties(props, Map.delete(map, prop))
       error -> error
     end
   end
 
-  defp validate_property(_schema, _property, nil), do: :ok
-  defp validate_property(schema, property, value) do
+  defp do_property(_schema, _prop, nil), do: :ok
+  defp do_property(schema, prop, value) do
     case Xema.validate(schema, value) do
       :ok -> :ok
       {:error, reason} ->
-        error(:invalid_property, property: property, error: reason)
+        error(:invalid_property, property: prop, error: reason)
     end
   end
 
@@ -87,14 +88,14 @@ defmodule Xema.Map do
   
   defp required(%Xema.Map{required: nil}, _map), do: :ok
   defp required(%Xema.Map{required: required}, map) do
-    properties = map |> Map.keys |> MapSet.new
+    props = map |> Map.keys |> MapSet.new
 
-    if MapSet.subset?(required, properties) do 
+    if MapSet.subset?(required, props) do 
       :ok 
     else 
       error(
         :missing_properties, 
-        missing: required |> MapSet.difference(properties) |> MapSet.to_list,
+        missing: required |> MapSet.difference(props) |> MapSet.to_list,
         required: MapSet.to_list(required)
       )
     end
@@ -112,58 +113,29 @@ defmodule Xema.Map do
     do: error(:too_many_properties, max_properties: max)
   defp do_size(_len, _min, _max), do: :ok
 
-  defp additional_properties(schema, map) do
-    case schema.additional_properties do
-      nil -> :ok
+  defp patterns(%Xema.Map{pattern_properties: nil}, map), do: {:ok, map}
+  defp patterns(%Xema.Map{pattern_properties: patterns}, map) do
+    props = 
+      for {pattern, schema} <- Map.to_list(patterns),
+          key <- Map.keys(map),
+          key_match?(pattern, key),
+          do: {key, schema}
 
-      false -> 
-        if Map.equal?(map, %{}) do
-          :ok
-        else
-          error(:no_additional_properties_allowed, 
-                additional_properties: Map.keys(map))
-        end
-    end
+
+    do_properties(props, map)
   end
 
-  defp do_additional_properties(props, nil, map) do
-    additional_properties =
-      map
-      |> Map.keys
-      |> MapSet.new
-      |> MapSet.difference(props |> Map.keys |> MapSet.new)
-      |> MapSet.to_list
+  defp key_match?(regex, atom) when is_atom(atom), 
+    do: key_match?(regex, to_string(atom)) 
+  defp key_match?(regex, string), do: Regex.match?(regex, string)
 
-    if Enum.empty?(additional_properties) do
+  defp additionals(%Xema.Map{additional_properties: false}, map) do
+    if Map.equal?(map, %{}) do
       :ok
     else
-      error(
-        :no_additional_properties_allowed,
-        additional_properties: additional_properties)
+      error(:no_additional_properties_allowed, 
+            additional_properties: Map.keys(map))
     end
   end
-  defp do_additional_properties(nil, patterns, map) do
-    properties =
-      map
-      |> Map.keys
-      |> Enum.map(fn x -> to_string x end)
-
-    patterns = Map.keys(patterns)
-      
-    do_additional_properties_match(properties, patterns)
-  end
-  defp do_additional_properties(props, patterns, map) do
-    with :ok <- do_additional_properties(props, nil, map),
-         :ok <- do_additional_properties(nil, patterns, map),
-      do: :ok
-  end
-
-  defp do_additional_properties_match([], _patterns), do: :ok
-  defp do_additional_properties_match([prop|props], patterns) do 
-    if Enum.any?(patterns, fn pattern -> Regex.match?(pattern, prop) end) do
-      do_additional_properties_match(props, patterns)
-    else
-      error(:no_pattern_match, property: prop, patterns: patterns)
-    end
-  end
+  defp additionals(_schema, _map), do: :ok
 end
