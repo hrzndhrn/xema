@@ -3,7 +3,15 @@ defmodule Xema do
   Xema ...
   """
 
-  defstruct type: :any, keywords: nil
+  defstruct [
+    :id, 
+    :schema, 
+    :title,
+    :description,
+    :default,
+    :type, 
+    :keywords
+  ]
 
   @types %{
     any: Xema.Any,
@@ -34,8 +42,19 @@ defmodule Xema do
 
     @spec create(unquote(type), keyword) :: %Xema{}
     def create(unquote(type), keywords) do
+      {id, keywords} = Keyword.pop(keywords, :id)
+      {schema, keywords} = Keyword.pop(keywords, :schema)
+      {title, keywords} = Keyword.pop(keywords, :title)
+      {description, keywords} = Keyword.pop(keywords, :description)
+      {default, keywords} = Keyword.pop(keywords, :default)
+
       %Xema{
         type: unquote(type),
+        id: id,
+        schema: schema,
+        title: title,
+        description: description,
+        default: default,
         keywords: unquote(xema_module).keywords(keywords)
       }
     end
