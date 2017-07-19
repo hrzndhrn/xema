@@ -1,4 +1,4 @@
-defmodule Xema.Format do
+defmodule Xema.Validator.Format do
   @moduledoc """
   TODO
   """

@@ -3,7 +3,7 @@ defmodule Xema.Float do
   TODO
   """
 
-  import Xema.Error
+  import Xema.Helper.Error
 
   use Xema.Validator.Enum
   use Xema.Validator.Number

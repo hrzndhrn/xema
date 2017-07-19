@@ -3,7 +3,7 @@ defmodule Xema.Map do
   TODO
   """
 
-  import Xema.Error
+  import Xema.Helper.Error
 
   @behaviour Xema
 

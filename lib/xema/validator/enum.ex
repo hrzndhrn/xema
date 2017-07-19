@@ -3,7 +3,7 @@ defmodule Xema.Validator.Enum do
   TODO
   """
 
-  import Xema.Error
+  import Xema.Helper.Error
 
   defmacro __using__(_) do
     quote do

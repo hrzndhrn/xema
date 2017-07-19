@@ -1,4 +1,4 @@
-defmodule Xema.Error do
+defmodule Xema.Helper.Error do
   @moduledoc """
   TODO
   """

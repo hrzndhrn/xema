@@ -3,9 +3,9 @@ defmodule Xema.String do
   TODO
   """
 
-  alias Xema.Format
+  alias Xema.Validator.Format
 
-  import Xema.Error
+  import Xema.Helper.Error
 
   @behaviour Xema
 
