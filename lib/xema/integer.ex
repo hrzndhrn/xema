@@ -3,12 +3,12 @@ defmodule Xema.Integer do
   TODO
   """
 
+  @behaviour Xema
+
   use Xema.Validator.Enum
   use Xema.Validator.Number
 
   import Xema.Helper.Error
-
-  @behaviour Xema
 
   defstruct minimum: nil,
             maximum: nil,

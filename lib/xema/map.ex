@@ -80,21 +80,24 @@ defmodule Xema.Map do
   defp get_value(map, key) do
     case {Map.get(map, key), Map.get(map, String.to_atom key)} do
       {nil, nil} -> nil
+
       {nil, value} -> value
+
       {value, nil} -> value
+
       _ -> {:erro, :mixed_map}
     end
   end
-  
+
   defp required(%Xema.Map{required: nil}, _map), do: :ok
   defp required(%Xema.Map{required: required}, map) do
     props = map |> Map.keys |> MapSet.new
 
-    if MapSet.subset?(required, props) do 
-      :ok 
-    else 
+    if MapSet.subset?(required, props) do
+      :ok
+    else
       error(
-        :missing_properties, 
+        :missing_properties,
         missing: required |> MapSet.difference(props) |> MapSet.to_list,
         required: MapSet.to_list(required)
       )
@@ -115,7 +118,7 @@ defmodule Xema.Map do
 
   defp patterns(%Xema.Map{pattern_properties: nil}, map), do: {:ok, map}
   defp patterns(%Xema.Map{pattern_properties: patterns}, map) do
-    props = 
+    props =
       for {pattern, schema} <- Map.to_list(patterns),
           key <- Map.keys(map),
           key_match?(pattern, key),
@@ -125,15 +128,15 @@ defmodule Xema.Map do
     do_properties(props, map)
   end
 
-  defp key_match?(regex, atom) when is_atom(atom), 
-    do: key_match?(regex, to_string(atom)) 
+  defp key_match?(regex, atom) when is_atom(atom),
+    do: key_match?(regex, to_string(atom))
   defp key_match?(regex, string), do: Regex.match?(regex, string)
 
   defp additionals(%Xema.Map{additional_properties: false}, map) do
     if Map.equal?(map, %{}) do
       :ok
     else
-      error(:no_additional_properties_allowed, 
+      error(:no_additional_properties_allowed,
             additional_properties: Map.keys(map))
     end
   end

@@ -3,17 +3,20 @@ defmodule Xema.String do
   TODO
   """
 
-  alias Xema.Validator.Format
+  @behaviour Xema
+
+  use Xema.Validator.Enum
 
   import Xema.Helper.Error
 
-  @behaviour Xema
+  alias Xema.Validator.Format
 
   defstruct [
     :max_length,
     :min_length,
     :pattern,
     :format,
+    :enum,
     as: :string
   ]
 
@@ -32,6 +35,7 @@ defmodule Xema.String do
          :ok <- max_length(keywords.max_length, length),
          :ok <- pattern(keywords.pattern, string),
          :ok <- format(keywords.format, string),
+         :ok <- enum(keywords, string),
       do: :ok
   end
 
