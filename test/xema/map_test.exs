@@ -8,10 +8,6 @@ defmodule Xema.MapTest do
 
   setup do
     %{
-      # An empty map schema
-      map: Xema.create(:map),
-      # An empty map schema running as an object schema
-      object: Xema.create(:map, as: :object),
       # A map schema with min_properties
       min: Xema.create(:map, min_properties: 2),
       # A map schema with max_properties
@@ -19,13 +15,6 @@ defmodule Xema.MapTest do
       # A map schema with min_properties and max_properties
       min_max: Xema.create(:map, min_properties: 2, max_properties: 3),
       # Just some properties
-      props: Xema.create(
-        :map,
-        properties: %{
-          foo: Xema.create(:number),
-          bar: Xema.create(:string)
-        }
-      ),
       # Some properties and no additional properties
       no_add: Xema.create(
         :map,
@@ -55,7 +44,7 @@ defmodule Xema.MapTest do
             bar:  Xema.create(:string),
             baz: Xema.create(:number)
           }
-        ),      
+        ),
         props: Xema.create(
           :map,
           properties: %{
@@ -75,46 +64,161 @@ defmodule Xema.MapTest do
     }
   end
 
-  test "type and keywords", schemas do
-    assert schemas.map.type == :map
-    assert Xema.type(schemas.map) == :map
-    assert schemas.map.keywords == %Map{}
+  describe "empty map schema" do
+    setup do
+      %{schema: Xema.create(:map)}
+    end
 
-    assert schemas.object.type == :map
-    assert Xema.type(schemas.object) == :object
-    assert schemas.object.keywords.as == :object
+    test "type", %{schema: schema} do
+      assert schema.type == :map
+      assert Xema.type(schema) == :map
+      assert %Map{} = schema.keywords
+    end
+
+    test "with an empty map", %{schema: schema},
+      do: assert validate(schema, %{}) == :ok
+
+    test "with a string", %{schema: schema} do
+      expected = {:error, %{reason: :wrong_type, type: :map}}
+      assert validate(schema, "foo") == expected
+    end
   end
 
-  test "with an empty map", %{map: schema},
-    do: assert validate(schema, %{}) == :ok
+  describe "empty map schema as object" do
+    setup do
+      %{schema: Xema.create(:map, as: :object)}
+    end
 
-  test "map with a string", %{map: schema} do
-    expected = {:error, %{reason: :wrong_type, type: :map}}
-    assert validate(schema, "foo") == expected
+    test "type", %{schema: schema} do
+      assert schema.type == :map
+      assert Xema.type(schema) == :object
+      assert %Map{} = schema.keywords
+    end
+
+    test "with a string", %{schema: schema} do
+      expected = {:error, %{reason: :wrong_type, type: :object}}
+      assert validate(schema, "foo") == expected
+    end
   end
 
-  test "object with a string", %{object: schema} do
-    expected = {:error, %{reason: :wrong_type, type: :object}}
-    assert validate(schema, "foo") == expected
+  describe "map schema with properties (atom keys)" do
+    setup do
+      %{
+        schema: Xema.create(
+          :map,
+          properties: %{
+            foo: Xema.create(:number),
+            bar: Xema.create(:string)
+          }
+        )
+      }
+    end
+
+    test "with valid values", %{schema: schema} do
+      assert validate(schema, %{foo: 2, bar: "bar"}) == :ok
+      assert validate(schema, %{"foo" => 2, "bar" => "bar"}) == :ok
+    end
+
+    test "with invalid values (atom keys)", %{schema: schema} do
+      expected = {:error, %{
+        reason: :invalid_property,
+        property: :foo,
+        error: %{reason: :wrong_type, type: :number}
+      }}
+      assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
+    end
+
+    test "with invalid values (string keys)", %{schema: schema} do
+      expected = {:error, %{
+        reason: :invalid_property,
+        property: "foo",
+        error: %{reason: :wrong_type, type: :number}
+      }}
+      assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) == expected
+    end
   end
 
-  test "properties with valid values", %{props: schema} do
-    assert validate(schema, %{foo: 2, bar: "bar"}) == :ok
-    assert validate(schema, %{"foo" => 2, "bar" => "bar"}) == :ok
+  describe "map schema with properties (string keys)" do
+    setup do
+      %{
+        schema: Xema.create(
+          :map,
+          properties: %{
+            "foo" => Xema.create(:number),
+            "bar" => Xema.create(:string)
+          }
+        )
+      }
+    end
+
+    test "with valid values", %{schema: schema} do
+      assert validate(schema, %{foo: 2, bar: "bar"}) == :ok
+      assert validate(schema, %{"foo" => 2, "bar" => "bar"}) == :ok
+    end
+
+    test "with invalid values (atom keys)", %{schema: schema} do
+      expected = {:error, %{
+        reason: :invalid_property,
+        property: :foo,
+        error: %{reason: :wrong_type, type: :number}
+      }}
+      assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
+    end
+
+    test "with invalid values (string keys)", %{schema: schema} do
+      expected = {:error, %{
+        reason: :invalid_property,
+        property: "foo",
+        error: %{reason: :wrong_type, type: :number}
+      }}
+      assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) == expected
+    end
   end
 
-  test "properties with valid values (string)", %{string: %{props: schema}} do
-    assert validate(schema, %{foo: 2, bar: "bar"}) == :ok
-    assert validate(schema, %{"foo" => 2, "bar" => "bar"}) == :ok
+  describe "map schema with keys: :atom" do
+    setup do
+      %{
+        schema: Xema.create(
+          :map,
+          keys: :atom,
+          properties: %{
+            "foo" => Xema.create(:number),
+            "bar" => Xema.create(:string)
+          }
+        )
+      }
+    end
+
+    test "with valid key type", %{schema: schema},
+      do: assert validate(schema, %{foo: 1}) == :ok
+
+    test "with invalid key type", %{schema: schema} do
+      expected = {:error, %{reason: :invalid_keys, keys: :atom}}
+      assert validate(schema, %{"foo" => 1}) == expected
+    end
   end
 
-  test "properties with invalid values", %{props: schema} do
-    expected = {:error, %{
-      reason: :invalid_property,
-      property: :foo,
-      error: %{reason: :wrong_type, type: :number}
-    }}
-    assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
+  describe "map schema with keys: :string" do
+    setup do
+      %{
+        schema: Xema.create(
+          :map,
+          keys: :string,
+          properties: %{
+            "foo" => Xema.create(:number),
+            "bar" => Xema.create(:string)
+          }
+        )
+      }
+    end
+
+    test "returns :ok for valid key type", %{schema: schema} do
+      expected = {:error, %{reason: :invalid_keys, keys: :string}}
+      assert validate(schema, %{foo: 1}) == expected
+    end
+
+    test "returns an error tuple for invalid key type", %{schema: schema},
+      do: assert validate(schema, %{"foo" => 1}) == :ok
   end
 
   test "min_properties with too less properties", %{min: schema} do
@@ -167,8 +271,8 @@ defmodule Xema.MapTest do
 
     test "with a missing property", %{atom: %{required: schema}} do
       expected = {:error, %{
-        reason: :missing_properties, 
-        missing: [:bar], 
+        reason: :missing_properties,
+        missing: [:bar],
         required: [:bar, :foo]
       }}
       assert validate(schema, %{foo: 1}) == expected
@@ -181,8 +285,8 @@ defmodule Xema.MapTest do
 
     test "with a missing property", %{string: %{required: schema}} do
       expected = {:error, %{
-        reason: :missing_properties, 
-        missing: ["bar"], 
+        reason: :missing_properties,
+        missing: ["bar"],
         required: ["bar", "foo"]
       }}
       assert validate(schema, %{"foo" => 1}) == expected
@@ -190,23 +294,22 @@ defmodule Xema.MapTest do
   end
 
   describe "schema with pattern properties" do
-    @tag :only
     test "with propper map", %{pattern: schema},
       do: assert validate(schema, %{i_0: 0, i_1: 1, s_X: "six"}) == :ok
 
     test "with wrong value", %{pattern: schema} do
       expected = {:error, %{
-        reason: :invalid_property, 
-        property: :i_0, 
+        reason: :invalid_property,
+        property: :i_0,
         error: %{
-          reason: :wrong_type, 
+          reason: :wrong_type,
           type: :number
         }
       }}
       assert validate(schema, %{i_0: "bla"}) == expected
     end
 
-    test "with addition property", %{pattern: schema} do 
+    test "with addition property", %{pattern: schema} do
       expected = {:error, %{
         reason: :no_additional_properties_allowed,
         additional_properties: [:add]
@@ -215,11 +318,15 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "is_valid?/2" do
-    test "with an empty map", %{map: schema},
+  describe "empty map schema is_valid?/2" do
+    setup do
+      %{schema: Xema.create(:map)}
+    end
+
+    test "with an empty map", %{schema: schema},
       do: assert is_valid?(schema, %{})
 
-    test "map with a string", %{map: schema},
+    test "map with a string", %{schema: schema},
       do: refute is_valid?(schema, "foo")
   end
 end
