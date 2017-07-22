@@ -14,6 +14,7 @@ defmodule Xema.Map do
     :properties,
     :required,
     :pattern_properties,
+    :keys,
     as: :map
   ]
 
@@ -32,6 +33,7 @@ defmodule Xema.Map do
   def validate(%Xema{keywords: keywords}, map) do
     with :ok <- type(keywords, map),
          :ok <- size(keywords, map),
+         :ok <- keys(keywords, map),
          :ok <- required(keywords, map),
          {:ok, map} <- properties(keywords, map),
          {:ok, map} <- patterns(keywords, map),
@@ -40,11 +42,19 @@ defmodule Xema.Map do
   end
 
   defp type(_keywords, map) when is_map(map), do: :ok
-  defp type(keywords, _map) do
-    {:error, %{
-      reason: :wrong_type,
-      type: keywords.as
-    }}
+  defp type(keywords, _map),
+    do: {:error, %{reason: :wrong_type, type: keywords.as }}
+
+  defp keys(%Xema.Map{keys: nil}, _map), do: :ok
+  defp keys(%Xema.Map{keys: :atom}, map) do
+    if map |> Map.keys |> Enum.all?(&is_atom/1),
+      do: :ok,
+      else: {:error, %{reason: :invalid_keys, keys: :atom}}
+  end
+  defp keys(%Xema.Map{keys: :string}, map) do
+    if map |> Map.keys |> Enum.all?(&is_binary/1),
+      do: :ok,
+      else: {:error, %{reason: :invalid_keys, keys: :string}}
   end
 
   defp properties(%Xema.Map{properties: nil}, map), do: {:ok, map}
@@ -54,18 +64,18 @@ defmodule Xema.Map do
 
   defp do_properties([], map), do: {:ok, map}
   defp do_properties([{prop, schema}|props], map) do
-    case do_property(schema, prop, get_value(map, prop)) do
+    case do_property(schema, get_value(map, prop)) do
       :ok -> do_properties(props, Map.delete(map, prop))
-      error -> error
+      {:error, reason} ->
+        {:error, Map.merge(reason, %{property: get_key(map, prop)})}
     end
   end
 
-  defp do_property(_schema, _prop, nil), do: :ok
-  defp do_property(schema, prop, value) do
+  defp do_property(_schema, nil), do: :ok
+  defp do_property(schema, value) do
     case Xema.validate(schema, value) do
       :ok -> :ok
-      {:error, reason} ->
-        error(:invalid_property, property: prop, error: reason)
+      {:error, reason} -> error(:invalid_property, error: reason)
     end
   end
 
@@ -87,6 +97,13 @@ defmodule Xema.Map do
 
       _ -> {:erro, :mixed_map}
     end
+  end
+
+  defp get_key(map, key) when is_atom(key) do
+    if Map.has_key?(map, key), do: key, else: to_string key
+  end
+  defp get_key(map, key) do
+    if Map.has_key?(map, key), do: key, else: String.to_existing_atom(key)
   end
 
   defp required(%Xema.Map{required: nil}, _map), do: :ok
