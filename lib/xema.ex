@@ -4,12 +4,12 @@ defmodule Xema do
   """
 
   defstruct [
-    :id, 
-    :schema, 
+    :id,
+    :schema,
     :title,
     :description,
     :default,
-    :type, 
+    :type,
     :keywords
   ]
 
