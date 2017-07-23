@@ -5,27 +5,21 @@ defmodule Xema.Validator.Number do
 
   import Xema.Helper.Error
 
-  defmacro __using__(_) do
-    quote do
-      alias Xema.Validator.Number
+  def minimum(%{minimum: nil}, _number), do: :ok
+  def minimum(
+    %{minimum: minimum, exclusive_minimum: exclusive_minimum},
+    number
+  ), do: minimum(minimum, exclusive_minimum, number)
 
-      defp minimum(%{minimum: nil}, _number), do: :ok
-      defp minimum(
-        %{minimum: minimum, exclusive_minimum: exclusive_minimum},
-        number
-      ), do: Number.minimum(minimum, exclusive_minimum, number)
+  def maximum(%{maximum: nil}, _number), do: :ok
+  def maximum(
+    %{maximum: maximum, exclusive_maximum: exclusive_maximum},
+    number
+  ), do: maximum(maximum, exclusive_maximum, number)
 
-      defp maximum(%{maximum: nil}, _number), do: :ok
-      defp maximum(
-        %{maximum: maximum, exclusive_maximum: exclusive_maximum},
-        number
-      ), do: Number.maximum(maximum, exclusive_maximum, number)
-
-      defp multiple_of(%{multiple_of: nil}, _number), do: :ok
-      defp multiple_of(%{multiple_of: multiple_of}, number),
-        do: Number.multiple_of(multiple_of, number)
-    end
-  end
+  def multiple_of(%{multiple_of: nil}, _number), do: :ok
+  def multiple_of(%{multiple_of: multiple_of}, number),
+    do: multiple_of(multiple_of, number)
 
   @spec minimum(number, boolean, number) :: {:error, map}
   def minimum(minimum, _exclusive, number)

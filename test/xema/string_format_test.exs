@@ -74,6 +74,8 @@ defmodule Xema.StringFormatTest do
       assert is_valid?(schema, "2001:0DB8:0000:CD30:0000:0000:0000:0000/60")
       assert is_valid?(schema, "2001:0DB8::CD30:0:0:0:0/60")
       assert is_valid?(schema, "2001:0DB8:0:CD30::/60")
+
+      refute is_valid?(schema, "no")
     end
 
     @tag :skip

@@ -6,7 +6,7 @@ defmodule Xema.Integer do
   @behaviour Xema
 
   import Xema.Validator.Enum
-  use Xema.Validator.Number
+  import Xema.Validator.Number
 
   import Xema.Helper.Error
 

@@ -5,7 +5,7 @@ defmodule Xema.Float do
 
   import Xema.Helper.Error
   import Xema.Validator.Enum
-  use Xema.Validator.Number
+  import Xema.Validator.Number
 
   @behaviour Xema
 
