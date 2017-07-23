@@ -43,7 +43,7 @@ defmodule Xema.Map do
 
   defp type(_keywords, map) when is_map(map), do: :ok
   defp type(keywords, _map),
-    do: {:error, %{reason: :wrong_type, type: keywords.as }}
+    do: {:error, %{reason: :wrong_type, type: keywords.as}}
 
   defp keys(%Xema.Map{keys: nil}, _map), do: :ok
   defp keys(%Xema.Map{keys: :atoms}, map) do
@@ -140,7 +140,6 @@ defmodule Xema.Map do
           key <- Map.keys(map),
           key_match?(pattern, key),
           do: {key, schema}
-
 
     do_properties(props, map)
   end

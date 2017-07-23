@@ -42,23 +42,25 @@ defmodule Xema do
 
     @spec create(unquote(type), keyword) :: %Xema{}
     def create(unquote(type), keywords) do
-      {id, keywords} = Keyword.pop(keywords, :id)
-      {schema, keywords} = Keyword.pop(keywords, :schema)
-      {title, keywords} = Keyword.pop(keywords, :title)
-      {description, keywords} = Keyword.pop(keywords, :description)
-      {default, keywords} = Keyword.pop(keywords, :default)
-
-      %Xema{
-        type: unquote(type),
-        id: id,
-        schema: schema,
-        title: title,
-        description: description,
-        default: default,
-        keywords: unquote(xema_module).keywords(keywords)
-      }
+      with {id, keywords} <- Keyword.pop(keywords, :id),
+           {schema, keywords} <- Keyword.pop(keywords, :schema),
+           {title, keywords} <- Keyword.pop(keywords, :title),
+           {description, keywords} <- Keyword.pop(keywords, :description),
+           {default, keywords} <- Keyword.pop(keywords, :default)
+      do
+        %Xema{
+          type: unquote(type),
+          id: id,
+          schema: schema,
+          title: title,
+          description: description,
+          default: default,
+          keywords: unquote(xema_module).keywords(keywords)
+        }
+      end
     end
 
+    @spec xema(any) :: %Xema{}
     def xema({unquote(type), data}), do: Xema.create(unquote(type), xema(data))
     def xema(unquote(type)), do: Xema.create(unquote(type))
 
@@ -73,6 +75,7 @@ defmodule Xema do
     end
   end
 
+  @spec xema(atom, keyword) :: %Xema{}
   def xema(type, data), do: xema {type, data}
 
   def xema(data) when is_list(data), do: Enum.map(data, &map_values/1)

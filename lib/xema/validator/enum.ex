@@ -5,6 +5,7 @@ defmodule Xema.Validator.Enum do
 
   import Xema.Helper.Error
 
+  @spec enum(%{enum: nil | list}, any) :: :ok | {:error, map}
   def enum(%{enum: nil}, _value), do: :ok
   def enum(%{enum: enum}, value) do
     if Enum.member?(enum, value),
