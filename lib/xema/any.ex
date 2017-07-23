@@ -3,7 +3,7 @@ defmodule Xema.Any do
   TODO
   """
 
-  use Xema.Validator.Enum
+  import Xema.Validator.Enum
 
   @behaviour Xema
 

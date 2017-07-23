@@ -2,11 +2,19 @@ defmodule Xema.StringFormatTest do
 
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2] #, validate: 2]
+  import Xema, only: [is_valid?: 2, validate: 2, xema: 2]
 
   describe "Semantic validation with 'format'" do
     # 2017-06-11
     # http://json-schema.org/latest/json-schema-validation.html#rfc.section.8
+
+    test "undefined" do
+      schema = xema :string, format: :foo
+
+      refute is_valid?(schema, "egal")
+      assert validate(schema, "egal") ==
+        {:error, %{reason: :undefined_format, format: :foo}}
+    end
 
     @tag :skip
     test "date-time"
@@ -69,11 +77,7 @@ defmodule Xema.StringFormatTest do
     end
 
     @tag :skip
-    test "TODO: ipv6" do
-      schema = Xema.create(:string, format: :ipv6)
-
-      refute is_valid?(schema, "2001:0DB8:0:CD3/60")
-    end
+    test "TODO: ipv6"
 
     @tag :skip
     test "uri"

@@ -2,14 +2,14 @@ defmodule Xema.MapTest do
 
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema, only: [is_valid?: 2, validate: 2, xema: 1]
 
   alias Xema.Map
 
   setup do
     %{
       # A map schema with min_properties
-      min: Xema.create(:map, min_properties: 2),
+      min: xema({:map, min_properties: 2}),
       # A map schema with max_properties
       max: Xema.create(:map, max_properties: 3),
       # A map schema with min_properties and max_properties
@@ -66,7 +66,7 @@ defmodule Xema.MapTest do
 
   describe "empty map schema" do
     setup do
-      %{schema: Xema.create(:map)}
+      %{schema: xema :map}
     end
 
     test "type", %{schema: schema} do
@@ -86,7 +86,7 @@ defmodule Xema.MapTest do
 
   describe "empty map schema as object" do
     setup do
-      %{schema: Xema.create(:map, as: :object)}
+      %{schema: xema {:map, as: :object}}
     end
 
     test "type", %{schema: schema} do
@@ -104,13 +104,13 @@ defmodule Xema.MapTest do
   describe "map schema with properties (atom keys)" do
     setup do
       %{
-        schema: Xema.create(
+        schema: xema {
           :map,
           properties: %{
-            foo: Xema.create(:number),
-            bar: Xema.create(:string)
+            foo: :number,
+            bar: :string
           }
-        )
+        }
       }
     end
 
@@ -141,13 +141,13 @@ defmodule Xema.MapTest do
   describe "map schema with properties (string keys)" do
     setup do
       %{
-        schema: Xema.create(
+        schema: xema{
           :map,
           properties: %{
-            "foo" => Xema.create(:number),
-            "bar" => Xema.create(:string)
+            "foo" => :number,
+            "bar" => :string
           }
-        )
+        }
       }
     end
 
@@ -178,14 +178,14 @@ defmodule Xema.MapTest do
   describe "map schema with keys: :atom" do
     setup do
       %{
-        schema: Xema.create(
+        schema: xema{
           :map,
-          keys: :atom,
+          keys: :atoms,
           properties: %{
-            "foo" => Xema.create(:number),
-            "bar" => Xema.create(:string)
+            "foo" => :number,
+            "bar" => :string
           }
-        )
+        }
       }
     end
 
@@ -193,7 +193,7 @@ defmodule Xema.MapTest do
       do: assert validate(schema, %{foo: 1}) == :ok
 
     test "with invalid key type", %{schema: schema} do
-      expected = {:error, %{reason: :invalid_keys, keys: :atom}}
+      expected = {:error, %{reason: :invalid_keys, keys: :atoms}}
       assert validate(schema, %{"foo" => 1}) == expected
     end
   end
@@ -201,19 +201,19 @@ defmodule Xema.MapTest do
   describe "map schema with keys: :string" do
     setup do
       %{
-        schema: Xema.create(
+        schema: xema {
           :map,
-          keys: :string,
+          keys: :strings,
           properties: %{
-            "foo" => Xema.create(:number),
-            "bar" => Xema.create(:string)
+            "foo" => :number,
+            "bar" => :string
           }
-        )
+        }
       }
     end
 
     test "returns :ok for valid key type", %{schema: schema} do
-      expected = {:error, %{reason: :invalid_keys, keys: :string}}
+      expected = {:error, %{reason: :invalid_keys, keys: :strings}}
       assert validate(schema, %{foo: 1}) == expected
     end
 

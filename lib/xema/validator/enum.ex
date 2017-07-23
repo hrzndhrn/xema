@@ -5,14 +5,10 @@ defmodule Xema.Validator.Enum do
 
   import Xema.Helper.Error
 
-  defmacro __using__(_) do
-    quote do
-      defp enum(%{enum: nil}, _value), do: :ok
-      defp enum(%{enum: enum}, value) do
-        if Enum.member?(enum, value),
-          do: :ok,
-          else: error(:not_in_enum, enum: enum)
-      end
-    end
+  def enum(%{enum: nil}, _value), do: :ok
+  def enum(%{enum: enum}, value) do
+    if Enum.member?(enum, value),
+      do: :ok,
+      else: error(:not_in_enum, enum: enum)
   end
 end

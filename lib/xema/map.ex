@@ -46,15 +46,15 @@ defmodule Xema.Map do
     do: {:error, %{reason: :wrong_type, type: keywords.as }}
 
   defp keys(%Xema.Map{keys: nil}, _map), do: :ok
-  defp keys(%Xema.Map{keys: :atom}, map) do
+  defp keys(%Xema.Map{keys: :atoms}, map) do
     if map |> Map.keys |> Enum.all?(&is_atom/1),
       do: :ok,
-      else: {:error, %{reason: :invalid_keys, keys: :atom}}
+      else: {:error, %{reason: :invalid_keys, keys: :atoms}}
   end
-  defp keys(%Xema.Map{keys: :string}, map) do
+  defp keys(%Xema.Map{keys: :strings}, map) do
     if map |> Map.keys |> Enum.all?(&is_binary/1),
       do: :ok,
-      else: {:error, %{reason: :invalid_keys, keys: :string}}
+      else: {:error, %{reason: :invalid_keys, keys: :strings}}
   end
 
   defp properties(%Xema.Map{properties: nil}, map), do: {:ok, map}

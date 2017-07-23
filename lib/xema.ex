@@ -59,6 +59,9 @@ defmodule Xema do
       }
     end
 
+    def xema({unquote(type), data}), do: Xema.create(unquote(type), xema(data))
+    def xema(unquote(type)), do: Xema.create(unquote(type))
+
     @spec is_valid?(%Xema{type: unquote(type)}, any) :: boolean
     def is_valid?(%Xema{type: unquote(type)} = schema, value) do
       unquote(xema_module).is_valid?(schema, value)
@@ -69,4 +72,12 @@ defmodule Xema do
       unquote(xema_module).validate(schema, value)
     end
   end
+
+  def xema(type, data), do: xema {type, data}
+
+  def xema(data) when is_list(data), do: Enum.map(data, &map_values/1)
+  def xema(data) when is_map(data), do: Enum.into(data, %{}, &map_values/1)
+  def xema(data), do: data
+
+  defp map_values({key, value}), do: {key, xema(value)}
 end
