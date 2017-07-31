@@ -60,12 +60,18 @@ defmodule Xema do
       end
     end
 
-    @spec xema(unquote(type) | {unquote(type), any()}) :: %Xema{} | keyword()
-    def xema(unquote(type)), do: create(unquote(type))
-    def xema({unquote(type), data}), do: create(unquote(type), xema(data))
+    @spec xema(unquote(type)) :: %Xema{}
+    def xema(unquote(type)), do: do_xema(unquote(type))
 
-    @spec xema(unquote(type), any()) :: %Xema{} | keyword()
-    def xema(unquote(type), data), do: create(unquote(type), xema(data))
+    @spec xema(unquote(type), any()) :: %Xema{}
+    def xema(unquote(type), data), do: do_xema(unquote(type), data)
+
+    @spec do_xema(unquote(type) | {unquote(type), any()}) :: %Xema{} | keyword()
+    defp do_xema(unquote(type)), do: create(unquote(type))
+    defp do_xema({unquote(type), data}), do: create(unquote(type), do_xema(data))
+
+    @spec do_xema(unquote(type), any()) :: %Xema{} | keyword()
+    defp do_xema(unquote(type), data), do: create(unquote(type), do_xema(data))
 
     @spec is_valid?(%Xema{type: unquote(type)}, any()) :: boolean
     def is_valid?(%Xema{type: unquote(type)} = schema, value) do
@@ -78,9 +84,9 @@ defmodule Xema do
     end
   end
 
-  def xema(data) when is_list(data), do: Enum.map(data, &map_values/1)
-  def xema(data) when is_map(data), do: Enum.into(data, %{}, &map_values/1)
-  def xema(data), do: data
+  defp do_xema(data) when is_list(data), do: Enum.map(data, &map_values/1)
+  defp do_xema(data) when is_map(data), do: Enum.into(data, %{}, &map_values/1)
+  defp do_xema(data), do: data
 
-  defp map_values({key, value}), do: {key, xema(value)}
+  defp map_values({key, value}), do: {key, do_xema(value)}
 end
