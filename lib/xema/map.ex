@@ -3,9 +3,9 @@ defmodule Xema.Map do
   TODO
   """
 
-  import Xema.Helper.Error
-
   @behaviour Xema
+
+  import Xema.Helper.Error
 
   defstruct [
     :additional_properties,
