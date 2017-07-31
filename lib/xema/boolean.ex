@@ -5,7 +5,7 @@ defmodule Xema.Boolean do
 
   @behaviour Xema
 
-  defstruct []
+  defstruct [as: :boolean]
 
   @spec new(keyword) :: %Xema{}
   def new(_), do: struct(%Xema.Boolean{})

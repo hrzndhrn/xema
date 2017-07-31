@@ -2,22 +2,42 @@ defmodule Xema.BooleanTest do
 
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema
 
-  test "boolean schema" do
-    schema = Xema.create(:boolean)
+  describe "schema 'boolean'" do
+    setup do
+      %{schema: xema(:boolean)}
+    end
 
-    assert schema.type == :boolean
-    assert schema.keywords == %Xema.Boolean{}
+    test "type", %{schema: schema} do
+      assert schema.type == :boolean
+      assert type(schema) == :boolean
+    end
 
-    assert is_valid?(schema, true)
-    assert is_valid?(schema, false)
-    refute is_valid?(schema, "true")
-    refute is_valid?(schema, 1)
-    refute is_valid?(schema, %{bla: 1})
+    test "is_valid?/2 with value true", %{schema: schema},
+      do: assert is_valid?(schema, true)
 
-    assert validate(schema, true) == :ok
-    assert validate(schema, false) == :ok
-    assert validate(schema, %{bla: 1}) == {:error, %{type: :boolean}}
+    test "is_valid?/2 with value false", %{schema: schema},
+      do: assert is_valid?(schema, false)
+
+    test "is_valid?/2 with non boolean values", %{schema: schema} do
+        refute is_valid?(schema, 1)
+        refute is_valid?(schema, "1")
+        refute is_valid?(schema, [1])
+        refute is_valid?(schema, nil)
+        refute is_valid?(schema, %{foo: "foo"})
+    end
+
+    test "validate/2 with value true", %{schema: schema},
+      do: assert validate(schema, true) == :ok
+
+    test "validate/2 with value false", %{schema: schema},
+      do: assert validate(schema, false) == :ok
+
+    test "validate/2 with non boolean value", %{schema: schema} do
+      assert validate(schema, "true") == {:error, %{type: :boolean}}
+      assert validate(schema, 1) == {:error, %{type: :boolean}}
+      assert validate(schema, []) == {:error, %{type: :boolean}}
+    end
   end
 end
