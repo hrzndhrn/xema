@@ -25,9 +25,9 @@ defmodule Xema do
     string: Xema.String
   }
 
-  @callback is_valid?(%Xema{}, any) :: boolean
-  @callback validate(%Xema{}, any) :: :ok | {:error, any}
-  @callback new(keyword) :: struct
+  @callback is_valid?(%Xema{}, any()) :: boolean()
+  @callback validate(%Xema{}, any()) :: :ok | {:error, any()}
+  @callback new(keyword()) :: struct()
 
   @spec type(%Xema{}) :: atom
   def type(schema) do
@@ -38,10 +38,10 @@ defmodule Xema do
 
   for {type, xema_module} <- Map.to_list(@types) do
     @spec create(unquote(type)) :: %Xema{}
-    def create(unquote(type)), do: create(unquote(type), [])
+    defp create(unquote(type)), do: create(unquote(type), [])
 
-    @spec create(unquote(type), keyword) :: %Xema{}
-    def create(unquote(type), keywords) do
+    @spec create(unquote(type), any()) :: %Xema{}
+    defp create(unquote(type), keywords) do
       with {id, keywords} <- Keyword.pop(keywords, :id),
            {schema, keywords} <- Keyword.pop(keywords, :schema),
            {title, keywords} <- Keyword.pop(keywords, :title),
@@ -60,23 +60,23 @@ defmodule Xema do
       end
     end
 
-    @spec xema(any) :: %Xema{}
-    def xema({unquote(type), data}), do: Xema.create(unquote(type), xema(data))
-    def xema(unquote(type)), do: Xema.create(unquote(type))
+    @spec xema(unquote(type) | {unquote(type), any()}) :: %Xema{} | keyword()
+    def xema(unquote(type)), do: create(unquote(type))
+    def xema({unquote(type), data}), do: create(unquote(type), xema(data))
 
-    @spec is_valid?(%Xema{type: unquote(type)}, any) :: boolean
+    @spec xema(unquote(type), any()) :: %Xema{} | keyword()
+    def xema(unquote(type), data), do: create(unquote(type), xema(data))
+
+    @spec is_valid?(%Xema{type: unquote(type)}, any()) :: boolean
     def is_valid?(%Xema{type: unquote(type)} = schema, value) do
       unquote(xema_module).is_valid?(schema, value)
     end
 
-    @spec validate(%Xema{type: unquote(type)}, any) :: :ok | {:error, any}
+    @spec validate(%Xema{type: unquote(type)}, any()) :: :ok | {:error, any}
     def validate(%Xema{type: unquote(type)} = schema, value) do
       unquote(xema_module).validate(schema, value)
     end
   end
-
-  @spec xema(atom, keyword) :: %Xema{}
-  def xema(type, data), do: xema {type, data}
 
   def xema(data) when is_list(data), do: Enum.map(data, &map_values/1)
   def xema(data) when is_map(data), do: Enum.into(data, %{}, &map_values/1)
