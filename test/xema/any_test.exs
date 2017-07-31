@@ -2,20 +2,40 @@ defmodule Xema.AnyTest do
 
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema, only: [is_valid?: 2, validate: 2, xema: 1]
 
-  test "any schema" do
-    schema = Xema.create(:any)
+  describe "schema 'any'" do
+    setup do
+      %{schema: xema(:any)}
+    end
 
-    assert schema.type == :any
-    assert schema.keywords.enum == nil
+    test "type", %{schema: schema} do
+      assert schema.type == :any
+      assert Xema.type(schema) == :any
+    end
 
-    assert is_valid?(schema, "foo")
-    assert is_valid?(schema, 1)
-    assert is_valid?(schema, %{bla: 1})
+    test "is_valid?/2 returns true for a string", %{schema: schema},
+      do: assert is_valid?(schema, "foo")
 
-    assert validate(schema, "foo") == :ok
-    assert validate(schema, 1) == :ok
-    assert validate(schema, %{bla: 1}) == :ok
+    test "is_valid?/2 returns true for a number", %{schema: schema},
+      do: assert is_valid?(schema, 42)
+
+    test "is_valid?/2 returns true for nil", %{schema: schema},
+      do: assert is_valid?(schema, nil)
+
+    test "is_valid?/2 returns true for a list", %{schema: schema},
+      do: assert is_valid?(schema, [1, 2, 3])
+
+    test "validate/2 returns :ok for a string", %{schema: schema},
+      do: assert validate(schema, "foo") == :ok
+
+    test "validate/2 returns :ok for a number", %{schema: schema},
+      do: assert validate(schema, 42) == :ok
+
+    test "validate/2 returns :ok for nil", %{schema: schema},
+      do: assert validate(schema, nil) == :ok
+
+    test "validate/2 returns true for a list", %{schema: schema},
+      do: assert validate(schema, [1, 2, 3]) == :ok
   end
 end

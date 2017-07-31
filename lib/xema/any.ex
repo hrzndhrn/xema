@@ -7,7 +7,7 @@ defmodule Xema.Any do
 
   @behaviour Xema
 
-  defstruct [:enum]
+  defstruct [:enum, as: :any]
 
   @spec new(keyword) :: %Xema.Any{}
   def new(keywords), do: struct(%Xema.Any{}, keywords)
