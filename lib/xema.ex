@@ -27,7 +27,7 @@ defmodule Xema do
 
   @callback is_valid?(%Xema{}, any) :: boolean
   @callback validate(%Xema{}, any) :: :ok | {:error, any}
-  @callback keywords(keyword) :: struct
+  @callback new(keyword) :: struct
 
   @spec type(%Xema{}) :: atom
   def type(schema) do
@@ -55,7 +55,7 @@ defmodule Xema do
           title: title,
           description: description,
           default: default,
-          keywords: unquote(xema_module).keywords(keywords)
+          keywords: unquote(xema_module).new(keywords)
         }
       end
     end

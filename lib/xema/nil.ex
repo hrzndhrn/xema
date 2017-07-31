@@ -9,8 +9,8 @@ defmodule Xema.Nil do
 
   defstruct as: :nil
 
-  @spec keywords(list) :: %Xema.Nil{}
-  def keywords(keywords), do: struct(%Xema.Nil{}, keywords)
+  @spec new(list) :: %Xema.Nil{}
+  def new(keywords), do: struct(%Xema.Nil{}, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(_xema, nil), do: true

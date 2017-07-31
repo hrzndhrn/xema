@@ -7,8 +7,8 @@ defmodule Xema.Boolean do
 
   defstruct []
 
-  @spec keywords(keyword) :: %Xema{}
-  def keywords(_), do: struct(%Xema.Boolean{})
+  @spec new(keyword) :: %Xema{}
+  def new(_), do: struct(%Xema.Boolean{})
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(_, true), do: true

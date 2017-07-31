@@ -9,8 +9,8 @@ defmodule Xema.Any do
 
   defstruct [:enum]
 
-  @spec keywords(keyword) :: %Xema.Any{}
-  def keywords(keywords), do: struct(%Xema.Any{}, keywords)
+  @spec new(keyword) :: %Xema.Any{}
+  def new(keywords), do: struct(%Xema.Any{}, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(schema, value), do: validate(schema, value) == :ok

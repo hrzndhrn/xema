@@ -16,8 +16,8 @@ defmodule Xema.List do
     as: :list
   ]
 
-  @spec keywords(list) :: %Xema.List{}
-  def keywords(keywords), do: struct(%Xema.List{}, keywords)
+  @spec new(list) :: %Xema.List{}
+  def new(keywords), do: struct(%Xema.List{}, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(xema, list), do: validate(xema, list) == :ok

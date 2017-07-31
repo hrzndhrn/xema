@@ -18,8 +18,8 @@ defmodule Xema.Map do
     as: :map
   ]
 
-  @spec keywords(keyword) :: %Xema.Map{}
-  def keywords(keywords), do: struct(%Xema.Map{}, setup(keywords))
+  @spec new(keyword) :: %Xema.Map{}
+  def new(keywords), do: struct(%Xema.Map{}, setup(keywords))
 
   defp setup(keywords) do
     keywords

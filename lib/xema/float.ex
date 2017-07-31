@@ -16,8 +16,8 @@ defmodule Xema.Float do
             multiple_of: nil,
             enum: nil
 
-  @spec keywords(keyword) :: %Xema.Float{}
-  def keywords(keywords), do: struct(%Xema.Float{}, keywords)
+  @spec new(keyword) :: %Xema.Float{}
+  def new(keywords), do: struct(%Xema.Float{}, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(xema, number), do: validate(xema, number) == :ok

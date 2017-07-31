@@ -19,9 +19,9 @@ defmodule Xema.String do
     as: :string
   ]
 
-  @spec keywords(list) :: %Xema{}
-  def keywords([]), do: %Xema.String{}
-  def keywords(keywords), do: struct(Xema.String, keywords)
+  @spec new(list) :: %Xema{}
+  def new([]), do: %Xema.String{}
+  def new(keywords), do: struct(Xema.String, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(xema, string), do: validate(xema, string) == :ok

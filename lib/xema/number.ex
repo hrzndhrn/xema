@@ -17,8 +17,8 @@ defmodule Xema.Number do
             multiple_of: nil,
             enum: nil
 
-  @spec keywords(keyword) :: %Xema.Number{}
-  def keywords(keywords), do: struct(%Xema.Number{}, keywords)
+  @spec new(keyword) :: %Xema.Number{}
+  def new(keywords), do: struct(%Xema.Number{}, keywords)
 
   @spec is_valid?(%Xema{}, any) :: boolean
   def is_valid?(xema, number), do: validate(xema, number) == :ok
