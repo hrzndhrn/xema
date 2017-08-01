@@ -9,6 +9,11 @@ defmodule Xema.IntegerTest do
       %{schema: xema(:integer)}
     end
 
+    test "type", %{schema: schema} do
+      assert schema.type == :integer
+      assert type(schema) == :integer
+    end
+
     test "validate/2 with an integer", %{schema: schema},
       do: assert validate(schema, 2) == :ok
 

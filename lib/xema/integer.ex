@@ -10,12 +10,15 @@ defmodule Xema.Integer do
 
   import Xema.Helper.Error
 
-  defstruct minimum: nil,
-            maximum: nil,
-            exclusive_maximum: nil,
-            exclusive_minimum: nil,
-            multiple_of: nil,
-            enum: nil
+  defstruct [
+    :minimum,
+    :maximum,
+    :exclusive_maximum,
+    :exclusive_minimum,
+    :multiple_of,
+    :enum,
+    as: :integer
+  ]
 
   @spec new(keyword) :: %Xema.Integer{}
   def new(keywords), do: struct(%Xema.Integer{}, keywords)
