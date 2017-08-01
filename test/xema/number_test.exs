@@ -2,239 +2,118 @@ defmodule Xema.NumberTest do
 
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema
 
-  describe "number schema with integer" do
-    test "number schema" do
-      schema = Xema.create(:number)
-
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{}
-
-      assert is_valid?(schema, 1)
-      assert is_valid?(schema, 1.1)
-      refute is_valid?(schema, "1")
-      refute is_valid?(schema, %{bla: 1})
-
-      assert validate(schema, 1) == :ok
-      assert validate(schema, 1.1) == :ok
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
-      assert validate(schema, %{bla: 1}) ==
-        {:error, %{reason: :wrong_type, type: :number}}
+  describe "'number' schema" do
+    setup do
+      %{schema: xema(:number)}
     end
 
-    test "number schema with minimum" do
-      schema = Xema.create(:number, minimum: 2)
+    test "validate/2 with a float", %{schema: schema},
+      do: assert validate(schema, 2.3) == :ok
 
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{minimum: 2}
-
-      refute is_valid?(schema, 1)
-      assert is_valid?(schema, 2)
-      assert is_valid?(schema, 3)
-      refute is_valid?(schema, "1")
-
-      assert validate(schema, 1) == {:error, %{reason: :too_small, minimum: 2}}
+    test "validate/2 with an integer", %{schema: schema} do
       assert validate(schema, 2) == :ok
-      assert validate(schema, 3) == :ok
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
     end
 
-    test "number schema with minimum and exclusive minimum" do
-      schema = Xema.create(:number, minimum: 2, exclusive_minimum: true)
-
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{
-        minimum: 2,
-        exclusive_minimum: true
-      }
-
-      refute is_valid?(schema, 1)
-      refute is_valid?(schema, 2)
-      assert is_valid?(schema, 3)
-      refute is_valid?(schema, "1")
-
-      assert validate(schema, 1) == {:error, %{reason: :too_small, minimum: 2}}
-      assert validate(schema, 2) ==
-        {:error, %{reason: :too_small, minimum: 2, exclusive_minimum: true}}
-      assert validate(schema, 3) == :ok
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+    test "validate/2 with a string", %{schema: schema} do
+      expected = {:error, %{reason: :wrong_type, type: :number}}
+      assert validate(schema, "foo") == expected
     end
 
-    test "number schema with maximum" do
-      schema = Xema.create(:number, maximum: 2)
+    test "is_valid?/2 with a valid value", %{schema: schema},
+      do: assert is_valid?(schema, 5.6)
 
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{
-        maximum: 2,
-        exclusive_maximum: nil
-      }
+    test "is_valid?/2 with an invalid value", %{schema: schema},
+      do: refute is_valid?(schema, [1])
+  end
 
-      assert is_valid?(schema, 1)
-      assert is_valid?(schema, 2)
-      refute is_valid?(schema, 3)
-      refute is_valid?(schema, "1")
-
-      assert validate(schema, 1) == :ok
-      assert validate(schema, 2) == :ok
-      assert validate(schema, 3) == {:error, %{reason: :too_big, maximum: 2}}
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+  describe "'number' schema with range" do
+    setup do
+      %{schema: xema(:number, minimum: 2, maximum: 4)}
     end
 
-    test "number schema with maximum and exclusie maximum" do
-      schema = Xema.create(:number, maximum: 2, exclusive_maximum: true)
-
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{
-        maximum: 2,
-        exclusive_maximum: true
-      }
-
-      assert is_valid?(schema, 1)
-      refute is_valid?(schema, 2)
-      refute is_valid?(schema, 3)
-      refute is_valid?(schema, "1")
-
-      assert validate(schema, 1) == :ok
-      assert validate(schema, 2) ==
-        {:error, %{reason: :too_big, maximum: 2, exclusive_maximum: true}}
-      assert validate(schema, 3) ==
-        {:error, %{reason: :too_big, maximum: 2}}
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+    test "validate/2 with a number in range", %{schema: schema} do
+      assert validate(schema, 2.0) == :ok
+      assert validate(schema, 3.0) == :ok
+      assert validate(schema, 4.0) == :ok
     end
 
-    test "number schema with multiple of" do
-      schema = Xema.create(:number, multiple_of: 2)
+    test "validate/2 with a too small number", %{schema: schema} do
+      expected = {:error, %{minimum: 2, reason: :too_small}}
+      assert validate(schema, 1.0) == expected
+    end
 
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{multiple_of: 2}
-
-      assert is_valid?(schema, 2)
-      refute is_valid?(schema, 3)
-      assert is_valid?(schema, 4)
-      refute is_valid?(schema, "1")
-
-      assert validate(schema, 2) == :ok
-      assert validate(schema, 3) ==
-        {:error, %{reason: :not_multiple, multiple_of: 2}}
-      assert validate(schema, 4) == :ok
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+    test "validate/2 with a too big number", %{schema: schema} do
+      expected = {:error, %{maximum: 4, reason: :too_big}}
+      assert validate(schema, 5.0) == expected
     end
   end
 
-  describe "number schema with float" do
-    test "number schema with minimum" do
-      schema = Xema.create(:number, minimum: 1.2)
-
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{minimum: 1.2}
-
-      refute is_valid?(schema, 1.1)
-      assert is_valid?(schema, 1.2)
-      assert is_valid?(schema, 1.3)
-      refute is_valid?(schema, "1")
-
-      assert validate(schema, 1.1) ==
-        {:error, %{reason: :too_small, minimum: 1.2}}
-      assert validate(schema, 1.2) == :ok
-      assert validate(schema, 1.3) == :ok
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+  describe "'number' schema with exclusive range" do
+    setup do
+      %{schema: xema(
+          :number,
+          minimum: 2,
+          maximum: 4,
+          exclusive_minimum: true,
+          exclusive_maximum: true
+      )}
     end
 
-    test "number schema with minimum and exclusive minimum" do
-      schema = Xema.create(:number, minimum: 1.2, exclusive_minimum: true)
+    test "validate/2 with a number in range", %{schema: schema},
+      do: assert validate(schema, 3.0) == :ok
 
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{
-        minimum: 1.2,
-        exclusive_minimum: true
-      }
-
-      refute is_valid?(schema, 1.1)
-      refute is_valid?(schema, 1.2)
-      assert is_valid?(schema, 1.3)
-      refute is_valid?(schema, "1")
-
-      assert validate(schema, 1.1) ==
-        {:error, %{reason: :too_small, minimum: 1.2}}
-      assert validate(schema, 1.2) ==
-        {:error, %{reason: :too_small, minimum: 1.2, exclusive_minimum: true}}
-      assert validate(schema, 1.3) == :ok
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+    test "validate/2 with a too small number", %{schema: schema} do
+      expected = {:error,
+        %{minimum: 2, reason: :too_small}}
+      assert validate(schema, 1.0) == expected
     end
 
-    test "number schema with maximum" do
-      schema = Xema.create(:number, maximum: 1.2)
-
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{
-        maximum: 1.2,
-        exclusive_maximum: nil
-      }
-
-      assert is_valid?(schema, 1.1)
-      assert is_valid?(schema, 1.2)
-      refute is_valid?(schema, 1.3)
-      refute is_valid?(schema, "1")
-
-      assert validate(schema, 1.1) == :ok
-      assert validate(schema, 1.2) == :ok
-      assert validate(schema, 1.3) ==
-        {:error, %{reason: :too_big, maximum: 1.2}}
-      assert validate(schema, "1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+    test "validate/2 with a minimum number", %{schema: schema} do
+      expected = {:error,
+        %{minimum: 2, reason: :too_small, exclusive_minimum: true}}
+      assert validate(schema, 2.0) == expected
     end
 
-    test "number schema with maximum and exclusie maximum" do
-      schema = Xema.create(:number, maximum: 1.2, exclusive_maximum: true)
-
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{
-        maximum: 1.2,
-        exclusive_maximum: true
-      }
-
-      assert is_valid?(schema, 1.1)
-      refute is_valid?(schema, 1.2)
-      refute is_valid?(schema, 1.3)
-      refute is_valid?(schema, "1.1")
-
-      assert validate(schema, 1.1) == :ok
-      assert validate(schema, 1.2) ==
-        {:error, %{reason: :too_big, maximum: 1.2, exclusive_maximum: true}}
-      assert validate(schema, 1.3) ==
-        {:error, %{reason: :too_big, maximum: 1.2}}
-      assert validate(schema, "1.1") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+    test "validate/2 with a maximum number", %{schema: schema} do
+      expected = {:error,
+        %{maximum: 4, reason: :too_big, exclusive_maximum: true}}
+      assert validate(schema, 4.0) == expected
     end
 
-    test "number schema with multiple of" do
-      schema = Xema.create(:number, multiple_of: 1.1)
+    test "validate/2 with a too big number", %{schema: schema} do
+      expected = {:error,
+        %{maximum: 4, reason: :too_big}}
+      assert validate(schema, 5.0) == expected
+    end
+  end
 
-      assert schema.type == :number
-      assert schema.keywords == %Xema.Number{multiple_of: 1.1}
+  describe "'number' schema with multiple-of" do
+    setup do
+      %{schema: xema(:number, multiple_of: 1.2)}
+    end
 
-      assert is_valid?(schema, 2.2)
-      refute is_valid?(schema, 3.1)
-      assert is_valid?(schema, 4.4)
-      refute is_valid?(schema, "4.4")
+    test "validate/2 with a valid number", %{schema: schema},
+      do: assert validate(schema, 3.6) == :ok
 
-      assert validate(schema, 2.2) == :ok
-      assert validate(schema, 3.1) ==
-        {:error, %{reason: :not_multiple, multiple_of: 1.1}}
-      assert validate(schema, 31) ==
-        {:error, %{reason: :not_multiple, multiple_of: 1.1}}
-      assert validate(schema, 4.4) == :ok
-      assert validate(schema, "4.4") ==
-        {:error, %{reason: :wrong_type, type: :number}}
+    test "validate/2 with an invalid number", %{schema: schema} do
+      expected = {:error, %{reason: :not_multiple, multiple_of: 1.2}}
+      assert validate(schema, 6.2) == expected
+    end
+  end
+
+  describe "'number' schema with enum" do
+    setup do
+      %{schema: xema(:number, enum: [1.2, 1.3, 3.3])}
+    end
+
+    test "with a value from the enum", %{schema: schema},
+      do: assert validate(schema, 1.3) == :ok
+
+    test "with a value that is not in the enum", %{schema: schema} do
+      expected = {:error, %{enum: [1.2, 1.3, 3.3], reason: :not_in_enum}}
+      assert validate(schema, 2) == expected
     end
   end
 end

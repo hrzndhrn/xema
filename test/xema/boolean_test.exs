@@ -4,7 +4,7 @@ defmodule Xema.BooleanTest do
 
   import Xema
 
-  describe "schema 'boolean'" do
+  describe "'boolean' schema" do
     setup do
       %{schema: xema(:boolean)}
     end

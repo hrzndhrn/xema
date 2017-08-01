@@ -54,11 +54,11 @@ defmodule Xema.AnyTest do
     end
 
     test "with a value that is not in the enum", %{schema: schema} do
-      error = {:error, %{enum: [1, 1.2, [1], "foo"], reason: :not_in_enum}}
-      assert validate(schema, 2) == error
-      assert validate(schema, 2.2) == error
-      assert validate(schema, "bar") == error
-      assert validate(schema, [2]) == error
+      expected = {:error, %{enum: [1, 1.2, [1], "foo"], reason: :not_in_enum}}
+      assert validate(schema, 2) == expected
+      assert validate(schema, 2.2) == expected
+      assert validate(schema, "bar") == expected
+      assert validate(schema, [2]) == expected
     end
 
     test "is_valid?/2 with a valid value", %{schema: schema},
