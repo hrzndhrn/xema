@@ -2,108 +2,165 @@ defmodule Xema.ListTest do
 
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema
 
-  alias Xema.List
+  describe "'list' schema" do
+    setup do
+      %{schema: xema(:list)}
+    end
 
-  setup do
-    %{
-      array: Xema.create(:list),
-      unique: Xema.create(:list, unique_items: true),
-      length: Xema.create(:list, min_items: 2, max_items: 3),
-      integers: Xema.create(:list, items: Xema.create(:integer)),
-      tuple: Xema.create(:list, items: [Xema.create(:string),
-                                        Xema.create(:integer)]),
-      tuple_add: Xema.create(:list,
-                             additional_items: true,
-                             items: [Xema.create(:string),
-                                     Xema.create(:integer)])
-    }
-  end
+    test "type", %{schema: schema} do
+      assert schema.type == :list
+      assert type(schema) == :list
+    end
 
-  test "type and keywords", schemas do
-    assert schemas.array.type == :list
-    assert schemas.array.keywords == %List{items: nil}
-
-    assert schemas.length.type == :list
-  end
-
-  describe "validate/2" do
-    test "with an empty list", %{array: schema},
+    test "validate/2 with an empty list", %{schema: schema},
       do: assert validate(schema, []) == :ok
 
-    test "with an list of different types", %{array: schema},
+    test "validate/2 with an list of different types", %{schema: schema},
       do: assert validate(schema, [1, "bla", 3.4]) == :ok
 
-    test "with different type", %{array: schema} do
+    test "validate/2 with an invalid value", %{schema: schema} do
       expected = {:error, %{reason: :wrong_type, type: :list}}
       assert validate(schema, "not an array") == expected
     end
 
-    test "too short list", %{length: schema} do
+    test "is_valid?/2 with a valid value", %{schema: schema},
+      do: assert is_valid?(schema, [1])
+
+    test "is_valid?/2 with an invalid value", %{schema: schema},
+      do: refute is_valid?(schema, 42)
+  end
+
+  describe "'list' schema with size" do
+    setup do
+      %{schema: xema(:list, min_items: 2, max_items: 3)}
+    end
+
+    test "validate/2 with too short list", %{schema: schema} do
       expected = {:error, %{reason: :too_less_items, min_items: 2}}
       assert validate(schema, [1]) == expected
     end
 
-    test "proper list", %{length: schema},
+    test "validate/2 with proper list", %{schema: schema},
       do: assert validate(schema, [1, 2]) == :ok
 
-    test "to long list", %{length: schema} do
+    test "validate/2 with to long list", %{schema: schema} do
       expected = {:error, %{reason: :too_many_items, max_items: 3}}
       assert validate(schema, [1, 2, 3, 4]) == expected
     end
+  end
 
-    test "integer items with list of integers", %{integers: schema},
+  describe "'list' schema with typed items" do
+    setup do
+      %{
+        integers: xema(:list, items: :integer),
+        strings: xema(:list, items: :string)
+      }
+    end
+
+    test "validate/2 integers with empty list", %{integers: schema},
+      do: assert validate(schema, []) == :ok
+
+    test "validate/2 integers with list of integers", %{integers: schema},
       do: assert validate(schema, [1, 2]) == :ok
 
-    test "integer items with invalid list", %{integers: schema} do
-      expected = {:error, %{
-        reason: :invalid_item,
-        at: 2,
-        error: %{reason: :wrong_type, type: :integer}
-      }}
-      assert validate(schema, [1, 2, "a", 3]) == expected
+    test "validate/2 integers with invalid list", %{integers: schema} do
+      expected = {
+        :error, %{
+          reason: :invalid_item,
+          at: 2,
+          error: %{reason: :wrong_type, type: :integer},
+        }
+      }
+      assert validate(schema, [1, 2, "foo"]) == expected
     end
 
-    test "tuple with valid values", %{tuple: schema},
-      do: assert validate(schema, ["a", 2]) == :ok
+    test "validate/2 strings with empty list", %{strings: schema},
+      do: assert validate(schema, []) == :ok
 
-    test "tuple with invalid values", %{tuple: schema} do
-      expected = {:error, %{
-        reason: :invalid_item,
-        at: 0,
-        error: %{reason: :wrong_type, type: :string}
-      }}
-      assert validate(schema, [2, "a"]) == expected
-    end
+    test "validate/2 strings with list of string", %{strings: schema},
+      do: assert validate(schema, ["foo"]) == :ok
 
-    test "tuple with too less values", %{tuple: schema} do
-      expected = {:error, %{reason: :missing_value, at: 1}}
-      assert validate(schema, ["a"]) == expected
-    end
-
-    test "tuple with more values", %{tuple: schema},
-      do: assert validate(schema, ["a", 2, "too many"]) == :ok
-
-    test "tuple with too many values", %{tuple_add: schema} do
-      expected = {:error, %{reason: :extra_value, at: 2}}
-      assert validate(schema, ["a", 2, "too many"]) == expected
-    end
-
-    test "list with unique items", %{unique: schema},
-      do: assert validate(schema, [1, 2, 3]) == :ok
-
-    test "list with none unique items", %{unique: schema} do
-      expected = {:error, %{reason: :not_unique}}
-      assert validate(schema, [1, 2, 2]) == expected
+    test "validate/2 strings with invalid list", %{strings: schema} do
+      expected = {
+        :error, %{
+          reason: :invalid_item,
+          at: 0,
+          error: %{reason: :wrong_type, type: :string},
+        }
+      }
+      assert validate(schema, [1, 2, "foo"]) == expected
     end
   end
 
-  describe "is_valid?/2" do
-    test "with an list of different types", %{array: schema},
-      do: assert is_valid?(schema, [1, "bla", 3.4])
+  describe "'list' schema with unique items" do
+    setup do
+      %{schema: xema(:list, unique_items: true)}
+    end
 
-    test "with different type", %{array: schema},
-      do: refute is_valid?(schema, "not an array")
+    test "validate/2 with list of unique items", %{schema: schema},
+      do: assert validate(schema, [1, 2, 3]) == :ok
+
+
+    test "validate/2 with list of not unique items", %{schema: schema} do
+      expected = {:error, %{reason: :not_unique}}
+      assert validate(schema, [1, 2, 3, 3, 4]) == expected
+    end
+  end
+
+  describe "'list' schema with tuple validation" do
+    setup do
+      %{schema: xema(:list,
+        items: [
+          {:string, min_length: 3},
+          {:number, minimum: 10}
+        ]
+      )}
+    end
+
+    test "validate/2 with valid values", %{schema: schema},
+      do: assert validate(schema, ["foo", 42]) == :ok
+
+    test "validate/2 with invalid values", %{schema: schema} do
+      expected = {:error, %{
+        reason: :invalid_item,
+        at: 1,
+        error: %{reason: :wrong_type, type: :number}
+      }}
+      assert validate(schema, ["foo", "bar"]) == expected
+
+      expected = {:error, %{
+        reason: :invalid_item,
+        at: 0,
+        error: %{reason: :too_short, min_length: 3}
+      }}
+      assert validate(schema, ["x", 33]) == expected
+    end
+
+    test "validate/2 with additional item", %{schema: schema},
+      do: assert validate(schema, ["foo", 42, "add"]) == :ok
+
+    test "validate/2 with missing item", %{schema: schema} do
+      expected = {:error, %{at: 1, reason: :missing_item}}
+      assert validate(schema, ["foo"]) == expected
+    end
+  end
+
+  describe "'list' schema with tuple validation without addtional items" do
+    setup do
+      %{schema: xema(:list,
+        additional_items: false,
+        items: [
+          {:string, min_length: 3},
+          {:number, minimum: 10}
+        ]
+      )}
+    end
+
+    test "validate/2 with additional item", %{schema: schema} do
+      expected = {:error, %{at: 2, reason: :additional_item}}
+      assert validate(schema, ["foo", 42, "add"]) == expected
+    end
   end
 end

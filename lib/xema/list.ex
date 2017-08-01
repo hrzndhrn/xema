@@ -12,7 +12,7 @@ defmodule Xema.List do
     :min_items,
     :max_items,
     :unique_items,
-    additional_items: false,
+    additional_items: true,
     as: :list
   ]
 
@@ -82,10 +82,10 @@ defmodule Xema.List do
 
   defp items_tuple([], _additonal_items, [], _at), do: :ok
   defp items_tuple(_schemas, _additonal_items, [], at),
-    do: error(:missing_value, at: at)
-  defp items_tuple([], true, _additonal_items, at),
-    do: error(:extra_value, at: at)
-  defp items_tuple([], false, _additonal_items, _at), do: :ok
+    do: error(:missing_item, at: at)
+  defp items_tuple([], false, _list, at),
+    do: error(:additional_item, at: at)
+  defp items_tuple([], true, _list, _at), do: :ok
   defp items_tuple([schema|schemas], additional_items, [item|list], at) do
     case Xema.validate(schema, item) do
       :ok -> items_tuple(schemas, additional_items, list, at + 1)
