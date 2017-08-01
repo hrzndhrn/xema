@@ -2,8 +2,10 @@ defmodule Xema.MetadataTest do
 
   use ExUnit.Case, async: true
 
+  import Xema
+
   test "schema with metadta" do
-    schema = Xema.create(
+    schema = xema(
       :any,
       id: "ID",
       schema: "elixir-schema",
