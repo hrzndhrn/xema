@@ -9,12 +9,15 @@ defmodule Xema.Float do
 
   @behaviour Xema
 
-  defstruct minimum: nil,
-            maximum: nil,
-            exclusive_maximum: nil,
-            exclusive_minimum: nil,
-            multiple_of: nil,
-            enum: nil
+  defstruct [
+    :minimum,
+    :maximum,
+    :exclusive_maximum,
+    :exclusive_minimum,
+    :multiple_of,
+    :enum,
+    as: :float
+  ]
 
   @spec new(keyword) :: %Xema.Float{}
   def new(keywords), do: struct(%Xema.Float{}, keywords)

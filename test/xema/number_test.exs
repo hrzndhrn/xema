@@ -9,6 +9,11 @@ defmodule Xema.NumberTest do
       %{schema: xema(:number)}
     end
 
+    test "type", %{schema: schema} do
+      assert schema.type == :number
+      assert type(schema) == :number
+    end
+
     test "validate/2 with a float", %{schema: schema},
       do: assert validate(schema, 2.3) == :ok
 

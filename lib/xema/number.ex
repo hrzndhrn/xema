@@ -10,12 +10,15 @@ defmodule Xema.Number do
 
   @behaviour Xema
 
-  defstruct minimum: nil,
-            maximum: nil,
-            exclusive_maximum: nil,
-            exclusive_minimum: nil,
-            multiple_of: nil,
-            enum: nil
+  defstruct [
+    :minimum,
+    :maximum,
+    :exclusive_maximum,
+    :exclusive_minimum,
+    :multiple_of,
+    :enum,
+    as: :number
+  ]
 
   @spec new(keyword) :: %Xema.Number{}
   def new(keywords), do: struct(%Xema.Number{}, keywords)
