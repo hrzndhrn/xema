@@ -2,7 +2,7 @@ defmodule Xema.StringFormatTest do
 
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2, xema: 2]
+  import Xema
 
   describe "Semantic validation with 'format'" do
     # 2017-06-11
@@ -20,20 +20,14 @@ defmodule Xema.StringFormatTest do
     test "date-time"
 
     test "email" do
-      schema = Xema.create(:string, format: :email)
-
-      assert schema.type == :string
-      assert schema.keywords == %Xema.String{format: :email}
+      schema = xema :string, format: :email
 
       assert is_valid?(schema, "test@mars.net")
       refute is_valid?(schema, "not an email")
     end
 
     test "hostname" do
-      schema = Xema.create(:string, format: :hostname)
-
-      assert schema.type == :string
-      assert schema.keywords == %Xema.String{format: :hostname}
+      schema = xema :string, format: :hostname
 
       assert is_valid?(schema, "localhost")
       assert is_valid?(schema, "elixirforum.com")
@@ -42,10 +36,7 @@ defmodule Xema.StringFormatTest do
     end
 
     test "ipv4" do
-      schema = Xema.create(:string, format: :ipv4)
-
-      assert schema.type == :string
-      assert schema.keywords == %Xema.String{format: :ipv4}
+      schema = xema :string, format: :ipv4
 
       assert is_valid?(schema, "127.0.0.1")
       assert is_valid?(schema, "192.168.0.1/3")
@@ -54,10 +45,7 @@ defmodule Xema.StringFormatTest do
     end
 
     test "ipv6" do
-      schema = Xema.create(:string, format: :ipv6)
-
-      assert schema.type == :string
-      assert schema.keywords == %Xema.String{format: :ipv6}
+      schema = xema :string, format: :ipv6
 
       assert is_valid?(schema, "::0")
       assert is_valid?(schema, "::10")

@@ -2,85 +2,83 @@ defmodule Xema.StringTest do
 
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema
 
-  setup do
-    %{
-      simple: Xema.create(:string),
-      min: Xema.create(:string, min_length: 5),
-      max: Xema.create(:string, max_length: 5),
-      min_max: Xema.create(:string, min_length: 2, max_length: 3),
-      pattern: Xema.create(:string, pattern: ~r/^.+match??.+$/)
-    }
-  end
+  describe "'string' schema" do
+    setup do
+      %{schema: xema(:string)}
+    end
 
-  test "type and properties", schemas do
-    assert schemas.simple.type == :string
-  end
+    test "type", %{schema: schema} do
+      assert schema.type == :string
+      assert type(schema) == :string
+    end
 
-  describe "simple string schema" do
-    test "with string", %{simple: schema},
+    test "validate/2 with a string", %{schema: schema},
       do: assert validate(schema, "foo") == :ok
 
-    test "with integer", %{simple: schema} do
+    test "validate/2 with a number", %{schema: schema} do
       expected = {:error, %{reason: :wrong_type, type: :string}}
       assert validate(schema, 1) == expected
     end
+
+    test "validate/2 with nil", %{schema: schema} do
+      expected = {:error, %{reason: :wrong_type, type: :string}}
+      assert validate(schema, nil) == expected
+    end
+
+    test "is_valid?/2 with a valid value", %{schema: schema},
+      do: assert is_valid?(schema, "foo")
+
+    test "is_valid?/2 with an invalid value", %{schema: schema},
+      do: refute is_valid?(schema, [])
   end
 
-  describe "string schema with min length" do
-    test "with propper string", %{min: schema},
-      do: assert validate(schema, "foofoo") == :ok
-
-    test "with too short string", %{min: schema} do
-      expected = {:error, %{reason: :too_short, min_length: 5}}
-      assert validate(schema, "foo") == expected
-    end
-  end
-
-  describe "string schema with max length" do
-    test "with propper string", %{max: schema},
-      do: assert validate(schema, "foo") == :ok
-
-    test "with too long string", %{max: schema} do
-      expected = {:error, %{reason: :too_long, max_length: 5}}
-      assert validate(schema, "foofoo") == expected
-    end
-  end
-
-  describe "string schema with min and max length" do
-    test "with propper string", %{min_max: schema} do
-      assert validate(schema, "ab") == :ok
-      assert validate(schema, "abc") == :ok
+  describe "'string' schema with restricted length" do
+    setup do
+      %{schema: xema(:string, min_length: 3, max_length: 4)}
     end
 
-    test "with too short string", %{min_max: schema} do
-      expected = {:error, %{reason: :too_short, min_length: 2}}
-      assert validate(schema, "a") == expected
+    test "validate/2 with a proper string", %{schema: schema},
+      do: assert(schema, "foo") == :ok
+
+    test "validate/2 with a too short string", %{schema: schema} do
+      expected = {:error, %{min_length: 3, reason: :too_short}}
+      assert validate(schema, "f") == expected
     end
 
-    test "with too long string", %{min_max: schema} do
-      expected = {:error, %{reason: :too_long, max_length: 3}}
-      assert validate(schema, "abcd") == expected
+    test "validate/2 with a too long string", %{schema: schema} do
+      expected = {:error, %{max_length: 4, reason: :too_long}}
+      assert validate(schema, "foobar") == expected
     end
   end
 
-  describe "string schema with pattern" do
-    test "with propper string", %{pattern: schema},
-      do: assert validate(schema, "a match?? a") == :ok
+  describe "'string' schema with pattern" do
+    setup do
+      %{schema: xema(:string, pattern: ~r/^.+match.+$/)}
+    end
 
-    test "with a none matching string", %{pattern: schema} do
-      regex = ~r/^.+match??.+$/
+    test "validate/2 with a matching string", %{schema: schema},
+      do: assert validate(schema, "a match a") == :ok
+
+    test "validate/2 with a none matching string", %{schema: schema} do
+      regex = ~r/^.+match.+$/
       expected = {:error, %{reason: :no_match, pattern: regex}}
       assert validate(schema, "a to a") == expected
     end
   end
 
-  describe "is_valid?/2" do
-    test "with string", %{simple: schema},
-      do: assert is_valid?(schema, "foo")
+  describe "'string' schema with enum" do
+    setup do
+      %{schema: xema(:string, enum: ["one", "two"])}
+    end
 
-    test "with integer", %{simple: schema},
-      do: refute is_valid?(schema, 1)
+    test "validate/2 with a value from the enum", %{schema: schema},
+      do: assert validate(schema, "two") == :ok
+
+    test "validate/2 with a value that is not in the enum", %{schema: schema} do
+      expected = {:error, %{enum: ["one", "two"], reason: :not_in_enum}}
+      assert validate(schema, "foo") == expected
+    end
   end
 end
