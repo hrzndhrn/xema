@@ -282,4 +282,19 @@ defmodule Xema.MapTest do
       assert validate(schema, %{x_1: 44}) == expected
     end
   end
+
+  describe "'map' schema with property names like keywords" do
+    setup do
+      %{schema: xema(:map,
+        properties: %{
+          map: :number,
+          items: :number,
+          properties: :number
+        }
+      )}
+    end
+
+    test "validate/2 with valid map", %{schema: schema},
+      do: assert validate(schema, %{map: 3, items: 5, properties: 4}) == :ok
+  end
 end
