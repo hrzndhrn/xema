@@ -164,28 +164,22 @@ defmodule Xema.Map do
   defp dependencies(%Xema.Map{dependencies: dependencies}, map) do
     dependencies
     |> Map.to_list
+    |> Enum.filter(fn {key, _} -> Map.has_key?(map, key) end)
     |> do_dependencies(map)
   end
 
   defp do_dependencies([], _map), do: :ok
   defp do_dependencies([{key, list}|tail], map) when is_list(list) do
-    if Map.has_key?(map, key) do
-      with :ok <- do_dependencies_list(key, list, map) do
-        do_dependencies(tail, map)
-      end
-    else
+    with :ok <- do_dependencies_list(key, list, map) do
       do_dependencies(tail, map)
     end
   end
   defp do_dependencies([{key, %Xema{} = schema}|tail], map) do
-    if Map.has_key?(map, key) do
-      case Xema.validate(schema, map) do
-        :ok -> do_dependencies(tail, map)
-        {:error, error} ->
-          {:error, %{reason: :invalid_dependency, for: key, error: error}}
-      end
-    else
+    with :ok <- Xema.validate(schema, map) do
       do_dependencies(tail, map)
+    else
+      {:error, error} ->
+        {:error, %{reason: :invalid_dependency, for: key, error: error}}
     end
   end
 
