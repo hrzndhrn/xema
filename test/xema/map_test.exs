@@ -297,4 +297,73 @@ defmodule Xema.MapTest do
     test "validate/2 with valid map", %{schema: schema},
       do: assert validate(schema, %{map: 3, items: 5, properties: 4}) == :ok
   end
+
+  describe "'map' schema with dependencies list" do
+    setup do
+      %{schema: xema(:map,
+        properties: %{
+          a: :number,
+          b: :number,
+          c: :number
+        },
+        dependencies: %{
+          b: [:c]
+        }
+      )}
+    end
+
+    test "validate/2 without dependency", %{schema: schema},
+      do: assert validate(schema, %{a: 1}) == :ok
+
+    test "validate/2 with dependency", %{schema: schema},
+      do: assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
+
+    test "validate/2 with missing dependency", %{schema: schema} do
+      expected = {:error, %{
+        reason: :missing_dependency,
+        for: :b,
+        dependency: :c
+      }}
+      assert validate(schema, %{a: 1, b: 2}) == expected
+    end
+  end
+
+  describe "'map' schema with dependencies schema" do
+    setup do
+      %{schema: xema(:map,
+        properties: %{
+          a: :number,
+          b: :number
+        },
+        dependencies: %{
+          b: {
+            :map,
+            properties: %{
+              c: :number
+            },
+            required: [:c]
+          }
+        }
+      )}
+    end
+
+    test "validate/2 without dependency", %{schema: schema},
+      do: assert validate(schema, %{a: 1}) == :ok
+
+    test "validate/2 with dependency", %{schema: schema},
+      do: assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
+
+    test "validate/2 with missing dependency", %{schema: schema} do
+      expected = {:error, %{
+        reason: :invalid_dependency,
+        for: :b,
+        error: %{
+          reason: :missing_properties,
+          missing: [:c],
+          required: [:c]
+        }
+      }}
+      assert validate(schema, %{a: 1, b: 2}) == expected
+    end
+  end
 end

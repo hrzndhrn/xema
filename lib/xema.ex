@@ -96,6 +96,14 @@ defmodule Xema do
     do: {:properties, Enum.into(map, %{}, &do_map_values/1)}
   defp map_values({:items, list}) when is_list(list),
     do: {:items, Enum.map(list, &do_xema/1)}
+  defp map_values({:dependencies, data}) do
+    {
+      :dependencies,
+      Enum.into(data, %{}, fn {key, value} ->
+        if is_list(value), do: {key, value}, else: {key, do_xema(value)}
+      end)
+    }
+  end
   defp map_values(data), do: do_map_values(data)
 
   defp do_map_values({key, value}), do: {key, do_xema(value)}

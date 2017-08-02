@@ -15,6 +15,7 @@ defmodule Xema.Map do
     :required,
     :pattern_properties,
     :keys,
+    :dependencies,
     as: :map
   ]
 
@@ -35,6 +36,7 @@ defmodule Xema.Map do
          :ok <- size(keywords, map),
          :ok <- keys(keywords, map),
          :ok <- required(keywords, map),
+         :ok <- dependencies(keywords, map),
          {:ok, map} <- properties(keywords, map),
          {:ok, map} <- patterns(keywords, map),
          :ok <- additionals(keywords, map),
@@ -157,4 +159,42 @@ defmodule Xema.Map do
     end
   end
   defp additionals(_schema, _map), do: :ok
+
+  defp dependencies(%Xema.Map{dependencies: nil}, _map), do: :ok
+  defp dependencies(%Xema.Map{dependencies: dependencies}, map) do
+    dependencies
+    |> Map.to_list
+    |> do_dependencies(map)
+  end
+
+  defp do_dependencies([], _map), do: :ok
+  defp do_dependencies([{key, list}|tail], map) when is_list(list) do
+    if Map.has_key?(map, key) do
+      with :ok <- do_dependencies_list(key, list, map) do
+        do_dependencies(tail, map)
+      end
+    else
+      do_dependencies(tail, map)
+    end
+  end
+  defp do_dependencies([{key, %Xema{} = schema}|tail], map) do
+    if Map.has_key?(map, key) do
+      case Xema.validate(schema, map) do
+        :ok -> do_dependencies(tail, map)
+        {:error, error} ->
+          {:error, %{reason: :invalid_dependency, for: key, error: error}}
+      end
+    else
+      do_dependencies(tail, map)
+    end
+  end
+
+  defp do_dependencies_list(_key, [], _map), do: :ok
+  defp do_dependencies_list(key, [dependency|dependencies], map) do
+    if Map.has_key?(map, dependency) do
+      do_dependencies_list(key, dependencies, map)
+    else
+      {:error, %{reason: :missing_dependency, for: key, dependency: dependency}}
+    end
+  end
 end
