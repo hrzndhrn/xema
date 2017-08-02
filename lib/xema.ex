@@ -88,10 +88,9 @@ defmodule Xema do
   defp do_xema(data) when is_map(data), do: Enum.into(data, %{}, &map_values/1)
   defp do_xema(data), do: data
 
-  defp map_values({:required, _value} = data), do: data
-  defp map_values({:enum, _value} = data), do: data
-  defp map_values({:keys, _value} = data), do: data
-  defp map_values({:pattern, _value} = data), do: data
+  defp map_values({keyword, _value} = data)
+    when keyword in [:required, :enum, :keys, :pattern],
+    do: data
   defp map_values({:properties, map}),
     do: {:properties, Enum.into(map, %{}, &do_map_values/1)}
   defp map_values({:items, list}) when is_list(list),

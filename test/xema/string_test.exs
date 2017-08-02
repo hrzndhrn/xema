@@ -40,7 +40,7 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a proper string", %{schema: schema},
-      do: assert(schema, "foo") == :ok
+      do: assert validate(schema, "foo") == :ok
 
     test "validate/2 with a too short string", %{schema: schema} do
       expected = {:error, %{min_length: 3, reason: :too_short}}

@@ -29,7 +29,7 @@ defmodule Xema.Mixfile do
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:excoveralls, "~> 0.7", only: :test},
-      {:exfmt, "~> 0.2.3", only: [:dev, :test]}
+      {:exfmt, "~> 0.3.0", only: [:dev, :test]}
     ]
   end
 end
