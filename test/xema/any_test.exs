@@ -3,6 +3,7 @@ defmodule Xema.AnyTest do
   use ExUnit.Case, async: true
 
   import Xema
+  import Xema.TestSupport
 
   describe "'any' schema" do
     setup do
@@ -10,8 +11,8 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type == :any
-      assert type(schema) == :any
+      assert type(schema, :any)
+      assert as(schema, :any)
     end
 
     test "is_valid?/2 with a string", %{schema: schema},
@@ -54,11 +55,15 @@ defmodule Xema.AnyTest do
     end
 
     test "with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{enum: [1, 1.2, [1], "foo"], reason: :not_in_enum}}
-      assert validate(schema, 2) == expected
-      assert validate(schema, 2.2) == expected
-      assert validate(schema, "bar") == expected
-      assert validate(schema, [2]) == expected
+      expected = %{
+        reason: :not_in_enum,
+        enum: [1, 1.2, [1], "foo"],
+        element: nil
+      }
+      assert validate(schema, 2) == {:error, %{expected | element: 2}}
+      assert validate(schema, 2.2) == {:error, %{expected | element: 2.2}}
+      assert validate(schema, "bar") == {:error, %{expected | element: "bar"}}
+      assert validate(schema, [2]) == {:error, %{expected | element: [2]}}
     end
 
     test "is_valid?/2 with a valid value", %{schema: schema},

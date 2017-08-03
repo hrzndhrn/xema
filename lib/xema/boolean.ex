@@ -7,15 +7,19 @@ defmodule Xema.Boolean do
 
   defstruct [as: :boolean]
 
-  @spec new(keyword) :: %Xema{}
-  def new(_), do: struct(%Xema.Boolean{})
+  @type t :: %Xema.Boolean{
+    as: atom
+  }
 
-  @spec is_valid?(%Xema{}, any) :: boolean
+  @spec new(keyword) :: Xema.Boolean.t
+  def new(keywords), do: struct(Xema.Boolean, keywords)
+
+  @spec is_valid?(Xema.t, any) :: boolean
   def is_valid?(_, true), do: true
   def is_valid?(_, false), do: true
   def is_valid?(_, _), do: false
 
-  @spec validate(%Xema{}, any) :: :ok | {:error, any}
+  @spec validate(Xema.t, any) :: :ok | {:error, any}
   def validate(_, true), do: :ok
   def validate(_, false), do: :ok
   def validate(_, _), do: {:error, %{type: :boolean}}

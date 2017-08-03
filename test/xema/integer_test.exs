@@ -3,6 +3,7 @@ defmodule Xema.IntegerTest do
   use ExUnit.Case, async: true
 
   import Xema
+  import Xema.TestSupport
 
   describe "'integer' schema" do
     setup do
@@ -10,8 +11,8 @@ defmodule Xema.IntegerTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type == :integer
-      assert type(schema) == :integer
+      assert type(schema, :integer)
+      assert as(schema, :integer)
     end
 
     test "validate/2 with an integer", %{schema: schema},
@@ -118,7 +119,11 @@ defmodule Xema.IntegerTest do
       do: assert validate(schema, 3) == :ok
 
     test "with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{enum: [1, 3], reason: :not_in_enum}}
+      expected = {:error, %{
+        reason: :not_in_enum,
+        enum: [1, 3],
+        element: 2
+      }}
       assert validate(schema, 2) == expected
     end
   end

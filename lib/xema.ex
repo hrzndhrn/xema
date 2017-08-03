@@ -1,6 +1,9 @@
 defmodule Xema do
   @moduledoc """
-  Xema ...
+  Xema is a schema validator inspired by JSON Schema. Xema allows you to annotate
+  and validate elixir data structures.
+
+  Xema is in beta. If you try it and has an issue, report them.
   """
 
   defstruct [
@@ -12,6 +15,50 @@ defmodule Xema do
     :type,
     :keywords
   ]
+
+  @typedoc """
+  The Xema base struct contains the meta data of a schema sub schema.
+
+  * `id` a unique idenfifier.
+  * `schema` declares the used schema.
+  * `title` of the schema.
+  * `description` of the schema.
+  * `type` of the schema.
+  * `keywords` contains the specification of the schema.
+  """
+  @type t :: %Xema{
+    id: String.t,
+    schema: String.t,
+    title: String.t,
+    description: String.t,
+    type: type,
+    keywords: any
+  }
+
+  @typedoc """
+  The available type notations.
+  """
+  @type type ::
+    :nil |
+    :any |
+    :boolean |
+    :map |
+    :list |
+    :number |
+    :integer |
+    :float |
+    :string
+
+  @type keywords ::
+    Xema.Any.t |
+    Xema.Nil.t |
+    Xema.Boolean.t |
+    Xema.Map.t |
+    Xema.List.t |
+    Xema.Number.t |
+    Xema.Integer.t |
+    Xema.Float.t |
+    Xema.String.t
 
   @types %{
     any: Xema.Any,
@@ -25,22 +72,19 @@ defmodule Xema do
     string: Xema.String
   }
 
-  @callback is_valid?(%Xema{}, any()) :: boolean()
-  @callback validate(%Xema{}, any()) :: :ok | {:error, any()}
-  @callback new(keyword()) :: struct()
+  @callback is_valid?(Xema.t, any()) :: boolean()
+  @callback validate(Xema.t, any()) :: :ok | {:error, any()}
+  @callback new(keyword) :: Xema.keywords
 
-  @spec type(%Xema{}) :: atom
-  def type(schema) do
-    if schema.keywords.as != nil,
-      do: schema.keywords.as,
-      else: schema.type
-  end
+  @spec xema(type, keyword) :: Xema.t
+  @spec is_valid?(Xema.t, any) :: boolean
+  @spec validate(Xema.t, any) :: :ok | {:error, any}
+
+  def xema(type, data \\ [])
 
   for {type, xema_module} <- Map.to_list(@types) do
-    @spec create(unquote(type)) :: %Xema{}
     defp create(unquote(type)), do: create(unquote(type), [])
 
-    @spec create(unquote(type), any()) :: %Xema{}
     defp create(unquote(type), keywords) do
       with {id, keywords} <- Keyword.pop(keywords, :id),
            {schema, keywords} <- Keyword.pop(keywords, :schema),
@@ -60,25 +104,17 @@ defmodule Xema do
       end
     end
 
-    @spec xema(unquote(type)) :: %Xema{}
-    def xema(unquote(type)), do: do_xema(unquote(type))
-
-    @spec xema(unquote(type), any()) :: %Xema{}
     def xema(unquote(type), data), do: do_xema(unquote(type), data)
 
-    @spec do_xema(unquote(type) | {unquote(type), any()}) :: %Xema{} | keyword()
     defp do_xema(unquote(type)), do: create(unquote(type))
     defp do_xema({unquote(type), data}), do: create(unquote(type), do_xema(data))
 
-    @spec do_xema(unquote(type), any()) :: %Xema{} | keyword()
     defp do_xema(unquote(type), data), do: create(unquote(type), do_xema(data))
 
-    @spec is_valid?(%Xema{type: unquote(type)}, any()) :: boolean
     def is_valid?(%Xema{type: unquote(type)} = schema, value) do
       unquote(xema_module).is_valid?(schema, value)
     end
 
-    @spec validate(%Xema{type: unquote(type)}, any()) :: :ok | {:error, any}
     def validate(%Xema{type: unquote(type)} = schema, value) do
       unquote(xema_module).validate(schema, value)
     end

@@ -16,13 +16,22 @@ defmodule Xema.List do
     as: :list
   ]
 
-  @spec new(list) :: %Xema.List{}
-  def new(keywords), do: struct(%Xema.List{}, keywords)
+  @type t :: %Xema.List{
+    items: list | Xema.t,
+    min_items: pos_integer,
+    max_items: pos_integer,
+    unique_items: boolean,
+    additional_items: boolean,
+    as: atom
+  }
 
-  @spec is_valid?(%Xema{}, any) :: boolean
+  @spec new(list) :: Xema.List.t
+  def new(keywords), do: struct(Xema.List, keywords)
+
+  @spec is_valid?(Xema.t, any) :: boolean
   def is_valid?(xema, list), do: validate(xema, list) == :ok
 
-  @spec validate(%Xema{}, any) :: :ok | {:error, map}
+  @spec validate(Xema.t, any) :: :ok | {:error, map}
   def validate(%Xema{keywords: keywords}, list) do
     with :ok <- type(keywords, list),
          :ok <- min_items(keywords, list),

@@ -9,14 +9,18 @@ defmodule Xema.Nil do
 
   defstruct as: :nil
 
-  @spec new(list) :: %Xema.Nil{}
-  def new(keywords), do: struct(%Xema.Nil{}, keywords)
+  @type t :: %Xema.Nil{
+    as: atom
+  }
 
-  @spec is_valid?(%Xema{}, any) :: boolean
+  @spec new(list) :: Xema.Nil.t
+  def new(keywords), do: struct(Xema.Nil, keywords)
+
+  @spec is_valid?(Xema.t, any) :: boolean
   def is_valid?(_xema, nil), do: true
   def is_valid?(_xema, _), do: false
 
-  @spec validate(%Xema{}, any) :: :ok | {:error, map}
+  @spec validate(Xema.t, any) :: :ok | {:error, map}
   def validate(_xema, nil), do: :ok
   def validate(%Xema{keywords: keywords}, _value),
     do: error(:wrong_type, type: keywords.as)

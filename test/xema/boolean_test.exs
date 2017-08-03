@@ -3,6 +3,7 @@ defmodule Xema.BooleanTest do
   use ExUnit.Case, async: true
 
   import Xema
+  import Xema.TestSupport
 
   describe "'boolean' schema" do
     setup do
@@ -10,8 +11,8 @@ defmodule Xema.BooleanTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type == :boolean
-      assert type(schema) == :boolean
+      assert type(schema, :boolean)
+      assert as(schema, :boolean)
     end
 
     test "is_valid?/2 with value true", %{schema: schema},

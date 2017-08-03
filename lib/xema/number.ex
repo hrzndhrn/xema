@@ -20,13 +20,23 @@ defmodule Xema.Number do
     as: :number
   ]
 
-  @spec new(keyword) :: %Xema.Number{}
-  def new(keywords), do: struct(%Xema.Number{}, keywords)
+  @type t :: %Xema.Number{
+    minimum: integer,
+    maximum: integer,
+    exclusive_minimum: boolean,
+    exclusive_maximum: boolean,
+    multiple_of: number,
+    enum: list,
+    as: atom
+  }
 
-  @spec is_valid?(%Xema{}, any) :: boolean
+  @spec new(keyword) :: Xema.Number.t
+  def new(keywords), do: struct(Xema.Number, keywords)
+
+  @spec is_valid?(Xema.t, any) :: boolean
   def is_valid?(xema, number), do: validate(xema, number) == :ok
 
-  @spec validate(%Xema{}, any) :: :ok | {:error, map}
+  @spec validate(Xema.t, any) :: :ok | {:error, map}
   def validate(%Xema{keywords: keywords}, number) do
     with :ok <- type(number),
          :ok <- minimum(keywords, number),

@@ -1,26 +1,64 @@
 defmodule Xema.Validator.Number do
   @moduledoc """
-  TODO
+  A validator for numbers.
   """
 
   import Xema.Helper.Error
 
-  @spec minimum(struct(), any()) :: :ok | {:error, map()}
-  def minimum(%{minimum: nil}, _number), do: :ok
+  @doc """
+  Checks if the number is bigger as the given minimum.
+
+  Checks if the keywords contains `minimum` and `exclusive_minimum`. Returns :ok
+  if not one of the keywords was found. Otherwise the function checks if the
+  minimum holds.
+
+  `exclusive_minimum` is just allowed but otional if `minimum` is set.
+
+  ## Examples
+
+      iex> import Xema
+      Xema
+      iex> schema = xema :number, minimum: 5, exclusive_minimum: true
+      %Xema{
+        type: :number,
+        schema: :nil,
+        id: nil,
+        title: nil,
+        description: nil,
+        keywords: %Xema.Number{
+          as: :number,
+          enum: nil,
+          exclusive_maximum: nil,
+          exclusive_minimum: true,
+          maximum: nil,
+          minimum: 5,
+          multiple_of: nil
+        }
+      }
+      iex> Xema.Validator.Number.minimum(schema.keywords, 9)
+      :ok
+      iex> Xema.Validator.Number.minimum(schema.keywords, 1)
+      {:error, %{minimum: 5, reason: :too_small}}
+      iex> Xema.Validator.Number.minimum(schema.keywords, 5)
+      {:error, %{minimum: 5, reason: :too_small, exclusive_minimum: true}}
+
+  """
+  @spec minimum(Xema.keywords, number) :: :ok | {:error, map()}
+  def minimum(%{minimum: nil} = _keywords, _number), do: :ok
   def minimum(
     %{minimum: minimum, exclusive_minimum: exclusive_minimum},
     number
   ), do: minimum(minimum, exclusive_minimum, number)
 
-  @spec maximum(struct(), any()) :: :ok | {:error, map()}
-  def maximum(%{maximum: nil}, _number), do: :ok
+  @spec maximum(Xema.keywords, number) :: :ok | {:error, map()}
+  def maximum(%{maximum: nil} = _keywords, _number), do: :ok
   def maximum(
     %{maximum: maximum, exclusive_maximum: exclusive_maximum},
     number
   ), do: maximum(maximum, exclusive_maximum, number)
 
-  @spec multiple_of(struct(), any) :: :ok | {:error, map}
-  def multiple_of(%{multiple_of: nil}, _number), do: :ok
+  @spec multiple_of(Xema.keywords, number) :: :ok | {:error, map}
+  def multiple_of(%{multiple_of: nil} = _keywords, _number), do: :ok
   def multiple_of(%{multiple_of: multiple_of}, number) do
     x = number / multiple_of
     if x - Float.floor(x) == 0,

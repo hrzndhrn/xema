@@ -19,18 +19,30 @@ defmodule Xema.Map do
     as: :map
   ]
 
-  @spec new(keyword) :: %Xema.Map{}
-  def new(keywords), do: struct(%Xema.Map{}, setup(keywords))
+  @type t :: %Xema.Map{
+    additional_properties: boolean,
+    max_properties: pos_integer,
+    min_properties: pos_integer,
+    properties: map,
+    required: list,
+    pattern_properties: map,
+    keys: atom,
+    dependencies: list | map,
+    as: atom
+  }
+
+  @spec new(keyword) :: Xema.Map.t
+  def new(keywords), do: struct(Xema.Map, setup(keywords))
 
   defp setup(keywords) do
     keywords
     |> Keyword.update(:required, nil, fn x -> MapSet.new(x) end)
   end
 
-  @spec is_valid?(%Xema{}, any) :: boolean
+  @spec is_valid?(Xema.t, any) :: boolean
   def is_valid?(xema, map), do: validate(xema, map) == :ok
 
-  @spec validate(%Xema{}, any) :: :ok | {:error, map}
+  @spec validate(Xema.t, any) :: :ok | {:error, map}
   def validate(%Xema{keywords: keywords}, map) do
     with :ok <- type(keywords, map),
          :ok <- size(keywords, map),

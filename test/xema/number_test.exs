@@ -3,6 +3,7 @@ defmodule Xema.NumberTest do
   use ExUnit.Case, async: true
 
   import Xema
+  import Xema.TestSupport
 
   describe "'number' schema" do
     setup do
@@ -10,8 +11,8 @@ defmodule Xema.NumberTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type == :number
-      assert type(schema) == :number
+      assert type(schema, :number)
+      assert as(schema, :number)
     end
 
     test "validate/2 with a float", %{schema: schema},
@@ -117,7 +118,11 @@ defmodule Xema.NumberTest do
       do: assert validate(schema, 1.3) == :ok
 
     test "with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{enum: [1.2, 1.3, 3.3], reason: :not_in_enum}}
+      expected = {:error, %{
+        reason: :not_in_enum,
+        enum: [1.2, 1.3, 3.3],
+        element: 2
+      }}
       assert validate(schema, 2) == expected
     end
   end

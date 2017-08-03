@@ -3,6 +3,7 @@ defmodule Xema.StringTest do
   use ExUnit.Case, async: true
 
   import Xema
+  import Xema.TestSupport
 
   describe "'string' schema" do
     setup do
@@ -10,8 +11,8 @@ defmodule Xema.StringTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type == :string
-      assert type(schema) == :string
+      assert type(schema, :string)
+      assert as(schema, :string)
     end
 
     test "validate/2 with a string", %{schema: schema},
@@ -77,7 +78,10 @@ defmodule Xema.StringTest do
       do: assert validate(schema, "two") == :ok
 
     test "validate/2 with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{enum: ["one", "two"], reason: :not_in_enum}}
+      expected = {:error, %{
+        reason: :not_in_enum,
+        enum: ["one", "two"],
+        element: "foo"}}
       assert validate(schema, "foo") == expected
     end
   end

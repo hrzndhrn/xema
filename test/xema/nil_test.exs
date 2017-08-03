@@ -3,6 +3,7 @@ defmodule Xema.NilTest do
   use ExUnit.Case, async: true
 
   import Xema
+  import Xema.TestSupport
 
   describe "'nil' schema" do
     setup do
@@ -10,8 +11,8 @@ defmodule Xema.NilTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type == :nil
-      assert type(schema) == :nil
+      assert type(schema, :nil)
+      assert as(schema, :nil)
     end
 
     test "validate/2 with nil value", %{schema: schema},

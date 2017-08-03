@@ -19,14 +19,22 @@ defmodule Xema.String do
     as: :string
   ]
 
-  @spec new(list) :: %Xema{}
-  def new([]), do: %Xema.String{}
+  @type t :: %Xema.String{
+    max_length: pos_integer,
+    min_length: pos_integer,
+    pattern: Regex.t,
+    format: atom,
+    enum: list,
+    as: atom
+  }
+
+  @spec new(list) :: Xema.String.t
   def new(keywords), do: struct(Xema.String, keywords)
 
-  @spec is_valid?(%Xema{}, any) :: boolean
+  @spec is_valid?(Xema.t, any) :: boolean
   def is_valid?(xema, string), do: validate(xema, string) == :ok
 
-  @spec validate(%Xema{}, any) :: :ok | {:error, map}
+  @spec validate(Xema.t, any) :: :ok | {:error, map}
   def validate(%Xema{keywords: keywords}, string) do
     with :ok <- type(keywords, string),
          length <- String.length(string),
