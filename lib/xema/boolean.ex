@@ -7,11 +7,11 @@ defmodule Xema.Boolean do
 
   defstruct [as: :boolean]
 
-  @type t :: %Xema.Boolean{
+  @type keywords :: %Xema.Boolean{
     as: atom
   }
 
-  @spec new(keyword) :: Xema.Boolean.t
+  @spec new(keyword) :: Xema.Boolean.keywords
   def new(keywords), do: struct(Xema.Boolean, keywords)
 
   @spec is_valid?(Xema.t, any) :: boolean

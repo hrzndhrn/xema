@@ -9,11 +9,11 @@ defmodule Xema.Nil do
 
   defstruct as: :nil
 
-  @type t :: %Xema.Nil{
+  @type keywords :: %Xema.Nil{
     as: atom
   }
 
-  @spec new(list) :: Xema.Nil.t
+  @spec new(list) :: Xema.Nil.keywords
   def new(keywords), do: struct(Xema.Nil, keywords)
 
   @spec is_valid?(Xema.t, any) :: boolean

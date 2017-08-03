@@ -16,7 +16,7 @@ defmodule Xema.List do
     as: :list
   ]
 
-  @type t :: %Xema.List{
+  @type keywords :: %Xema.List{
     items: list | Xema.t,
     min_items: pos_integer,
     max_items: pos_integer,
@@ -25,7 +25,7 @@ defmodule Xema.List do
     as: atom
   }
 
-  @spec new(list) :: Xema.List.t
+  @spec new(list) :: Xema.List.keywords
   def new(keywords), do: struct(Xema.List, keywords)
 
   @spec is_valid?(Xema.t, any) :: boolean

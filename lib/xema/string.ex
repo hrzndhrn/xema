@@ -19,7 +19,7 @@ defmodule Xema.String do
     as: :string
   ]
 
-  @type t :: %Xema.String{
+  @type keywords :: %Xema.String{
     max_length: pos_integer,
     min_length: pos_integer,
     pattern: Regex.t,
@@ -28,7 +28,7 @@ defmodule Xema.String do
     as: atom
   }
 
-  @spec new(list) :: Xema.String.t
+  @spec new(list) :: Xema.String.keywords
   def new(keywords), do: struct(Xema.String, keywords)
 
   @spec is_valid?(Xema.t, any) :: boolean

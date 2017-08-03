@@ -63,7 +63,7 @@ defmodule Xema.Float do
     as: :float
   ]
 
-  @type keywords :: %__MODULE__{
+  @type keywords :: %Xema.Float{
     minimum: integer,
     maximum: integer,
     exclusive_minimum: boolean,

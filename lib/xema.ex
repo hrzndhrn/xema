@@ -50,15 +50,15 @@ defmodule Xema do
     :string
 
   @type keywords ::
-    Xema.Any.t |
-    Xema.Nil.t |
-    Xema.Boolean.t |
-    Xema.Map.t |
-    Xema.List.t |
-    Xema.Number.t |
-    Xema.Integer.t |
-    Xema.Float.t |
-    Xema.String.t
+    Xema.Any.keywords |
+    Xema.Nil.keywords |
+    Xema.Boolean.keywords |
+    Xema.Map.keywords |
+    Xema.List.keywords |
+    Xema.Number.keywords |
+    Xema.Integer.keywords |
+    Xema.Float.keywords |
+    Xema.String.keywords
 
   @types %{
     any: Xema.Any,

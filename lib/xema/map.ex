@@ -19,7 +19,7 @@ defmodule Xema.Map do
     as: :map
   ]
 
-  @type t :: %Xema.Map{
+  @type keywords :: %Xema.Map{
     additional_properties: boolean,
     max_properties: pos_integer,
     min_properties: pos_integer,
@@ -31,7 +31,7 @@ defmodule Xema.Map do
     as: atom
   }
 
-  @spec new(keyword) :: Xema.Map.t
+  @spec new(keyword) :: Xema.Map.keywords
   def new(keywords), do: struct(Xema.Map, setup(keywords))
 
   defp setup(keywords) do

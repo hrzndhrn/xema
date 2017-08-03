@@ -20,7 +20,7 @@ defmodule Xema.Integer do
     as: :integer
   ]
 
-  @type t :: %Xema.Integer{
+  @type keywords :: %Xema.Integer{
     minimum: integer,
     maximum: integer,
     exclusive_minimum: boolean,
@@ -30,7 +30,7 @@ defmodule Xema.Integer do
     as: atom
   }
 
-  @spec new(keyword) :: Xema.Integer.t
+  @spec new(keyword) :: Xema.Integer.keywords
   def new(keywords), do: struct(Xema.Integer, keywords)
 
   @spec is_valid?(Xema.t, any) :: boolean

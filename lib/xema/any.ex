@@ -9,12 +9,12 @@ defmodule Xema.Any do
 
   defstruct [:enum, as: :any]
 
-  @type t :: %Xema.Any{
+  @type keywords :: %Xema.Any{
     enum: list,
     as: atom
   }
 
-  @spec new(keyword) :: Xema.Any.t
+  @spec new(keyword) :: Xema.Any.keywords
   def new(keywords), do: struct(Xema.Any, keywords)
 
   @spec is_valid?(Xema.t, any) :: boolean
