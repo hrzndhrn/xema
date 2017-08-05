@@ -1,7 +1,5 @@
 defmodule Xema.Helper.Error do
-  @moduledoc """
-  TODO
-  """
+  @moduledoc false
 
   @spec error(atom, keyword) :: {:error, map}
   def error(reason, info \\ []) do

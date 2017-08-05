@@ -1,6 +1,6 @@
 defmodule Xema.Number do
   @moduledoc """
-  TODO
+  A validator for `number`, `float` and `integer` values.
   """
 
   import Xema.Validator.Enum

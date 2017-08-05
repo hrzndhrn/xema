@@ -1,7 +1,8 @@
 defmodule Xema do
   @moduledoc """
-  Xema is a schema validator inspired by JSON Schema. Xema allows you to annotate
-  and validate elixir data structures.
+  Xema is a schema validator inspired by JSON Schema.
+
+  Xema allows you to annotate and validate elixir data structures.
 
   Xema is in beta. If you try it and has an issue, report them.
   """
@@ -49,6 +50,9 @@ defmodule Xema do
     :float |
     :string
 
+  @typedoc """
+  The `keywords` for the schema types.
+  """
   @type keywords ::
     Xema.Any.keywords |
     Xema.Nil.keywords |
@@ -76,11 +80,56 @@ defmodule Xema do
   @callback validate(Xema.t, any()) :: :ok | {:error, any()}
   @callback new(keyword) :: Xema.keywords
 
+  @doc """
+  This function defines the schemas.
+
+  The first argument sets the `type` of the schema. The second arguments
+  contains the keywords of the schema.
+
+  ## Parameters
+
+    - type: type of the schema.
+    - opts: keywords of the schema.
+
+  ## Examples
+
+      iex> import Xema
+      Xema
+      iex> xema :string, min_length: 3, max_length: 12
+      %Xema{
+        type: :string,
+        keywords: %Xema.String{
+          max_length: 12,
+          min_length: 3,
+        }
+      }
+
+  For nested schema you can use `{:type, opts: ...}` like here.
+
+  ## Examples
+      iex> import Xema
+      Xema
+      iex> schema = xema :list, items: {:number, minimum: 2}
+      %Xema{
+        type: :list,
+        keywords: %Xema.List{
+          items: %Xema{
+            type: :number,
+            keywords: %Xema.Number{
+              minimum: 2
+            }
+          }
+        }
+      }
+      iex> validate(schema, [2, 3, 4])
+      :ok
+
+  """
   @spec xema(type, keyword) :: Xema.t
+  def xema(type, data \\ [])
+
   @spec is_valid?(Xema.t, any) :: boolean
   @spec validate(Xema.t, any) :: :ok | {:error, any}
-
-  def xema(type, data \\ [])
 
   for {type, xema_module} <- Map.to_list(@types) do
     defp create(unquote(type)), do: create(unquote(type), [])
@@ -104,7 +153,7 @@ defmodule Xema do
       end
     end
 
-    def xema(unquote(type), data), do: do_xema(unquote(type), data)
+    def xema(unquote(type), opts), do: do_xema(unquote(type), opts)
 
     defp do_xema(unquote(type)), do: create(unquote(type))
     defp do_xema({unquote(type), data}), do: create(unquote(type), do_xema(data))

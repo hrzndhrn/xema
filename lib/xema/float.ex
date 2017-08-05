@@ -1,6 +1,6 @@
 defmodule Xema.Float do
   @moduledoc """
-  This module contains the keywords and validation function for a `float`
+  This module contains the keywords and validation functions for a `float`
   schema.
 
   Supported keywords:

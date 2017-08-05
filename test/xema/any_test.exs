@@ -2,6 +2,8 @@ defmodule Xema.AnyTest do
 
   use ExUnit.Case, async: true
 
+  doctest Xema.Any
+
   import Xema
   import Xema.TestSupport
 

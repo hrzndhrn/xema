@@ -1,6 +1,7 @@
 defmodule Xema.Validator.Format do
   @moduledoc """
-  TODO
+  A validator for basic semantic validation on certain kinds of `string` values
+  that are commonly used.
   """
 
   import Xema.Helper.Error
