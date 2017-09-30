@@ -2,10 +2,7 @@ defmodule Xema.FloatTest do
 
   use ExUnit.Case, async: true
 
-  doctest Xema.Float
-
   import Xema
-  import Xema.TestSupport
 
   describe "'float' schema" do
     setup do
@@ -13,10 +10,10 @@ defmodule Xema.FloatTest do
     end
 
     test "type", %{schema: schema} do
-      assert type(schema, :float)
-      assert as(schema, :float)
+      assert schema.type.as == :float
     end
 
+    @tag :some
     test "validate/2 with a float", %{schema: schema},
       do: assert validate(schema, 2.3) == :ok
 

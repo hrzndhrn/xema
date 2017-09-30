@@ -3,7 +3,6 @@ defmodule Xema.MapTest do
   use ExUnit.Case, async: true
 
   import Xema
-  import Xema.TestSupport
 
   describe "empty 'map' schema" do
     setup do
@@ -11,8 +10,7 @@ defmodule Xema.MapTest do
     end
 
     test "type", %{schema: schema} do
-      assert type(schema, :map)
-      assert as(schema, :map)
+      assert schema.type.as == :map
     end
 
     test "validate/2 with an empty map", %{schema: schema},
@@ -36,8 +34,7 @@ defmodule Xema.MapTest do
     end
 
     test "type", %{schema: schema} do
-      assert type(schema, :map)
-      assert as(schema, :object)
+      assert schema.type.as == :object
     end
 
     test "validate/2 with a string", %{schema: schema} do

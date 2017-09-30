@@ -1,11 +1,9 @@
 defmodule Xema.AnyTest do
+  use ExUnit.Case
 
-  use ExUnit.Case, async: true
-
-  doctest Xema.Any
+  # doctest Xema.Any
 
   import Xema
-  import Xema.TestSupport
 
   describe "'any' schema" do
     setup do
@@ -13,8 +11,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert type(schema, :any)
-      assert as(schema, :any)
+      assert schema.type.as == :any
     end
 
     test "is_valid?/2 with a string", %{schema: schema},

@@ -3,7 +3,6 @@ defmodule Xema.ListTest do
   use ExUnit.Case, async: true
 
   import Xema
-  import Xema.TestSupport
 
   describe "'list' schema" do
     setup do
@@ -11,8 +10,7 @@ defmodule Xema.ListTest do
     end
 
     test "type", %{schema: schema} do
-      assert type(schema, :list)
-      assert as(schema, :list)
+      assert schema.type.as == :list
     end
 
     test "validate/2 with an empty list", %{schema: schema},

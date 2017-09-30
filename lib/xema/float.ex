@@ -47,10 +47,6 @@ defmodule Xema.Float do
 
   """
 
-  import Xema.Helper.Error
-  import Xema.Validator.Enum
-  import Xema.Validator.Number
-
   @behaviour Xema
 
   defstruct [
@@ -75,20 +71,4 @@ defmodule Xema.Float do
 
   @spec new(keyword) :: Xema.Float.keywords
   def new(keywords), do: struct(Xema.Float, keywords)
-
-  @spec is_valid?(Xema.t, any) :: boolean
-  def is_valid?(xema, number), do: validate(xema, number) == :ok
-
-  @spec validate(Xema.t, any) :: :ok | {:error, map}
-  def validate(%Xema{keywords: keywords}, number) do
-    with :ok <- type(keywords, number),
-         :ok <- minimum(keywords, number),
-         :ok <- maximum(keywords, number),
-         :ok <- multiple_of(keywords, number),
-         :ok <- enum(keywords, number),
-      do: :ok
-  end
-
-  defp type(_keywords, number) when is_float(number), do: :ok
-  defp type(keywords, _number), do: error(:wrong_type, type: keywords.as)
 end

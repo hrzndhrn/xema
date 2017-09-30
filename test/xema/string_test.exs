@@ -3,7 +3,6 @@ defmodule Xema.StringTest do
   use ExUnit.Case, async: true
 
   import Xema
-  import Xema.TestSupport
 
   describe "'string' schema" do
     setup do
@@ -11,8 +10,7 @@ defmodule Xema.StringTest do
     end
 
     test "type", %{schema: schema} do
-      assert type(schema, :string)
-      assert as(schema, :string)
+      assert schema.type.as == :string
     end
 
     test "validate/2 with a string", %{schema: schema},

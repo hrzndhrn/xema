@@ -3,7 +3,6 @@ defmodule Xema.IntegerTest do
   use ExUnit.Case, async: true
 
   import Xema
-  import Xema.TestSupport
 
   describe "'integer' schema" do
     setup do
@@ -11,8 +10,7 @@ defmodule Xema.IntegerTest do
     end
 
     test "type", %{schema: schema} do
-      assert type(schema, :integer)
-      assert as(schema, :integer)
+      assert schema.type.as == :integer
     end
 
     test "validate/2 with an integer", %{schema: schema},

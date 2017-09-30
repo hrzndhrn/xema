@@ -63,7 +63,7 @@ defmodule Xema.Validator.Number do
     x = number / multiple_of
     if x - Float.floor(x) == 0,
       do: :ok,
-      else: error(:not_multiple, multiple_of: multiple_of)
+      else: error :not_multiple, multiple_of: multiple_of
   end
 
   defp minimum(minimum, _exclusive, number)
