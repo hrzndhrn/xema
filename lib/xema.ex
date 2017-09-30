@@ -127,7 +127,7 @@ defmodule Xema do
   @spec is_valid?(Xema.t, any) :: boolean
   @spec validate(Xema.t, any) :: :ok | {:error, any}
 
-  for {type, xema_module} <- Map.to_list(@types) do
+  for {type, module} <- Map.to_list(@types) do
     defp create(unquote(type)), do: create(unquote(type), [])
 
     defp create(unquote(type), keywords) do
@@ -141,14 +141,14 @@ defmodule Xema do
           schema: schema,
           title: title,
           description: description,
-          type: unquote(xema_module).new(keywords)
+          type: unquote(module).new(keywords)
         }
       end
     end
 
     def create_keywords(unquote(type), opts) do
-      # struct(unquote(xema_module), opts)
-      unquote(xema_module).new(opts)
+      # struct(unquote(module), opts)
+      unquote(module).new(opts)
     end
 
 
@@ -160,15 +160,15 @@ defmodule Xema do
     defp do_xema(unquote(type), data), do: create(unquote(type), do_xema(data))
 
     #def is_valid?(%Xema{type: unquote(type)} = schema, value) do
-    #  unquote(xema_module).is_valid?(schema, value)
+    #  unquote(module).is_valid?(schema, value)
     #end
 
     #def validate(%Xema{type: unquote(type)} = schema, value) do
-    #  unquote(xema_module).validate(schema, value)
+    #  unquote(module).validate(schema, value)
     #end
 
-    #def xvalidate(%Xema{keywords: %unquote(xema_module).Keywords{}} = schema, value) do
-    #  unquote(xema_module).validate(schema, value)
+    #def xvalidate(%Xema{keywords: %unquote(module).Keywords{}} = schema, value) do
+    #  unquote(module).validate(schema, value)
     #end
   end
 
