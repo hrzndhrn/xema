@@ -19,7 +19,7 @@ defmodule Xema do
   ]
 
   @typedoc """
-  The Xema base struct contains the meta data of a schema sub schema.
+  The Xema base struct contains the meta data of a schema.
 
   * `id` a unique idenfifier.
   * `schema` declares the used schema.
@@ -28,12 +28,11 @@ defmodule Xema do
   * `type` contains the specification of the schema.
   """
   @type t :: %Xema{
-    id: String.t,
-    schema: String.t,
-    title: String.t,
-    description: String.t,
-    type: type,
-    keywords: any
+    id: String.t | nil,
+    schema: String.t | nil,
+    title: String.t | nil,
+    description: String.t | nil,
+    type: types
   }
 
   @typedoc """
@@ -54,13 +53,15 @@ defmodule Xema do
   The `keywords` for the schema types.
   """
   @type types ::
-    Xema.Any.keywords |
+    Xema.Any.t |
     Xema.Nil.t |
-    Xema.Boolean.keywords |
-    Xema.Map.keywords |
-    Xema.List.keywords |
-    Xema.Number.keywords |
-    Xema.String.keywords
+    Xema.Boolean.t |
+    Xema.Map.t |
+    Xema.List.t |
+    Xema.Number.t |
+    Xema.Integer.t |
+    Xema.Float.t |
+    Xema.String.t
 
   @types %{
     any: Xema.Any,
@@ -74,13 +75,17 @@ defmodule Xema do
     integer: Xema.Integer
   }
 
-  @callback new(keyword) :: Xema.types
+  @spec is_valid?(Xema.t, any) :: boolean
+  def is_valid?(xema, value), do: validate(xema, value) == :ok
+
+  @spec validate(Xema.t, any) :: :ok | {:error, any}
+  def validate(xema, value), do: Validator.validate(xema, value)
 
   @doc """
   This function defines the schemas.
 
   The first argument sets the `type` of the schema. The second arguments
-  contains the keywords of the schema.
+  contains the 'keywords' of the schema.
 
   ## Parameters
 
@@ -123,49 +128,31 @@ defmodule Xema do
   """
 
   @spec xema(type, keyword) :: Xema.t
-  #def xema(type, data \\ [])
-
-  @spec create_type(type, keyword) :: Xema.types
-  # def create_type(type, opts \\ [])
-
-  defp create_schema(type, opts \\ [])
-
-  for {type, module} <- Map.to_list(@types) do
-
-    defp create_schema(unquote(type), opts) do
-      opts = Keyword.put(opts, :type, unquote(module).new(opts))
-      struct(Xema, opts)
+  def xema(type, keywords \\ [])
+  for {type, module} <- @types do
+    def xema(unquote(type), []) do
+      struct(Xema, [type: struct(unquote(module), [])])
+    end
+    def xema(unquote(type), opts) do
+      opts = opts(unquote(type), opts)
+      struct(Xema, Keyword.put(opts, :type, struct(unquote(module), opts)))
     end
 
-    def create_type({unquote(type), opts}) do
-      unquote(module).new(opts)
+    defp type(unquote(type), opts) do
+      # unquote(module).new(opts(unquote(type), opts))
+      struct(unquote(module), opts(unquote(type), opts))
     end
-
-    def create_type(unquote(type), opts) do
-      unquote(module).new(opts)
+    defp type({unquote(type), opts}) do
+      # unquote(module).new(opts(unquote(type), opts))
+      struct(unquote(module), opts(unquote(type), opts))
+    end
+    defp type(unquote(type)) do
+      # unquote(module).new([])
+      struct(unquote(module), [])
     end
   end
 
-  # new ----
-  def xema(type, opts) do
-    create_schema(type, opts(type, opts))
-  end
-  def xema(type) do
-    create_schema(type, [])
-  end
-
-  def type(type, opts) do
-    create_type(type, opts(type, opts))
-  end
-  def type({type, opts}) do
-    create_type(type, opts(type, opts))
-  end
-  def type(type), do: create_type(type, [])
-
-
-  # --------
-
-  def opts(:list, opts) do
+  defp opts(:list, opts) do
     Keyword.update(opts, :items, nil,
       fn
         items when is_atom(items) -> type(items)
@@ -175,14 +162,14 @@ defmodule Xema do
       end
     )
   end
-  def opts(:map, opts) do
+  defp opts(:map, opts) do
     opts
     |> Keyword.update(:properties, nil, &properties/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
+    |> Keyword.update(:required, nil, &(MapSet.new(&1)))
   end
-  def opts(_, opts), do: opts
-  # --------
+  defp opts(_, opts), do: opts
 
   defp properties(map) do
     Enum.into(map, %{}, fn {key, prop} -> {key, type(prop)} end)
@@ -194,14 +181,4 @@ defmodule Xema do
       {key, dep} -> {key, type(dep)}
     end)
   end
-
-
-  # ====================================
-
-  @spec is_valid?(Xema.t, any) :: boolean
-  def is_valid?(xema, value), do: validate(xema, value) == :ok
-
-  @spec validate(Xema.t, any) :: :ok | {:error, any}
-  def validate(xema, value), do: Validator.validate(xema, value)
-
 end

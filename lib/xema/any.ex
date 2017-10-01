@@ -1,5 +1,6 @@
 defmodule Xema.Any do
   @moduledoc """
+  TODO: rewrite
   This module contains the keywords and validation functions for an `any`
   schema.
 
@@ -32,12 +33,7 @@ defmodule Xema.Any do
       {:error, %{element: :foo, enum: [1, "a", :b], reason: :not_in_enum}}
   """
 
-  @behaviour Xema
-
   defstruct [:enum, as: :any]
 
-  @type t :: %Xema.Any{enum: list, as: atom}
-
-  @spec new(keyword) :: Xema.Any.t
-  def new(keywords), do: struct(Xema.Any, keywords)
+  @type t :: %Xema.Any{enum: list | nil, as: atom}
 end

@@ -3,8 +3,6 @@ defmodule Xema.String do
   TODO
   """
 
-  @behaviour Xema
-
   defstruct [
     :max_length,
     :min_length,
@@ -14,13 +12,10 @@ defmodule Xema.String do
   ]
 
   @type t :: %Xema.String{
-    max_length: pos_integer,
-    min_length: pos_integer,
-    pattern: Regex.t,
-    enum: list,
+    max_length: pos_integer | nil,
+    min_length: pos_integer | nil,
+    pattern: Regex.t | nil,
+    enum: list | nil,
     as: atom
   }
-
-  @spec new(list) :: Xema.String.t
-  def new(keywords), do: struct(Xema.String, keywords)
 end

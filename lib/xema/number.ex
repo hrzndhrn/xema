@@ -3,8 +3,6 @@ defmodule Xema.Number do
   TODO
   """
 
-  @behaviour Xema
-
   defstruct [
     :minimum,
     :maximum,
@@ -16,16 +14,13 @@ defmodule Xema.Number do
     as: :number
   ]
 
-  @type keywords :: %Xema.Number{
-    minimum: integer,
-    maximum: integer,
-    exclusive_minimum: boolean,
-    exclusive_maximum: boolean,
-    multiple_of: number,
-    enum: list,
+  @type t :: %Xema.Number{
+    minimum: integer | nil,
+    maximum: integer | nil,
+    exclusive_minimum: boolean | nil,
+    exclusive_maximum: boolean | nil,
+    multiple_of: number | nil,
+    enum: list | nil,
     as: atom
   }
-
-  @spec new(keyword) :: Xema.Number.keywords
-  def new(keywords), do: struct(Xema.Number, keywords)
 end

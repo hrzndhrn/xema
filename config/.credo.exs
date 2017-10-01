@@ -19,7 +19,7 @@
         #
         # You can give explicit globs or simply directories.
         # In the latter case `**/*.{ex,exs}` will be used.
-        included: ["lib/", "src/", "web/", "apps/"],
+        included: ["lib/", "src/", "web/", "apps/", "test/"],
         excluded: [~r"/_build/", ~r"/deps/"]
       },
       #
@@ -29,7 +29,7 @@
       #
       # Credo automatically checks for updates, like e.g. Hex does.
       # You can disable this behaviour below:
-      check_for_updates: false,
+      check_for_updates: true,
       #
       # If you want to enforce a style guide and need a more traditional linting
       # experience, you can change `strict` to `true` below:
@@ -69,12 +69,13 @@
         # You can also customize the exit_status of each check.
         # If you don't want TODO comments to cause `mix credo` to fail, just
         # set this value to 0 (zero).
-        {Credo.Check.Design.TagTODO, exit_status: 2},
+        # {Credo.Check.Design.TagTODO, exit_status: 2},
+        {Credo.Check.Design.TagTODO, false},
         {Credo.Check.Design.TagFIXME},
 
         {Credo.Check.Readability.FunctionNames},
         {Credo.Check.Readability.LargeNumbers},
-        {Credo.Check.Readability.MaxLineLength, priority: :low, max_length: 120},
+        {Credo.Check.Readability.MaxLineLength, priority: :low, max_length: 80},
         {Credo.Check.Readability.ModuleAttributeNames},
         {Credo.Check.Readability.ModuleDoc},
         {Credo.Check.Readability.ModuleNames},
@@ -125,10 +126,10 @@
 
         # Deprecated checks (these will be deleted after a grace period)
         {Credo.Check.Readability.Specs},
-        {Credo.Check.Warning.NameRedeclarationByAssignment, false},
-        {Credo.Check.Warning.NameRedeclarationByCase, false},
-        {Credo.Check.Warning.NameRedeclarationByDef, false},
-        {Credo.Check.Warning.NameRedeclarationByFn, false},
+        {Credo.Check.Warning.NameRedeclarationByAssignment},
+        {Credo.Check.Warning.NameRedeclarationByCase},
+        {Credo.Check.Warning.NameRedeclarationByDef},
+        {Credo.Check.Warning.NameRedeclarationByFn},
 
         # Custom checks can be created using `mix credo.gen.check`.
         #

@@ -1,5 +1,6 @@
 defmodule Xema.Float do
   @moduledoc """
+  TODO: rewrite
   This module contains the keywords and validation functions for a `float`
   schema.
 
@@ -47,8 +48,6 @@ defmodule Xema.Float do
 
   """
 
-  @behaviour Xema
-
   defstruct [
     :minimum,
     :maximum,
@@ -59,16 +58,13 @@ defmodule Xema.Float do
     as: :float
   ]
 
-  @type keywords :: %Xema.Float{
-    minimum: integer,
-    maximum: integer,
-    exclusive_minimum: boolean,
-    exclusive_maximum: boolean,
-    multiple_of: number,
-    enum: list,
+  @type t :: %Xema.Float{
+    minimum: integer | nil,
+    maximum: integer | nil,
+    exclusive_minimum: boolean | nil,
+    exclusive_maximum: boolean | nil,
+    multiple_of: number | nil,
+    enum: list | nil,
     as: atom
   }
-
-  @spec new(keyword) :: Xema.Float.keywords
-  def new(keywords), do: struct(Xema.Float, keywords)
 end

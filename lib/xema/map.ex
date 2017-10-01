@@ -3,8 +3,6 @@ defmodule Xema.Map do
   TODO
   """
 
-  @behaviour Xema
-
   defstruct [
     :additional_properties,
     :max_properties,
@@ -18,20 +16,14 @@ defmodule Xema.Map do
   ]
 
   @type t :: %Xema.Map{
-    additional_properties: boolean,
-    max_properties: pos_integer,
-    min_properties: pos_integer,
-    properties: map,
-    required: list,
-    pattern_properties: map,
-    keys: atom,
-    dependencies: list | map,
+    additional_properties: boolean | nil,
+    max_properties: pos_integer | nil,
+    min_properties: pos_integer | nil,
+    properties: map | nil,
+    required: MapSet.t | nil,
+    pattern_properties: map | nil,
+    keys: atom | nil,
+    dependencies: list | map | nil,
     as: atom
   }
-
-  @spec new(keyword) :: Xema.Map.t
-  def new(keywords) do
-    keywords = Keyword.update(keywords, :required, nil, &(MapSet.new(&1)))
-    struct(Xema.Map, keywords)
-  end
 end

@@ -102,7 +102,7 @@ defmodule Xema.NestedTest do
 
     test "validate/2 with invalid data", %{schema: schema} do
       data = %{
-        id: 5,
+        id: 6,
         items: [
           %{num: 1, desc: "foo"},
           %{num: -2, desc: "bar"}

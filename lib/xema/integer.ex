@@ -11,17 +11,13 @@ defmodule Xema.Integer do
     as: :integer
   ]
 
-  @type keywords :: %Xema.Integer{
-    minimum: integer,
-    maximum: integer,
-    exclusive_minimum: boolean,
-    exclusive_maximum: boolean,
-    multiple_of: number,
-    enum: list,
+  @type t :: %Xema.Integer{
+    minimum: integer | nil,
+    maximum: integer | nil,
+    exclusive_minimum: boolean | nil,
+    exclusive_maximum: boolean | nil,
+    multiple_of: number | nil,
+    enum: list | nil,
     as: atom
   }
-
-  def new(keywords), do: struct(Xema.Integer, keywords)
-
-  def bla, do: "bla"
 end

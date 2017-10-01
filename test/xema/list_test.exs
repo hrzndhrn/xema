@@ -98,9 +98,9 @@ defmodule Xema.ListTest do
       %{schema: xema(:list, unique_items: true)}
     end
 
-    test "validate/2 with list of unique items", %{schema: schema},
-      do: assert validate(schema, [1, 2, 3]) == :ok
-
+    test "validate/2 with list of unique items", %{schema: schema} do
+      assert validate(schema, [1, 2, 3]) == :ok
+    end
 
     test "validate/2 with list of not unique items", %{schema: schema} do
       expected = {:error, %{reason: :not_unique}}
@@ -122,19 +122,19 @@ defmodule Xema.ListTest do
       do: assert validate(schema, ["foo", 42]) == :ok
 
     test "validate/2 with invalid values", %{schema: schema} do
-      expected = {:error, %{
-        reason: :invalid_item,
-        at: 1,
-        error: %{reason: :wrong_type, type: :number}
-      }}
-      assert validate(schema, ["foo", "bar"]) == expected
+      assert validate(schema, ["foo", "bar"]) ==
+        {:error, %{
+          reason: :invalid_item,
+          at: 1,
+          error: %{reason: :wrong_type, type: :number}
+        }}
 
-      expected = {:error, %{
-        reason: :invalid_item,
-        at: 0,
-        error: %{reason: :too_short, min_length: 3}
-      }}
-      assert validate(schema, ["x", 33]) == expected
+      assert validate(schema, ["x", 33]) ==
+        {:error, %{
+          reason: :invalid_item,
+          at: 0,
+          error: %{reason: :too_short, min_length: 3}
+        }}
     end
 
     test "validate/2 with additional item", %{schema: schema},
