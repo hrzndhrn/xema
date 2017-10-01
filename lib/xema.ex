@@ -144,89 +144,57 @@ defmodule Xema do
     def create_type(unquote(type), opts) do
       unquote(module).new(opts)
     end
-
-
-    #def xema(unquote(type), opts), do: do_xema(unquote(type), opts)
-
-    #defp do_xema(unquote(type)), do: create_schema(unquote(type))
-    #defp do_xema({unquote(type), data}), do: create_schema(unquote(type), do_xema(data))
-    #defp do_xema(unquote(type), data), do: create_schema(unquote(type), do_xema(data))
   end
 
   # new ----
-  def xema({type, opts}) when is_list(opts) do
-    create_schema(type, Enum.map(opts, &map_values/1))
+  def xema(type, opts) do
+    create_schema(type, opts(type, opts))
   end
-  def xema({type, opts}) when is_map(opts) do
-    create_schema(type, Enum.into(opts, %{}, &map_values/1))
+  def xema(type) do
+    create_schema(type, [])
   end
-  def xema({type, opts}), do: create_schema(type, opts)
 
-  def xema(type), do: create_schema(type, [])
-
-  def xema(type, opts) when is_list(opts) do
-    IO.puts "is list opts: #{inspect opts}"
-    create_schema(type, Enum.map(opts, &map_values/1))
+  def type(type, opts) do
+    create_type(type, opts(type, opts))
   end
-  def xema(type, opts) when is_map(opts) do
-    create_schema(type, Enum.into(opts, %{}, &map_values/1))
+  def type({type, opts}) do
+    create_type(type, opts(type, opts))
   end
-  def xema(type, opts), do: create_schema(type, opts)
-
-  # --------
-
-  def type({type, opts}) when is_list(opts) do
-    IO.puts "create #{inspect type}, #{inspect opts}"
-    create_type(type, Enum.map(opts, &map_values/1))
-  end
-  def type({type, opts}) when is_map(opts) do
-    create_type(type, Enum.into(opts, %{}, &map_values/1))
-  end
-  def type({type, opts}), do: create_type(type, opts)
-
   def type(type), do: create_type(type, [])
 
-  def type(type, opts) when is_list(opts) do
-    IO.puts "is list"
-    create_type(type, Enum.map(opts, &map_values/1))
-  end
-  def type(type, opts) when is_map(opts) do
-    create_type(type, Enum.into(opts, %{}, &map_values/1))
-  end
-  def type(type, opts), do: create_type(type, opts)
+
   # --------
 
-  defp do_xema(data) when is_list(data), do: Enum.map(data, &map_values/1)
-  defp do_xema(data) when is_map(data), do: Enum.into(data, %{}, &map_values/1)
-  defp do_xema(data), do: data
+  def opts(:list, opts) do
+    Keyword.update(opts, :items, nil,
+      fn
+        items when is_atom(items) -> type(items)
+        items when is_tuple(items) -> type(items)
+        items when is_list(items) -> Enum.map(items, &type/1)
+        items -> items
+      end
+    )
+  end
+  def opts(:map, opts) do
+    opts
+    |> Keyword.update(:properties, nil, &properties/1)
+    |> Keyword.update(:pattern_properties, nil, &properties/1)
+    |> Keyword.update(:dependencies, nil, &dependencies/1)
+  end
+  def opts(_, opts), do: opts
+  # --------
 
-  defp map_values({_keyword, %Xema{}} = data), do: data
-  defp map_values({keyword, _value} = data)
-    when keyword in [:required, :enum, :keys, :pattern],
-    do: data
-  defp map_values({:properties, props}) do
-    IO.puts "properties"
-    {:properties, Enum.map(props, fn {key, value} -> {key, type(value)} end)}
+  defp properties(map) do
+    Enum.into(map, %{}, fn {key, prop} -> {key, type(prop)} end)
   end
-  defp map_values({:items, items}) when is_list(items) do
-    IO.puts "items"
-    {:items, Enum.map(items, &type/1)}
-  end
-  defp map_values({:items, items}) when is_atom(items) do
-    {:items, type(items)}
-  end
-  defp map_values({:dependencies, data}) do
-    {
-      :dependencies,
-      Enum.into(data, %{}, fn {key, value} ->
-        if is_list(value), do: {key, value}, else: {key, do_xema(value)}
-      end)
-    }
-  end
-  # defp map_values(data), do: do_map_values(data)
-  defp map_values(data), do: data
 
-  defp do_map_values({key, value}), do: {key, type(value)}
+  defp dependencies(map) do
+    Enum.into(map, %{}, fn
+      {key, dep} when is_list(dep) -> {key, dep}
+      {key, dep} -> {key, type(dep)}
+    end)
+  end
+
 
   # ====================================
 

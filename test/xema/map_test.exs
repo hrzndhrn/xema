@@ -351,6 +351,7 @@ defmodule Xema.MapTest do
     test "validate/2 with dependency", %{schema: schema},
       do: assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
 
+    @tag :deps
     test "validate/2 with missing dependency", %{schema: schema} do
       expected = {:error, %{
         reason: :invalid_dependency,
