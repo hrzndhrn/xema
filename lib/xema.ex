@@ -2,9 +2,16 @@ defmodule Xema do
   @moduledoc """
   Xema is a schema validator inspired by JSON Schema.
 
+  Xema is in early beta. If you try it and has an issue, report them.
+
   Xema allows you to annotate and validate elixir data structures.
 
-  Xema is in beta. If you try it and has an issue, report them.
+  ```
+  # JSON schema:
+  { "type": "string" }
+  # Xema
+  xema :string
+  ```
   """
 
   alias Xema.Validator
@@ -98,8 +105,7 @@ defmodule Xema do
       Xema
       iex> xema :string, min_length: 3, max_length: 12
       %Xema{
-        type: :string,
-        keywords: %Xema.String.Keywords{
+        type: %Xema.String{
           max_length: 12,
           min_length: 3,
         }
@@ -112,18 +118,25 @@ defmodule Xema do
       Xema
       iex> schema = xema :list, items: {:number, minimum: 2}
       %Xema{
-        type: :list,
-        keywords: %Xema.List{
-          items: %Xema{
-            type: :number,
-            keywords: %Xema.Number{
-              minimum: 2
-            }
+        type: %Xema.List{
+          items: %Xema.Number{
+            minimum: 2
           }
         }
       }
       iex> validate(schema, [2, 3, 4])
       :ok
+      iex> validate(schema, [2, 3, 1])
+      {:error,
+        %{
+          reason: :invalid_item,
+          at: 2,
+          error: %{
+            minimum: 2,
+            reason: :too_small
+          }
+        }
+      }
 
   """
 

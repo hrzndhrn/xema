@@ -1,7 +1,5 @@
 defmodule Xema.Validator do
-  @moduledoc """
-  TODO
-  """
+  @moduledoc false
 
   @spec validate(Xema.t, any) :: :ok | {:error, map}
   def validate(%Xema{} = xema, value) do
