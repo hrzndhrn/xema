@@ -121,56 +121,80 @@ defmodule Xema do
       :ok
 
   """
-  @spec xema(type, keyword) :: Xema.t
-  def xema(type, data \\ [])
 
-  @spec is_valid?(Xema.t, any) :: boolean
-  @spec validate(Xema.t, any) :: :ok | {:error, any}
+  @spec xema(type, keyword) :: Xema.t
+  #def xema(type, data \\ [])
+
+  @spec create_type(type, keyword) :: Xema.types
+  # def create_type(type, opts \\ [])
+
+  defp create_schema(type, opts \\ [])
 
   for {type, module} <- Map.to_list(@types) do
-    defp create(unquote(type)), do: create(unquote(type), [])
 
-    defp create(unquote(type), keywords) do
-      with {id, keywords} <- Keyword.pop(keywords, :id),
-           {schema, keywords} <- Keyword.pop(keywords, :schema),
-           {title, keywords} <- Keyword.pop(keywords, :title),
-           {description, keywords} <- Keyword.pop(keywords, :description)
-      do
-        %Xema{
-          id: id,
-          schema: schema,
-          title: title,
-          description: description,
-          type: unquote(module).new(keywords)
-        }
-      end
+    defp create_schema(unquote(type), opts) do
+      opts = Keyword.put(opts, :type, unquote(module).new(opts))
+      struct(Xema, opts)
     end
 
-    def create_keywords(unquote(type), opts) do
-      # struct(unquote(module), opts)
+    def create_type({unquote(type), opts}) do
+      unquote(module).new(opts)
+    end
+
+    def create_type(unquote(type), opts) do
       unquote(module).new(opts)
     end
 
 
+    #def xema(unquote(type), opts), do: do_xema(unquote(type), opts)
 
-    def xema(unquote(type), opts), do: do_xema(unquote(type), opts)
-
-    defp do_xema(unquote(type)), do: create(unquote(type))
-    defp do_xema({unquote(type), data}), do: create(unquote(type), do_xema(data))
-    defp do_xema(unquote(type), data), do: create(unquote(type), do_xema(data))
-
-    #def is_valid?(%Xema{type: unquote(type)} = schema, value) do
-    #  unquote(module).is_valid?(schema, value)
-    #end
-
-    #def validate(%Xema{type: unquote(type)} = schema, value) do
-    #  unquote(module).validate(schema, value)
-    #end
-
-    #def xvalidate(%Xema{keywords: %unquote(module).Keywords{}} = schema, value) do
-    #  unquote(module).validate(schema, value)
-    #end
+    #defp do_xema(unquote(type)), do: create_schema(unquote(type))
+    #defp do_xema({unquote(type), data}), do: create_schema(unquote(type), do_xema(data))
+    #defp do_xema(unquote(type), data), do: create_schema(unquote(type), do_xema(data))
   end
+
+  # new ----
+  def xema({type, opts}) when is_list(opts) do
+    create_schema(type, Enum.map(opts, &map_values/1))
+  end
+  def xema({type, opts}) when is_map(opts) do
+    create_schema(type, Enum.into(opts, %{}, &map_values/1))
+  end
+  def xema({type, opts}), do: create_schema(type, opts)
+
+  def xema(type), do: create_schema(type, [])
+
+  def xema(type, opts) when is_list(opts) do
+    IO.puts "is list opts: #{inspect opts}"
+    create_schema(type, Enum.map(opts, &map_values/1))
+  end
+  def xema(type, opts) when is_map(opts) do
+    create_schema(type, Enum.into(opts, %{}, &map_values/1))
+  end
+  def xema(type, opts), do: create_schema(type, opts)
+
+  # --------
+
+  def type({type, opts}) when is_list(opts) do
+    IO.puts "create #{inspect type}, #{inspect opts}"
+    create_type(type, Enum.map(opts, &map_values/1))
+  end
+  def type({type, opts}) when is_map(opts) do
+    create_type(type, Enum.into(opts, %{}, &map_values/1))
+  end
+  def type({type, opts}), do: create_type(type, opts)
+
+  def type(type), do: create_type(type, [])
+
+  def type(type, opts) when is_list(opts) do
+    IO.puts "is list"
+    create_type(type, Enum.map(opts, &map_values/1))
+  end
+  def type(type, opts) when is_map(opts) do
+    create_type(type, Enum.into(opts, %{}, &map_values/1))
+  end
+  def type(type, opts), do: create_type(type, opts)
+  # --------
 
   defp do_xema(data) when is_list(data), do: Enum.map(data, &map_values/1)
   defp do_xema(data) when is_map(data), do: Enum.into(data, %{}, &map_values/1)
@@ -180,10 +204,17 @@ defmodule Xema do
   defp map_values({keyword, _value} = data)
     when keyword in [:required, :enum, :keys, :pattern],
     do: data
-  defp map_values({:properties, map}),
-    do: {:properties, Enum.into(map, %{}, &do_map_values/1)}
-  defp map_values({:items, list}) when is_list(list),
-    do: {:items, Enum.map(list, &do_xema/1)}
+  defp map_values({:properties, props}) do
+    IO.puts "properties"
+    {:properties, Enum.map(props, fn {key, value} -> {key, type(value)} end)}
+  end
+  defp map_values({:items, items}) when is_list(items) do
+    IO.puts "items"
+    {:items, Enum.map(items, &type/1)}
+  end
+  defp map_values({:items, items}) when is_atom(items) do
+    {:items, type(items)}
+  end
   defp map_values({:dependencies, data}) do
     {
       :dependencies,
@@ -192,11 +223,17 @@ defmodule Xema do
       end)
     }
   end
-  defp map_values(data), do: do_map_values(data)
+  # defp map_values(data), do: do_map_values(data)
+  defp map_values(data), do: data
 
-  defp do_map_values({key, value}), do: {key, do_xema(value)}
+  defp do_map_values({key, value}), do: {key, type(value)}
 
+  # ====================================
+
+  @spec is_valid?(Xema.t, any) :: boolean
   def is_valid?(xema, value), do: validate(xema, value) == :ok
+
+  @spec validate(Xema.t, any) :: :ok | {:error, any}
   def validate(xema, value), do: Validator.validate(xema, value)
 
 end
