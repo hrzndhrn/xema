@@ -98,12 +98,34 @@ defmodule Xema.Validator do
     value
   ), do: minimum(minimum, exclusive_minimum, value)
 
+  @spec minimum(number, boolean, number) :: :ok | {:error, map}
+  defp minimum(minimum, _exclusive, value) when value > minimum, do: :ok
+  defp minimum(minimum, nil, value) when value == minimum, do: :ok
+  defp minimum(minimum, false, value) when value == minimum, do: :ok
+  defp minimum(minimum, _exclusive, value) do
+    cond do
+      value != minimum -> error :too_small, minimum: minimum
+      true -> error :too_small, minimum: minimum, exclusive_minimum: true
+    end
+  end
+
   @spec maximum(Xema.types, any) :: :ok | {:error, map}
   defp maximum(%{maximum: nil}, _value), do: :ok
   defp maximum(
     %{maximum: maximum, exclusive_maximum: exclusive_maximum},
     value
   ), do: maximum(maximum, exclusive_maximum, value)
+
+  @spec maximum(number, boolean, number) :: :ok | {:error, map}
+  defp maximum(maximum, _exclusive, value) when value < maximum, do: :ok
+  defp maximum(maximum, nil, value) when value == maximum, do: :ok
+  defp maximum(maximum, false, value) when value == maximum, do: :ok
+  defp maximum(maximum, _exclusive, value) do
+    cond do
+      value != maximum -> error :too_big, maximum: maximum
+      true -> error :too_big, maximum: maximum, exclusive_maximum: true
+    end
+  end
 
   @spec multiple_of(Xema.types, number) :: :ok | {:error, map}
   defp multiple_of(%{multiple_of: nil} = _keywords, _value), do: :ok
@@ -114,82 +136,48 @@ defmodule Xema.Validator do
       else: error :not_multiple, multiple_of: multiple_of
   end
 
-  @spec minimum(number, boolean, number) :: :ok | {:error, map}
-  defp minimum(minimum, _exclusive, value) when value > minimum, do: :ok
-  defp minimum(minimum, true, value) when value == minimum do
-    error :too_small, minimum: minimum, exclusive_minimum: true
-  end
-  defp minimum(minimum, _exclusive, value) when value == minimum, do: :ok
-  defp minimum(minimum, _exclusive, _value) do
-    error :too_small, minimum: minimum
-  end
-
-  @spec maximum(number, boolean, number) :: :ok | {:error, map}
-  defp maximum(maximum, _exclusive, value) when value < maximum, do: :ok
-  defp maximum(maximum, true, value) when value == maximum do
-    error :too_big, maximum: maximum, exclusive_maximum: true
-  end
-  defp maximum(maximum, _exclusive, value) when value == maximum, do: :ok
-  defp maximum(maximum, _exclusive, _value) do
-    error :too_big, maximum: maximum
-  end
-
-  @spec error(atom | Xema.types) :: {:error, map}
-  defp error(atom) when is_atom(atom), do: error atom, []
-  defp error(type), do: error :wrong_type, type: type.as
-
-  @spec error(atom, keyword) :: {:error, map}
-  defp error(reason, info) when is_atom(reason) do
-    info =
-      info
-      |> Enum.into(%{})
-      |> Map.merge(%{reason: reason})
-
-    {:error, info}
-  end
-
   defp min_length(%{min_length: nil}, _), do: :ok
-  defp min_length(%{min_length: min_length}, length)
-       when length >= min_length do
-    :ok
-  end
-  defp min_length(%{min_length: min_length}, _length) do
-    error :too_short, min_length: min_length
+  defp min_length(%{min_length: min}, len) when len >= min, do: :ok
+  defp min_length(%{min_length: min}, _length) do
+    error :too_short, min_length: min
   end
 
   defp max_length(%{max_length: nil}, _length), do: :ok
-  defp max_length(%{max_length: max_length}, length)
-       when length <= max_length do
-    :ok
-  end
-  defp max_length(%{max_length: max_length}, _length) do
-    error :too_long, max_length: max_length
+  defp max_length(%{max_length: max}, len) when len <= max, do: :ok
+  defp max_length(%{max_length: max}, _length) do
+    error :too_long, max_length: max
   end
 
   defp pattern(%{pattern: nil}, _string), do: :ok
   defp pattern(%{pattern: pattern}, string) do
-    if Regex.match?(pattern, string),
-    do: :ok,
-    else: error :no_match, pattern: pattern
+    case Regex.match?(pattern, string) do
+      true -> :ok
+      false -> error :no_match, pattern: pattern
+    end
   end
 
   defp min_items(%Xema.List{min_items: nil}, _list), do: :ok
-  defp min_items(%Xema.List{min_items: min_items}, list)
-    when length(list) < min_items,
-    do: error :too_less_items, min_items: min_items
-  defp min_items(_keywords, _list), do: :ok
+  defp min_items(%Xema.List{min_items: min}, list) when length(list) >= min do
+    :ok
+  end
+  defp min_items(%Xema.List{min_items: min}, _list) do
+    error :too_less_items, min_items: min
+  end
 
   defp max_items(%Xema.List{max_items: nil}, _list), do: :ok
-  defp max_items(%Xema.List{max_items: max_items}, list)
-    when length(list) > max_items,
-    do: error :too_many_items, max_items: max_items
-  defp max_items(_keywords, _list), do: :ok
+  defp max_items(%Xema.List{max_items: max}, list) when length(list) <= max do
+    :ok
+  end
+  defp max_items(%Xema.List{max_items: max}, _list) do
+    error :too_many_items, max_items: max
+  end
 
   defp unique(%Xema.List{unique_items: nil}, _list), do: :ok
   defp unique(%Xema.List{unique_items: true}, list) do
-    if is_unique?(list),
-      do: :ok,
-      else: error :not_unique
+    case is_unique?(list) do
+      true -> :ok
+      false -> error :not_unique
+    end
   end
 
   defp is_unique?(list, set \\ %{})
@@ -202,12 +190,11 @@ defmodule Xema.Validator do
   end
 
   defp items(%Xema.List{items: nil}, _list), do: :ok
-  defp items(%Xema.List{items: items, additional_items: additional_items}, list)
-    when is_list(items),
-    do: items_tuple(items, additional_items, list, 0)
-  defp items(%Xema.List{items: items}, list) do
-    items_list(items, list, 0)
-  end
+  defp items(
+    %Xema.List{items: items, additional_items: additional_items},
+    list
+  ) when is_list(items), do: items_tuple(items, additional_items, list, 0)
+  defp items(%Xema.List{items: items}, list), do: items_list(items, list, 0)
 
   defp items_list(_schema, [], _at), do: :ok
   defp items_list(schema, [item|list], at) do
@@ -218,10 +205,10 @@ defmodule Xema.Validator do
   end
 
   defp items_tuple([], _additonal_items, [], _at), do: :ok
-  defp items_tuple(_schemas, _additonal_items, [], at),
-    do: error :missing_item, at: at
-  defp items_tuple([], false, _list, at),
-    do: error :additional_item, at: at
+  defp items_tuple(_schemas, _additonal_items, [], at) do
+    error :missing_item, at: at
+  end
+  defp items_tuple([], false, _list, at), do: error :additional_item, at: at
   defp items_tuple([], true, _list, _at), do: :ok
   defp items_tuple([schema|schemas], additional_items, [item|list], at) do
     case Xema.validate(schema, item) do
@@ -232,14 +219,16 @@ defmodule Xema.Validator do
 
   defp keys(%Xema.Map{keys: nil}, _value), do: :ok
   defp keys(%Xema.Map{keys: :atom}, map) do
-    if map |> Map.keys |> Enum.all?(&is_atom/1),
-      do: :ok,
-      else: {:error, %{reason: :invalid_keys, keys: :atom}}
+    case map |> Map.keys |> Enum.all?(&is_atom/1) do
+      true -> :ok
+      false -> error :invalid_keys, keys: :atom
+    end
   end
   defp keys(%Xema.Map{keys: :string}, map) do
-    if map |> Map.keys |> Enum.all?(&is_binary/1),
-      do: :ok,
-      else: {:error, %{reason: :invalid_keys, keys: :string}}
+    case map |> Map.keys |> Enum.all?(&is_binary/1) do
+      true -> :ok
+      false -> error :invalid_keys, keys: :string
+    end
   end
 
   defp properties(%Xema.Map{properties: nil}, map), do: {:ok, map}
@@ -260,24 +249,23 @@ defmodule Xema.Validator do
   defp do_property(schema, value) do
     case Xema.validate(schema, value) do
       :ok -> :ok
-      {:error, reason} -> error(:invalid_property, error: reason)
+      {:error, reason} -> error :invalid_property, error: reason
     end
   end
 
   defp get_value(map, key) when is_atom(key) do
-    case {Map.get(map, key), Map.get(map, to_string key)} do
-      {nil, nil} -> nil
-      {nil, value} -> value
-      {value, nil} -> value
-      _ -> {:erro, :mixed_map}
-    end
+    do_get_value(map, to_string(key), key)
   end
   defp get_value(map, key) do
-    case {Map.get(map, key), Map.get(map, String.to_atom key)} do
+    do_get_value(map, key, String.to_atom(key))
+  end
+  defp do_get_value(map, key_string, key_atom) do
+    case {Map.get(map, key_string), Map.get(map, key_atom)} do
       {nil, nil} -> nil
       {nil, value} -> value
       {value, nil} -> value
-      _ -> {:erro, :mixed_map}
+      _ ->
+        error :mixed_map
     end
   end
 
@@ -371,5 +359,19 @@ defmodule Xema.Validator do
     else
       {:error, %{reason: :missing_dependency, for: key, dependency: dependency}}
     end
+  end
+
+  @spec error(atom | Xema.types) :: {:error, map}
+  defp error(atom) when is_atom(atom), do: error atom, []
+  defp error(type), do: error :wrong_type, type: type.as
+
+  @spec error(atom, keyword) :: {:error, map}
+  defp error(reason, info) when is_atom(reason) do
+    info =
+      info
+      |> Enum.into(%{})
+      |> Map.merge(%{reason: reason})
+
+    {:error, info}
   end
 end
