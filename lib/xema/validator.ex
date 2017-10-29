@@ -103,9 +103,10 @@ defmodule Xema.Validator do
   defp minimum(minimum, nil, value) when value == minimum, do: :ok
   defp minimum(minimum, false, value) when value == minimum, do: :ok
   defp minimum(minimum, _exclusive, value) do
-    cond do
-      value != minimum -> error :too_small, minimum: minimum
-      true -> error :too_small, minimum: minimum, exclusive_minimum: true
+    if value != minimum do
+      error :too_small, minimum: minimum
+    else
+      error :too_small, minimum: minimum, exclusive_minimum: true
     end
   end
 
@@ -121,9 +122,10 @@ defmodule Xema.Validator do
   defp maximum(maximum, nil, value) when value == maximum, do: :ok
   defp maximum(maximum, false, value) when value == maximum, do: :ok
   defp maximum(maximum, _exclusive, value) do
-    cond do
-      value != maximum -> error :too_big, maximum: maximum
-      true -> error :too_big, maximum: maximum, exclusive_maximum: true
+    if value != maximum do
+      error :too_big, maximum: maximum
+    else
+      error :too_big, maximum: maximum, exclusive_maximum: true
     end
   end
 
@@ -238,8 +240,11 @@ defmodule Xema.Validator do
 
   defp do_properties([], map), do: {:ok, map}
   defp do_properties([{prop, schema}|props], map) do
-    case do_property(schema, get_value(map, prop)) do
-      :ok -> do_properties(props, Map.delete(map, prop))
+    with {:ok, value} <- get_value(map, prop),
+         :ok <- do_property(schema, value)
+    do
+      do_properties(props, Map.delete(map, prop))
+    else
       {:error, reason} ->
         {:error, Map.merge(reason, %{property: get_key(map, prop)})}
     end
@@ -261,9 +266,9 @@ defmodule Xema.Validator do
   end
   defp do_get_value(map, key_string, key_atom) do
     case {Map.get(map, key_string), Map.get(map, key_atom)} do
-      {nil, nil} -> nil
-      {nil, value} -> value
-      {value, nil} -> value
+      {nil, nil} -> {:ok, nil}
+      {nil, value} -> {:ok, value}
+      {value, nil} -> {:ok, value}
       _ ->
         error :mixed_map
     end
@@ -280,14 +285,14 @@ defmodule Xema.Validator do
   defp required(%Xema.Map{required: required}, map) do
     props = map |> Map.keys |> MapSet.new
 
-    if MapSet.subset?(required, props) do
-      :ok
-    else
-      error(
-        :missing_properties,
-        missing: required |> MapSet.difference(props) |> MapSet.to_list,
-        required: MapSet.to_list(required)
-      )
+    case MapSet.subset?(required, props) do
+      true -> :ok
+      false ->
+        error(
+          :missing_properties,
+          missing: required |> MapSet.difference(props) |> MapSet.to_list,
+          required: MapSet.to_list(required)
+        )
     end
   end
 
@@ -299,9 +304,9 @@ defmodule Xema.Validator do
   defp do_size(len, min, _max) when not is_nil(min) and len < min do
     error :too_less_properties, min_properties: min
   end
-  defp do_size(len, _min, max)
-    when not is_nil(max) and len > max,
-    do: error :too_many_properties, max_properties: max
+  defp do_size(len, _min, max) when not is_nil(max) and len > max do
+    error :too_many_properties, max_properties: max
+  end
   defp do_size(_len, _min, _max), do: :ok
 
   defp patterns(%Xema.Map{pattern_properties: nil}, map), do: {:ok, map}
@@ -315,16 +320,19 @@ defmodule Xema.Validator do
     do_properties(props, map)
   end
 
-  defp key_match?(regex, atom) when is_atom(atom),
-    do: key_match?(regex, to_string(atom))
+  defp key_match?(regex, atom) when is_atom(atom) do
+    key_match?(regex, to_string(atom))
+  end
   defp key_match?(regex, string), do: Regex.match?(regex, string)
 
   defp additionals(%Xema.Map{additional_properties: false}, map) do
-    if Map.equal?(map, %{}) do
-      :ok
-    else
-      error(:no_additional_properties_allowed,
-            additional_properties: Map.keys(map))
+    case Map.equal?(map, %{}) do
+      true -> :ok
+      false ->
+        error(
+          :no_additional_properties_allowed,
+          additional_properties: Map.keys(map)
+        )
     end
   end
   defp additionals(_schema, _map), do: :ok
@@ -348,24 +356,22 @@ defmodule Xema.Validator do
       do_dependencies(tail, map)
     else
       {:error, error} ->
-        {:error, %{reason: :invalid_dependency, for: key, error: error}}
+        error :invalid_dependency, for: key, error: error
     end
   end
 
   defp do_dependencies_list(_key, [], _map), do: :ok
   defp do_dependencies_list(key, [dependency|dependencies], map) do
-    if Map.has_key?(map, dependency) do
-      do_dependencies_list(key, dependencies, map)
-    else
-      {:error, %{reason: :missing_dependency, for: key, dependency: dependency}}
+    case Map.has_key?(map, dependency) do
+      true -> do_dependencies_list(key, dependencies, map)
+      false ->
+        error :missing_dependency, for: key, dependency: dependency
     end
   end
 
-  @spec error(atom | Xema.types) :: {:error, map}
   defp error(atom) when is_atom(atom), do: error atom, []
   defp error(type), do: error :wrong_type, type: type.as
 
-  @spec error(atom, keyword) :: {:error, map}
   defp error(reason, info) when is_atom(reason) do
     info =
       info

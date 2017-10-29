@@ -78,6 +78,11 @@ defmodule Xema.MapTest do
       }}
       assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) == expected
     end
+
+    test "validate/2 with mixed map", %{schema: schema} do
+      expected = {:error, %{reason: :mixed_map, property: :foo}}
+      assert validate(schema, %{"foo" => 1, foo: 2}) == expected
+    end
   end
 
   describe "'map' schema with properties (string keys)" do
@@ -114,6 +119,11 @@ defmodule Xema.MapTest do
         error: %{reason: :wrong_type, type: :number}
       }}
       assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) == expected
+    end
+
+    test "validate/2 with mixed map", %{schema: schema} do
+      expected = {:error, %{reason: :mixed_map, property: "foo"}}
+      assert validate(schema, %{"foo" => 1, foo: 2}) == expected
     end
   end
 
