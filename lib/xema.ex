@@ -1,5 +1,7 @@
 defmodule Xema do
-  @moduledoc File.read!("README.md")
+  @moduledoc """
+  A schema validator inspired by [JSON Schema](http://json-schema.org)
+  """
 
   alias Xema.Validator
 

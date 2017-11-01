@@ -15,6 +15,10 @@ defmodule Xema.Mixfile do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
+      ],
+      docs: [
+        extras: ["README.md"],
+        main: "readme",
       ]
     ]
   end

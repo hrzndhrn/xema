@@ -1,10 +1,12 @@
-Xema is a schema validator inspired by [Json Schema](json-schema).
+# Xema
+
+Xema is a schema validator inspired by [JSON Schema](http://json-schema.org).
 
 Xema allows you to annotate and validate elixir data structures.
 
 Xema is in early beta. If you try it and has an issue, report them.
 
-# Installation
+## Installation
 
 First, add Xema to youe `mix.exs` dependencies:
 
@@ -20,11 +22,11 @@ Then, update youe dependencies:
 $ mix deps.get
 ```
 
-# Usage
+## Usage
 
 Xema supported the following types to validate data structures.
 
-## Type any
+### Type any
 
 The schema any will accept any data.
 
@@ -41,7 +43,7 @@ iex> validate schema, nil
 :ok
 ```
 
-## Type string
+### Type string
 
 The string type is used for strings.
 
@@ -56,7 +58,7 @@ iex> validate schema, 42
 {:error, %{reason: :wrong_type, type: :string}}
 ```
 
-### Length
+#### Length
 
 The length of a string can be constrained using the `min_length` and `max_length` keywords. For both keywords, the value must be a non-negative number.
 
@@ -75,7 +77,7 @@ iex> validate schema, "abcd"
 {:error, %{reason: :too_long, max_length: 3}}
 ```
 
-### Regular Expression
+#### Regular Expression
 
 The `pattern` keyword is used to restrict a string to a particular regular expression.
 
@@ -90,7 +92,7 @@ iex> validate schema, "foo"
 {:error, %{reason: :no_match, pattern: ~r/[0-9]-[A-B]+/}}
 ```
 
-# References
+## References
 
 The home of JSON Schema: http://json-schema.org/
 
@@ -103,5 +105,4 @@ Specification:
 [Understanding JSON Schema](https://spacetelescope.github.io/understanding-json-schema/index.html) a great tutorial for JSON Schema authors and a template for the description of Xema.
 
 
-[json-schema]: http://json-schema.org/"Json Schema"
 
