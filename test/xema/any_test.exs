@@ -1,7 +1,7 @@
 defmodule Xema.AnyTest do
   use ExUnit.Case
 
-  # doctest Xema.Any
+  doctest Xema.Any
 
   import Xema
 

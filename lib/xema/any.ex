@@ -1,39 +1,26 @@
 defmodule Xema.Any do
   @moduledoc """
-  TODO: rewrite
-  This module contains the keywords and validation functions for an `any`
-  schema.
+  This module contains the struct for the keywords of the type `any`.
 
-  Supported keywords:
-  * `enum` specifies an enumeration.
-
-  `as` can be an atom that will be report in an error case as type of the
-  schema. Default of `as` is `:float`
+  Usualy this struct will be just used by `xema`.
 
   ## Examples
 
       iex> import Xema
       Xema
-      iex> any = xema :any, enum: [1, "a", :b]
-      %Xema{
-        default: nil,
-        description: nil,
-        id: nil,
-        keywords: %Xema.Any{
-          as: :any,
-          enum: [1, "a", :b]
-        },
-        schema: nil,
-        title: nil,
-        type: :any
-      }
-      iex> validate(any, "a")
-      :ok
-      iex> validate(any, :foo)
-      {:error, %{element: :foo, enum: [1, "a", :b], reason: :not_in_enum}}
+      iex> schema = xema :any
+      %Xema{type: %Xema.Any{}}
+      iex> schema.type == %Xema.Any{}
+      true
   """
 
   defstruct [:enum, as: :any]
 
+  @typedoc """
+  The struct contains tke keywords for the type `any`.
+
+  * `enum` specifies an enumeration
+  * `as` is used in an error report. Default of `as` is `:any`.
+  """
   @type t :: %Xema.Any{enum: list | nil, as: atom}
 end

@@ -1,6 +1,22 @@
 defmodule Xema.String do
   @moduledoc """
-  TODO
+  This module contains the struct for the keywords of the type `string`.
+
+  Supported keywords:
+  * `enum` specifies an enumeration
+
+  `as` is an atom that is used in an error report. Default of `as` is `:string`.
+
+  Usualy this struct will be just used by `xema`.
+
+  ## Examples
+
+      iex> import Xema
+      Xema
+      iex> schema = xema :string
+      %Xema{type: %Xema.String{}}
+      iex> schema.type == %Xema.String{}
+      true
   """
 
   defstruct [
