@@ -24,40 +24,40 @@ defmodule Xema do
   * `type` contains the specification of the schema.
   """
   @type t :: %Xema{
-    id: String.t | nil,
-    schema: String.t | nil,
-    title: String.t | nil,
-    description: String.t | nil,
-    type: types
-  }
+          id: String.t() | nil,
+          schema: String.t() | nil,
+          title: String.t() | nil,
+          description: String.t() | nil,
+          type: types
+        }
 
   @typedoc """
   The available type notations.
   """
   @type type ::
-    :nil |
-    :any |
-    :boolean |
-    :map |
-    :list |
-    :string |
-    :number |
-    :float |
-    :integer
+          nil
+          | :any
+          | :boolean
+          | :map
+          | :list
+          | :string
+          | :number
+          | :float
+          | :integer
 
   @typedoc """
   The `keywords` for the schema types.
   """
   @type types ::
-    Xema.Any.t |
-    Xema.Nil.t |
-    Xema.Boolean.t |
-    Xema.Map.t |
-    Xema.List.t |
-    Xema.Number.t |
-    Xema.Integer.t |
-    Xema.Float.t |
-    Xema.String.t
+          Xema.Any.t()
+          | Xema.Nil.t()
+          | Xema.Boolean.t()
+          | Xema.Map.t()
+          | Xema.List.t()
+          | Xema.Number.t()
+          | Xema.Integer.t()
+          | Xema.Float.t()
+          | Xema.String.t()
 
   @types %{
     any: Xema.Any,
@@ -71,10 +71,10 @@ defmodule Xema do
     integer: Xema.Integer
   }
 
-  @spec is_valid?(Xema.t, any) :: boolean
+  @spec is_valid?(Xema.t(), any) :: boolean
   def is_valid?(xema, value), do: validate(xema, value) == :ok
 
-  @spec validate(Xema.t, any) :: :ok | {:error, any}
+  @spec validate(Xema.t(), any) :: :ok | {:error, any}
   def validate(xema, value), do: Validator.validate(xema, value)
 
   @doc """
@@ -129,48 +129,49 @@ defmodule Xema do
 
   """
 
-  @spec xema(type, keyword) :: Xema.t
+  @spec xema(type, keyword) :: Xema.t()
   def xema(type, keywords \\ [])
+
   for {type, module} <- @types do
     def xema(unquote(type), []) do
-      struct(Xema, [type: struct(unquote(module), [])])
+      struct(Xema, type: struct(unquote(module), []))
     end
+
     def xema(unquote(type), opts) do
       opts = opts(unquote(type), opts)
       struct(Xema, Keyword.put(opts, :type, struct(unquote(module), opts)))
     end
 
     defp type(unquote(type), opts) do
-      # unquote(module).new(opts(unquote(type), opts))
       struct(unquote(module), opts(unquote(type), opts))
     end
+
     defp type({unquote(type), opts}) do
-      # unquote(module).new(opts(unquote(type), opts))
       struct(unquote(module), opts(unquote(type), opts))
     end
+
     defp type(unquote(type)) do
-      # unquote(module).new([])
       struct(unquote(module), [])
     end
   end
 
   defp opts(:list, opts) do
-    Keyword.update(opts, :items, nil,
-      fn
-        items when is_atom(items) -> type(items)
-        items when is_tuple(items) -> type(items)
-        items when is_list(items) -> Enum.map(items, &type/1)
-        items -> items
-      end
-    )
+    Keyword.update(opts, :items, nil, fn
+      items when is_atom(items) -> type(items)
+      items when is_tuple(items) -> type(items)
+      items when is_list(items) -> Enum.map(items, &type/1)
+      items -> items
+    end)
   end
+
   defp opts(:map, opts) do
     opts
     |> Keyword.update(:properties, nil, &properties/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
-    |> Keyword.update(:required, nil, &(MapSet.new(&1)))
+    |> Keyword.update(:required, nil, &MapSet.new(&1))
   end
+
   defp opts(_, opts), do: opts
 
   defp properties(map) do
