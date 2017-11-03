@@ -2,7 +2,7 @@ defmodule Xema.Any do
   @moduledoc """
   This module contains the struct for the keywords of type `any`.
 
-  Usualy this struct will be just used by `xema`.
+  Usually this struct will be just used by `xema`.
 
   ## Examples
 
@@ -15,7 +15,7 @@ defmodule Xema.Any do
   """
 
   @typedoc """
-  The struct contains tke keywords for the type `any`.
+  The struct contains the keywords for the type `any`.
 
   * `as` is used in an error report. Default of `as` is `:any`
   * `enum` specifies an enumeration

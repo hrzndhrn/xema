@@ -8,7 +8,7 @@ Xema is in early beta. If you try it and has an issue, report them.
 
 ## Installation
 
-First, add Xema to youe `mix.exs` dependencies:
+First, add Xema to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
@@ -16,7 +16,7 @@ def deps do
 end
 ```
 
-Then, update youe dependencies:
+Then, update your dependencies:
 
 ```Shell
 $ mix deps.get

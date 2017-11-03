@@ -2,7 +2,7 @@ defmodule Xema.String do
   @moduledoc """
   This module contains the struct for the keywords of type `string`.
 
-  Usualy this struct will be just used by `xema`.
+  Usually this struct will be just used by `xema`.
 
   ## Examples
 
@@ -15,7 +15,7 @@ defmodule Xema.String do
   """
 
   @typedoc """
-  The struct contains tke keywords for the type `string`.
+  The struct contains the keywords for the type `string`.
 
   * `as` is used in an error report. Default of `as` is `:string`
   * `enum` specifies an enumeration
