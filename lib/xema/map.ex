@@ -16,14 +16,14 @@ defmodule Xema.Map do
   ]
 
   @type t :: %Xema.Map{
-    additional_properties: boolean | nil,
-    max_properties: pos_integer | nil,
-    min_properties: pos_integer | nil,
-    properties: map | nil,
-    required: MapSet.t | nil,
-    pattern_properties: map | nil,
-    keys: atom | nil,
-    dependencies: list | map | nil,
-    as: atom
-  }
+          additional_properties: boolean | nil,
+          max_properties: pos_integer | nil,
+          min_properties: pos_integer | nil,
+          properties: map | nil,
+          required: MapSet.t() | nil,
+          pattern_properties: map | nil,
+          keys: atom | nil,
+          dependencies: list | map | nil,
+          as: atom
+        }
 end

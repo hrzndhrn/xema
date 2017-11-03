@@ -3,7 +3,7 @@ defmodule Xema.Nil do
   TODO
   """
 
-  defstruct as: :nil
+  defstruct as: nil
 
   @type t :: %Xema.Nil{as: atom}
 end

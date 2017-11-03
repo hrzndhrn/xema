@@ -3,7 +3,7 @@ defmodule Xema.Boolean do
   TODO
   """
 
-  defstruct [as: :boolean]
+  defstruct as: :boolean
 
   @type t :: %Xema.Boolean{as: atom}
 end

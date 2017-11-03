@@ -15,12 +15,12 @@ defmodule Xema.Number do
   ]
 
   @type t :: %Xema.Number{
-    minimum: integer | nil,
-    maximum: integer | nil,
-    exclusive_minimum: boolean | nil,
-    exclusive_maximum: boolean | nil,
-    multiple_of: number | nil,
-    enum: list | nil,
-    as: atom
-  }
+          minimum: integer | nil,
+          maximum: integer | nil,
+          exclusive_minimum: boolean | nil,
+          exclusive_maximum: boolean | nil,
+          multiple_of: number | nil,
+          enum: list | nil,
+          as: atom
+        }
 end

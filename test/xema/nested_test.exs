@@ -1,26 +1,30 @@
 defmodule Xema.NestedTest do
-
   use ExUnit.Case, async: true
 
   import Xema
 
   describe "list of objects in one schema" do
     setup do
-      %{schema:
-        xema(
-          :map,
-          properties: %{
-            id: {:number, minimum: 1},
-            items: {:list,
-              items: {:map,
-                properties: %{
-                  num: {:number, minimum: 0},
-                  desc: :string
+      %{
+        schema:
+          xema(
+            :map,
+            properties: %{
+              id: {:number, minimum: 1},
+              items:
+                {
+                  :list,
+                  items:
+                    {
+                      :map,
+                      properties: %{
+                        num: {:number, minimum: 0},
+                        desc: :string
+                      }
+                    }
                 }
-              }
             }
-          }
-        )
+          )
       }
     end
 
@@ -45,25 +49,26 @@ defmodule Xema.NestedTest do
         ]
       }
 
-      error = {
-        :error,
-        %{
-          reason: :invalid_property,
-          property: :items,
-          error: %{
-            reason: :invalid_item,
-            at: 1,
+      error =
+        {
+          :error,
+          %{
+            reason: :invalid_property,
+            property: :items,
             error: %{
-              reason: :invalid_property,
-              property: :num,
+              reason: :invalid_item,
+              at: 1,
               error: %{
-                reason: :too_small,
-                minimum: 0,
-              },
-            },
-          },
+                reason: :invalid_property,
+                property: :num,
+                error: %{
+                  reason: :too_small,
+                  minimum: 0
+                }
+              }
+            }
+          }
         }
-      }
 
       assert validate(schema, data) == error
     end
@@ -71,20 +76,24 @@ defmodule Xema.NestedTest do
 
   describe "list of objects in two schemas" do
     setup do
-      item = xema :map,
-        properties: %{
-          num: {:number, minimum: 0},
-          desc: :string
-        }
-
-      %{schema:
+      item =
         xema(
           :map,
           properties: %{
-            id: {:number, minimum: 1},
-            items: {:list, items: item}
+            num: {:number, minimum: 0},
+            desc: :string
           }
         )
+
+      %{
+        schema:
+          xema(
+            :map,
+            properties: %{
+              id: {:number, minimum: 1},
+              items: {:list, items: item}
+            }
+          )
       }
     end
 
@@ -109,25 +118,26 @@ defmodule Xema.NestedTest do
         ]
       }
 
-      error = {
-        :error,
-        %{
-          reason: :invalid_property,
-          property: :items,
-          error: %{
-            reason: :invalid_item,
-            at: 1,
+      error =
+        {
+          :error,
+          %{
+            reason: :invalid_property,
+            property: :items,
             error: %{
-              reason: :invalid_property,
-              property: :num,
+              reason: :invalid_item,
+              at: 1,
               error: %{
-                reason: :too_small,
-                minimum: 0,
-              },
-            },
-          },
+                reason: :invalid_property,
+                property: :num,
+                error: %{
+                  reason: :too_small,
+                  minimum: 0
+                }
+              }
+            }
+          }
         }
-      }
 
       assert validate(schema, data) == error
     end

@@ -1,5 +1,4 @@
 defmodule Xema.StringTest do
-
   use ExUnit.Case, async: true
 
   import Xema
@@ -13,8 +12,11 @@ defmodule Xema.StringTest do
       assert schema.type.as == :string
     end
 
-    test "validate/2 with a string", %{schema: schema},
-      do: assert validate(schema, "foo") == :ok
+    test(
+      "validate/2 with a string",
+      %{schema: schema},
+      do: assert(validate(schema, "foo") == :ok)
+    )
 
     test "validate/2 with a number", %{schema: schema} do
       expected = {:error, %{reason: :wrong_type, type: :string}}
@@ -26,11 +28,17 @@ defmodule Xema.StringTest do
       assert validate(schema, nil) == expected
     end
 
-    test "is_valid?/2 with a valid value", %{schema: schema},
-      do: assert is_valid?(schema, "foo")
+    test(
+      "is_valid?/2 with a valid value",
+      %{schema: schema},
+      do: assert(is_valid?(schema, "foo"))
+    )
 
-    test "is_valid?/2 with an invalid value", %{schema: schema},
-      do: refute is_valid?(schema, [])
+    test(
+      "is_valid?/2 with an invalid value",
+      %{schema: schema},
+      do: refute(is_valid?(schema, []))
+    )
   end
 
   describe "'string' schema with restricted length" do
@@ -38,8 +46,11 @@ defmodule Xema.StringTest do
       %{schema: xema(:string, min_length: 3, max_length: 4)}
     end
 
-    test "validate/2 with a proper string", %{schema: schema},
-      do: assert validate(schema, "foo") == :ok
+    test(
+      "validate/2 with a proper string",
+      %{schema: schema},
+      do: assert(validate(schema, "foo") == :ok)
+    )
 
     test "validate/2 with a too short string", %{schema: schema} do
       expected = {:error, %{min_length: 3, reason: :too_short}}
@@ -57,8 +68,11 @@ defmodule Xema.StringTest do
       %{schema: xema(:string, pattern: ~r/^.+match.+$/)}
     end
 
-    test "validate/2 with a matching string", %{schema: schema},
-      do: assert validate(schema, "a match a") == :ok
+    test(
+      "validate/2 with a matching string",
+      %{schema: schema},
+      do: assert(validate(schema, "a match a") == :ok)
+    )
 
     test "validate/2 with a none matching string", %{schema: schema} do
       regex = ~r/^.+match.+$/
@@ -72,14 +86,14 @@ defmodule Xema.StringTest do
       %{schema: xema(:string, enum: ["one", "two"])}
     end
 
-    test "validate/2 with a value from the enum", %{schema: schema},
-      do: assert validate(schema, "two") == :ok
+    test(
+      "validate/2 with a value from the enum",
+      %{schema: schema},
+      do: assert(validate(schema, "two") == :ok)
+    )
 
     test "validate/2 with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{
-        reason: :not_in_enum,
-        enum: ["one", "two"],
-        element: "foo"}}
+      expected = {:error, %{reason: :not_in_enum, enum: ["one", "two"], element: "foo"}}
       assert validate(schema, "foo") == expected
     end
   end

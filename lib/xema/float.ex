@@ -59,12 +59,12 @@ defmodule Xema.Float do
   ]
 
   @type t :: %Xema.Float{
-    minimum: integer | nil,
-    maximum: integer | nil,
-    exclusive_minimum: boolean | nil,
-    exclusive_maximum: boolean | nil,
-    multiple_of: number | nil,
-    enum: list | nil,
-    as: atom
-  }
+          minimum: integer | nil,
+          maximum: integer | nil,
+          exclusive_minimum: boolean | nil,
+          exclusive_maximum: boolean | nil,
+          multiple_of: number | nil,
+          enum: list | nil,
+          as: atom
+        }
 end

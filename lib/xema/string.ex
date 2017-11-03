@@ -30,11 +30,11 @@ defmodule Xema.String do
   * `max_length` maximum length of string
   * `min_length` minimal length of string
   """
-    @type t :: %Xema.String{
-    max_length: pos_integer | nil,
-    min_length: pos_integer | nil,
-    pattern: Regex.t | nil,
-    enum: list | nil,
-    as: atom
-  }
+  @type t :: %Xema.String{
+          max_length: pos_integer | nil,
+          min_length: pos_integer | nil,
+          pattern: Regex.t() | nil,
+          enum: list | nil,
+          as: atom
+        }
 end

@@ -13,11 +13,11 @@ defmodule Xema.List do
   ]
 
   @type t :: %Xema.List{
-    items: list | Xema.t | nil,
-    min_items: pos_integer | nil,
-    max_items: pos_integer | nil,
-    unique_items: boolean | nil,
-    additional_items: boolean | nil,
-    as: atom
-  }
+          items: list | Xema.t() | nil,
+          min_items: pos_integer | nil,
+          max_items: pos_integer | nil,
+          unique_items: boolean | nil,
+          additional_items: boolean | nil,
+          as: atom
+        }
 end
