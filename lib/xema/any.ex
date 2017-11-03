@@ -14,8 +14,6 @@ defmodule Xema.Any do
       true
   """
 
-  defstruct [:enum, as: :any]
-
   @typedoc """
   The struct contains tke keywords for the type `any`.
 
@@ -23,4 +21,6 @@ defmodule Xema.Any do
   * `enum` specifies an enumeration
   """
   @type t :: %Xema.Any{enum: list | nil, as: atom}
+
+  defstruct [:enum, as: :any]
 end

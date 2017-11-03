@@ -14,14 +14,6 @@ defmodule Xema.String do
       true
   """
 
-  defstruct [
-    :max_length,
-    :min_length,
-    :pattern,
-    :enum,
-    as: :string
-  ]
-
   @typedoc """
   The struct contains tke keywords for the type `string`.
 
@@ -37,4 +29,12 @@ defmodule Xema.String do
           enum: list | nil,
           as: atom
         }
+
+  defstruct [
+    :max_length,
+    :min_length,
+    :pattern,
+    :enum,
+    as: :string
+  ]
 end
