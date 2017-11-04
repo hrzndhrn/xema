@@ -12,30 +12,26 @@ defmodule Xema.ListTest do
       assert schema.type.as == :list
     end
 
-    test(
-      "validate/2 with an empty list",
-      %{schema: schema},
-      do: assert(validate(schema, []) == :ok)
-    )
+    test "validate/2 with an empty list", %{schema: schema} do
+      assert validate(schema, []) == :ok
+    end
 
-    test(
-      "validate/2 with an list of different types",
-      %{schema: schema},
-      do: assert(validate(schema, [1, "bla", 3.4]) == :ok)
-    )
+    test "validate/2 with an list of different types", %{schema: schema} do
+      assert validate(schema, [1, "bla", 3.4]) == :ok
+    end
 
     test "validate/2 with an invalid value", %{schema: schema} do
       expected = {:error, %{reason: :wrong_type, type: :list}}
       assert validate(schema, "not an array") == expected
     end
 
-    test("is_valid?/2 with a valid value", %{schema: schema}, do: assert(is_valid?(schema, [1])))
+    test "is_valid?/2 with a valid value", %{schema: schema} do
+      assert is_valid?(schema, [1])
+    end
 
-    test(
-      "is_valid?/2 with an invalid value",
-      %{schema: schema},
-      do: refute(is_valid?(schema, 42))
-    )
+    test "is_valid?/2 with an invalid value", %{schema: schema} do
+      refute is_valid?(schema, 42)
+    end
   end
 
   describe "'list' schema with size" do
@@ -48,11 +44,9 @@ defmodule Xema.ListTest do
       assert validate(schema, [1]) == expected
     end
 
-    test(
-      "validate/2 with proper list",
-      %{schema: schema},
-      do: assert(validate(schema, [1, 2]) == :ok)
-    )
+    test "validate/2 with proper list", %{schema: schema} do
+      assert validate(schema, [1, 2]) == :ok
+    end
 
     test "validate/2 with to long list", %{schema: schema} do
       expected = {:error, %{reason: :too_many_items, max_items: 3}}
@@ -68,17 +62,13 @@ defmodule Xema.ListTest do
       }
     end
 
-    test(
-      "validate/2 integers with empty list",
-      %{integers: schema},
-      do: assert(validate(schema, []) == :ok)
-    )
+    test "validate/2 integers with empty list", %{integers: schema} do
+      assert validate(schema, []) == :ok
+    end
 
-    test(
-      "validate/2 integers with list of integers",
-      %{integers: schema},
-      do: assert(validate(schema, [1, 2]) == :ok)
-    )
+    test "validate/2 integers with list of integers", %{integers: schema} do
+      assert validate(schema, [1, 2]) == :ok
+    end
 
     test "validate/2 integers with invalid list", %{integers: schema} do
       expected =
@@ -94,17 +84,13 @@ defmodule Xema.ListTest do
       assert validate(schema, [1, 2, "foo"]) == expected
     end
 
-    test(
-      "validate/2 strings with empty list",
-      %{strings: schema},
-      do: assert(validate(schema, []) == :ok)
-    )
+    test "validate/2 strings with empty list", %{strings: schema} do
+      assert validate(schema, []) == :ok
+    end
 
-    test(
-      "validate/2 strings with list of string",
-      %{strings: schema},
-      do: assert(validate(schema, ["foo"]) == :ok)
-    )
+    test "validate/2 strings with list of string", %{strings: schema} do
+      assert validate(schema, ["foo"]) == :ok
+    end
 
     test "validate/2 strings with invalid list", %{strings: schema} do
       expected =
@@ -150,11 +136,9 @@ defmodule Xema.ListTest do
       }
     end
 
-    test(
-      "validate/2 with valid values",
-      %{schema: schema},
-      do: assert(validate(schema, ["foo", 42]) == :ok)
-    )
+    test "validate/2 with valid values", %{schema: schema} do
+      assert validate(schema, ["foo", 42]) == :ok
+    end
 
     test "validate/2 with invalid values", %{schema: schema} do
       assert validate(schema, ["foo", "bar"]) ==
@@ -172,11 +156,9 @@ defmodule Xema.ListTest do
                }}
     end
 
-    test(
-      "validate/2 with additional item",
-      %{schema: schema},
-      do: assert(validate(schema, ["foo", 42, "add"]) == :ok)
-    )
+    test "validate/2 with additional item", %{schema: schema} do
+      assert validate(schema, ["foo", 42, "add"]) == :ok
+    end
 
     test "validate/2 with missing item", %{schema: schema} do
       expected = {:error, %{at: 1, reason: :missing_item}}

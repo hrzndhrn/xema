@@ -14,29 +14,37 @@ defmodule Xema.AnyTest do
       assert schema.type.as == :any
     end
 
-    test("is_valid?/2 with a string", %{schema: schema}, do: assert(is_valid?(schema, "foo")))
+    test "is_valid?/2 with a string", %{schema: schema} do
+      assert is_valid?(schema, "foo")
+    end
 
-    test("is_valid?/2 with a number", %{schema: schema}, do: assert(is_valid?(schema, 42)))
+    test "is_valid?/2 with a number", %{schema: schema} do
+      assert is_valid?(schema, 42)
+    end
 
-    test("is_valid?/2 with nil", %{schema: schema}, do: assert(is_valid?(schema, nil)))
+    test "is_valid?/2 with nil", %{schema: schema} do
+      assert is_valid?(schema, nil)
+    end
 
-    test("is_valid?/2 with a list", %{schema: schema}, do: assert(is_valid?(schema, [1, 2, 3])))
+    test "is_valid?/2 with a list", %{schema: schema} do
+      assert is_valid?(schema, [1, 2, 3])
+    end
 
-    test(
-      "validate/2 with a string",
-      %{schema: schema},
-      do: assert(validate(schema, "foo") == :ok)
-    )
+    test "validate/2 with a string", %{schema: schema} do
+      assert validate(schema, "foo") == :ok
+    end
 
-    test("validate/2 with a number", %{schema: schema}, do: assert(validate(schema, 42) == :ok))
+    test "validate/2 with a number", %{schema: schema} do
+      assert validate(schema, 42) == :ok
+    end
 
-    test("validate/2 with nil", %{schema: schema}, do: assert(validate(schema, nil) == :ok))
+    test "validate/2 with nil", %{schema: schema} do
+      assert validate(schema, nil) == :ok
+    end
 
-    test(
-      "validate/2 with a list",
-      %{schema: schema},
-      do: assert(validate(schema, [1, 2, 3]) == :ok)
-    )
+    test "validate/2 with a list", %{schema: schema} do
+      assert validate(schema, [1, 2, 3]) == :ok
+    end
   end
 
   describe "'any' schema with enum" do
@@ -66,8 +74,12 @@ defmodule Xema.AnyTest do
       assert validate(schema, [2]) == {:error, %{expected | element: [2]}}
     end
 
-    test("is_valid?/2 with a valid value", %{schema: schema}, do: assert(is_valid?(schema, 1)))
+    test "is_valid?/2 with a valid value", %{schema: schema} do
+      assert is_valid?(schema, 1)
+    end
 
-    test("is_valid?/2 with an invalid value", %{schema: schema}, do: refute(is_valid?(schema, 5)))
+    test "is_valid?/2 with an invalid value", %{schema: schema} do
+      refute is_valid?(schema, 5)
+    end
   end
 end
