@@ -27,6 +27,7 @@ $ mix deps.get
 Xema supported the following types to validate data structures.
 
 * [Type any](#any)
+* [Type nil](#nil)
 * [Type string](#string)
   * [Length](#length)
   * [Regular Expression](#regex)
@@ -49,6 +50,21 @@ iex> validate schema, "foo"
 :ok
 iex> validate schema, nil
 :ok
+```
+
+### < name="nil"></a> Type nil
+
+The nil type matches only `nil`.
+
+``` Elixir
+iex> import Xema
+Xema
+iex> schema = xema :nil
+%Xema{type: %Xema.Nil{}}
+iex> validate schema, nil
+:ok
+iex> validate schema, 0
+{:error, %{reason: :wrong_type, type: :nil}}
 ```
 
 ### <a name="string"></a> Type string
