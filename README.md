@@ -31,6 +31,8 @@ Xema supported the following types to validate data structures.
   * [Length](#length)
   * [Regular Expression](#regex)
 * [Types number, integer and float](#number)
+  * [Multiples](multi)
+  * [Range](range)
 
 ### <a name="any"></a> Type any
 
@@ -62,6 +64,10 @@ iex> validate schema, "José"
 :ok
 iex> validate schema, 42
 {:error, %{reason: :wrong_type, type: :string}}
+iex> is_valid? schema, "José"
+true
+iex> is_valid? schema, 42
+false
 ```
 
 #### <a name="length"></a> Length
@@ -138,6 +144,53 @@ iex> validate schema, 42
 {:error, %{reason: :wrong_type, type: :float}}
 iex> validate schema, 21.5
 :ok
+```
+
+#### <a name="multi"></a> Multiples
+Numbers can be restricted to a multiple of a given number, using the
+`multiple_of` keyword. It may be set to any positive number.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :number, multiple_of: 2
+%Xema{type: %Xema.Number{multiple_of: 2}}
+iex> validate schema, 8
+:ok
+iex> validate schema, 7
+{:error, %{reason: :not_multiple, multiple_of: 2}}
+iex> is_valid? schema, 8.0
+true
+```
+
+#### <a name="range"></a> Range
+Ranges of numbers are specified using a combination of the `minimum`, `maximum`,
+`exclusive_minimum` and `exclusive_maximum` keywords.
+* `minimum` specifies a minimum numeric value.
+* `exclusive_minimum` is a boolean. When true, it indicates that the range
+   excludes the minimum value, i.e., x > minx > min. When false (or not included),
+   it indicates that the range includes the minimum value, i.e., x≥minx≥min.
+* `maximum` specifies a maximum numeric value.
+* `exclusive_maximum` is a boolean. When true, it indicates that the range
+   excludes the maximum value, i.e., x < maxx < max. When false (or not
+   included), it indicates that the range includes the maximum value, i.e., x ≤
+   maxx ≤ max.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :float, minimum: 1.2, maximum: 1.4, exclusive_maximum: true
+%Xema{type: %Xema.Float{minimum: 1.2, maximum: 1.4, exclusive_maximum: true}}
+iex> validate schema, 1.1
+{:error, %{reason: :too_small, minimum: 1.2}}
+iex> validate schema, 1.2
+:ok
+iex> is_valid? schema, 1.3
+true
+iex> validate schema, 1.4
+{:error, %{reason: :too_big, maximum: 1.4, exclusive_maximum: true}}
+iex> validate schema, 1.5
+{:error, %{reason: :too_big, maximum: 1.4}}
 ```
 
 ## References
