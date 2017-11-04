@@ -33,8 +33,7 @@ defmodule Xema.Mixfile do
       {:credo, "~> 0.8", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.7", only: :test},
-      {:exfmt, "~> 0.3.0", only: [:dev, :test]}
+      {:excoveralls, "~> 0.7", only: :test}
     ]
   end
 
