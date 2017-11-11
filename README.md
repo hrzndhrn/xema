@@ -398,8 +398,8 @@ Atoms as keys:
 ```Elixir
 iex> import Xema
 Xema
-iex> schema = xema :map, keys: :atom
-%Xema{type: %Xema.Map{keys: :atom}}
+iex> schema = xema :map, keys: :atoms
+%Xema{type: %Xema.Map{keys: :atoms}}
 iex> is_valid? schema, %{"foo" => "bar"}
 false
 iex> is_valid? schema, %{foo: "bar"}
@@ -412,8 +412,8 @@ Strings as keys:
 ```Elixir
 iex> import Xema
 Xema
-iex> schema = xema :map, keys: :string
-%Xema{type: %Xema.Map{keys: :string}}
+iex> schema = xema :map, keys: :strings
+%Xema{type: %Xema.Map{keys: :strings}}
 iex> is_valid? schema, %{"foo" => "bar"}
 true
 iex> is_valid? schema, %{foo: "bar"}

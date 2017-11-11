@@ -141,13 +141,13 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with keys: :atom" do
+  describe "'map' schema with keys: :atoms" do
     setup do
       %{
         schema:
           xema(
             :map,
-            keys: :atom,
+            keys: :atoms,
             properties: %{
               "foo" => :number,
               "bar" => :string
@@ -161,18 +161,18 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key type", %{schema: schema} do
-      expected = {:error, %{reason: :invalid_keys, keys: :atom}}
+      expected = {:error, %{reason: :invalid_keys, keys: :atoms}}
       assert validate(schema, %{"foo" => 1}) == expected
     end
   end
 
-  describe "'map' schema with keys: :string" do
+  describe "'map' schema with keys: :strings" do
     setup do
       %{
         schema:
           xema(
             :map,
-            keys: :string,
+            keys: :strings,
             properties: %{
               "foo" => :number,
               "bar" => :string
@@ -182,7 +182,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with valid key type", %{schema: schema} do
-      expected = {:error, %{reason: :invalid_keys, keys: :string}}
+      expected = {:error, %{reason: :invalid_keys, keys: :strings}}
       assert validate(schema, %{foo: 1}) == expected
     end
 

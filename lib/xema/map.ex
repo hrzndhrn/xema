@@ -21,7 +21,7 @@ defmodule Xema.Map do
   * `as` is used in an error report. Default of `as` is `:list`
   * `dependencies` allows the schema of the map to change based on the
     presence of certain special properties
-  * `keys` could be `:atom` or `:string`
+  * `keys` could be `:atoms` or `:strings`
   * `max_properties` the maximum count of properties for the map
   * `min_properties` the minimal count of properties for the map
   * `pattern_properties` specifies schemas for properties by patterns

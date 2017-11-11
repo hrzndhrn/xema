@@ -249,17 +249,17 @@ defmodule Xema.Validator do
 
   defp keys(%Xema.Map{keys: nil}, _value), do: :ok
 
-  defp keys(%Xema.Map{keys: :atom}, map) do
+  defp keys(%Xema.Map{keys: :atoms}, map) do
     case map |> Map.keys() |> Enum.all?(&is_atom/1) do
       true -> :ok
-      false -> error(:invalid_keys, keys: :atom)
+      false -> error(:invalid_keys, keys: :atoms)
     end
   end
 
-  defp keys(%Xema.Map{keys: :string}, map) do
+  defp keys(%Xema.Map{keys: :strings}, map) do
     case map |> Map.keys() |> Enum.all?(&is_binary/1) do
       true -> :ok
-      false -> error(:invalid_keys, keys: :string)
+      false -> error(:invalid_keys, keys: :strings)
     end
   end
 
