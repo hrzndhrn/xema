@@ -41,8 +41,8 @@ Xema supported the following types to validate data structures.
   * [Length](#list_length)
   * [Uniqueness](#unique)
 * [Type map](#map)
-  * [Keys](#keys}
-  * [Properties](#properties}
+  * [Keys](#keys)
+  * [Properties](#properties)
 
 ### <a name="any"></a> Type any
 
