@@ -19,8 +19,8 @@ defmodule Xema.String do
 
   * `as` is used in an error report. Default of `as` is `:string`
   * `enum` specifies an enumeration
-  * `max_length` maximum length of string
-  * `min_length` minimal length of string
+  * `max_length` the maximum length of string
+  * `min_length` the minimal length of string
   """
   @type t :: %Xema.String{
           max_length: pos_integer | nil,

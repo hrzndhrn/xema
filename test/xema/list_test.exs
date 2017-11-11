@@ -1,6 +1,8 @@
 defmodule Xema.ListTest do
   use ExUnit.Case, async: true
 
+  doctest Xema.List
+
   import Xema
 
   describe "'list' schema" do

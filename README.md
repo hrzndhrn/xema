@@ -33,8 +33,13 @@ Xema supported the following types to validate data structures.
   * [Length](#length)
   * [Regular Expression](#regex)
 * [Types number, integer and float](#number)
-  * [Multiples](multi)
-  * [Range](range)
+  * [Multiples](#multi)
+  * [Range](#range)
+* [Type list](#list)
+  * [Items](#items)
+  * [Additional items](#additional_items)
+  * [Length](#list_length)
+  * [Uniqueness](#unique)
 
 ### <a name="any"></a> Type any
 
@@ -228,10 +233,10 @@ iex> validate schema, 1.5
 {:error, %{reason: :too_big, maximum: 1.4}}
 ```
 
-### List
+### <a name="list"></a> Type list
 List are used for ordered elements, each element may be of a different type.
 
-#### Items
+#### <a name="items"></a> Items
 The `items` keyword will be used to validate all items of a list to a single
 schema.
 
@@ -288,6 +293,65 @@ iex> validate schema, [1]
 # And, by default, it’s also okay to add additional items to end:
 iex> validate schema, [1, "hello", "foo"]
 :ok
+```
+
+#### <a name="additional_items"></a> Additional items
+
+The `additional_items` keyword controls whether it is valid to have additional
+items in the array beyond what is defined in the schema.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :list,
+...>   items: [:integer, {:string, min_length: 5}],
+...>   additional_items: false
+%Xema{type: %Xema.List{
+  items: [%Xema.Integer{}, %Xema.String{min_length: 5}],
+  additional_items: false
+}}
+# It’s okay to not provide all of the items:
+iex> validate schema, [1]
+:ok
+# But, since additionalItems is false, we can’t provide extra items:
+iex> validate schema, [1, "hello", "foo"]
+{:error, %{reason: :additional_item, at: 2}}
+iex> validate schema, [1, "hello", "foo", "bar"]
+{:error, %{reason: :additional_item, at: 2}}
+```
+
+#### <a name="list_length"></a> Length
+
+The length of the array can be specified using the `min_items` and `max_items`
+keywords. The value of each keyword must be a non-negative number.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :list, min_items: 2, max_items: 3
+%Xema{type: %Xema.List{min_items: 2, max_items: 3}}
+iex> validate schema, [1]
+{:error, %{reason: :too_less_items, min_items: 2}}
+iex> validate schema, [1, 2]
+:ok
+iex> validate schema, [1, 2, 3]
+:ok
+iex> validate schema, [1, 2, 3, 4]
+{:error, %{reason: :too_many_items, max_items: 3}}
+```
+
+#### <a name="unique"></a> Uniqueness
+A schema can ensure that each of the items in an array is unique.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :list, unique_items: true
+%Xema{type: %Xema.List{unique_items: true}}
+iex> is_valid? schema, [1, 2, 3]
+true
+iex> validate schema, [1, 2, 3, 2, 1]
+{:error, %{reason: :not_unique}}
 ```
 
 ## References
