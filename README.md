@@ -37,12 +37,15 @@ Xema supported the following types to validate data structures.
   * [Range](#range)
 * [Type list](#list)
   * [Items](#items)
-  * [Additional items](#additional_items)
+  * [Additional Items](#additional_items)
   * [Length](#list_length)
   * [Uniqueness](#unique)
 * [Type map](#map)
   * [Keys](#keys)
   * [Properties](#properties)
+  * [Required Properties](#required_properties)
+  * [Pattern Properties](#pattern_properties)
+  * [Size](#map_size)
 
 ### <a name="any"></a> Type any
 
@@ -309,7 +312,7 @@ iex> validate schema, [1, "hello", "foo"]
 :ok
 ```
 
-#### <a name="additional_items"></a> Additional items
+#### <a name="additional_items"></a> Additional Items
 
 The `additional_items` keyword controls whether it is valid to have additional
 items in the array beyond what is defined in the schema.
@@ -454,6 +457,22 @@ iex> validate schema, %{a: 5, b: "ups"}
   }
 }}
 ```
+
+#### <a name="required_properties"></a> Required Properties
+
+TODO
+
+#### <a name="pattern_properties"></a> Pattern Properties
+
+TODO
+
+#### <a name="map_size"></a> Size
+
+TODO
+
+#### <a name="dependencies"></a> Dependencies
+
+TODO
 
 ## References
 
