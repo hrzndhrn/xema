@@ -28,6 +28,7 @@ Xema supported the following types to validate data structures.
 
 * [Type any](#any)
 * [Type nil](#nil)
+* [Type boolean](#boolean)
 * [Type string](#string)
   * [Length](#length)
   * [Regular Expression](#regex)
@@ -39,7 +40,7 @@ Xema supported the following types to validate data structures.
 
 The schema any will accept any data.
 
-``` Elixir
+```elixir
 iex> import Xema
 Xema
 iex> schema = xema :any
@@ -52,11 +53,11 @@ iex> validate schema, nil
 :ok
 ```
 
-### < name="nil"></a> Type nil
+### <a name="nil"></a> Type nil
 
 The nil type matches only `nil`.
 
-``` Elixir
+```elixir
 iex> import Xema
 Xema
 iex> schema = xema :nil
@@ -65,6 +66,24 @@ iex> validate schema, nil
 :ok
 iex> validate schema, 0
 {:error, %{reason: :wrong_type, type: :nil}}
+```
+
+### <a name="boolean"></a> Type boolean
+
+The boolean type matches only `true` and `false`.
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :boolean
+%Xema{type: %Xema.Boolean{}}
+iex> validate schema, true
+:ok
+iex> is_valid? schema, false
+true
+iex> validate schema, 0
+{:error, %{reason: :wrong_type, type: :boolean}}
+iex> is_valid? schema, nil
+false
 ```
 
 ### <a name="string"></a> Type string

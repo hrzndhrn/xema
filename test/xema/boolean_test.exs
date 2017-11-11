@@ -1,6 +1,8 @@
 defmodule Xema.BooleanTest do
   use ExUnit.Case, async: true
 
+  doctest Xema.Boolean
+
   import Xema
 
   describe "'boolean' schema" do
