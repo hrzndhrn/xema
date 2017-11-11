@@ -284,10 +284,10 @@ iex> validate schema, [1, "five"]
 }
 # It’s okay to not provide all of the items:
 iex> validate schema, [1]
-{:ok}
+:ok
 # And, by default, it’s also okay to add additional items to end:
 iex> validate schema, [1, "hello", "foo"]
-{:ok}
+:ok
 ```
 
 ## References

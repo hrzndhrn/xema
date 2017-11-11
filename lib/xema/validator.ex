@@ -235,11 +235,7 @@ defmodule Xema.Validator do
     end
   end
 
-  defp items_tuple([], _additonal_items, [], _at), do: :ok
-
-  defp items_tuple(_schemas, _additonal_items, [], at) do
-    error(:missing_item, at: at)
-  end
+  defp items_tuple(_schemas, _additonal_items, [], _at), do: :ok
 
   defp items_tuple([], false, _list, at), do: error(:additional_item, at: at)
   defp items_tuple([], true, _list, _at), do: :ok
