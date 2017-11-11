@@ -161,8 +161,7 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with missing item", %{schema: schema} do
-      expected = {:error, %{at: 1, reason: :missing_item}}
-      assert validate(schema, ["foo"]) == expected
+      assert validate(schema, ["foo"]) == :ok
     end
   end
 
