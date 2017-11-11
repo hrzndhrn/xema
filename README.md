@@ -40,6 +40,9 @@ Xema supported the following types to validate data structures.
   * [Additional items](#additional_items)
   * [Length](#list_length)
   * [Uniqueness](#unique)
+* [Type map](#map)
+  * [Keys](#keys}
+  * [Properties](#properties}
 
 ### <a name="any"></a> Type any
 
@@ -236,6 +239,17 @@ iex> validate schema, 1.5
 ### <a name="list"></a> Type list
 List are used for ordered elements, each element may be of a different type.
 
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :list
+%Xema{type: %Xema.List{}}
+iex> is_valid? schema, [1, "two", 3.0]
+true
+iex> validate schema, 9
+{:error, %{reason: :wrong_type, type: :list}}
+```
+
 #### <a name="items"></a> Items
 The `items` keyword will be used to validate all items of a list to a single
 schema.
@@ -341,6 +355,7 @@ iex> validate schema, [1, 2, 3, 4]
 ```
 
 #### <a name="unique"></a> Uniqueness
+
 A schema can ensure that each of the items in an array is unique.
 
 ```Elixir
@@ -353,6 +368,63 @@ true
 iex> validate schema, [1, 2, 3, 2, 1]
 {:error, %{reason: :not_unique}}
 ```
+
+### <a name="map"></a> Type map
+
+Whenever you need a key-value store, maps are the “go to” data structure in
+Elixir. Each of these pairs is conventionally referred to as a “property”.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map
+%Xema{type: %Xema.Map{}}
+iex> is_valid? schema, %{"foo" => "bar"}
+true
+iex> validate schema, "bar"
+{:error, %{reason: :wrong_type, type: :map}}
+# Using non-strings as keys are also valid:
+iex> is_valid? schema, %{foo: "bar"}
+true
+iex> is_valid? schema, %{1 => "bar"}
+true
+```
+
+#### <a name="keys"></a> Keys
+
+The keyword `keys` can restrict the keys to atoms or strings.
+
+Atoms as keys:
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map, keys: :atom
+%Xema{type: %Xema.Map{keys: :atom}}
+iex> is_valid? schema, %{"foo" => "bar"}
+false
+iex> is_valid? schema, %{foo: "bar"}
+true
+iex> is_valid? schema, %{1 => "bar"}
+false
+```
+
+Strings as keys:
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map, keys: :string
+%Xema{type: %Xema.Map{keys: :string}}
+iex> is_valid? schema, %{"foo" => "bar"}
+true
+iex> is_valid? schema, %{foo: "bar"}
+false
+iex> is_valid? schema, %{1 => "bar"}
+false
+```
+
+#### <a name="properties"></a> Properties
+
+TODO
 
 ## References
 

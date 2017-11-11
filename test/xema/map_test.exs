@@ -1,6 +1,8 @@
 defmodule Xema.MapTest do
   use ExUnit.Case, async: true
 
+  doctest Xema.Map
+
   import Xema
 
   describe "empty 'map' schema" do
