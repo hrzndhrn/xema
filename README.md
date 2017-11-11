@@ -228,6 +228,68 @@ iex> validate schema, 1.5
 {:error, %{reason: :too_big, maximum: 1.4}}
 ```
 
+### List
+List are used for ordered elements, each element may be of a different type.
+
+#### Items
+The `items` keyword will be used to validate all items of a list to a single
+schema.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :list, items: :string
+%Xema{type: %Xema.List{items: %Xema.String{}}}
+iex> is_valid? schema, ["a", "b", "abc"]
+true
+iex> validate schema, ["a", 1]
+{
+  :error,
+  %{reason: :invalid_item, at: 1, error: %{reason: :wrong_type, type: :string}}
+}
+```
+
+The next example shows how to add keywords to the items schema.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :list, items: {:integer, minimum: 1, maximum: 10}
+%Xema{type: %Xema.List{items: %Xema.Integer{minimum: 1, maximum: 10}}}
+iex> validate schema, [1, 2, 3]
+:ok
+iex> validate schema, [3, 2, 1, 0]
+{
+  :error,
+  %{reason: :invalid_item, at: 3, error: %{reason: :too_small, minimum: 1}}
+}
+```
+
+`items` can also be used to give each item a specific schema.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :list,
+...>   items: [:integer, {:string, min_length: 5}]
+%Xema{type: %Xema.List{
+  items: [%Xema.Integer{}, %Xema.String{min_length: 5}]
+}}
+iex> is_valid? schema, [1, "hello"]
+true
+iex> validate schema, [1, "five"]
+{
+  :error,
+  %{reason: :invalid_item, at: 1, error: %{reason: :too_short, min_length: 5}}
+}
+# It’s okay to not provide all of the items:
+iex> validate schema, [1]
+{:ok}
+# And, by default, it’s also okay to add additional items to end:
+iex> validate schema, [1, "hello", "foo"]
+{:ok}
+```
+
 ## References
 
 The home of JSON Schema: http://json-schema.org/
