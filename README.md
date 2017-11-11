@@ -424,7 +424,36 @@ false
 
 #### <a name="properties"></a> Properties
 
-TODO
+The properties on a map are defined using the `properties` keyword. The value
+of properties is a map, where each key is the name of a property and each
+value is a schema used to validate that property.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map,
+...>   properties: %{
+...>     a: :integer,
+...>     b: {:string, min_length: 5}
+...>   }
+%Xema{type: %Xema.Map{
+  properties: %{
+    a: %Xema.Integer{},
+    b: %Xema.String{min_length: 5}
+  }
+}}
+iex> is_valid? schema, %{a: 5, b: "hello"}
+true
+iex> validate schema, %{a: 5, b: "ups"}
+{:error, %{
+  reason: :invalid_property,
+  property: :b,
+  error: %{
+    reason: :too_short,
+    min_length: 5
+  }
+}}
+```
 
 ## References
 
