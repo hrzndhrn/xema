@@ -1,4 +1,6 @@
 # Xema
+[![Build Status](https://travis-ci.org/hrzndhrn/xema.svg?branch=master)](https://travis-ci.org/hrzndhrn/xema)
+[![Coverage Status](https://coveralls.io/repos/github/hrzndhrn/xema/badge.svg?branch=master)](https://coveralls.io/github/hrzndhrn/xema?branch=master)
 
 Xema is a schema validator inspired by [JSON Schema](http://json-schema.org).
 
