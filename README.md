@@ -46,6 +46,7 @@ Xema supported the following types to validate data structures.
   * [Required Properties](#required_properties)
   * [Pattern Properties](#pattern_properties)
   * [Size](#map_size)
+* [Enumerations](#enum)
 
 ### <a name="any"></a> Type any
 
@@ -456,11 +457,65 @@ iex> validate schema, %{a: 5, b: "ups"}
     min_length: 5
   }
 }}
+# Additinonal properties are allowed by default:
+iex> is_valid? schema, %{a: 5, b: "hello", add: :prop}
+true
 ```
 
 #### <a name="required_properties"></a> Required Properties
 
-TODO
+By default, the properties defined by the properties keyword are not required.
+However, one can provide a list of `required` properties using the required
+keyword.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map, properties: %{foo: :string}, required: [:foo]
+%Xema{
+  type: %Xema.Map{
+    properties: %{foo: %Xema.String{}},
+    required: MapSet.new([:foo])
+  }
+}
+iex> validate schema, %{foo: "bar"}
+:ok
+iex> validate schema, %{bar: "foo"}
+{:error, %{reason: :missing_properties, missing: [:foo], required: [:foo]}}
+```
+
+#### <a name="additional_properties"></a> Additional Properties
+
+The `additional_properties` keyword is used to control the handling of extra
+stuff, that is, properties whose names are not listed in the properties keyword.
+By default any additional properties are allowed.
+
+The `additional_properties` keyword may be either a boolean or an object. If
+`additional_properties` is a boolean and set to false, no additional properties
+will be allowed.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map,
+...>   properties: %{foo: :string},
+...>   required: [:foo],
+...>   additional_properties: false
+%Xema{
+  type: %Xema.Map{
+    properties: %{foo: %Xema.String{}},
+    required: MapSet.new([:foo]),
+    additional_properties: false
+  }
+}
+iex> validate schema, %{foo: "bar"}
+:ok
+iex> validate schema, %{foo: "bar", bar: "foo"}
+{:error, %{
+  reason: :no_additional_properties_allowed,
+  additional_properties: [:bar]}
+}
+```
 
 #### <a name="pattern_properties"></a> Pattern Properties
 
@@ -471,6 +526,10 @@ TODO
 TODO
 
 #### <a name="dependencies"></a> Dependencies
+
+TODO
+
+### <a name="enum"></a> Enumerations
 
 TODO
 
