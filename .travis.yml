@@ -1,0 +1,20 @@
+language: elixir
+
+elixir:
+  - 1.4.5
+  - 1.5.0
+  - 1.5.1
+
+otp_release:
+  - 19.0
+  - 19.1
+  - 19.2
+  - 19.3
+  - 20.0
+
+env:
+  global:
+    - MIX_ENV=test
+
+script:
+  - mix do deps.get, deps.compile, coveralls.travis
