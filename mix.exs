@@ -11,6 +11,9 @@ defmodule Xema.Mixfile do
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
       test_coverage: [tool: ExCoveralls],
+      description: description(),
+      package: package(),
+      source_url: "https://github.com/hrzndhrn/xema",
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
@@ -22,6 +25,10 @@ defmodule Xema.Mixfile do
         main: "readme"
       ]
     ]
+  end
+
+  defp description() do
+    "A schema validator inspired by JSON Schema."
   end
 
   def application do
@@ -39,4 +46,12 @@ defmodule Xema.Mixfile do
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp package do
+    [
+      maintainers: ["Marcus Kruse"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/hrzndhrn/xema"}
+    ]
+  end
 end
