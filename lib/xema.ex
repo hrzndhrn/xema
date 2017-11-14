@@ -144,8 +144,6 @@ defmodule Xema do
     def type(unquote(type), opts), do: unquote(module).new(opts)
 
     def type({unquote(type), opts}, []), do: unquote(module).new(opts)
-
-    def type(unquote(type), []), do: unquote(module).new([])
   end
 
   defp new(type), do: struct(Xema, type: type)
