@@ -52,5 +52,5 @@ defmodule Xema.Integer do
   ]
 
   @spec new(keyword) :: Xema.Integer.t()
-  def new(opts \\ []), do: struct Xema.Integer, opts
+  def new(opts \\ []), do: struct(Xema.Integer, opts)
 end
