@@ -49,6 +49,6 @@ defmodule Xema.Integer do
     as: :integer
   ]
 
-  @spec new(keyword) :: Xema.Integer.t
+  @spec new(keyword) :: Xema.Integer.t()
   def new(opts \\ []), do: struct(Xema.Integer, opts)
 end

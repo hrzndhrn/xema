@@ -24,6 +24,6 @@ defmodule Xema.Any do
 
   defstruct [:enum, as: :any]
 
-  @spec new(keyword) :: Xema.Any.t
+  @spec new(keyword) :: Xema.Any.t()
   def new(opts \\ []), do: struct(Xema.Any, opts)
 end

@@ -24,6 +24,6 @@ defmodule Xema.Nil do
 
   defstruct as: nil
 
-  @spec new(keyword) :: Xema.Nil.t
+  @spec new(keyword) :: Xema.Nil.t()
   def new(opts \\ []), do: struct(Xema.Nil, opts)
 end

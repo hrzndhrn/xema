@@ -137,9 +137,9 @@ defmodule Xema do
   def type(type, keywords \\ [])
 
   for {type, module} <- @types do
-    def xema(unquote(type), []), do: new unquote(module).new([])
+    def xema(unquote(type), []), do: new(unquote(module).new([]))
 
-    def xema(unquote(type), opts), do: new unquote(module).new(opts), opts
+    def xema(unquote(type), opts), do: new(unquote(module).new(opts), opts)
 
     def type(unquote(type), opts), do: unquote(module).new(opts)
 
@@ -148,8 +148,7 @@ defmodule Xema do
     def type(unquote(type), []), do: unquote(module).new([])
   end
 
+  defp new(type), do: struct(Xema, type: type)
 
-  defp new(type), do: struct Xema, type: type
-
-  defp new(type, fields), do: struct Xema, Keyword.put(fields, :type, type)
+  defp new(type, fields), do: struct(Xema, Keyword.put(fields, :type, type))
 end

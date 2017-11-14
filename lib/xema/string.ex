@@ -38,6 +38,6 @@ defmodule Xema.String do
     as: :string
   ]
 
-  @spec new(keyword) :: Xema.String.t
+  @spec new(keyword) :: Xema.String.t()
   def new(opts \\ []), do: struct(Xema.String, opts)
 end

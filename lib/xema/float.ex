@@ -49,6 +49,6 @@ defmodule Xema.Float do
     as: :float
   ]
 
-  @spec new(keyword) :: Xema.Float.t
+  @spec new(keyword) :: Xema.Float.t()
   def new(opts \\ []), do: struct(Xema.Float, opts)
 end

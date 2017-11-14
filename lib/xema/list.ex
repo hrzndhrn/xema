@@ -43,7 +43,7 @@ defmodule Xema.List do
     as: :list
   ]
 
-  @spec new(keyword) :: Xema.List.t
+  @spec new(keyword) :: Xema.List.t()
   def new(opts \\ []), do: struct(Xema.List, update(opts))
 
   defp update(opts) do

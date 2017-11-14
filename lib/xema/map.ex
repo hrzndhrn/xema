@@ -52,7 +52,7 @@ defmodule Xema.Map do
     as: :map
   ]
 
-  @spec new(keyword) :: Xema.Map.t
+  @spec new(keyword) :: Xema.Map.t()
   def new(opts \\ []), do: struct(Xema.Map, update(opts))
 
   defp update(opts) do
@@ -62,7 +62,6 @@ defmodule Xema.Map do
     |> Keyword.update(:dependencies, nil, &dependencies/1)
     |> Keyword.update(:required, nil, &MapSet.new(&1))
   end
-
 
   defp properties(map) do
     Enum.into(map, %{}, fn {key, prop} -> {key, Xema.type(prop)} end)
@@ -74,5 +73,4 @@ defmodule Xema.Map do
       {key, dep} -> {key, Xema.type(dep)}
     end)
   end
-
 end

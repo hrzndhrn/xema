@@ -50,6 +50,6 @@ defmodule Xema.Number do
     as: :number
   ]
 
-  @spec new(keyword) :: Xema.Number.t
+  @spec new(keyword) :: Xema.Number.t()
   def new(opts \\ []), do: struct(Xema.Number, opts)
 end
