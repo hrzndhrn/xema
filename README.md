@@ -522,19 +522,105 @@ iex> validate schema, %{foo: "bar", bar: "foo"}
 
 #### <a name="pattern_properties"></a> Pattern Properties
 
-TODO
+The keyword `pattern_properties` defined additional properties by regular
+expressions.
+
+```Eixir
+iex> import Xema
+Xema
+iex> schema = xema :map,
+...> additional_properties: false,
+...> pattern_properties: %{
+...>   ~r/^s_/ => :string,
+...>   ~r/^i_/ => :integer
+...> }
+%Xema{type: %Xema.Map{
+  additional_properties: false,
+  pattern_properties: %{
+    ~r/^s_/ => %Xema.String{},
+    ~r/^i_/ => %Xema.Integer{}
+  }
+}}
+iex> is_valid? schema, %{"s_0" => "foo", "i_1" => 6}
+true
+iex> is_valid? schema, %{s_0: "foo", i_1: 6}
+true
+iex> validate schema, %{s_0: "foo", f_1: 6.6}
+{:error, %{
+  reason: :no_additional_properties_allowed,
+  additional_properties: [:f_1]
+}}
+```
 
 #### <a name="map_size"></a> Size
 
-TODO
+The number of properties on an object can be restricted using the
+`min_properties` and `max_properties` keywords.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map,
+...>   min_properties: 2,
+...>   max_properties: 3
+%Xema{type: %Xema.Map{
+  min_properties: 2,
+  max_properties: 3
+}}
+iex> is_valid? schema, %{a: 1, b: 2}
+true
+iex> validate schema, %{}
+{:error, %{reason: :too_less_properties, min_properties: 2}}
+iex> validate schema, %{a: 1, b: 2, c: 3, d: 4}
+{:error, %{reason: :too_many_properties, max_properties: 3}}
+```
 
 #### <a name="dependencies"></a> Dependencies
 
-TODO
+The `dependencies` keyword allows the schema of the object to change based on
+the presence of certain special properties.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map,
+...>   properties: %{
+...>     a: :number,
+...>     b: :number,
+...>     c: :number
+...>   },
+...>   dependencies: %{
+...>     b: [:c]
+...>   }
+%Xema{type: %Xema.Map{
+  properties: %{a: %Xema.Number{}, b: %Xema.Number{}, c: %Xema.Number{}},
+  dependencies: %{b: [:c]}
+}}
+iex> is_valid? schema, %{a: 5}
+true
+iex> is_valid? schema, %{c: 9}
+true
+iex> is_valid? schema, %{b: 1}
+false
+iex> is_valid? schema, %{b: 1, c: 7}
+true
+```
 
 ### <a name="enum"></a> Enumerations
 
-TODO
+The `enum` keyword is used to restrict a value to a fixed set of values. It must
+be an array with at least one element, where each element is unique.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :any, enum: [1, "foo", :bar]
+%Xema{type: %Xema.Any{enum: [1, "foo", :bar]}}
+iex> is_valid? schema, :bar
+true
+iex> is_valid? schema, 42
+false
+```
 
 ## References
 
