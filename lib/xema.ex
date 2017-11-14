@@ -144,17 +144,20 @@ defmodule Xema do
     end
 
     def xema(unquote(type), opts) do
-      new(unquote(module).new(opts), SchemaValidator.validate(opts))
+      SchemaValidator.validate(unquote(type), opts)
+      new(unquote(module).new(opts), opts)
     catch
       {:error, msg} -> raise SchemaError, message: msg
     end
 
     def type(unquote(type), opts) do
-      unquote(module).new(SchemaValidator.validate(opts))
+      SchemaValidator.validate(unquote(type), opts)
+      unquote(module).new(opts)
     end
 
     def type({unquote(type), opts}, []) do
-      unquote(module).new(SchemaValidator.validate(opts))
+      SchemaValidator.validate(unquote(type), opts)
+      unquote(module).new(opts)
     end
   end
 
