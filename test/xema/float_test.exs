@@ -1,6 +1,8 @@
 defmodule Xema.FloatTest do
   use ExUnit.Case, async: true
 
+  doctest Xema.Float
+
   import Xema
 
   describe "'float' schema" do

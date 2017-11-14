@@ -1,6 +1,8 @@
 defmodule Xema.NumberTest do
   use ExUnit.Case, async: true
 
+  doctest Xema.Number
+
   import Xema
 
   describe "'number' schema" do

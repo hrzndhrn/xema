@@ -1,62 +1,33 @@
 defmodule Xema.Float do
   @moduledoc """
-  TODO: rewrite
-  This module contains the keywords and validation functions for a `float`
-  schema.
+  This module contains the struct for the keywords of type `float`.
 
-  Supported keywords:
-  * `minimum` specifies a minimum numeric value.
-  * `maximum` specifies a maximum numeric value.
-  * `exclusive_minimum` is a boolean. When `true`, it indicates that the
-    `minimum` excludes the value himself, i.e., x > min. When false (or not set)
-    , it indicates that the `minimum` includes the value himself, i.e., x ≥ min.
-  * `exclusive_maximum`
-  * `multiple_of` restrict the value to a multiple of the given number.
-  * `enum` specifies an enumeration.
-
-  `as` can be an atom that will be report in an error case as type of the
-  schema. Default of `as` is `:float`
+  Usually this struct will be just used by `xema`.
 
   ## Examples
 
       iex> import Xema
       Xema
-      iex> float = xema :float, minimum: 2.3, as: :frac
-      %Xema{
-        keywords: %Xema.Float{
-          as: :frac,
-          enum: nil,
-          exclusive_maximum: nil,
-          exclusive_minimum: nil,
-          maximum: nil,
-          minimum: 2.3,
-          multiple_of: nil
-        },
-        type: :float,
-        id: nil,
-        schema: nil,
-        title: nil,
-        description: nil,
-        default: nil
-      }
-      iex> validate(float, 3.2)
-      :ok
-      iex> validate(float, 1.1)
-      {:error, %{minimum: 2.3, reason: :too_small}}
-      iex> validate(float, "foo")
-      {:error, %{reason: :wrong_type, type: :frac}}
-
+      iex> schema = xema :float
+      %Xema{type: %Xema.Float{}}
+      iex> schema.type == %Xema.Float{}
+      true
   """
 
-  defstruct [
-    :minimum,
-    :maximum,
-    :exclusive_maximum,
-    :exclusive_minimum,
-    :multiple_of,
-    :enum,
-    as: :float
-  ]
+  @typedoc """
+  The struct contains the keywords for the type `float`.
+
+  * `as` is used in an error report. Default of `as` is `:float`
+  * `enum` specifies an enumeration
+  * `exclusive_maximum` is a boolean. When true, it indicates that the range
+    excludes the maximum value.
+  * `exclusive_minimum` is a boolean. When true, it indicates that the range
+    excludes the minimum value.
+  * `maximum` the maximum value
+  * `minimum` the minimum value
+  * `multiple_of` is a number greater 0. The value has to be a multiple of this
+    number.
+  """
 
   @type t :: %Xema.Float{
           minimum: integer | nil,
@@ -67,4 +38,14 @@ defmodule Xema.Float do
           enum: list | nil,
           as: atom
         }
+
+  defstruct [
+    :minimum,
+    :maximum,
+    :exclusive_maximum,
+    :exclusive_minimum,
+    :multiple_of,
+    :enum,
+    as: :float
+  ]
 end

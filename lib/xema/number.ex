@@ -1,7 +1,43 @@
 defmodule Xema.Number do
   @moduledoc """
-  TODO
+  This module contains the struct for the keywords of type `number`.
+
+  Usually this struct will be just used by `xema`.
+
+  ## Examples
+
+      iex> import Xema
+      Xema
+      iex> schema = xema :number
+      %Xema{type: %Xema.Number{}}
+      iex> schema.type == %Xema.Number{}
+      true
   """
+
+  @typedoc """
+  The struct contains the keywords for the type `number`.
+
+  * `as` is used in an error report. Default of `as` is `:number`
+  * `enum` specifies an enumeration
+  * `exclusive_maximum` is a boolean. When true, it indicates that the range
+    excludes the maximum value.
+  * `exclusive_minimum` is a boolean. When true, it indicates that the range
+    excludes the minimum value.
+  * `maximum` the maximum value
+  * `minimum` the minimum value
+  * `multiple_of` is a number greater 0. The value has to be a multiple of this
+    number.
+  """
+
+  @type t :: %Xema.Number{
+          minimum: integer | nil,
+          maximum: integer | nil,
+          exclusive_minimum: boolean | nil,
+          exclusive_maximum: boolean | nil,
+          multiple_of: number | nil,
+          enum: list | nil,
+          as: atom
+        }
 
   defstruct [
     :minimum,
@@ -13,14 +49,4 @@ defmodule Xema.Number do
     type: :number,
     as: :number
   ]
-
-  @type t :: %Xema.Number{
-          minimum: integer | nil,
-          maximum: integer | nil,
-          exclusive_minimum: boolean | nil,
-          exclusive_maximum: boolean | nil,
-          multiple_of: number | nil,
-          enum: list | nil,
-          as: atom
-        }
 end
