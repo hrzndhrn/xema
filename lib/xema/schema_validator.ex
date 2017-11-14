@@ -29,7 +29,7 @@ defmodule Xema.SchemaValidator do
     do: {:error, "Expected an Integer for minimum, got #{inspect(value)}."}
 
   defp minimum(_, minimum: value),
-    do: {:error, "Expected an Integer of Float for minimum, got #{inspect(value)}."}
+    do: {:error, "Expected an Integer or Float for minimum, got #{inspect(value)}."}
 
   defp minimum(_, _), do: :ok
 
@@ -59,7 +59,7 @@ defmodule Xema.SchemaValidator do
   defp multiple_of(_, multiple_of: value) do
     {
       :error,
-      "Expected a Float or Integer for multiple_of, got #{inspect(value)}."
+      "Expected an Integer or Float for multiple_of, got #{inspect(value)}."
     }
   end
 
