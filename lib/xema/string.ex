@@ -37,4 +37,7 @@ defmodule Xema.String do
     :enum,
     as: :string
   ]
+
+  @spec new(keyword) :: Xema.String.t
+  def new(opts \\ []), do: struct(Xema.String, opts)
 end

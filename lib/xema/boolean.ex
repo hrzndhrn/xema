@@ -24,4 +24,7 @@ defmodule Xema.Boolean do
   @type t :: %Xema.Boolean{as: atom}
 
   defstruct as: :boolean
+
+  @spec new(keyword) :: Xema.Boolean.t
+  def new(opts \\ []), do: struct(Xema.Boolean, opts)
 end

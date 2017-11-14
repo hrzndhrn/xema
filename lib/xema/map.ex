@@ -51,4 +51,28 @@ defmodule Xema.Map do
     :dependencies,
     as: :map
   ]
+
+  @spec new(keyword) :: Xema.Map.t
+  def new(opts \\ []), do: struct(Xema.Map, update(opts))
+
+  defp update(opts) do
+    opts
+    |> Keyword.update(:properties, nil, &properties/1)
+    |> Keyword.update(:pattern_properties, nil, &properties/1)
+    |> Keyword.update(:dependencies, nil, &dependencies/1)
+    |> Keyword.update(:required, nil, &MapSet.new(&1))
+  end
+
+
+  defp properties(map) do
+    Enum.into(map, %{}, fn {key, prop} -> {key, Xema.type(prop)} end)
+  end
+
+  defp dependencies(map) do
+    Enum.into(map, %{}, fn
+      {key, dep} when is_list(dep) -> {key, dep}
+      {key, dep} -> {key, Xema.type(dep)}
+    end)
+  end
+
 end

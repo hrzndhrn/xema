@@ -132,56 +132,24 @@ defmodule Xema do
   @spec xema(type, keyword) :: Xema.t()
   def xema(type, keywords \\ [])
 
+  @doc false
+  @spec type(type, keyword) :: types
+  def type(type, keywords \\ [])
+
   for {type, module} <- @types do
-    def xema(unquote(type), []) do
-      struct(Xema, type: struct(unquote(module), []))
-    end
+    def xema(unquote(type), []), do: new unquote(module).new([])
 
-    def xema(unquote(type), opts) do
-      opts = opts(unquote(type), opts)
-      struct(Xema, Keyword.put(opts, :type, struct(unquote(module), opts)))
-    end
+    def xema(unquote(type), opts), do: new unquote(module).new(opts), opts
 
-    defp type(unquote(type), opts) do
-      struct(unquote(module), opts(unquote(type), opts))
-    end
+    def type(unquote(type), opts), do: unquote(module).new(opts)
 
-    defp type({unquote(type), opts}) do
-      struct(unquote(module), opts(unquote(type), opts))
-    end
+    def type({unquote(type), opts}, []), do: unquote(module).new(opts)
 
-    defp type(unquote(type)) do
-      struct(unquote(module), [])
-    end
+    def type(unquote(type), []), do: unquote(module).new([])
   end
 
-  defp opts(:list, opts) do
-    Keyword.update(opts, :items, nil, fn
-      items when is_atom(items) -> type(items)
-      items when is_tuple(items) -> type(items)
-      items when is_list(items) -> Enum.map(items, &type/1)
-      items -> items
-    end)
-  end
 
-  defp opts(:map, opts) do
-    opts
-    |> Keyword.update(:properties, nil, &properties/1)
-    |> Keyword.update(:pattern_properties, nil, &properties/1)
-    |> Keyword.update(:dependencies, nil, &dependencies/1)
-    |> Keyword.update(:required, nil, &MapSet.new(&1))
-  end
+  defp new(type), do: struct Xema, type: type
 
-  defp opts(_, opts), do: opts
-
-  defp properties(map) do
-    Enum.into(map, %{}, fn {key, prop} -> {key, type(prop)} end)
-  end
-
-  defp dependencies(map) do
-    Enum.into(map, %{}, fn
-      {key, dep} when is_list(dep) -> {key, dep}
-      {key, dep} -> {key, type(dep)}
-    end)
-  end
+  defp new(type, fields), do: struct Xema, Keyword.put(fields, :type, type)
 end

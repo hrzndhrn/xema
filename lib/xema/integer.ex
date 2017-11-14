@@ -48,4 +48,7 @@ defmodule Xema.Integer do
     :enum,
     as: :integer
   ]
+
+  @spec new(keyword) :: Xema.Integer.t
+  def new(opts \\ []), do: struct(Xema.Integer, opts)
 end

@@ -23,4 +23,7 @@ defmodule Xema.Nil do
   @type t :: %Xema.Nil{as: atom}
 
   defstruct as: nil
+
+  @spec new(keyword) :: Xema.Nil.t
+  def new(opts \\ []), do: struct(Xema.Nil, opts)
 end

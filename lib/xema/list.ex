@@ -42,4 +42,16 @@ defmodule Xema.List do
     additional_items: true,
     as: :list
   ]
+
+  @spec new(keyword) :: Xema.List.t
+  def new(opts \\ []), do: struct(Xema.List, update(opts))
+
+  defp update(opts) do
+    Keyword.update(opts, :items, nil, fn
+      items when is_atom(items) -> Xema.type(items)
+      items when is_tuple(items) -> Xema.type(items)
+      items when is_list(items) -> Enum.map(items, &Xema.type/1)
+      items -> items
+    end)
+  end
 end

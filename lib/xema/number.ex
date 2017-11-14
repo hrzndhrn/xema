@@ -49,4 +49,7 @@ defmodule Xema.Number do
     type: :number,
     as: :number
   ]
+
+  @spec new(keyword) :: Xema.Number.t
+  def new(opts \\ []), do: struct(Xema.Number, opts)
 end
