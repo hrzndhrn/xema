@@ -3,7 +3,6 @@ defmodule Xema.SchemaValidator do
 
   @spec validate(atom, keyword) :: :ok
   def validate(type, opts) do
-    # :ok <- maximum(type, opts),
     with :ok <- minimum(type, opts),
          :ok <- multiple_of(type, opts) do
       opts
