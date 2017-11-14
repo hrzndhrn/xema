@@ -6,12 +6,12 @@ defmodule Xema.String do
 
   ## Examples
 
-      iex> import Xema
-      Xema
-      iex> schema = xema :string
-      %Xema{type: %Xema.String{}}
-      iex> schema.type == %Xema.String{}
-      true
+    iex> import Xema
+    Xema
+    iex> schema = xema :string
+    %Xema{type: %Xema.String{}}
+    iex> schema.type == %Xema.String{}
+    true
   """
 
   @typedoc """

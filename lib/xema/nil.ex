@@ -6,13 +6,13 @@ defmodule Xema.Nil do
 
   ## Examples
 
-      iex> import Xema
-      Xema
-      iex> schema = xema :nil
-      %Xema{type: %Xema.Nil{}}
-      iex> schema.type == %Xema.Nil{}
-      true
-    """
+    iex> import Xema
+    Xema
+    iex> schema = xema :nil
+    %Xema{type: %Xema.Nil{}}
+    iex> schema.type == %Xema.Nil{}
+    true
+  """
 
   @typedoc """
   The struct contains the keywords for the type `nil`.
