@@ -3,6 +3,8 @@ defmodule Xema do
   A schema validator inspired by [JSON Schema](http://json-schema.org)
   """
 
+  alias Xema.SchemaError
+  alias Xema.SchemaValidator
   alias Xema.Validator
 
   defstruct [
@@ -137,13 +139,23 @@ defmodule Xema do
   def type(type, keywords \\ [])
 
   for {type, module} <- @types do
-    def xema(unquote(type), []), do: new(unquote(module).new([]))
+    def xema(unquote(type), []) do
+      new unquote(module).new([])
+    end
 
-    def xema(unquote(type), opts), do: new(unquote(module).new(opts), opts)
+    def xema(unquote(type), opts) do
+        new unquote(module).new(opts), SchemaValidator.validate(opts)
+      catch
+        {:error, msg} -> raise SchemaError, message: msg
+    end
 
-    def type(unquote(type), opts), do: unquote(module).new(opts)
+    def type(unquote(type), opts) do
+      unquote(module).new SchemaValidator.validate(opts)
+    end
 
-    def type({unquote(type), opts}, []), do: unquote(module).new(opts)
+    def type({unquote(type), opts}, []) do
+      unquote(module).new SchemaValidator.validate(opts)
+    end
   end
 
   defp new(type), do: struct(Xema, type: type)

@@ -52,17 +52,5 @@ defmodule Xema.Integer do
   ]
 
   @spec new(keyword) :: Xema.Integer.t()
-  def new(opts \\ []), do: struct Xema.Integer, validate(opts)
-
-  defp validate(opts) do
-    with :ok <- minimum opts do
-      opts
-    end
-  end
-
-  defp minimum([minimum: nil]), do: :ok
-
-  defp minimum([minimum: value]) when not is_integer(value) do
-    raise SchemaError, message: "shit"
-  end
+  def new(opts \\ []), do: struct Xema.Integer, opts
 end
