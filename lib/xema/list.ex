@@ -17,7 +17,8 @@ defmodule Xema.List do
   @typedoc """
   The struct contains the keywords for the type `list`.
 
-  * `additional_items` disallow additional items, if set to false
+  * `additional_items` disallow additional items, if set to false. The keyword
+    can also contain a schema to specify the type of additional items.
   * `as` is used in an error report. Default of `as` is `:list`
   * `items` specifies the type(s) of the items
   * `max_items` the maximum length of list
@@ -47,11 +48,16 @@ defmodule Xema.List do
   def new(opts \\ []), do: struct(Xema.List, update(opts))
 
   defp update(opts) do
-    Keyword.update(opts, :items, nil, fn
-      items when is_atom(items) -> Xema.type(items)
-      items when is_tuple(items) -> Xema.type(items)
-      items when is_list(items) -> Enum.map(items, &Xema.type/1)
-      items -> items
-    end)
+    opts
+    |> Keyword.update(:items, nil, fn
+         items when is_atom(items) -> Xema.type(items)
+         items when is_tuple(items) -> Xema.type(items)
+         items when is_list(items) -> Enum.map(items, &Xema.type/1)
+         items -> items
+       end)
+    |> Keyword.update(:additional_items, true, fn
+         additional_items when is_boolean(additional_items) -> additional_items
+         additional_items -> Xema.type(additional_items)
+       end)
   end
 end

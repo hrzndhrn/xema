@@ -207,8 +207,12 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with invalid additional item", %{schema: schema} do
-      IO.puts("ha")
-      assert validate(schema, [11, 12]) == :error
+      assert validate(schema, [11, 12]) ==
+               {:error, %{
+                 reason: :invalid_item,
+                 at: 1,
+                 error: %{reason: :wrong_type, type: :string}
+               }}
     end
   end
 end

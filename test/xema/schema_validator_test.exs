@@ -10,7 +10,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected an Integer or Float for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema :float, maximum: "5"
+        xema(:float, maximum: "5")
       end
     end
 
@@ -48,7 +48,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected an Integer for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema :integer, maximum: "5"
+        xema(:integer, maximum: "5")
       end
     end
 
@@ -86,7 +86,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected an Integer or Float for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema :float, maximum: "5"
+        xema(:float, maximum: "5")
       end
     end
 
