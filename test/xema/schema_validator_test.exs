@@ -5,7 +5,15 @@ defmodule Xema.SchemaValidatorTest do
 
   import Xema
 
-  describe "schema type number" do
+  describe "schema type number:" do
+    test "keyword maximum with wrong value type" do
+      expected = ~s(Expected an Integer or Float for maximum, got "5".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema :float, maximum: "5"
+      end
+    end
+
     test "keyword minimum with wrong value type" do
       expected = ~s(Expected an Integer or Float for minimum, got "5".)
 
@@ -36,6 +44,14 @@ defmodule Xema.SchemaValidatorTest do
   end
 
   describe "schema type integer" do
+    test "keyword maximum with wrong value type" do
+      expected = ~s(Expected an Integer for maximum, got "5".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema :integer, maximum: "5"
+      end
+    end
+
     test "keyword minimum with wrong value type" do
       expected = ~s(Expected an Integer for minimum, got "5".)
 
@@ -66,6 +82,14 @@ defmodule Xema.SchemaValidatorTest do
   end
 
   describe "schema type float" do
+    test "keyword maximum with wrong value type" do
+      expected = ~s(Expected an Integer or Float for maximum, got "5".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema :float, maximum: "5"
+      end
+    end
+
     test "keyword minimum with wrong value type" do
       expected = ~s(Expected an Integer or Float for minimum, got "5".)
 

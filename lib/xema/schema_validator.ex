@@ -3,13 +3,38 @@ defmodule Xema.SchemaValidator do
 
   @spec validate(atom, keyword) :: :ok
   def validate(type, opts) do
-    with :ok <- minimum(type, opts),
+    with :ok <- maximum(type, opts),
+         :ok <- minimum(type, opts),
          :ok <- multiple_of(type, opts) do
       opts
     else
       error -> throw(error)
     end
   end
+
+  # Keyword: maximum
+  # The value of `maximum` must be a number, representing an inclusive upper
+  # limit for a numeric instance.
+
+  defp maximum(:number, maximum: value)
+       when is_integer(value) or is_float(value),
+       do: :ok
+
+  defp maximum(:integer, maximum: value)
+       when is_integer(value),
+       do: :ok
+
+  defp maximum(:float, maximum: value)
+       when is_integer(value) or is_float(value),
+       do: :ok
+
+  defp maximum(:integer, maximum: value),
+    do: {:error, "Expected an Integer for maximum, got #{inspect(value)}."}
+
+  defp maximum(_, maximum: value),
+    do: {:error, "Expected an Integer or Float for maximum, got #{inspect(value)}."}
+
+  defp maximum(_, _), do: :ok
 
   # Keyword: minimum
   # The value of `minimum` must be a number, representing an inclusive upper
@@ -34,7 +59,6 @@ defmodule Xema.SchemaValidator do
     do: {:error, "Expected an Integer or Float for minimum, got #{inspect(value)}."}
 
   defp minimum(_, _), do: :ok
-
 
   # Keyword: multiple_of
   # The value of `multipleOf` must be a number, strictly greater than 0.

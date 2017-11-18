@@ -14,8 +14,6 @@ defmodule Xema.Integer do
       true
   """
 
-  alias Xema.SchemaError
-
   @typedoc """
   The struct contains the keywords for the type `integer`.
 
