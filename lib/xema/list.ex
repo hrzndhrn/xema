@@ -17,7 +17,7 @@ defmodule Xema.List do
   @typedoc """
   The struct contains the keywords for the type `list`.
 
-  * `additional_items` disallow additional items, if set to true
+  * `additional_items` disallow additional items, if set to false
   * `as` is used in an error report. Default of `as` is `:list`
   * `items` specifies the type(s) of the items
   * `max_items` the maximum length of list
