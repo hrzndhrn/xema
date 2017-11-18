@@ -203,14 +203,14 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with valid additional item", %{schema: schema} do
-      assert validate(schema, [11, "twelve"]) == :ok
+      assert validate(schema, [11, "twelve", "thirteen"]) == :ok
     end
 
     test "validate/2 with invalid additional item", %{schema: schema} do
-      assert validate(schema, [11, 12]) ==
+      assert validate(schema, [11, "twelve", 13]) ==
                {:error, %{
                  reason: :invalid_item,
-                 at: 1,
+                 at: 2,
                  error: %{reason: :wrong_type, type: :string}
                }}
     end

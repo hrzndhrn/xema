@@ -342,6 +342,27 @@ iex> validate schema, [1, "hello", "foo", "bar"]
 {:error, %{reason: :additional_item, at: 2}}
 ```
 
+The keyword can also contain a schema to specify the type of additional items.
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :list,
+...>   items: [:integer, {:string, min_length: 3}],
+...>   additional_items: :integer
+%Xema{type: %Xema.List{
+  items: [%Xema.Integer{}, %Xema.String{min_length: 3}],
+  additional_items: %Xema.Integer{}
+}}
+iex> is_valid? schema, [1, "two", 3, 4]
+true
+iex> validate schema, [1, "two", 3, "four"]
+{:error, %{
+  reason: :invalid_item,
+  at: 3,
+  error: %{reason: :wrong_type, type: :integer}
+}}
+```
+
 #### <a name="list_length"></a> Length
 
 The length of the array can be specified using the `min_items` and `max_items`
