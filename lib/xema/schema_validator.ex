@@ -11,7 +11,9 @@ defmodule Xema.SchemaValidator do
     end
   end
 
-  # keyword: minimum
+  # Keyword: minimum
+  # The value of `minimum` must be a number, representing an inclusive upper
+  # limit for a numeric instance.
 
   defp minimum(:number, minimum: value)
        when is_integer(value) or is_float(value),
@@ -33,7 +35,9 @@ defmodule Xema.SchemaValidator do
 
   defp minimum(_, _), do: :ok
 
-  # keyword: multiple_of
+
+  # Keyword: multiple_of
+  # The value of `multipleOf` must be a number, strictly greater than 0.
 
   defp multiple_of(:integer, multiple_of: value) when is_integer(value) do
     do_multiple_of(value)
@@ -65,6 +69,7 @@ defmodule Xema.SchemaValidator do
 
   defp multiple_of(_, _), do: :ok
 
+  @compile {:inline, do_multiple_of: 1}
   defp do_multiple_of(value) do
     case value > 0 do
       true -> :ok
