@@ -23,30 +23,26 @@ defmodule Xema.SchemaValidator do
     string: @get_keys.(%Xema.String{})
   ]
 
-  @spec validate(atom, keyword) :: :ok
+  @spec validate(atom, keyword) :: :ok | {:error, String.t()}
+  def validate(_, []), do: :ok
+
   def validate(:any, opts) do
     with :ok <- validate_keywords(:any, opts),
          :ok <- enum(:any, opts[:enum]) do
-      opts
-    else
-      error -> throw(error)
+      :ok
     end
   end
 
   def validate(:boolean, opts) do
     with :ok <- validate_keywords(:boolean, opts) do
-      opts
-    else
-      error -> throw(error)
+      :ok
     end
   end
 
   def validate(:list, opts) do
     with :ok <- additional_items(opts[:additional_items], opts[:items]),
          :ok <- validate_keywords(:list, opts) do
-      opts
-    else
-      error -> throw(error)
+      :ok
     end
   end
 
@@ -59,8 +55,7 @@ defmodule Xema.SchemaValidator do
            ),
          :ok <- dependencies(opts[:dependencies]),
          :ok <- validate_keywords(:map, opts) do
-    else
-      error -> throw(error)
+      :ok
     end
   end
 
@@ -71,18 +66,14 @@ defmodule Xema.SchemaValidator do
          :ok <- multiple_of(type, opts[:multiple_of]),
          :ok <- validate_keywords(type, opts),
          :ok <- enum(type, opts[:enum]) do
-      opts
-    else
-      error -> throw(error)
+      :ok
     end
   end
 
   def validate(:string, opts) do
     with :ok <- validate_keywords(:string, opts),
          :ok <- enum(:string, opts[:enum]) do
-      opts
-    else
-      error -> throw(error)
+      :ok
     end
   end
 
