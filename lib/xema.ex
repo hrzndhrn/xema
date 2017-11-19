@@ -161,6 +161,8 @@ defmodule Xema do
     end
   end
 
+  def type(type, _), do: throw({:error, "#{inspect(type)} is not a valid type."})
+
   defp new(type), do: struct(Xema, type: type)
 
   defp new(type, fields), do: struct(Xema, Keyword.put(fields, :type, type))

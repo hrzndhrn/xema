@@ -2,96 +2,124 @@ defmodule Xema.SchemaValidator do
   @moduledoc false
 
   @spec validate(atom, keyword) :: :ok
-  def validate(type, opts) do
-    with :ok <- maximum(type, opts),
-         :ok <- minimum(type, opts),
-         :ok <- multiple_of(type, opts) do
+  def validate(:any, opts), do: opts
+  def validate(:boolean, opts), do: opts
+
+  def validate(:list, opts) do
+    with :ok <- additional_items(opts[:additional_items], opts[:items]) do
       opts
     else
       error -> throw(error)
     end
   end
 
+  def validate(:map, opts), do: opts
+
+  def validate(type, opts)
+    when type == :number or type == :integer or type == :float do
+    with :ok <- maximum(type, opts[:maximum]),
+         :ok <- minimum(type, opts[:minimum]),
+         :ok <- multiple_of(type, opts[:multiple_of]) do
+      opts
+    else
+      error -> throw(error)
+    end
+  end
+
+  def validate(:string, opts), do: opts
+
+  # Keyword: additional_items
+  # The value of `additional_items` must be either a boolean or a schema.
+
+  defp additional_items(nil, _), do: :ok
+
+  defp additional_items(_, nil),
+    do: {:error, "additional_items has no effect if items not set."}
+
+  defp additional_items(_, items)
+       when not is_list(items),
+       do: {:error, "additional_items has no effect if items is not a list."}
+
+  defp additional_items(_, _), do: :ok
+
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
   # limit for a numeric instance.
 
-  defp maximum(:number, maximum: value)
+  defp maximum(_, nil), do: :ok
+
+  defp maximum(:number, value)
        when is_integer(value) or is_float(value),
        do: :ok
 
-  defp maximum(:integer, maximum: value)
+  defp maximum(:integer, value)
        when is_integer(value),
        do: :ok
 
-  defp maximum(:float, maximum: value)
+  defp maximum(:float, value)
        when is_integer(value) or is_float(value),
        do: :ok
 
-  defp maximum(:integer, maximum: value),
+  defp maximum(:integer, value),
     do: {:error, "Expected an Integer for maximum, got #{inspect(value)}."}
 
-  defp maximum(_, maximum: value),
+  defp maximum(_, value),
     do: {:error, "Expected an Integer or Float for maximum, got #{inspect(value)}."}
-
-  defp maximum(_, _), do: :ok
 
   # Keyword: minimum
   # The value of `minimum` must be a number, representing an inclusive upper
   # limit for a numeric instance.
 
-  defp minimum(:number, minimum: value)
+  defp minimum(_, nil), do: :ok
+
+  defp minimum(:number, value)
        when is_integer(value) or is_float(value),
        do: :ok
 
-  defp minimum(:integer, minimum: value)
+  defp minimum(:integer, value)
        when is_integer(value),
        do: :ok
 
-  defp minimum(:float, minimum: value)
+  defp minimum(:float, value)
        when is_integer(value) or is_float(value),
        do: :ok
 
-  defp minimum(:integer, minimum: value),
+  defp minimum(:integer, value),
     do: {:error, "Expected an Integer for minimum, got #{inspect(value)}."}
 
-  defp minimum(_, minimum: value),
+  defp minimum(_, value),
     do: {:error, "Expected an Integer or Float for minimum, got #{inspect(value)}."}
-
-  defp minimum(_, _), do: :ok
 
   # Keyword: multiple_of
   # The value of `multipleOf` must be a number, strictly greater than 0.
 
-  defp multiple_of(:integer, multiple_of: value) when is_integer(value) do
-    do_multiple_of(value)
-  end
+  defp multiple_of(_, nil), do: :ok
 
-  defp multiple_of(:float, multiple_of: value)
-       when is_float(value) or is_integer(value) do
-    do_multiple_of(value)
-  end
+  defp multiple_of(:integer, value)
+       when is_integer(value),
+       do: do_multiple_of(value)
 
-  defp multiple_of(:number, multiple_of: value)
-       when is_float(value) or is_integer(value) do
-    do_multiple_of(value)
-  end
+  defp multiple_of(:float, value)
+       when is_float(value) or is_integer(value),
+       do: do_multiple_of(value)
 
-  defp multiple_of(:integer, multiple_of: value) do
-    {
-      :error,
-      "Expected an Integer for multiple_of, got #{inspect(value)}."
-    }
-  end
+  defp multiple_of(:number, value)
+       when is_float(value) or is_integer(value),
+       do: do_multiple_of(value)
 
-  defp multiple_of(_, multiple_of: value) do
-    {
-      :error,
-      "Expected an Integer or Float for multiple_of, got #{inspect(value)}."
-    }
-  end
+  defp multiple_of(:integer, value),
+    do:
+      {
+        :error,
+        "Expected an Integer for multiple_of, got #{inspect(value)}."
+      }
 
-  defp multiple_of(_, _), do: :ok
+  defp multiple_of(_, value),
+    do:
+      {
+        :error,
+        "Expected an Integer or Float for multiple_of, got #{inspect(value)}."
+      }
 
   @compile {:inline, do_multiple_of: 1}
   defp do_multiple_of(value) do

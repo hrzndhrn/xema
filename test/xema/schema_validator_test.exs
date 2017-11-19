@@ -5,12 +5,46 @@ defmodule Xema.SchemaValidatorTest do
 
   import Xema
 
+  describe "schema type list:" do
+    test "keyword additional_items without items" do
+      expected = "additional_items has no effect if items not set."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, additional_items: false)
+      end
+    end
+
+    test "keyword additional_items with items set to schema" do
+      expected = "additional_items has no effect if items is not a list."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, items: :string, additional_items: false)
+      end
+    end
+
+    test "keyword additional_items with invalid value" do
+      expected = ~s("foo" is not a valid type.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, items: [:string], additional_items: "foo")
+      end
+    end
+
+    test "keyword additional_items with invalid schema" do
+      expected = ~s(Expected an Integer for minimum, got "1".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, items: [:string], additional_items: {:integer, minimum: "1"})
+      end
+    end
+  end
+
   describe "schema type number:" do
     test "keyword maximum with wrong value type" do
       expected = ~s(Expected an Integer or Float for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, maximum: "5")
+        xema(:float, maximum: "5", minimum: 1)
       end
     end
 
@@ -72,6 +106,7 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
+    @tag :only
     test "keyword multiple_of with too small value" do
       msg = ~s(multiple_of must be strictly greater than 0.)
 
