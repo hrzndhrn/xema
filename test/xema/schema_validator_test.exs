@@ -6,6 +6,14 @@ defmodule Xema.SchemaValidatorTest do
   import Xema
 
   describe "schema type any:" do
+    test "unsupported keyword" do
+      expected = "Keywords [:foo] are not supported by :any."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:any, foo: false)
+      end
+    end
+
     test "keyword enum with invalid value" do
       expected = "enum must be a list."
 
@@ -28,6 +36,20 @@ defmodule Xema.SchemaValidatorTest do
       assert_raise SchemaError, expected, fn ->
         xema(:any, enum: [1, 2, 3, 2])
       end
+    end
+  end
+
+  describe "schema type boolean:" do
+    test "unsupported keyword" do
+      expected = "Keywords [:foo] are not supported by :boolean."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:boolean, foo: false)
+      end
+    end
+
+    test "supported keyword" do
+      assert xema(:boolean, as: :bool) == %Xema{type: %Xema.Boolean{as: :bool}}
     end
   end
 
