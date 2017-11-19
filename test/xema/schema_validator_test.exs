@@ -91,6 +91,22 @@ defmodule Xema.SchemaValidatorTest do
         )
       end
     end
+
+    test "keyword dependencies with inavalid value" do
+      expected = "dependencies must be a map."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, dependencies: "invalid")
+      end
+    end
+
+    test "keyword dependencies with invalid property" do
+      expected = ~s("invalid" is not a valid type.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, dependencies: %{foo: "invalid"})
+      end
+    end
   end
 
   describe "schema type number:" do

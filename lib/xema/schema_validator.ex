@@ -29,6 +29,7 @@ defmodule Xema.SchemaValidator do
              opts[:properties],
              opts[:pattern_properties]
            ),
+         :ok <- dependencies(opts[:dependencies]),
          :ok <- validate_keywords(:map, opts) do
     else
       error -> throw(error)
@@ -98,6 +99,17 @@ defmodule Xema.SchemaValidator do
        do: {:error, "additional_properties has no effect if properties is not a map."}
 
   defp additional_properties(_, _, _), do: :ok
+
+  # Keyword: dependencies
+  # This keyword's value must be a map. Each property specifies a dependency.
+  # Each dependency value must be an array or a valid schema.
+  defp dependencies(nil), do: :ok
+
+  defp dependencies(value) when is_map(value), do: :ok
+
+  defp dependencies(_), do: {:error, "dependencies must be a map."}
+
+
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
