@@ -1,17 +1,42 @@
 defmodule Xema.SchemaValidator do
   @moduledoc false
 
+  @xema %Xema{} |> Map.keys() |> MapSet.new()
+
+  @get_keys fn type ->
+    type
+    |> Map.keys()
+    |> MapSet.new()
+    |> MapSet.union(@xema)
+  end
+
   @keys [
-    float: %Xema.Float{} |> Map.keys() |> MapSet.new(),
-    integer: %Xema.Number{} |> Map.keys() |> MapSet.new(),
-    list: %Xema.List{} |> Map.keys() |> MapSet.new(),
-    number: %Xema.Number{} |> Map.keys() |> MapSet.new(),
-    map: %Xema.Map{} |> Map.keys() |> MapSet.new()
+    any: @get_keys.(%Xema.Any{}),
+    boolean: @get_keys.(%Xema.Boolean{}),
+    float: @get_keys.(%Xema.Float{}),
+    integer: @get_keys.(%Xema.Integer{}),
+    list: @get_keys.(%Xema.List{}),
+    map: @get_keys.(%Xema.Map{}),
+    number: @get_keys.(%Xema.Number{}),
+    string: @get_keys.(%Xema.String{})
   ]
 
   @spec validate(atom, keyword) :: :ok
-  def validate(:any, opts), do: opts
-  def validate(:boolean, opts), do: opts
+  def validate(:any, opts) do
+    with :ok <- validate_keywords(:any, opts) do
+      opts
+    else
+      error -> throw(error)
+    end
+  end
+
+  def validate(:boolean, opts) do
+    with :ok <- validate_keywords(:boolean, opts) do
+      opts
+    else
+      error -> throw(error)
+    end
+  end
 
   def validate(:list, opts) do
     with :ok <- additional_items(opts[:additional_items], opts[:items]),
@@ -48,7 +73,13 @@ defmodule Xema.SchemaValidator do
     end
   end
 
-  def validate(:string, opts), do: opts
+  def validate(:string, opts) do
+    with :ok <- validate_keywords(:string, opts) do
+      opts
+    else
+      error -> throw(error)
+    end
+  end
 
   # Check for unsupported keywords.
 
@@ -108,8 +139,6 @@ defmodule Xema.SchemaValidator do
   defp dependencies(value) when is_map(value), do: :ok
 
   defp dependencies(_), do: {:error, "dependencies must be a map."}
-
-
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
