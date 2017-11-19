@@ -5,7 +5,8 @@ defmodule Xema.SchemaValidator do
     float: %Xema.Float{} |> Map.keys() |> MapSet.new(),
     integer: %Xema.Number{} |> Map.keys() |> MapSet.new(),
     list: %Xema.List{} |> Map.keys() |> MapSet.new(),
-    number: %Xema.Number{} |> Map.keys() |> MapSet.new()
+    number: %Xema.Number{} |> Map.keys() |> MapSet.new(),
+    map: %Xema.Map{} |> Map.keys() |> MapSet.new()
   ]
 
   @spec validate(atom, keyword) :: :ok
@@ -21,7 +22,18 @@ defmodule Xema.SchemaValidator do
     end
   end
 
-  def validate(:map, opts), do: opts
+  def validate(:map, opts) do
+    with :ok <-
+           additional_properties(
+             opts[:additional_properties],
+             opts[:properties],
+             opts[:pattern_properties]
+           ),
+         :ok <- validate_keywords(:map, opts) do
+    else
+      error -> throw(error)
+    end
+  end
 
   def validate(type, opts)
       when type == :number or type == :integer or type == :float do
@@ -72,6 +84,20 @@ defmodule Xema.SchemaValidator do
        do: {:error, "additional_items has no effect if items is not a list."}
 
   defp additional_items(_, _), do: :ok
+
+  # Keyword: additional_properties
+  # The value of `additional_properties` must be a boolean or a schema.
+
+  defp additional_properties(nil, _, _), do: :ok
+
+  defp additional_properties(_, nil, nil),
+    do: {:error, "additional_properties has no effect if properties not set."}
+
+  defp additional_properties(_, properties, nil)
+       when not is_map(properties),
+       do: {:error, "additional_properties has no effect if properties is not a map."}
+
+  defp additional_properties(_, _, _), do: :ok
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
