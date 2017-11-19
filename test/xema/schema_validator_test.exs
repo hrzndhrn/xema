@@ -179,6 +179,32 @@ defmodule Xema.SchemaValidatorTest do
         xema(:number, multiple_of: 0)
       end
     end
+
+    test "keyword enum with invalid entries" do
+      msg = "Entries of enum have to be Integers or Floats."
+
+      assert_raise SchemaError, msg, fn ->
+        xema(:number, enum: [1, "two"])
+      end
+    end
+  end
+
+  describe "schema type string:" do
+    test "unsupported keyword" do
+      expected = "Keywords [:foo] are not supported by :string."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:string, foo: false)
+      end
+    end
+
+    test "keyword enum with invalid entries" do
+      msg = "Entries of enum have to be Strings."
+
+      assert_raise SchemaError, msg, fn ->
+        xema(:string, enum: ["one", 2])
+      end
+    end
   end
 
   describe "schema type integer:" do
@@ -226,6 +252,14 @@ defmodule Xema.SchemaValidatorTest do
         xema(:integer, multiple_of: 0)
       end
     end
+
+    test "keyword enum with invalid entries" do
+      msg = "Entries of enum have to be Integers."
+
+      assert_raise SchemaError, msg, fn ->
+        xema(:integer, enum: [1, "two"])
+      end
+    end
   end
 
   describe "schema type float:" do
@@ -270,6 +304,14 @@ defmodule Xema.SchemaValidatorTest do
 
       assert_raise SchemaError, msg, fn ->
         xema(:float, multiple_of: 0)
+      end
+    end
+
+    test "keyword enum with invalid entries" do
+      msg = "Entries of enum have to be Floats."
+
+      assert_raise SchemaError, msg, fn ->
+        xema(:float, enum: [1.0, "two"])
       end
     end
   end

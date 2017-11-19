@@ -69,7 +69,8 @@ defmodule Xema.SchemaValidator do
     with :ok <- maximum(type, opts[:maximum]),
          :ok <- minimum(type, opts[:minimum]),
          :ok <- multiple_of(type, opts[:multiple_of]),
-         :ok <- validate_keywords(type, opts) do
+         :ok <- validate_keywords(type, opts),
+         :ok <- enum(type, opts[:enum]) do
       opts
     else
       error -> throw(error)
@@ -77,7 +78,8 @@ defmodule Xema.SchemaValidator do
   end
 
   def validate(:string, opts) do
-    with :ok <- validate_keywords(:string, opts) do
+    with :ok <- validate_keywords(:string, opts),
+         :ok <- enum(:string, opts[:enum]) do
       opts
     else
       error -> throw(error)
@@ -162,6 +164,34 @@ defmodule Xema.SchemaValidator do
   defp enum(_, _), do: {:error, "enum must be a list."}
 
   defp do_enum(:any, _), do: :ok
+
+  defp do_enum(:number, value) do
+    case Enum.all?(value, fn item -> is_integer(item) or is_float(item) end) do
+      true -> :ok
+      false -> {:error, "Entries of enum have to be Integers or Floats."}
+    end
+  end
+
+  defp do_enum(:integer, value) do
+    case Enum.all?(value, fn item -> is_integer(item) end) do
+      true -> :ok
+      false -> {:error, "Entries of enum have to be Integers."}
+    end
+  end
+
+  defp do_enum(:float, value) do
+    case Enum.all?(value, fn item -> is_float(item) end) do
+      true -> :ok
+      false -> {:error, "Entries of enum have to be Floats."}
+    end
+  end
+
+  defp do_enum(:string, value) do
+    case Enum.all?(value, fn item -> is_binary(item) end) do
+      true -> :ok
+      false -> {:error, "Entries of enum have to be Strings."}
+    end
+  end
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
