@@ -1,12 +1,20 @@
 defmodule Xema.SchemaValidator do
   @moduledoc false
 
+  @keys [
+    float: %Xema.Float{} |> Map.keys() |> MapSet.new(),
+    integer: %Xema.Number{} |> Map.keys() |> MapSet.new(),
+    list: %Xema.List{} |> Map.keys() |> MapSet.new(),
+    number: %Xema.Number{} |> Map.keys() |> MapSet.new()
+  ]
+
   @spec validate(atom, keyword) :: :ok
   def validate(:any, opts), do: opts
   def validate(:boolean, opts), do: opts
 
   def validate(:list, opts) do
-    with :ok <- additional_items(opts[:additional_items], opts[:items]) do
+    with :ok <- additional_items(opts[:additional_items], opts[:items]),
+         :ok <- validate_keywords(:list, opts) do
       opts
     else
       error -> throw(error)
@@ -16,10 +24,11 @@ defmodule Xema.SchemaValidator do
   def validate(:map, opts), do: opts
 
   def validate(type, opts)
-    when type == :number or type == :integer or type == :float do
+      when type == :number or type == :integer or type == :float do
     with :ok <- maximum(type, opts[:maximum]),
          :ok <- minimum(type, opts[:minimum]),
-         :ok <- multiple_of(type, opts[:multiple_of]) do
+         :ok <- multiple_of(type, opts[:multiple_of]),
+         :ok <- validate_keywords(type, opts) do
       opts
     else
       error -> throw(error)
@@ -28,13 +37,35 @@ defmodule Xema.SchemaValidator do
 
   def validate(:string, opts), do: opts
 
+  # Check for unsupported keywords.
+
+  defp validate_keywords(type, opts) do
+    case difference(type, opts) do
+      [] ->
+        :ok
+
+      keywords ->
+        {
+          :error,
+          "Keywords #{inspect(keywords)} are not supported by #{inspect(type)}."
+        }
+    end
+  end
+
+  defp difference(type, opts),
+    do:
+      opts
+      |> Keyword.keys()
+      |> MapSet.new()
+      |> MapSet.difference(@keys[type])
+      |> MapSet.to_list()
+
   # Keyword: additional_items
   # The value of `additional_items` must be either a boolean or a schema.
 
   defp additional_items(nil, _), do: :ok
 
-  defp additional_items(_, nil),
-    do: {:error, "additional_items has no effect if items not set."}
+  defp additional_items(_, nil), do: {:error, "additional_items has no effect if items not set."}
 
   defp additional_items(_, items)
        when not is_list(items),

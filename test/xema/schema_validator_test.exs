@@ -6,6 +6,14 @@ defmodule Xema.SchemaValidatorTest do
   import Xema
 
   describe "schema type list:" do
+    test "unsupported keyword" do
+      expected = "Keywords [:foo] are not supported by :list."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, foo: false)
+      end
+    end
+
     test "keyword additional_items without items" do
       expected = "additional_items has no effect if items not set."
 
@@ -40,6 +48,14 @@ defmodule Xema.SchemaValidatorTest do
   end
 
   describe "schema type number:" do
+    test "unsupported keyword" do
+      expected = "Keywords [:foo] are not supported by :number."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, foo: false)
+      end
+    end
+
     test "keyword maximum with wrong value type" do
       expected = ~s(Expected an Integer or Float for maximum, got "5".)
 
@@ -78,6 +94,14 @@ defmodule Xema.SchemaValidatorTest do
   end
 
   describe "schema type integer" do
+    test "unsupported keyword" do
+      expected = "Keywords [:foo] are not supported by :integer."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, foo: false)
+      end
+    end
+
     test "keyword maximum with wrong value type" do
       expected = ~s(Expected an Integer for maximum, got "5".)
 
@@ -117,6 +141,14 @@ defmodule Xema.SchemaValidatorTest do
   end
 
   describe "schema type float" do
+    test "unsupported keyword" do
+      expected = "Keywords [:foo] are not supported by :float."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, foo: false)
+      end
+    end
+
     test "keyword maximum with wrong value type" do
       expected = ~s(Expected an Integer or Float for maximum, got "5".)
 
