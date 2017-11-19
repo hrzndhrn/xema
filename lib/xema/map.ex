@@ -60,6 +60,7 @@ defmodule Xema.Map do
     |> Keyword.update(:properties, nil, &properties/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
+    |> Keyword.update(:additional_properties, nil, &additional_properties/1)
     |> Keyword.update(:required, nil, &MapSet.new(&1))
   end
 
@@ -73,4 +74,10 @@ defmodule Xema.Map do
       {key, dep} -> {key, Xema.type(dep)}
     end)
   end
+
+  defp additional_properties(additional_properties)
+       when is_boolean(additional_properties),
+       do: additional_properties
+
+  defp additional_properties(additional_properties), do: Xema.type(additional_properties)
 end

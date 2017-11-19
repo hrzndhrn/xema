@@ -238,6 +238,38 @@ defmodule Xema.MapTest do
     end
   end
 
+  describe "map schema with specific additional properties" do
+    setup do
+      %{
+        schema:
+          xema(
+            :map,
+            properties: %{foo: {:string, min_length: 3}},
+            additional_properties: :integer
+          )
+      }
+    end
+
+    test "validate/2 with valid additional property", %{schema: schema} do
+      assert validate(schema, %{foo: "foo", add: 1}) == :ok
+    end
+
+    test "validate/2 with invalid additional property", %{schema: schema} do
+      assert validate(schema, %{foo: "foo", add: "invalid"}) ==
+               {
+                 :error,
+                 %{
+                   reason: :invalid_property,
+                   property: :add,
+                   error: %{
+                     reason: :wrong_type,
+                     type: :integer
+                   }
+                 }
+               }
+    end
+  end
+
   describe "'map' schema with required properties (atom keys)" do
     setup do
       %{schema: xema(:map, properties: %{foo: :number}, required: [:foo])}

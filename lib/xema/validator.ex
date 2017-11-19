@@ -395,6 +395,19 @@ defmodule Xema.Validator do
     end
   end
 
+  defp additionals(%Xema.Map{additional_properties: schema}, map)
+       when is_map(schema) do
+    Enum.reduce_while(map, :ok, fn {key, value}, _ ->
+      case Xema.validate(schema, value) do
+        :ok ->
+          {:cont, :ok}
+
+        {:error, reason} ->
+          {:halt, error(:invalid_property, property: key, error: reason)}
+      end
+    end)
+  end
+
   defp additionals(_schema, _map), do: :ok
 
   defp dependencies(%Xema.Map{dependencies: nil}, _map), do: :ok

@@ -47,6 +47,52 @@ defmodule Xema.SchemaValidatorTest do
     end
   end
 
+  describe "schema type map:" do
+    test "unsupported keyword" do
+      expected = "Keywords [:foo] are not supported by :map."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, foo: false)
+      end
+    end
+
+    test "keyword additional_properties without properties" do
+      expected = "additional_properties has no effect if properties not set."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, additional_properties: false)
+      end
+    end
+
+    test "keyword additional_properties with properties set to schema" do
+      expected = "additional_properties has no effect if properties is not a map."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, properties: :string, additional_properties: false)
+      end
+    end
+
+    test "keyword additional_properties with invalid value" do
+      expected = ~s("foo" is not a valid type.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, properties: %{a: :string}, additional_properties: "foo")
+      end
+    end
+
+    test "keyword additional_properties with invalid schema" do
+      expected = ~s(Expected an Integer for minimum, got "1".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(
+          :map,
+          properties: %{a: :string},
+          additional_properties: {:integer, minimum: "1"}
+        )
+      end
+    end
+  end
+
   describe "schema type number:" do
     test "unsupported keyword" do
       expected = "Keywords [:foo] are not supported by :number."
@@ -93,7 +139,7 @@ defmodule Xema.SchemaValidatorTest do
     end
   end
 
-  describe "schema type integer" do
+  describe "schema type integer:" do
     test "unsupported keyword" do
       expected = "Keywords [:foo] are not supported by :integer."
 
@@ -140,7 +186,7 @@ defmodule Xema.SchemaValidatorTest do
     end
   end
 
-  describe "schema type float" do
+  describe "schema type float:" do
     test "unsupported keyword" do
       expected = "Keywords [:foo] are not supported by :float."
 

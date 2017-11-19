@@ -48,6 +48,7 @@ Xema supported the following types to validate data structures.
   * [Keys](#keys)
   * [Properties](#properties)
   * [Required Properties](#required_properties)
+  * [Additional Properties](#additional_properties)
   * [Pattern Properties](#pattern_properties)
   * [Size](#map_size)
 * [Enumerations](#enum)
@@ -515,7 +516,7 @@ The `additional_properties` keyword is used to control the handling of extra
 stuff, that is, properties whose names are not listed in the properties keyword.
 By default any additional properties are allowed.
 
-The `additional_properties` keyword may be either a boolean or an object. If
+The `additional_properties` keyword may be either a boolean or an schema. If
 `additional_properties` is a boolean and set to false, no additional properties
 will be allowed.
 
@@ -540,6 +541,31 @@ iex> validate schema, %{foo: "bar", bar: "foo"}
   reason: :no_additional_properties_allowed,
   additional_properties: [:bar]}
 }
+```
+
+`additional_properties` can also contain a schema to specify the type of
+additional properites.
+
+```Elixir
+iex> import Xema
+Xema
+iex> schema = xema :map,
+...>   properties: %{foo: :string},
+...>   additional_properties: :integer
+%Xema{
+  type: %Xema.Map{
+    properties: %{foo: %Xema.String{}},
+    additional_properties: %Xema.Integer{}
+  }
+}
+iex> is_valid? schema, %{foo: "foo", add: 1}
+true
+iex> validate schema, %{foo: "foo", add: "one"}
+{:error, %{
+  reason: :invalid_property,
+  property: :add,
+  error: %{reason: :wrong_type, type: :integer}
+}}
 ```
 
 #### <a name="pattern_properties"></a> Pattern Properties
