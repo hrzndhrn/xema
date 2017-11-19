@@ -187,4 +187,32 @@ defmodule Xema.ListTest do
       assert validate(schema, ["foo", 42, "add"]) == expected
     end
   end
+
+  describe "list schema with with specific additional items" do
+    setup do
+      %{
+        schema:
+          xema(
+            :list,
+            additional_items: :string,
+            items: [
+              {:number, minimum: 10}
+            ]
+          )
+      }
+    end
+
+    test "validate/2 with valid additional item", %{schema: schema} do
+      assert validate(schema, [11, "twelve", "thirteen"]) == :ok
+    end
+
+    test "validate/2 with invalid additional item", %{schema: schema} do
+      assert validate(schema, [11, "twelve", 13]) ==
+               {:error, %{
+                 reason: :invalid_item,
+                 at: 2,
+                 error: %{reason: :wrong_type, type: :string}
+               }}
+    end
+  end
 end
