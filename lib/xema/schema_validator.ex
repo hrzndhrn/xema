@@ -1,6 +1,8 @@
 defmodule Xema.SchemaValidator do
   @moduledoc false
 
+  import Xema.Validator, only: [is_unique?: 1]
+
   @xema %Xema{} |> Map.keys() |> MapSet.new()
 
   @get_keys fn type ->
@@ -23,7 +25,8 @@ defmodule Xema.SchemaValidator do
 
   @spec validate(atom, keyword) :: :ok
   def validate(:any, opts) do
-    with :ok <- validate_keywords(:any, opts) do
+    with :ok <- validate_keywords(:any, opts),
+         :ok <- enum(:any, opts[:enum]) do
       opts
     else
       error -> throw(error)
@@ -134,11 +137,31 @@ defmodule Xema.SchemaValidator do
   # Keyword: dependencies
   # This keyword's value must be a map. Each property specifies a dependency.
   # Each dependency value must be an array or a valid schema.
+
   defp dependencies(nil), do: :ok
 
   defp dependencies(value) when is_map(value), do: :ok
 
   defp dependencies(_), do: {:error, "dependencies must be a map."}
+
+  # Keyword: enum
+  # The value of this keyword must be an array. This array should have at least
+  # one element. Elements in the array should be unique.
+
+  defp enum(_, nil), do: :ok
+
+  defp enum(_, []), do: {:error, "enum can not be an empty list."}
+
+  defp enum(type, value) when is_list(value) do
+    case is_unique?(value) do
+      false -> {:error, "enum must be unique."}
+      true -> do_enum(type, value)
+    end
+  end
+
+  defp enum(_, _), do: {:error, "enum must be a list."}
+
+  defp do_enum(:any, _), do: :ok
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper

@@ -5,6 +5,32 @@ defmodule Xema.SchemaValidatorTest do
 
   import Xema
 
+  describe "schema type any:" do
+    test "keyword enum with invalid value" do
+      expected = "enum must be a list."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:any, enum: "foo")
+      end
+    end
+
+    test "keyword enum with empty list" do
+      expected = "enum can not be an empty list."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:any, enum: [])
+      end
+    end
+
+    test "keyword enum with duplicate entries" do
+      expected = "enum must be unique."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:any, enum: [1, 2, 3, 2])
+      end
+    end
+  end
+
   describe "schema type list:" do
     test "unsupported keyword" do
       expected = "Keywords [:foo] are not supported by :list."

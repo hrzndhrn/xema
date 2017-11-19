@@ -205,10 +205,10 @@ defmodule Xema.Validator do
     end
   end
 
-  defp is_unique?(list, set \\ %{})
-  defp is_unique?([], _), do: true
+  def is_unique?(list, set \\ %{})
+  def is_unique?([], _), do: true
 
-  defp is_unique?([h | t], set) do
+  def is_unique?([h | t], set) do
     case set do
       %{^h => true} -> false
       _ -> is_unique?(t, Map.put(set, h, true))
