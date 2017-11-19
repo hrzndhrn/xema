@@ -384,7 +384,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with dependencies list" do
+  describe "map schema with dependencies list" do
     setup do
       %{
         schema:
@@ -422,7 +422,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with dependencies schema" do
+  describe "map schema with dependencies schema" do
     setup do
       %{
         schema:
@@ -468,6 +468,46 @@ defmodule Xema.MapTest do
         }}
 
       assert validate(schema, %{a: 1, b: 2}) == expected
+    end
+  end
+
+  describe "In for a penny, in for a pound." do
+    setup do
+      %{
+        schema:
+          xema(
+            :map,
+            dependencies: %{
+              penny: [:pound]
+            }
+          )
+      }
+    end
+
+    test "a cent", %{schema: schema} do
+      assert is_valid?(schema, %{cent: 1})
+    end
+
+    test "a pound", %{schema: schema} do
+      assert is_valid?(schema, %{pound: 1})
+    end
+
+    test "a penny and a pound", %{schema: schema} do
+      assert is_valid?(schema, %{penny: 1, pound: 1})
+    end
+
+    test "a penny", %{schema: schema} do
+      expected =
+        {
+          :error,
+          %{
+            reason: :missing_dependency,
+            dependency: :pound,
+            for: :penny
+          }
+        }
+
+      assert validate(schema, %{penny: 1}) == expected
     end
   end
 end
