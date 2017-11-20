@@ -157,7 +157,7 @@ defmodule Xema.SchemaValidator do
   defp do_enum(:any, _), do: :ok
 
   defp do_enum(:number, value) do
-    case Enum.all?(value, fn item -> is_integer(item) or is_float(item) end) do
+    case Enum.all?(value, fn item -> is_number(item) end) do
       true -> :ok
       false -> {:error, "Entries of enum have to be Integers or Floats."}
     end
@@ -190,17 +190,11 @@ defmodule Xema.SchemaValidator do
 
   defp maximum(_, nil), do: :ok
 
-  defp maximum(:number, value)
-       when is_integer(value) or is_float(value),
-       do: :ok
+  defp maximum(:number, value) when is_number(value), do: :ok
 
-  defp maximum(:integer, value)
-       when is_integer(value),
-       do: :ok
+  defp maximum(:integer, value) when is_integer(value), do: :ok
 
-  defp maximum(:float, value)
-       when is_integer(value) or is_float(value),
-       do: :ok
+  defp maximum(:float, value) when is_number(value), do: :ok
 
   defp maximum(:integer, value),
     do: {:error, "Expected an Integer for maximum, got #{inspect(value)}."}
@@ -214,17 +208,11 @@ defmodule Xema.SchemaValidator do
 
   defp minimum(_, nil), do: :ok
 
-  defp minimum(:number, value)
-       when is_integer(value) or is_float(value),
-       do: :ok
+  defp minimum(:number, value) when is_number(value), do: :ok
 
-  defp minimum(:integer, value)
-       when is_integer(value),
-       do: :ok
+  defp minimum(:integer, value) when is_integer(value), do: :ok
 
-  defp minimum(:float, value)
-       when is_integer(value) or is_float(value),
-       do: :ok
+  defp minimum(:float, value) when is_number(value), do: :ok
 
   defp minimum(:integer, value),
     do: {:error, "Expected an Integer for minimum, got #{inspect(value)}."}
@@ -237,17 +225,11 @@ defmodule Xema.SchemaValidator do
 
   defp multiple_of(_, nil), do: :ok
 
-  defp multiple_of(:integer, value)
-       when is_integer(value),
-       do: do_multiple_of(value)
+  defp multiple_of(:integer, value) when is_integer(value), do: do_multiple_of(value)
 
-  defp multiple_of(:float, value)
-       when is_float(value) or is_integer(value),
-       do: do_multiple_of(value)
+  defp multiple_of(:float, value) when is_number(value), do: do_multiple_of(value)
 
-  defp multiple_of(:number, value)
-       when is_float(value) or is_integer(value),
-       do: do_multiple_of(value)
+  defp multiple_of(:number, value) when is_number(value), do: do_multiple_of(value)
 
   defp multiple_of(:integer, value),
     do:
