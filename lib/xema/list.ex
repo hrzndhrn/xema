@@ -31,7 +31,7 @@ defmodule Xema.List do
           min_items: pos_integer | nil,
           max_items: pos_integer | nil,
           unique_items: boolean | nil,
-          additional_items: boolean | nil,
+          additional_items: Xema.types() | boolean | nil,
           as: atom
         }
 

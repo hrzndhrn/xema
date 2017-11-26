@@ -29,7 +29,7 @@ defmodule Xema.Map do
   * `required` contains a set of required properties
   """
   @type t :: %Xema.Map{
-          additional_properties: boolean | nil,
+          additional_properties: map | boolean | nil,
           max_properties: pos_integer | nil,
           min_properties: pos_integer | nil,
           properties: map | nil,

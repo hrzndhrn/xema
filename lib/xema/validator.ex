@@ -1,12 +1,11 @@
 defmodule Xema.Validator do
   @moduledoc false
 
-  @spec validate(Xema.t(), any) :: :ok | {:error, map}
+  @spec validate(Xema.t() | Xema.types(), any) :: :ok | {:error, map}
   def validate(%Xema{} = xema, value) do
     validate(xema.type, value)
   end
 
-  @spec validate(Xema.types(), any) :: :ok | {:error, map}
   def validate(%Xema.Nil{} = type, value) do
     case value == nil do
       true -> :ok
@@ -266,7 +265,6 @@ defmodule Xema.Validator do
   end
 
   defp items_tuple(_schemas, _additonal_items, [], _at), do: :ok
-
   defp items_tuple([], false, _list, at), do: error(:additional_item, at: at)
   defp items_tuple([], true, _list, _at), do: :ok
   defp items_tuple([], nil, _list, _at), do: :ok
@@ -478,9 +476,11 @@ defmodule Xema.Validator do
     end
   end
 
+  @spec error(atom | Xema.types()) :: {:error, map}
   defp error(atom) when is_atom(atom), do: error(atom, [])
   defp error(type), do: error(:wrong_type, type: type.as)
 
+  @spec error(atom, any) :: {:error, map}
   defp error(reason, info) when is_atom(reason) do
     info =
       info

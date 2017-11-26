@@ -30,10 +30,10 @@ defmodule Xema.Number do
   """
 
   @type t :: %Xema.Number{
-          minimum: integer | nil,
-          maximum: integer | nil,
-          exclusive_minimum: boolean | nil,
-          exclusive_maximum: boolean | nil,
+          minimum: number | nil,
+          maximum: number | nil,
+          exclusive_minimum: boolean | number | nil,
+          exclusive_maximum: boolean | number | nil,
           multiple_of: number | nil,
           enum: list | nil,
           as: atom
