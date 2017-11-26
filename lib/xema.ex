@@ -76,7 +76,7 @@ defmodule Xema do
   @spec is_valid?(Xema.t(), any) :: boolean
   def is_valid?(xema, value), do: validate(xema, value) == :ok
 
-  @spec validate(Xema.t() | Xema.types(), any) :: :ok | {:error, map}
+  @spec validate(Xema.t() | Xema.types(), any) :: Validator.result()
   def validate(xema, value), do: Validator.validate(xema, value)
 
   @doc """
