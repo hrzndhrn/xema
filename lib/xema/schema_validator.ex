@@ -63,8 +63,8 @@ defmodule Xema.SchemaValidator do
       when type == :number or type == :integer or type == :float do
     with :ok <- ex_min_max(type, :exclusive_maximum, opts[:exclusive_maximum], opts[:maximum]),
          :ok <- ex_min_max(type, :exclusive_minimum, opts[:exclusive_minimum], opts[:minimum]),
-         :ok <- maximum(type, opts[:maximum]),
-         :ok <- minimum(type, opts[:minimum]),
+         :ok <- min_max(type, :maximum, opts[:maximum]),
+         :ok <- min_max(type, :minimum, opts[:minimum]),
          :ok <- multiple_of(type, opts[:multiple_of]),
          :ok <- validate_keywords(type, opts),
          :ok <- enum(type, opts[:enum]) do
@@ -218,11 +218,11 @@ defmodule Xema.SchemaValidator do
        when is_boolean(value),
        do: {:error, "No minimum value found for exclusive_minimum."}
 
-  defp ex_min_max(:integer, name, value, nil),
-    do: {:error, "Expected a integer for #{name}, got #{inspect(value)}"}
+  defp ex_min_max(:integer, keyword, value, nil),
+    do: {:error, "Expected a integer for #{keyword}, got #{inspect(value)}"}
 
-  defp ex_min_max(_, name, value, nil),
-    do: {:error, "Expected a number for #{name}, got #{inspect(value)}"}
+  defp ex_min_max(_, keyword, value, nil),
+    do: {:error, "Expected a number for #{keyword}, got #{inspect(value)}"}
 
   defp ex_min_max(_, :exclusive_maximum, value, _maximum)
        when is_number(value),
@@ -232,42 +232,30 @@ defmodule Xema.SchemaValidator do
        when is_number(value),
        do: {:error, "The exclusive_minimum overwrites minimum."}
 
-  defp ex_min_max(_, name, value, _maximum),
-    do: {:error, "Expected a boolean for #{name}, got #{inspect(value)}"}
+  defp ex_min_max(_, keyword, value, _maximum),
+    do: {:error, "Expected a boolean for #{keyword}, got #{inspect(value)}"}
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
   # limit for a numeric instance.
-
-  defp maximum(_, nil), do: :ok
-
-  defp maximum(:number, value) when is_number(value), do: :ok
-
-  defp maximum(:integer, value) when is_integer(value), do: :ok
-
-  defp maximum(:float, value) when is_number(value), do: :ok
-
-  defp maximum(:integer, value),
-    do: {:error, "Expected an Integer for maximum, got #{inspect(value)}."}
-
-  defp maximum(_, value), do: {:error, "Expected a number for maximum, got #{inspect(value)}."}
-
+  #
   # Keyword: minimum
   # The value of `minimum` must be a number, representing an inclusive upper
   # limit for a numeric instance.
 
-  defp minimum(_, nil), do: :ok
+  defp min_max(_, _, nil), do: :ok
 
-  defp minimum(:number, value) when is_number(value), do: :ok
+  defp min_max(:number, _, value) when is_number(value), do: :ok
 
-  defp minimum(:integer, value) when is_integer(value), do: :ok
+  defp min_max(:integer, _, value) when is_integer(value), do: :ok
 
-  defp minimum(:float, value) when is_number(value), do: :ok
+  defp min_max(:float, _, value) when is_number(value), do: :ok
 
-  defp minimum(:integer, value),
-    do: {:error, "Expected an Integer for minimum, got #{inspect(value)}."}
+  defp min_max(:integer, keyword, value),
+    do: {:error, "Expected an Integer for #{keyword}, got #{inspect(value)}."}
 
-  defp minimum(_, value), do: {:error, "Expected a number for minimum, got #{inspect(value)}."}
+  defp min_max(_, keyword, value),
+    do: {:error, "Expected a number for #{keyword}, got #{inspect(value)}."}
 
   # Keyword: multiple_of
   # The value of `multipleOf` must be a number, strictly greater than 0.
