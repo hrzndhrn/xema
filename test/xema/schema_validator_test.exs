@@ -101,6 +101,38 @@ defmodule Xema.SchemaValidatorTest do
         xema(:list, items: "foo")
       end
     end
+
+    test "keyword max_items with a wrong type" do
+      expected = ~s(Expected a non negative integer for max_items, got "foo".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, max_items: "foo")
+      end
+    end
+
+    test "keyword max_items with a negative integer" do
+      expected = ~s(Expected a non negative integer for max_items, got -1.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, max_items: -1)
+      end
+    end
+
+    test "keyword min_items with a wrong type" do
+      expected = ~s(Expected a non negative integer for min_items, got "foo".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, min_items: "foo")
+      end
+    end
+
+    test "keyword min_items with a negative integer" do
+      expected = ~s(Expected a non negative integer for min_items, got -2.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, min_items: -2)
+      end
+    end
   end
 
   describe "schema type map:" do

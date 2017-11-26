@@ -3,6 +3,8 @@ defmodule Xema.SchemaValidator do
 
   import Xema.Validator, only: [is_unique?: 1]
 
+  @type result :: :ok | {:error, String.t()}
+
   @xema %Xema{} |> Map.keys() |> MapSet.new()
 
   @get_keys fn type ->
@@ -40,9 +42,11 @@ defmodule Xema.SchemaValidator do
   end
 
   def validate(:list, opts) do
-    with :ok <- items(opts[:items]),
-         :ok <- additional_items(opts[:additional_items], opts[:items]),
-         :ok <- validate_keywords(:list, opts) do
+    with :ok <- validate_keywords(:list, opts),
+         :ok <- items(opts[:items]),
+         :ok <- non_negative_integer(:max_items, opts[:max_items]),
+         :ok <- non_negative_integer(:min_items, opts[:min_items]),
+         :ok <- additional_items(opts[:additional_items], opts[:items]) do
       :ok
     end
   end
@@ -300,6 +304,29 @@ defmodule Xema.SchemaValidator do
       {
         :error,
         "Expected a number for multiple_of, got #{inspect(value)}."
+      }
+
+  @spec non_negative_integer(atom, any) :: result
+  defp non_negative_integer(_, nil), do: :ok
+
+  defp non_negative_integer(keyword, value) when is_integer(value) do
+    case value >= 0 do
+      true ->
+        :ok
+
+      false ->
+        {
+          :error,
+          "Expected a non negative integer for #{keyword}, got #{value}."
+        }
+    end
+  end
+
+  defp non_negative_integer(keyword, value),
+    do:
+      {
+        :error,
+        "Expected a non negative integer for #{keyword}, got #{inspect(value)}."
       }
 
   @compile {:inline, do_multiple_of: 1}
