@@ -158,6 +158,8 @@ defmodule Xema.SchemaValidatorTest do
   end
 
   describe "schema type number:" do
+    # unsupported keyword
+
     test "unsupported keyword" do
       expected = "Keywords [:foo] are not supported by :number."
 
@@ -166,16 +168,94 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword maximum with wrong value type" do
-      expected = ~s(Expected an Integer or Float for maximum, got "5".)
+    # Keyword: exclusive_maximum
+
+    @tag :number
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum with a wrong type and undefined maximum" do
+      expected = ~s(Expected a number for exclusive_maximum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, maximum: "5", minimum: 1)
+        xema(:number, exclusive_maximum: "1")
       end
     end
 
-    test "keyword minimum with wrong value type" do
-      expected = ~s(Expected an Integer or Float for minimum, got "5".)
+    @tag :number
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum with a wrong type and defined maximum" do
+      expected = ~s(Expected a boolean for exclusive_maximum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, exclusive_maximum: "1", maximum: 1)
+      end
+    end
+
+    @tag :number
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum as boolean and undefined maximum" do
+      expected = ~s(No maximum value found for exclusive_maximum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, exclusive_maximum: true)
+      end
+    end
+
+    @tag :number
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum as number and defined maximum" do
+      expected = ~s(The exclusive_maximum overwrites maximum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, exclusive_maximum: 1, maximum: 1)
+      end
+    end
+
+    # Keyword: exclusive_minimum
+
+    test "keyword exclusive_minimum with a wrong type and undefined minimum" do
+      expected = ~s(Expected a number for exclusive_minimum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, exclusive_minimum: "1")
+      end
+    end
+
+    test "keyword exclusive_minimum with a wrong type and defined minimum" do
+      expected = ~s(Expected a boolean for exclusive_minimum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, exclusive_minimum: "1", minimum: 1)
+      end
+    end
+
+    test "keyword exclusive_minimum as boolean and undefined minimum" do
+      expected = ~s(No minimum value found for exclusive_minimum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, exclusive_minimum: true)
+      end
+    end
+
+    test "keyword exclusive_minimum as number and defined minimum" do
+      expected = ~s(The exclusive_minimum overwrites minimum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, exclusive_minimum: 1, minimum: 1)
+      end
+    end
+
+    test "keyword maximum with a wrong type" do
+      expected = ~s(Expected a number for maximum, got "5".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:number, maximum: "5", minimum: 1)
+      end
+    end
+
+    # Keyword: minimum
+
+    test "keyword minimum with a wrong type" do
+      expected = ~s(Expected a number for minimum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
         xema(:number, minimum: "5")
@@ -186,8 +266,8 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword multiple_of with wrong value type" do
-      msg = ~s(Expected an Integer or Float for multiple_of, got "1".)
+    test "keyword multiple_of with a wrong type" do
+      msg = ~s(Expected a number for multiple_of, got "1".)
 
       assert_raise SchemaError, msg, fn ->
         xema(:number, multiple_of: "1")
@@ -230,6 +310,9 @@ defmodule Xema.SchemaValidatorTest do
   end
 
   describe "schema type integer:" do
+    # unsupported keyword
+
+    @tag :integer
     test "unsupported keyword" do
       expected = "Keywords [:foo] are not supported by :integer."
 
@@ -238,7 +321,93 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword maximum with wrong value type" do
+    # Keyword: exclusive_maximum
+
+    @tag :integer
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum with a wrong type and undefined maximum" do
+      expected = ~s(Expected a integer for exclusive_maximum, got 1.1)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, exclusive_maximum: 1.1)
+      end
+    end
+
+    @tag :integer
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum with a wrong type and defined maximum" do
+      expected = ~s(Expected a boolean for exclusive_maximum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, exclusive_maximum: "1", maximum: 1)
+      end
+    end
+
+    @tag :integer
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum as boolean and undefined maximum" do
+      expected = ~s(No maximum value found for exclusive_maximum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, exclusive_maximum: true)
+      end
+    end
+
+    @tag :integer
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum as number and defined maximum" do
+      expected = ~s(The exclusive_maximum overwrites maximum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, exclusive_maximum: 1, maximum: 1)
+      end
+    end
+
+    # Keyword: exclusive_minimum
+
+    @tag :integer
+    @tag :exclusive_minimum
+    test "keyword exclusive_minimum with a wrong type and undefined minimum" do
+      expected = ~s(Expected a integer for exclusive_minimum, got 1.2)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, exclusive_minimum: 1.2)
+      end
+    end
+
+    @tag :integer
+    @tag :exclusive_minimum
+    test "keyword exclusive_minimum with a wrong type and defined minimum" do
+      expected = ~s(Expected a boolean for exclusive_minimum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, exclusive_minimum: "1", minimum: 1)
+      end
+    end
+
+    @tag :integer
+    @tag :exclusive_minimum
+    test "keyword exclusive_minimum as boolean and undefined minimum" do
+      expected = ~s(No minimum value found for exclusive_minimum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, exclusive_minimum: true)
+      end
+    end
+
+    @tag :integer
+    @tag :exclusive_minimum
+    test "keyword exclusive_minimum as number and defined minimum" do
+      expected = ~s(The exclusive_minimum overwrites minimum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:integer, exclusive_minimum: 1, minimum: 1)
+      end
+    end
+
+    @tag :integer
+    @tag :maximum
+    test "keyword maximum with a wrong type" do
       expected = ~s(Expected an Integer for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
@@ -246,7 +415,7 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword minimum with wrong value type" do
+    test "keyword minimum with a wrong type" do
       expected = ~s(Expected an Integer for minimum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
@@ -258,7 +427,7 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword multiple_of with wrong value type" do
+    test "keyword multiple_of with a wrong type" do
       msg = ~s(Expected an Integer for multiple_of, got "1".)
 
       assert_raise SchemaError, msg, fn ->
@@ -285,6 +454,8 @@ defmodule Xema.SchemaValidatorTest do
   end
 
   describe "schema type float:" do
+    # unsupprted keyword
+
     test "unsupported keyword" do
       expected = "Keywords [:foo] are not supported by :float."
 
@@ -293,16 +464,104 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword maximum with wrong value type" do
-      expected = ~s(Expected an Integer or Float for maximum, got "5".)
+    # Keyword: exclusive_maximum
+
+    @tag :float
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum with a wrong type and undefined maximum" do
+      expected = ~s(Expected a number for exclusive_maximum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, exclusive_maximum: "1")
+      end
+    end
+
+    @tag :float
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum with a wrong type and defined maximum" do
+      expected = ~s(Expected a boolean for exclusive_maximum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, exclusive_maximum: "1", maximum: 1)
+      end
+    end
+
+    @tag :float
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum as boolean and undefined maximum" do
+      expected = ~s(No maximum value found for exclusive_maximum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, exclusive_maximum: true)
+      end
+    end
+
+    @tag :float
+    @tag :exclusive_maximum
+    test "keyword exclusive_maximum as number and defined maximum" do
+      expected = ~s(The exclusive_maximum overwrites maximum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, exclusive_maximum: 1, maximum: 1)
+      end
+    end
+
+    # Keyword: exclusive_minimum
+
+    @tag :float
+    @tag :exclusive_minimum
+    test "keyword exclusive_minimum with a wrong type and undefined minimum" do
+      expected = ~s(Expected a number for exclusive_minimum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, exclusive_minimum: "1")
+      end
+    end
+
+    @tag :float
+    @tag :exclusive_minimum
+    test "keyword exclusive_minimum with a wrong type and defined minimum" do
+      expected = ~s(Expected a boolean for exclusive_minimum, got "1")
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, exclusive_minimum: "1", minimum: 1)
+      end
+    end
+
+    @tag :float
+    @tag :exclusive_minimum
+    test "keyword exclusive_minimum as boolean and undefined minimum" do
+      expected = ~s(No minimum value found for exclusive_minimum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, exclusive_minimum: true)
+      end
+    end
+
+    @tag :float
+    @tag :exclusive_minimum
+    test "keyword exclusive_minimum as number and defined minimum" do
+      expected = ~s(The exclusive_minimum overwrites minimum.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:float, exclusive_minimum: 1, minimum: 1)
+      end
+    end
+
+    # Keyword: maximum
+
+    test "keyword maximum with a wrong type" do
+      expected = ~s(Expected a number for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
         xema(:float, maximum: "5")
       end
     end
 
-    test "keyword minimum with wrong value type" do
-      expected = ~s(Expected an Integer or Float for minimum, got "5".)
+    # Keyword: minimum
+
+    test "keyword minimum with a wrong type" do
+      expected = ~s(Expected a number for minimum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
         xema(:float, minimum: "5")
@@ -313,8 +572,10 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword multiple_of with wrong value type" do
-      msg = ~s(Expected an Integer or Float for multiple_of, got "1".)
+    # Keyword: multiple_of
+
+    test "keyword multiple_of with a wrong type" do
+      msg = ~s(Expected a number for multiple_of, got "1".)
 
       assert_raise SchemaError, msg, fn ->
         xema(:float, multiple_of: "1")
@@ -328,6 +589,8 @@ defmodule Xema.SchemaValidatorTest do
         xema(:float, multiple_of: 0)
       end
     end
+
+    # Keyword: enum
 
     test "keyword enum with invalid entries" do
       msg = "Entries of enum have to be Floats."

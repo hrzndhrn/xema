@@ -61,7 +61,9 @@ defmodule Xema.SchemaValidator do
 
   def validate(type, opts)
       when type == :number or type == :integer or type == :float do
-    with :ok <- maximum(type, opts[:maximum]),
+    with :ok <- ex_min_max(type, :exclusive_maximum, opts[:exclusive_maximum], opts[:maximum]),
+         :ok <- ex_min_max(type, :exclusive_minimum, opts[:exclusive_minimum], opts[:minimum]),
+         :ok <- maximum(type, opts[:maximum]),
          :ok <- minimum(type, opts[:minimum]),
          :ok <- multiple_of(type, opts[:multiple_of]),
          :ok <- validate_keywords(type, opts),
@@ -184,6 +186,55 @@ defmodule Xema.SchemaValidator do
     end
   end
 
+  # Keyword: exclusive_maximum
+  # Draft-06: The value of `exclusive_maximum` must be number, representing an
+  # exclusive upper limit for a numeric instance.
+  # Draft-04: if `exclusive_maximum` has boolean value true, the instance is
+  # valid if it is strictly lower than the value of `maximum`.
+  #
+  # Keyword: exclusive_minimum
+  # Draft-06: The value of `exclusive_minimum` must be number, representing an
+  # exclusive lower limit for a numeric instance.
+  # Draft-04: if `exclusive_minimum` has boolean value true, the instance is
+  # valid if it is strictly higher than the value of `maximum`.
+
+  defp ex_min_max(_, _, nil, _), do: :ok
+
+  defp ex_min_max(:integer, _, value, nil) when is_integer(value), do: :ok
+
+  defp ex_min_max(:float, _, value, nil) when is_number(value), do: :ok
+
+  defp ex_min_max(:number, _, value, nil) when is_number(value), do: :ok
+
+  defp ex_min_max(_, _, value, maximum)
+       when is_boolean(value) and is_number(maximum),
+       do: :ok
+
+  defp ex_min_max(_, :exclusive_maximum, value, _maximum)
+       when is_boolean(value),
+       do: {:error, "No maximum value found for exclusive_maximum."}
+
+  defp ex_min_max(_, :exclusive_minimum, value, _maximum)
+       when is_boolean(value),
+       do: {:error, "No minimum value found for exclusive_minimum."}
+
+  defp ex_min_max(:integer, name, value, nil),
+    do: {:error, "Expected a integer for #{name}, got #{inspect(value)}"}
+
+  defp ex_min_max(_, name, value, nil),
+    do: {:error, "Expected a number for #{name}, got #{inspect(value)}"}
+
+  defp ex_min_max(_, :exclusive_maximum, value, _maximum)
+       when is_number(value),
+       do: {:error, "The exclusive_maximum overwrites maximum."}
+
+  defp ex_min_max(_, :exclusive_minimum, value, _maximum)
+       when is_number(value),
+       do: {:error, "The exclusive_minimum overwrites minimum."}
+
+  defp ex_min_max(_, name, value, _maximum),
+    do: {:error, "Expected a boolean for #{name}, got #{inspect(value)}"}
+
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
   # limit for a numeric instance.
@@ -199,8 +250,7 @@ defmodule Xema.SchemaValidator do
   defp maximum(:integer, value),
     do: {:error, "Expected an Integer for maximum, got #{inspect(value)}."}
 
-  defp maximum(_, value),
-    do: {:error, "Expected an Integer or Float for maximum, got #{inspect(value)}."}
+  defp maximum(_, value), do: {:error, "Expected a number for maximum, got #{inspect(value)}."}
 
   # Keyword: minimum
   # The value of `minimum` must be a number, representing an inclusive upper
@@ -217,19 +267,24 @@ defmodule Xema.SchemaValidator do
   defp minimum(:integer, value),
     do: {:error, "Expected an Integer for minimum, got #{inspect(value)}."}
 
-  defp minimum(_, value),
-    do: {:error, "Expected an Integer or Float for minimum, got #{inspect(value)}."}
+  defp minimum(_, value), do: {:error, "Expected a number for minimum, got #{inspect(value)}."}
 
   # Keyword: multiple_of
   # The value of `multipleOf` must be a number, strictly greater than 0.
 
   defp multiple_of(_, nil), do: :ok
 
-  defp multiple_of(:integer, value) when is_integer(value), do: do_multiple_of(value)
+  defp multiple_of(:integer, value)
+       when is_integer(value),
+       do: do_multiple_of(value)
 
-  defp multiple_of(:float, value) when is_number(value), do: do_multiple_of(value)
+  defp multiple_of(:float, value)
+       when is_number(value),
+       do: do_multiple_of(value)
 
-  defp multiple_of(:number, value) when is_number(value), do: do_multiple_of(value)
+  defp multiple_of(:number, value)
+       when is_number(value),
+       do: do_multiple_of(value)
 
   defp multiple_of(:integer, value),
     do:
@@ -242,7 +297,7 @@ defmodule Xema.SchemaValidator do
     do:
       {
         :error,
-        "Expected an Integer or Float for multiple_of, got #{inspect(value)}."
+        "Expected a number for multiple_of, got #{inspect(value)}."
       }
 
   @compile {:inline, do_multiple_of: 1}

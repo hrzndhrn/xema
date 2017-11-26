@@ -73,6 +73,8 @@ defmodule Xema.Validator do
     with :ok <- type(type, value),
          :ok <- minimum(type, value),
          :ok <- maximum(type, value),
+         :ok <- exclusive_maximum(type, value),
+         :ok <- exclusive_minimum(type, value),
          :ok <- multiple_of(type, value),
          :ok <- enum(type, value) do
       :ok
@@ -97,6 +99,34 @@ defmodule Xema.Validator do
       false -> error(:not_in_enum, enum: enum, element: value)
     end
   end
+
+  @spec exclusive_maximum(Xema.types(), any) :: :ok | {:error, map}
+  defp exclusive_maximum(%{exclusive_maximum: nil}, _value), do: :ok
+
+  defp exclusive_maximum(%{exclusive_maximum: max}, _value)
+       when is_boolean(max),
+       do: :ok
+
+  defp exclusive_maximum(%{exclusive_maximum: max}, value)
+       when value < max,
+       do: :ok
+
+  defp exclusive_maximum(%{exclusive_maximum: max}, _value),
+    do: error(:too_big, exclusive_maximum: max)
+
+  @spec exclusive_minimum(Xema.types(), any) :: :ok | {:error, map}
+  defp exclusive_minimum(%{exclusive_minimum: nil}, _value), do: :ok
+
+  defp exclusive_minimum(%{exclusive_minimum: min}, _value)
+       when is_boolean(min),
+       do: :ok
+
+  defp exclusive_minimum(%{exclusive_minimum: min}, value)
+       when value > min,
+       do: :ok
+
+  defp exclusive_minimum(%{exclusive_minimum: min}, _value),
+    do: error(:too_small, exclusive_minimum: min)
 
   @spec minimum(Xema.types(), any) :: :ok | {:error, map}
   defp minimum(%{minimum: nil}, _value), do: :ok
