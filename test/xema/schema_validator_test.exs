@@ -93,6 +93,14 @@ defmodule Xema.SchemaValidatorTest do
         xema(:list, items: [:string], additional_items: {:integer, minimum: "1"})
       end
     end
+
+    test "keyword items with a wrong type" do
+      expected = ~s(Expected a schema or a list of schemas, got "foo".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:list, items: "foo")
+      end
+    end
   end
 
   describe "schema type map:" do

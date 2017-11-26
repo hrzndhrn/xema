@@ -40,7 +40,8 @@ defmodule Xema.SchemaValidator do
   end
 
   def validate(:list, opts) do
-    with :ok <- additional_items(opts[:additional_items], opts[:items]),
+    with :ok <- items(opts[:items]),
+         :ok <- additional_items(opts[:additional_items], opts[:items]),
          :ok <- validate_keywords(:list, opts) do
       :ok
     end
@@ -234,6 +235,19 @@ defmodule Xema.SchemaValidator do
 
   defp ex_min_max(_, keyword, value, _maximum),
     do: {:error, "Expected a boolean for #{keyword}, got #{inspect(value)}"}
+
+  # Keyword: items
+  # The value of `items` MUST be either a valid JSON Schema or an array of
+  # valid JSON Schemas.
+
+  defp items(nil), do: :ok
+
+  defp items(value)
+       when is_list(value) or is_tuple(value) or is_atom(value) or is_map(value),
+       do: :ok
+
+  defp items(value),
+    do: {:error, "Expected a schema or a list of schemas, got #{inspect(value)}."}
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
