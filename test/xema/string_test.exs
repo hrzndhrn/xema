@@ -81,7 +81,9 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{reason: :not_in_enum, enum: ["one", "two"], element: "foo"}}
+      expected =
+        {:error, %{reason: :not_in_enum, enum: ["one", "two"], element: "foo"}}
+
       assert validate(schema, "foo") == expected
     end
   end

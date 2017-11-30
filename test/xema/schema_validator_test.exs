@@ -90,7 +90,11 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected an Integer for minimum, got "1".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, items: [:string], additional_items: {:integer, minimum: "1"})
+        xema(
+          :list,
+          items: [:string],
+          additional_items: {:integer, minimum: "1"}
+        )
       end
     end
 
@@ -153,7 +157,8 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword additional_properties with properties set to schema" do
-      expected = "additional_properties has no effect if properties is not a map."
+      expected =
+        "additional_properties has no effect if properties is not a map."
 
       assert_raise SchemaError, expected, fn ->
         xema(:map, properties: :string, additional_properties: false)

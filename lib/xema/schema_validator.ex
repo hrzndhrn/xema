@@ -66,8 +66,20 @@ defmodule Xema.SchemaValidator do
 
   def validate(type, opts)
       when type == :number or type == :integer or type == :float do
-    with :ok <- ex_min_max(type, :exclusive_maximum, opts[:exclusive_maximum], opts[:maximum]),
-         :ok <- ex_min_max(type, :exclusive_minimum, opts[:exclusive_minimum], opts[:minimum]),
+    with :ok <-
+           ex_min_max(
+             type,
+             :exclusive_maximum,
+             opts[:exclusive_maximum],
+             opts[:maximum]
+           ),
+         :ok <-
+           ex_min_max(
+             type,
+             :exclusive_minimum,
+             opts[:exclusive_minimum],
+             opts[:minimum]
+           ),
          :ok <- min_max(type, :maximum, opts[:maximum]),
          :ok <- min_max(type, :minimum, opts[:minimum]),
          :ok <- multiple_of(type, opts[:multiple_of]),
@@ -114,7 +126,8 @@ defmodule Xema.SchemaValidator do
 
   defp additional_items(nil, _), do: :ok
 
-  defp additional_items(_, nil), do: {:error, "additional_items has no effect if items not set."}
+  defp additional_items(_, nil),
+    do: {:error, "additional_items has no effect if items not set."}
 
   defp additional_items(_, items)
        when not is_list(items),
@@ -132,7 +145,11 @@ defmodule Xema.SchemaValidator do
 
   defp additional_properties(_, properties, nil)
        when not is_map(properties),
-       do: {:error, "additional_properties has no effect if properties is not a map."}
+       do:
+         {
+           :error,
+           "additional_properties has no effect if properties is not a map."
+         }
 
   defp additional_properties(_, _, _), do: :ok
 
@@ -253,7 +270,8 @@ defmodule Xema.SchemaValidator do
        do: :ok
 
   defp items(value),
-    do: {:error, "Expected a schema or a list of schemas, got #{inspect(value)}."}
+    do:
+      {:error, "Expected a schema or a list of schemas, got #{inspect(value)}."}
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
