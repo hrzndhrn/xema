@@ -341,10 +341,42 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword enum with invalid entries" do
-      msg = "Entries of enum have to be Strings."
+      expected = "Entries of enum have to be Strings."
 
-      assert_raise SchemaError, msg, fn ->
+      assert_raise SchemaError, expected, fn ->
         xema(:string, enum: ["one", 2])
+      end
+    end
+
+    test "keyword max_length with a wrong type" do
+      expected = "Expected a non negative integer for max_length, got 1.1."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:string, max_length: 1.1)
+      end
+    end
+
+    test "keyword max_length with a negative integer" do
+      expected = "Expected a non negative integer for max_length, got -1."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:string, max_length: -1)
+      end
+    end
+
+    test "keyword min_length with a wrong type" do
+      expected = "Expected a non negative integer for min_length, got [1]."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:string, min_length: [1])
+      end
+    end
+
+    test "keyword min_length with a negative integer" do
+      expected = "Expected a non negative integer for min_length, got -1."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:string, min_length: -1)
       end
     end
   end

@@ -79,7 +79,9 @@ defmodule Xema.SchemaValidator do
 
   def validate(:string, opts) do
     with :ok <- validate_keywords(:string, opts),
-         :ok <- enum(:string, opts[:enum]) do
+         :ok <- enum(:string, opts[:enum]),
+         :ok <- non_negative_integer(:max_length, opts[:max_length]),
+         :ok <- non_negative_integer(:min_length, opts[:min_length]) do
       :ok
     end
   end
@@ -309,18 +311,9 @@ defmodule Xema.SchemaValidator do
   @spec non_negative_integer(atom, any) :: result
   defp non_negative_integer(_, nil), do: :ok
 
-  defp non_negative_integer(keyword, value) when is_integer(value) do
-    case value >= 0 do
-      true ->
-        :ok
-
-      false ->
-        {
-          :error,
-          "Expected a non negative integer for #{keyword}, got #{value}."
-        }
-    end
-  end
+  defp non_negative_integer(_, value)
+       when is_integer(value) and value >= 0,
+       do: :ok
 
   defp non_negative_integer(keyword, value),
     do:
