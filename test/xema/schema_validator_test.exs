@@ -200,6 +200,38 @@ defmodule Xema.SchemaValidatorTest do
         xema(:map, dependencies: %{foo: "invalid"})
       end
     end
+
+    test "keyword max_properties with a wrong type" do
+      expected = ~s(Expected a non negative integer for max_properties, got "foo".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, max_properties: "foo")
+      end
+    end
+
+    test "keyword max_properties with a negative integer" do
+      expected = ~s(Expected a non negative integer for max_properties, got -2.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, max_properties: -2)
+      end
+    end
+
+    test "keyword min_properties with a wrong type" do
+      expected = ~s(Expected a non negative integer for min_properties, got "foo".)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, min_properties: "foo")
+      end
+    end
+
+    test "keyword min_properties with a negative integer" do
+      expected = ~s(Expected a non negative integer for min_properties, got -2.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, min_properties: -2)
+      end
+    end
   end
 
   describe "schema type number:" do
