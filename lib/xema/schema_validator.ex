@@ -95,7 +95,8 @@ defmodule Xema.SchemaValidator do
     with :ok <- validate_keywords(:string, opts),
          :ok <- enum(:string, opts[:enum]),
          :ok <- non_negative_integer(:max_length, opts[:max_length]),
-         :ok <- non_negative_integer(:min_length, opts[:min_length]) do
+         :ok <- non_negative_integer(:min_length, opts[:min_length]),
+         :ok <- regex(:pattern, opts[:pattern]) do
       :ok
     end
   end
@@ -341,6 +342,23 @@ defmodule Xema.SchemaValidator do
         :error,
         "Expected a non negative integer for #{keyword}, got #{inspect(value)}."
       }
+
+  @spec regex(atom, any) :: result
+  defp regex(_, nil), do: :ok
+
+  defp regex(keyword, value) do
+    case is_regex(value) do
+      true ->
+        :ok
+      false ->
+        {:error, "Expected a regular expression for #{keyword}, got #{inspect(value)}."}
+    end
+  end
+
+  @spec is_regex(any) :: boolean
+  defp is_regex(value) when is_map(value),
+    do: Map.has_key?(value, :__struct__) && value.__struct__ == Regex
+  defp is_regex(_), do: false
 
   @compile {:inline, do_multiple_of: 1}
   defp do_multiple_of(value) do

@@ -416,6 +416,14 @@ defmodule Xema.SchemaValidatorTest do
         xema(:string, min_length: -1)
       end
     end
+
+    test "keyword pattern with a wrong type" do
+      expected = ~s(Expected a regular expression for pattern, got %{}.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:string, pattern: %{})
+      end
+    end
   end
 
   describe "schema type integer:" do
