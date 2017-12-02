@@ -52,14 +52,16 @@ defmodule Xema.SchemaValidator do
   end
 
   def validate(:map, opts) do
-    with :ok <-
+    with :ok <- validate_keywords(:map, opts),
+         :ok <-
            additional_properties(
              opts[:additional_properties],
              opts[:properties],
              opts[:pattern_properties]
            ),
          :ok <- dependencies(opts[:dependencies]),
-         :ok <- validate_keywords(:map, opts) do
+         :ok <- non_negative_integer(:max_properties, opts[:max_properties]),
+         :ok <- non_negative_integer(:min_properties, opts[:min_properties]) do
       :ok
     end
   end
