@@ -29,7 +29,7 @@ defmodule Xema.Map do
   * `required` contains a set of required properties
   """
   @type t :: %Xema.Map{
-          additional_properties: boolean | nil,
+          additional_properties: map | boolean | nil,
           max_properties: pos_integer | nil,
           min_properties: pos_integer | nil,
           properties: map | nil,
@@ -64,20 +64,20 @@ defmodule Xema.Map do
     |> Keyword.update(:required, nil, &MapSet.new(&1))
   end
 
-  defp properties(map) do
-    Enum.into(map, %{}, fn {key, prop} -> {key, Xema.type(prop)} end)
-  end
+  defp properties(map),
+    do: Enum.into(map, %{}, fn {key, prop} -> {key, Xema.type(prop)} end)
 
-  defp dependencies(map) do
-    Enum.into(map, %{}, fn
-      {key, dep} when is_list(dep) -> {key, dep}
-      {key, dep} -> {key, Xema.type(dep)}
-    end)
-  end
+  defp dependencies(map),
+    do:
+      Enum.into(map, %{}, fn
+        {key, dep} when is_list(dep) -> {key, dep}
+        {key, dep} -> {key, Xema.type(dep)}
+      end)
 
   defp additional_properties(additional_properties)
        when is_boolean(additional_properties),
        do: additional_properties
 
-  defp additional_properties(additional_properties), do: Xema.type(additional_properties)
+  defp additional_properties(additional_properties),
+    do: Xema.type(additional_properties)
 end

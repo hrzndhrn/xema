@@ -124,7 +124,8 @@ false
 
 #### <a name="length"></a> Length
 
-The length of a string can be constrained using the `min_length` and `max_length` keywords. For both keywords, the value must be a non-negative number.
+The length of a string can be constrained using the `min_length` and `max_length`
+keywords. For both keywords, the value must be a non-negative number.
 
 ```elixir
 iex> import Xema
@@ -143,7 +144,8 @@ iex> validate schema, "abcd"
 
 #### <a name="regex"></a> Regular Expression
 
-The `pattern` keyword is used to restrict a string to a particular regular expression.
+The `pattern` keyword is used to restrict a string to a particular regular
+expression.
 
 ```Elixir
 iex> import Xema

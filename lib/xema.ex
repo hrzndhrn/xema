@@ -76,7 +76,7 @@ defmodule Xema do
   @spec is_valid?(Xema.t(), any) :: boolean
   def is_valid?(xema, value), do: validate(xema, value) == :ok
 
-  @spec validate(Xema.t(), any) :: :ok | {:error, any}
+  @spec validate(Xema.t() | Xema.types(), any) :: Validator.result()
   def validate(xema, value), do: Validator.validate(xema, value)
 
   @doc """
@@ -144,24 +144,27 @@ defmodule Xema do
     end
 
     def xema(unquote(type), opts) do
-      SchemaValidator.validate(unquote(type), opts)
-      new(unquote(module).new(opts), opts)
-    catch
-      {:error, msg} -> raise SchemaError, message: msg
+      case SchemaValidator.validate(unquote(type), opts) do
+        :ok -> new(unquote(module).new(opts), opts)
+        {:error, msg} -> raise SchemaError, message: msg
+      end
     end
 
-    def type(unquote(type), opts) do
-      SchemaValidator.validate(unquote(type), opts)
-      unquote(module).new(opts)
+    def type(unquote(type), []) do
+      unquote(module).new()
     end
 
     def type({unquote(type), opts}, []) do
-      SchemaValidator.validate(unquote(type), opts)
-      unquote(module).new(opts)
+      case SchemaValidator.validate(unquote(type), opts) do
+        :ok -> unquote(module).new(opts)
+        {:error, msg} -> raise SchemaError, message: msg
+      end
     end
   end
 
-  def type(type, _), do: throw({:error, "#{inspect(type)} is not a valid type."})
+  def type(type, _) do
+    raise SchemaError, message: "#{inspect(type)} is not a valid type."
+  end
 
   defp new(type), do: struct(Xema, type: type)
 

@@ -58,7 +58,7 @@ defmodule Xema.NumberTest do
     end
   end
 
-  describe "'number' schema with exclusive range" do
+  describe "number schema with exclusive range (draft-04)" do
     setup do
       %{
         schema:
@@ -103,6 +103,54 @@ defmodule Xema.NumberTest do
 
     test "validate/2 with a too big number", %{schema: schema} do
       expected = {:error, %{maximum: 4, reason: :too_big}}
+      assert validate(schema, 5.0) == expected
+    end
+  end
+
+  describe "number schema with exclusive range (draft-06)" do
+    setup do
+      %{
+        schema:
+          xema(
+            :number,
+            exclusive_minimum: 2,
+            exclusive_maximum: 4
+          )
+      }
+    end
+
+    test "validate/2 with a number in range", %{schema: schema} do
+      assert(validate(schema, 3.0) == :ok)
+    end
+
+    test "validate/2 with a too small number", %{schema: schema} do
+      expected = {:error, %{exclusive_minimum: 2, reason: :too_small}}
+      assert validate(schema, 1.0) == expected
+    end
+
+    test "validate/2 with a minimum number", %{schema: schema} do
+      expected =
+        {
+          :error,
+          %{reason: :too_small, exclusive_minimum: 2}
+        }
+
+      assert validate(schema, 2.0) == expected
+    end
+
+    test "validate/2 with a maximum number", %{schema: schema} do
+      expected =
+        {
+          :error,
+          %{reason: :too_big, exclusive_maximum: 4}
+        }
+
+      assert validate(schema, 4.0) == expected
+    end
+
+    test "validate/2 with a too big number", %{schema: schema} do
+      expected = {:error, %{exclusive_maximum: 4, reason: :too_big}}
+
       assert validate(schema, 5.0) == expected
     end
   end

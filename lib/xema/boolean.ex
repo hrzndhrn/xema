@@ -18,7 +18,6 @@ defmodule Xema.Boolean do
   The struct contains the keywords for the type `boolean`.
 
   * `as` is used in an error report. Default of `as` is `:boolean`
-  * `enum` specifies an enumeration
   """
 
   @type t :: %Xema.Boolean{as: atom}

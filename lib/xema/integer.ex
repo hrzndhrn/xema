@@ -32,9 +32,9 @@ defmodule Xema.Integer do
   @type t :: %Xema.Integer{
           minimum: integer | nil,
           maximum: integer | nil,
-          exclusive_minimum: boolean | nil,
-          exclusive_maximum: boolean | nil,
-          multiple_of: number | nil,
+          exclusive_minimum: boolean | integer | nil,
+          exclusive_maximum: boolean | integer | nil,
+          multiple_of: integer | nil,
           enum: list | nil,
           as: atom
         }
