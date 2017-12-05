@@ -62,7 +62,8 @@ defmodule Xema.SchemaValidator do
          :ok <- dependencies(opts[:dependencies]),
          :ok <- non_negative_integer(:max_properties, opts[:max_properties]),
          :ok <- non_negative_integer(:min_properties, opts[:min_properties]),
-         :ok <- properties(opts[:properties]) do
+         :ok <- properties(opts[:properties]),
+         :ok <- pattern_properties(opts[:pattern_properties]) do
       :ok
     end
   end
@@ -367,9 +368,31 @@ defmodule Xema.SchemaValidator do
         :halt,
         {
           :error,
-          "Expected string or atom for key in properties, got #{inspect(key)}."
+          "Expected a string or atom for key in properties, got #{inspect(key)}."
         }
       }
+
+  @spec pattern_properties(any) :: result
+  defp pattern_properties(nil), do: :ok
+
+  defp pattern_properties(value) when is_map(value) do
+    case value |> Map.keys() |> Enum.drop_while(&is_regex/1) do
+      [] ->
+        :ok
+
+      [key | _] ->
+        {
+          :error,
+          "Expected a regular expression for key in pattern_properties, got #{
+            inspect(key)
+          }."
+        }
+    end
+  end
+
+  defp pattern_properties(value),
+    do:
+      {:error, "Expected a map for pattern_properties, got #{inspect(value)}."}
 
   @spec regex(atom, any) :: result
   defp regex(_, nil), do: :ok
