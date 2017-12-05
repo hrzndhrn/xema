@@ -202,7 +202,8 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword max_properties with a wrong type" do
-      expected = ~s(Expected a non negative integer for max_properties, got "foo".)
+      expected =
+        ~s(Expected a non negative integer for max_properties, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
         xema(:map, max_properties: "foo")
@@ -218,7 +219,8 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword min_properties with a wrong type" do
-      expected = ~s(Expected a non negative integer for min_properties, got "foo".)
+      expected =
+        ~s(Expected a non negative integer for min_properties, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
         xema(:map, min_properties: "foo")
@@ -230,6 +232,22 @@ defmodule Xema.SchemaValidatorTest do
 
       assert_raise SchemaError, expected, fn ->
         xema(:map, min_properties: -2)
+      end
+    end
+
+    test "keyword properties with a wrong type" do
+      expected = ~s(Expected a map for properties, got 12.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, properties: 12)
+      end
+    end
+
+    test "keyword properties with a wrong key" do
+      expected = "Expected string or atom for key in properties, got 7."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:map, properties: %{7 => :string})
       end
     end
   end

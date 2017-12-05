@@ -61,7 +61,8 @@ defmodule Xema.SchemaValidator do
            ),
          :ok <- dependencies(opts[:dependencies]),
          :ok <- non_negative_integer(:max_properties, opts[:max_properties]),
-         :ok <- non_negative_integer(:min_properties, opts[:min_properties]) do
+         :ok <- non_negative_integer(:min_properties, opts[:min_properties]),
+         :ok <- properties(opts[:properties]) do
       :ok
     end
   end
@@ -343,6 +344,33 @@ defmodule Xema.SchemaValidator do
         "Expected a non negative integer for #{keyword}, got #{inspect(value)}."
       }
 
+  @spec properties(any) :: result
+  defp properties(nil), do: :ok
+
+  defp properties(value) when is_map(value) do
+    value
+    |> Map.keys()
+    |> Enum.reduce_while(:ok, &property_key/2)
+  end
+
+  defp properties(value),
+    do: {:error, "Expected a map for properties, got #{inspect(value)}."}
+
+  @spec property_key(any, any) :: result
+  defp property_key(key, _)
+       when is_binary(key) or is_atom(key),
+       do: {:cont, :ok}
+
+  defp property_key(key, _),
+    do:
+      {
+        :halt,
+        {
+          :error,
+          "Expected string or atom for key in properties, got #{inspect(key)}."
+        }
+      }
+
   @spec regex(atom, any) :: result
   defp regex(_, nil), do: :ok
 
@@ -350,14 +378,19 @@ defmodule Xema.SchemaValidator do
     case is_regex(value) do
       true ->
         :ok
+
       false ->
-        {:error, "Expected a regular expression for #{keyword}, got #{inspect(value)}."}
+        {
+          :error,
+          "Expected a regular expression for #{keyword}, got #{inspect(value)}."
+        }
     end
   end
 
   @spec is_regex(any) :: boolean
   defp is_regex(value) when is_map(value),
     do: Map.has_key?(value, :__struct__) && value.__struct__ == Regex
+
   defp is_regex(_), do: false
 
   @compile {:inline, do_multiple_of: 1}
