@@ -23,7 +23,13 @@ defmodule Xema.NumberTest do
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      expected = {:error, %{reason: :wrong_type, type: :number}}
+      expected =
+        {:error, %Xema.TypeError{
+          expected: :number,
+          got: "foo",
+          message: ~s(Expected :number, got "foo".)
+        }}
+
       assert validate(schema, "foo") == expected
     end
 

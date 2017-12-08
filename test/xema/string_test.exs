@@ -17,12 +17,24 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a number", %{schema: schema} do
-      expected = {:error, %{reason: :wrong_type, type: :string}}
+      expected =
+        {:error, %Xema.TypeError{
+          expected: :string,
+          got: 1,
+          message: "Expected :string, got 1."
+        }}
+
       assert validate(schema, 1) == expected
     end
 
     test "validate/2 with nil", %{schema: schema} do
-      expected = {:error, %{reason: :wrong_type, type: :string}}
+      expected =
+        {:error, %Xema.TypeError{
+          expected: :string,
+          got: nil,
+          message: "Expected :string, got nil."
+        }}
+
       assert validate(schema, nil) == expected
     end
 

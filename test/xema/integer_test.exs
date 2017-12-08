@@ -19,13 +19,21 @@ defmodule Xema.IntegerTest do
     end
 
     test "validate/2 with a float", %{schema: schema} do
-      expected = {:error, %{reason: :wrong_type, type: :integer}}
-      assert validate(schema, 2.3) == expected
+      assert validate(schema, 2.3) ==
+               {:error, %Xema.TypeError{
+                 expected: :integer,
+                 got: 2.3,
+                 message: "Expected :integer, got 2.3."
+               }}
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      expected = {:error, %{reason: :wrong_type, type: :integer}}
-      assert validate(schema, "foo") == expected
+      assert validate(schema, "foo") ==
+               {:error, %Xema.TypeError{
+                 expected: :integer,
+                 got: "foo",
+                 message: ~s(Expected :integer, got "foo".)
+               }}
     end
 
     test "is_valid?/2 with a valid value", %{schema: schema} do

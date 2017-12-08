@@ -23,7 +23,13 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      expected = {:error, %{reason: :wrong_type, type: :list}}
+      expected =
+        {:error, %Xema.TypeError{
+          expected: :list,
+          got: "not an array",
+          message: ~s(Expected :list, got "not an array".)
+        }}
+
       assert validate(schema, "not an array") == expected
     end
 
@@ -79,7 +85,11 @@ defmodule Xema.ListTest do
           %{
             reason: :invalid_item,
             at: 2,
-            error: %{reason: :wrong_type, type: :integer}
+            error: %Xema.TypeError{
+              expected: :integer,
+              got: "foo",
+              message: ~s(Expected :integer, got "foo".)
+            }
           }
         }
 
@@ -101,7 +111,11 @@ defmodule Xema.ListTest do
           %{
             reason: :invalid_item,
             at: 0,
-            error: %{reason: :wrong_type, type: :string}
+            error: %Xema.TypeError{
+              expected: :string,
+              got: 1,
+              message: "Expected :string, got 1."
+            }
           }
         }
 
@@ -147,7 +161,11 @@ defmodule Xema.ListTest do
                {:error, %{
                  reason: :invalid_item,
                  at: 1,
-                 error: %{reason: :wrong_type, type: :number}
+                 error: %Xema.TypeError{
+                   expected: :number,
+                   got: "bar",
+                   message: ~s(Expected :number, got "bar".)
+                 }
                }}
 
       assert validate(schema, ["x", 33]) ==
@@ -211,7 +229,11 @@ defmodule Xema.ListTest do
                {:error, %{
                  reason: :invalid_item,
                  at: 2,
-                 error: %{reason: :wrong_type, type: :string}
+                 error: %Xema.TypeError{
+                   expected: :string,
+                   got: 13,
+                   message: "Expected :string, got 13."
+                 }
                }}
     end
   end

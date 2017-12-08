@@ -89,7 +89,7 @@ defmodule Xema.Validator do
   defp type(%Xema.String{}, value) when is_binary(value), do: :ok
   defp type(%Xema.List{}, value) when is_list(value), do: :ok
   defp type(%Xema.Map{}, value) when is_map(value), do: :ok
-  defp type(type, _value), do: error(type)
+  defp type(type, value), do: Xema.TypeError.tuple(type, value)
 
   @spec enum(Xema.types(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok
