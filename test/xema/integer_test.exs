@@ -142,10 +142,10 @@ defmodule Xema.IntegerTest do
 
     test "with a value that is not in the enum", %{schema: schema} do
       expected =
-        {:error, %{
-          reason: :not_in_enum,
+        {:error, %Xema.EnumError{
+          message: "Value 2 is not in enum [1, 3].",
           enum: [1, 3],
-          element: 2
+          value: 2
         }}
 
       assert validate(schema, 2) == expected

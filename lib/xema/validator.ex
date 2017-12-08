@@ -97,7 +97,7 @@ defmodule Xema.Validator do
   defp enum(%{enum: enum}, value) do
     case Enum.member?(enum, value) do
       true -> :ok
-      false -> error(:not_in_enum, enum: enum, element: value)
+      false -> Xema.EnumError.tuple(value, enum)
     end
   end
 

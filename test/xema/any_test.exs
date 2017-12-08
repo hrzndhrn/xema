@@ -62,16 +62,13 @@ defmodule Xema.AnyTest do
     end
 
     test "with a value that is not in the enum", %{schema: schema} do
-      expected = %{
-        reason: :not_in_enum,
+      expected = {:error, %Xema.EnumError{
+        value: 2,
         enum: [1, 1.2, [1], "foo"],
-        element: nil
-      }
+        message: ~s(Value 2 is not in enum [1, 1.2, [1], "foo"].)
+      }}
 
-      assert validate(schema, 2) == {:error, %{expected | element: 2}}
-      assert validate(schema, 2.2) == {:error, %{expected | element: 2.2}}
-      assert validate(schema, "bar") == {:error, %{expected | element: "bar"}}
-      assert validate(schema, [2]) == {:error, %{expected | element: [2]}}
+      assert validate(schema, 2) == expected
     end
 
     test "is_valid?/2 with a valid value", %{schema: schema} do
