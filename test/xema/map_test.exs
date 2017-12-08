@@ -21,8 +21,8 @@ defmodule Xema.MapTest do
     test "validate/2 with a string", %{schema: schema} do
       expected =
         {:error, %Xema.TypeError{
-          expected: :map,
-          got: "foo",
+          type: :map,
+          value: "foo",
           message: ~s(Expected :map, got "foo".)
         }}
 
@@ -50,8 +50,8 @@ defmodule Xema.MapTest do
     test "validate/2 with a string", %{schema: schema} do
       expected =
         {:error, %Xema.TypeError{
-          expected: :object,
-          got: "foo",
+          type: :object,
+          value: "foo",
           message: ~s(Expected :object, got "foo".)
         }}
 
@@ -84,8 +84,8 @@ defmodule Xema.MapTest do
           reason: :invalid_property,
           property: :foo,
           error: %Xema.TypeError{
-            expected: :number,
-            got: "foo",
+            type: :number,
+            value: "foo",
             message: ~s(Expected :number, got "foo".)
           }
         }}
@@ -99,8 +99,8 @@ defmodule Xema.MapTest do
           reason: :invalid_property,
           property: "foo",
           error: %Xema.TypeError{
-            expected: :number,
-            got: "foo",
+            type: :number,
+            value: "foo",
             message: ~s(Expected :number, got "foo".)
           }
         }}
@@ -139,8 +139,8 @@ defmodule Xema.MapTest do
           reason: :invalid_property,
           property: :foo,
           error: %Xema.TypeError{
-            expected: :number,
-            got: "foo",
+            type: :number,
+            value: "foo",
             message: ~s(Expected :number, got "foo".)
           }
         }}
@@ -154,8 +154,8 @@ defmodule Xema.MapTest do
           reason: :invalid_property,
           property: "foo",
           error: %Xema.TypeError{
-            expected: :number,
-            got: "foo",
+            type: :number,
+            value: "foo",
             message: ~s(Expected :number, got "foo".)
           }
         }}
@@ -290,8 +290,8 @@ defmodule Xema.MapTest do
             reason: :invalid_property,
             property: :add,
             error: %Xema.TypeError{
-              expected: :integer,
-              got: "invalid",
+              type: :integer,
+              value: "invalid",
               message: ~s(Expected :integer, got "invalid".)
             }
           }

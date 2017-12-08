@@ -1,13 +1,13 @@
 defmodule Xema.EnumError do
-  defexception [:message, :value, :enum]
+  defexception [:message, :enum, :value]
 
-  def exception(value, enum), do: new(value, enum)
+  def exception(enum, value), do: new(enum, value)
 
-  def tuple(value, enum), do: {:error, new(value, enum)}
+  def tuple(enum, value), do: {:error, new(enum, value)}
 
-  def new(value, enum),
+  def new(enum, value),
     do: %Xema.EnumError{
-      message: "Value #{inspect value} is not in enum #{inspect enum}.",
+      message: "Value #{inspect(value)} is not in enum #{inspect(enum)}.",
       value: value,
       enum: enum
     }
@@ -18,16 +18,16 @@ defmodule Xema.SchemaError do
 end
 
 defmodule Xema.TypeError do
-  defexception [:message, :expected, :got]
+  defexception [:message, :type, :value]
 
-  def exception(expected, got), do: new(expected, got)
+  def exception(type, value), do: new(type, value)
 
-  def tuple(expected, got), do: {:error, new(expected, got)}
+  def tuple(type, value), do: {:error, new(type, value)}
 
-  defp new(expected, got),
+  defp new(type, value),
     do: %Xema.TypeError{
-      message: "Expected #{inspect(expected.as)}, got #{inspect(got)}.",
-      expected: expected.as,
-      got: got
+      message: "Expected #{inspect(type.as)}, got #{inspect(value)}.",
+      type: type.as,
+      value: value
     }
 end

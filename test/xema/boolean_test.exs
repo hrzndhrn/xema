@@ -39,10 +39,14 @@ defmodule Xema.BooleanTest do
     end
 
     test "validate/2 with non boolean value", %{schema: schema} do
-      expected = {:error, %{reason: :wrong_type, type: :boolean}}
+      expected =
+        {:error, %Xema.TypeError{
+          type: :boolean,
+          value: "true",
+          message: ~s(Expected :boolean, got "true".)
+        }}
+
       assert validate(schema, "true") == expected
-      assert validate(schema, 1) == expected
-      assert validate(schema, []) == expected
     end
   end
 end

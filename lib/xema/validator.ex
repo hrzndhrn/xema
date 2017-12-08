@@ -11,7 +11,7 @@ defmodule Xema.Validator do
   def validate(%Xema.Nil{} = type, value) do
     case value == nil do
       true -> :ok
-      false -> error(type)
+      false -> Xema.TypeError.tuple(type, value)
     end
   end
 
@@ -34,7 +34,7 @@ defmodule Xema.Validator do
   def validate(%Xema.Boolean{} = type, value) do
     case is_boolean(value) do
       true -> :ok
-      false -> error(type)
+      false -> Xema.TypeError.tuple(type, value)
     end
   end
 
@@ -97,7 +97,7 @@ defmodule Xema.Validator do
   defp enum(%{enum: enum}, value) do
     case Enum.member?(enum, value) do
       true -> :ok
-      false -> Xema.EnumError.tuple(value, enum)
+      false -> Xema.EnumError.tuple(enum, value)
     end
   end
 

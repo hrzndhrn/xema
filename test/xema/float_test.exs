@@ -21,8 +21,8 @@ defmodule Xema.FloatTest do
     test "validate/2 with an integer", %{schema: schema} do
       expected =
         {:error, %Xema.TypeError{
-          expected: :float,
-          got: 2,
+          type: :float,
+          value: 2,
           message: ~s(Expected :float, got 2.)
         }}
 
@@ -32,8 +32,8 @@ defmodule Xema.FloatTest do
     test "validate/2 with a string", %{schema: schema} do
       expected =
         {:error, %Xema.TypeError{
-          expected: :float,
-          got: "foo",
+          type: :float,
+          value: "foo",
           message: ~s(Expected :float, got "foo".)
         }}
 

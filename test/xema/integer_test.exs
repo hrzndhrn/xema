@@ -21,8 +21,8 @@ defmodule Xema.IntegerTest do
     test "validate/2 with a float", %{schema: schema} do
       assert validate(schema, 2.3) ==
                {:error, %Xema.TypeError{
-                 expected: :integer,
-                 got: 2.3,
+                 type: :integer,
+                 value: 2.3,
                  message: "Expected :integer, got 2.3."
                }}
     end
@@ -30,8 +30,8 @@ defmodule Xema.IntegerTest do
     test "validate/2 with a string", %{schema: schema} do
       assert validate(schema, "foo") ==
                {:error, %Xema.TypeError{
-                 expected: :integer,
-                 got: "foo",
+                 type: :integer,
+                 value: "foo",
                  message: ~s(Expected :integer, got "foo".)
                }}
     end

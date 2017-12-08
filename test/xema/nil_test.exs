@@ -17,7 +17,14 @@ defmodule Xema.NilTest do
     end
 
     test "validate/2 with non-nil value", %{schema: schema} do
-      assert validate(schema, 1) == {:error, %{reason: :wrong_type, type: nil}}
+      expected =
+        {:error, %Xema.TypeError{
+          type: nil,
+          value: 1,
+          message: "Expected nil, got 1."
+        }}
+
+      assert validate(schema, 1) == expected
     end
   end
 end
