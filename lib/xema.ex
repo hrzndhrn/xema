@@ -102,7 +102,7 @@ defmodule Xema do
         }
       }
 
-  For nested schema you can use `{:type, opts: ...}` like here.
+  For nested schemas you can use `{:type, opts: ...}` like here.
 
   ## Examples
       iex> import Xema
@@ -122,9 +122,10 @@ defmodule Xema do
         %{
           reason: :invalid_item,
           at: 2,
-          error: %{
+          error: %Xema.RangeError{
+            value: 1,
             minimum: 2,
-            reason: :too_small
+            message: "Expected a value with a minimum of 2, got 1."
           }
         }
       }

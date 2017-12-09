@@ -57,16 +57,23 @@ defmodule Xema.IntegerTest do
     end
 
     test "validate/2 with a too small integer", %{schema: schema} do
-      expected = {:error, %{minimum: 2, reason: :too_small}}
+      expected =
+        {:error, %Xema.RangeError{
+          value: 1,
+          minimum: 2,
+          message: "Expected a value with a minimum of 2, got 1."
+        }}
+
       assert validate(schema, 1) == expected
     end
 
     test "validate/2 with a too big integer", %{schema: schema} do
-      expected = {:error, %Xema.RangeError{
-        value: 5,
-        maximum: 4,
-        message: "Expected a value with a maximum of 4, got 5."
-      }}
+      expected =
+        {:error, %Xema.RangeError{
+          value: 5,
+          maximum: 4,
+          message: "Expected a value with a maximum of 4, got 5."
+        }}
 
       assert validate(schema, 5) == expected
     end
@@ -91,38 +98,49 @@ defmodule Xema.IntegerTest do
     end
 
     test "validate/2 with a too small integer", %{schema: schema} do
-      expected = {:error, %{minimum: 2, reason: :too_small}}
+      expected =
+        {:error, %Xema.RangeError{
+          value: 1,
+          minimum: 2,
+          exclusive_minimum: true,
+          message: "Expected a value with an exclusive minimum of 2, got 1."
+        }}
+
       assert validate(schema, 1) == expected
     end
 
     test "validate/2 with a minimum integer", %{schema: schema} do
       expected =
-        {
-          :error,
-          %{minimum: 2, reason: :too_small, exclusive_minimum: true}
-        }
+        {:error, %Xema.RangeError{
+          minimum: 2,
+          exclusive_minimum: true,
+          message: "Expected a value with an exclusive minimum of 2, got 2.",
+          value: 2
+        }}
 
       assert validate(schema, 2) == expected
     end
 
     test "validate/2 with a maximum integer", %{schema: schema} do
-      expected = {:error, %Xema.RangeError{
-        value: 4,
-        maximum: 4,
-        exclusive_maximum: true,
-        message: "Expected a value with an exclusive maximum of 4, got 4."
-      }}
+      expected =
+        {:error, %Xema.RangeError{
+          value: 4,
+          maximum: 4,
+          exclusive_maximum: true,
+          message: "Expected a value with an exclusive maximum of 4, got 4."
+        }}
 
       assert validate(schema, 4) == expected
     end
 
     test "validate/2 with a too big integer", %{schema: schema} do
-      expected = {:error, %Xema.RangeError{
-        value: 5,
-        maximum: 4,
-        exclusive_maximum: true,
-        message: "Expected a value with an exclusive maximum of 4, got 5."
-      }}
+      expected =
+        {:error, %Xema.RangeError{
+          value: 5,
+          maximum: 4,
+          exclusive_maximum: true,
+          message: "Expected a value with an exclusive maximum of 4, got 5."
+        }}
 
       assert validate(schema, 5) == expected
     end

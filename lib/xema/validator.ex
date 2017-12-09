@@ -126,8 +126,8 @@ defmodule Xema.Validator do
        when value > min,
        do: :ok
 
-  defp exclusive_minimum(%{exclusive_minimum: min}, _value),
-    do: error(:too_small, exclusive_minimum: min)
+  defp exclusive_minimum(%{exclusive_minimum: min}, value),
+    do: Xema.RangeError.tuple(value, exclusive_minimum: min)
 
   @spec minimum(Xema.types(), any) :: result
   defp minimum(%{minimum: nil}, _value), do: :ok
@@ -143,13 +143,13 @@ defmodule Xema.Validator do
   defp minimum(minimum, nil, value) when value == minimum, do: :ok
   defp minimum(minimum, false, value) when value == minimum, do: :ok
 
-  defp minimum(minimum, _exclusive, value) do
-    if value != minimum do
-      error(:too_small, minimum: minimum)
-    else
-      error(:too_small, minimum: minimum, exclusive_minimum: true)
-    end
-  end
+  defp minimum(minimum, exclusive, value),
+    do:
+      Xema.RangeError.tuple(
+        value,
+        minimum: minimum,
+        exclusive_minimum: exclusive
+      )
 
   @spec maximum(Xema.types(), any) :: result
   defp maximum(%{maximum: nil}, _value), do: :ok
@@ -165,9 +165,13 @@ defmodule Xema.Validator do
   defp maximum(maximum, nil, value) when value == maximum, do: :ok
   defp maximum(maximum, false, value) when value == maximum, do: :ok
 
-  defp maximum(maximum, exclusive, value) do
-    Xema.RangeError.tuple(value, maximum: maximum, exclusive_maximum: exclusive)
-  end
+  defp maximum(maximum, exclusive, value),
+    do:
+      Xema.RangeError.tuple(
+        value,
+        maximum: maximum,
+        exclusive_maximum: exclusive
+      )
 
   @spec multiple_of(Xema.types(), number) :: result
   defp multiple_of(%{multiple_of: nil} = _keywords, _value), do: :ok

@@ -46,12 +46,24 @@ defmodule Xema.RangeError do
       "Expected a value with an exclusive maximum of #{maximum}, got #{value}."
 
   defp message(value, %{exclusive_maximum: maximum})
-    when is_number(maximum),
-    do:
-      "Expected a value with an exclusive maximum of #{maximum}, got #{value}."
+       when is_number(maximum),
+       do:
+         "Expected a value with an exclusive maximum of #{maximum}, got #{value}."
 
   defp message(value, %{maximum: maximum}),
     do: "Expected a value with a maximum of #{maximum}, got #{value}."
+
+  defp message(value, %{exclusive_minimum: true, minimum: minimum}),
+    do:
+      "Expected a value with an exclusive minimum of #{minimum}, got #{value}."
+
+  defp message(value, %{exclusive_minimum: minimum})
+       when is_number(minimum),
+       do:
+         "Expected a value with an exclusive minimum of #{minimum}, got #{value}."
+
+  defp message(value, %{minimum: minimum}),
+    do: "Expected a value with a minimum of #{minimum}, got #{value}."
 end
 
 defmodule Xema.SchemaError do

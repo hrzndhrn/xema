@@ -260,7 +260,11 @@ Xema
 iex> schema = xema :float, minimum: 1.2, maximum: 1.4, exclusive_maximum: true
 %Xema{type: %Xema.Float{minimum: 1.2, maximum: 1.4, exclusive_maximum: true}}
 iex> validate schema, 1.1
-{:error, %{reason: :too_small, minimum: 1.2}}
+{:error, %Xema.RangeError{
+  value: 1.1,
+  minimum: 1.2,
+  message: "Expected a value with a minimum of 1.2, got 1.1."
+}}
 iex> validate schema, 1.2
 :ok
 iex> is_valid? schema, 1.3
@@ -330,10 +334,15 @@ iex> schema = xema :list, items: {:integer, minimum: 1, maximum: 10}
 iex> validate schema, [1, 2, 3]
 :ok
 iex> validate schema, [3, 2, 1, 0]
-{
-  :error,
-  %{reason: :invalid_item, at: 3, error: %{reason: :too_small, minimum: 1}}
-}
+{:error, %{
+  reason: :invalid_item,
+  at: 3,
+  error: %Xema.RangeError{
+    value: 0,
+    minimum: 1,
+    message: "Expected a value with a minimum of 1, got 0."
+  }
+}}
 ```
 
 `items` can also be used to give each item a specific schema.
