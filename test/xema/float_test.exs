@@ -66,7 +66,12 @@ defmodule Xema.FloatTest do
     end
 
     test "validate/2 with a too big float", %{schema: schema} do
-      expected = {:error, %{maximum: 4, reason: :too_big}}
+      expected = {:error, %Xema.RangeError{
+        value: 5.0,
+        maximum: 4,
+        message: "Expected a value with a maximum of 4, got 5.0."
+      }}
+
       assert validate(schema, 5.0) == expected
     end
   end
@@ -105,17 +110,24 @@ defmodule Xema.FloatTest do
     end
 
     test "validate/2 with a maximum float", %{schema: schema} do
-      expected =
-        {
-          :error,
-          %{maximum: 4, reason: :too_big, exclusive_maximum: true}
-        }
+      expected = {:error, %Xema.RangeError{
+        value: 4.0,
+        maximum: 4,
+        exclusive_maximum: true,
+        message: "Expected a value with an exclusive maximum of 4, got 4.0."
+      }}
 
       assert validate(schema, 4.0) == expected
     end
 
     test "validate/2 with a too big float", %{schema: schema} do
-      expected = {:error, %{maximum: 4, reason: :too_big}}
+      expected = {:error, %Xema.RangeError{
+        value: 5.0,
+        maximum: 4,
+        exclusive_maximum: true,
+        message: "Expected a value with an exclusive maximum of 4, got 5.0."
+      }}
+
       assert validate(schema, 5.0) == expected
     end
   end

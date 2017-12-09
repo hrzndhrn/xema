@@ -11,7 +11,7 @@ defmodule Xema.Validator do
   def validate(%Xema.Nil{} = type, value) do
     case value == nil do
       true -> :ok
-      false -> Xema.TypeError.tuple(type, value)
+      false -> Xema.TypeError.tuple(value, type)
     end
   end
 
@@ -34,7 +34,7 @@ defmodule Xema.Validator do
   def validate(%Xema.Boolean{} = type, value) do
     case is_boolean(value) do
       true -> :ok
-      false -> Xema.TypeError.tuple(type, value)
+      false -> Xema.TypeError.tuple(value, type)
     end
   end
 
@@ -89,7 +89,7 @@ defmodule Xema.Validator do
   defp type(%Xema.String{}, value) when is_binary(value), do: :ok
   defp type(%Xema.List{}, value) when is_list(value), do: :ok
   defp type(%Xema.Map{}, value) when is_map(value), do: :ok
-  defp type(type, value), do: Xema.TypeError.tuple(type, value)
+  defp type(type, value), do: Xema.TypeError.tuple(value, type)
 
   @spec enum(Xema.types(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok
@@ -97,7 +97,7 @@ defmodule Xema.Validator do
   defp enum(%{enum: enum}, value) do
     case Enum.member?(enum, value) do
       true -> :ok
-      false -> Xema.EnumError.tuple(enum, value)
+      false -> Xema.EnumError.tuple(value, enum)
     end
   end
 
@@ -112,8 +112,8 @@ defmodule Xema.Validator do
        when value < max,
        do: :ok
 
-  defp exclusive_maximum(%{exclusive_maximum: max}, _value),
-    do: error(:too_big, exclusive_maximum: max)
+  defp exclusive_maximum(%{exclusive_maximum: max}, value),
+    do: Xema.RangeError.tuple(value, exclusive_maximum: max)
 
   @spec exclusive_minimum(Xema.types(), any) :: result
   defp exclusive_minimum(%{exclusive_minimum: nil}, _value), do: :ok
@@ -165,12 +165,8 @@ defmodule Xema.Validator do
   defp maximum(maximum, nil, value) when value == maximum, do: :ok
   defp maximum(maximum, false, value) when value == maximum, do: :ok
 
-  defp maximum(maximum, _exclusive, value) do
-    if value != maximum do
-      error(:too_big, maximum: maximum)
-    else
-      error(:too_big, maximum: maximum, exclusive_maximum: true)
-    end
+  defp maximum(maximum, exclusive, value) do
+    Xema.RangeError.tuple(value, maximum: maximum, exclusive_maximum: exclusive)
   end
 
   @spec multiple_of(Xema.types(), number) :: result

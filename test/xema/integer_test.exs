@@ -62,7 +62,12 @@ defmodule Xema.IntegerTest do
     end
 
     test "validate/2 with a too big integer", %{schema: schema} do
-      expected = {:error, %{maximum: 4, reason: :too_big}}
+      expected = {:error, %Xema.RangeError{
+        value: 5,
+        maximum: 4,
+        message: "Expected a value with a maximum of 4, got 5."
+      }}
+
       assert validate(schema, 5) == expected
     end
   end
@@ -101,17 +106,24 @@ defmodule Xema.IntegerTest do
     end
 
     test "validate/2 with a maximum integer", %{schema: schema} do
-      expected =
-        {
-          :error,
-          %{maximum: 4, reason: :too_big, exclusive_maximum: true}
-        }
+      expected = {:error, %Xema.RangeError{
+        value: 4,
+        maximum: 4,
+        exclusive_maximum: true,
+        message: "Expected a value with an exclusive maximum of 4, got 4."
+      }}
 
       assert validate(schema, 4) == expected
     end
 
     test "validate/2 with a too big integer", %{schema: schema} do
-      expected = {:error, %{maximum: 4, reason: :too_big}}
+      expected = {:error, %Xema.RangeError{
+        value: 5,
+        maximum: 4,
+        exclusive_maximum: true,
+        message: "Expected a value with an exclusive maximum of 4, got 5."
+      }}
+
       assert validate(schema, 5) == expected
     end
   end

@@ -266,9 +266,19 @@ iex> validate schema, 1.2
 iex> is_valid? schema, 1.3
 true
 iex> validate schema, 1.4
-{:error, %{reason: :too_big, maximum: 1.4, exclusive_maximum: true}}
+{:error, %Xema.RangeError{
+  value: 1.4,
+  maximum: 1.4,
+  exclusive_maximum: true,
+  message: "Expected a value with an exclusive maximum of 1.4, got 1.4."
+}}
 iex> validate schema, 1.5
-{:error, %{reason: :too_big, maximum: 1.4}}
+{:error, %Xema.RangeError{
+  value: 1.5,
+  maximum: 1.4,
+  exclusive_maximum: true,
+  message: "Expected a value with an exclusive maximum of 1.4, got 1.5."
+}}
 ```
 
 ### <a name="list"></a> Type list
