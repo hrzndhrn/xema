@@ -212,7 +212,7 @@ iex> schema = xema :number, multiple_of: 2
 iex> validate schema, 8
 :ok
 iex> validate schema, 7
-{:error, %{reason: :not_multiple, multiple_of: 2}}
+{:error, %{value: 7, multiple_of: 2}}
 iex> is_valid? schema, 8.0
 true
 ```

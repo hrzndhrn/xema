@@ -155,7 +155,8 @@ defmodule Xema.NumberTest do
     end
 
     test "validate/2 with an invalid number", %{schema: schema} do
-      expected = {:error, %{reason: :not_multiple, multiple_of: 1.2}}
+      expected = {:error, %{value: 6.2, multiple_of: 1.2}}
+
       assert validate(schema, 6.2) == expected
     end
   end
