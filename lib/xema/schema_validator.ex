@@ -1,3 +1,7 @@
+defmodule Xema.SchemaError do
+  defexception [:message]
+end
+
 defmodule Xema.SchemaValidator do
   @moduledoc false
 

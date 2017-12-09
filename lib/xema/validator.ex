@@ -11,7 +11,7 @@ defmodule Xema.Validator do
   def validate(%Xema.Nil{} = type, value) do
     case value == nil do
       true -> :ok
-      false -> Xema.TypeError.tuple(value, type)
+      false -> {:error, %{value: value, type: type.as}}
     end
   end
 
@@ -34,7 +34,7 @@ defmodule Xema.Validator do
   def validate(%Xema.Boolean{} = type, value) do
     case is_boolean(value) do
       true -> :ok
-      false -> Xema.TypeError.tuple(value, type)
+      false -> {:error, %{value: value, type: type.as}}
     end
   end
 
@@ -89,7 +89,7 @@ defmodule Xema.Validator do
   defp type(%Xema.String{}, value) when is_binary(value), do: :ok
   defp type(%Xema.List{}, value) when is_list(value), do: :ok
   defp type(%Xema.Map{}, value) when is_map(value), do: :ok
-  defp type(type, value), do: Xema.TypeError.tuple(value, type)
+  defp type(type, value), do: {:error, %{type: type.as, value: value}}
 
   @spec enum(Xema.types(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok
@@ -97,7 +97,7 @@ defmodule Xema.Validator do
   defp enum(%{enum: enum}, value) do
     case Enum.member?(enum, value) do
       true -> :ok
-      false -> Xema.EnumError.tuple(value, enum)
+      false -> {:error, %{enum: enum, value: value}}
     end
   end
 
@@ -113,7 +113,7 @@ defmodule Xema.Validator do
        do: :ok
 
   defp exclusive_maximum(%{exclusive_maximum: max}, value),
-    do: Xema.RangeError.tuple(value, exclusive_maximum: max)
+    do: {:error, %{exclusive_maximum: max, value: value}}
 
   @spec exclusive_minimum(Xema.types(), any) :: result
   defp exclusive_minimum(%{exclusive_minimum: nil}, _value), do: :ok
@@ -127,7 +127,7 @@ defmodule Xema.Validator do
        do: :ok
 
   defp exclusive_minimum(%{exclusive_minimum: min}, value),
-    do: Xema.RangeError.tuple(value, exclusive_minimum: min)
+    do: {:error, %{value: value, exclusive_minimum: min}}
 
   @spec minimum(Xema.types(), any) :: result
   defp minimum(%{minimum: nil}, _value), do: :ok
@@ -143,13 +143,13 @@ defmodule Xema.Validator do
   defp minimum(minimum, nil, value) when value == minimum, do: :ok
   defp minimum(minimum, false, value) when value == minimum, do: :ok
 
+  defp minimum(minimum, nil, value),
+    do: {:error, %{value: value, minimum: minimum}}
+
+  @spec maximum(Xema.types(), any) :: result
   defp minimum(minimum, exclusive, value),
     do:
-      Xema.RangeError.tuple(
-        value,
-        minimum: minimum,
-        exclusive_minimum: exclusive
-      )
+      {:error, %{value: value, minimum: minimum, exclusive_minimum: exclusive}}
 
   @spec maximum(Xema.types(), any) :: result
   defp maximum(%{maximum: nil}, _value), do: :ok
@@ -165,13 +165,12 @@ defmodule Xema.Validator do
   defp maximum(maximum, nil, value) when value == maximum, do: :ok
   defp maximum(maximum, false, value) when value == maximum, do: :ok
 
+  defp maximum(maximum, nil, value),
+    do: {:error, %{value: value, maximum: maximum}}
+
   defp maximum(maximum, exclusive, value),
     do:
-      Xema.RangeError.tuple(
-        value,
-        maximum: maximum,
-        exclusive_maximum: exclusive
-      )
+      {:error, %{value: value, maximum: maximum, exclusive_maximum: exclusive}}
 
   @spec multiple_of(Xema.types(), number) :: result
   defp multiple_of(%{multiple_of: nil} = _keywords, _value), do: :ok

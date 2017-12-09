@@ -23,12 +23,7 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      expected =
-        {:error, %Xema.TypeError{
-          type: :list,
-          value: "not an array",
-          message: ~s(Expected :list, got "not an array".)
-        }}
+      expected = {:error, %{type: :list, value: "not an array"}}
 
       assert validate(schema, "not an array") == expected
     end
@@ -85,11 +80,7 @@ defmodule Xema.ListTest do
           %{
             reason: :invalid_item,
             at: 2,
-            error: %Xema.TypeError{
-              type: :integer,
-              value: "foo",
-              message: ~s(Expected :integer, got "foo".)
-            }
+            error: %{type: :integer, value: "foo"}
           }
         }
 
@@ -111,11 +102,7 @@ defmodule Xema.ListTest do
           %{
             reason: :invalid_item,
             at: 0,
-            error: %Xema.TypeError{
-              type: :string,
-              value: 1,
-              message: "Expected :string, got 1."
-            }
+            error: %{type: :string, value: 1}
           }
         }
 
@@ -161,11 +148,7 @@ defmodule Xema.ListTest do
                {:error, %{
                  reason: :invalid_item,
                  at: 1,
-                 error: %Xema.TypeError{
-                   type: :number,
-                   value: "bar",
-                   message: ~s(Expected :number, got "bar".)
-                 }
+                 error: %{type: :number, value: "bar"}
                }}
 
       assert validate(schema, ["x", 33]) ==
@@ -229,11 +212,7 @@ defmodule Xema.ListTest do
                {:error, %{
                  reason: :invalid_item,
                  at: 2,
-                 error: %Xema.TypeError{
-                   type: :string,
-                   value: 13,
-                   message: "Expected :string, got 13."
-                 }
+                 error: %{type: :string, value: 13}
                }}
     end
   end

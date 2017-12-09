@@ -19,12 +19,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      expected =
-        {:error, %Xema.TypeError{
-          type: :map,
-          value: "foo",
-          message: ~s(Expected :map, got "foo".)
-        }}
+      expected = {:error, %{type: :map, value: "foo"}}
 
       assert validate(schema, "foo") == expected
     end
@@ -48,12 +43,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      expected =
-        {:error, %Xema.TypeError{
-          type: :object,
-          value: "foo",
-          message: ~s(Expected :object, got "foo".)
-        }}
+      expected = {:error, %{type: :object, value: "foo"}}
 
       assert validate(schema, "foo") == expected
     end
@@ -83,11 +73,7 @@ defmodule Xema.MapTest do
         {:error, %{
           reason: :invalid_property,
           property: :foo,
-          error: %Xema.TypeError{
-            type: :number,
-            value: "foo",
-            message: ~s(Expected :number, got "foo".)
-          }
+          error: %{type: :number, value: "foo"}
         }}
 
       assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
@@ -98,11 +84,7 @@ defmodule Xema.MapTest do
         {:error, %{
           reason: :invalid_property,
           property: "foo",
-          error: %Xema.TypeError{
-            type: :number,
-            value: "foo",
-            message: ~s(Expected :number, got "foo".)
-          }
+          error: %{type: :number, value: "foo"}
         }}
 
       assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) == expected
@@ -138,11 +120,7 @@ defmodule Xema.MapTest do
         {:error, %{
           reason: :invalid_property,
           property: :foo,
-          error: %Xema.TypeError{
-            type: :number,
-            value: "foo",
-            message: ~s(Expected :number, got "foo".)
-          }
+          error: %{type: :number, value: "foo"}
         }}
 
       assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
@@ -153,11 +131,7 @@ defmodule Xema.MapTest do
         {:error, %{
           reason: :invalid_property,
           property: "foo",
-          error: %Xema.TypeError{
-            type: :number,
-            value: "foo",
-            message: ~s(Expected :number, got "foo".)
-          }
+          error: %{type: :number, value: "foo"}
         }}
 
       assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) == expected
@@ -289,11 +263,7 @@ defmodule Xema.MapTest do
           %{
             reason: :invalid_property,
             property: :add,
-            error: %Xema.TypeError{
-              type: :integer,
-              value: "invalid",
-              message: ~s(Expected :integer, got "invalid".)
-            }
+            error: %{type: :integer, value: "invalid"}
           }
         }
 

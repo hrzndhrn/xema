@@ -122,11 +122,7 @@ defmodule Xema do
         %{
           reason: :invalid_item,
           at: 2,
-          error: %Xema.RangeError{
-            value: 1,
-            minimum: 2,
-            message: "Expected a value with a minimum of 2, got 1."
-          }
+          error: %{value: 1, minimum: 2}
         }
       }
 

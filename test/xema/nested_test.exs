@@ -61,11 +61,7 @@ defmodule Xema.NestedTest do
               error: %{
                 reason: :invalid_property,
                 property: :num,
-                error: %Xema.RangeError{
-                  value: -2,
-                  minimum: 0,
-                  message: "Expected a value with a minimum of 0, got -2."
-                }
+                error: %{value: -2, minimum: 0}
               }
             }
           }
@@ -131,11 +127,7 @@ defmodule Xema.NestedTest do
               error: %{
                 reason: :invalid_property,
                 property: :num,
-                error: %Xema.RangeError{
-                  value: -2,
-                  minimum: 0,
-                  message: "Expected a value with a minimum of 0, got -2."
-                }
+                error: %{value: -2, minimum: 0}
               }
             }
           }

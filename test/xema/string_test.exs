@@ -17,23 +17,13 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a number", %{schema: schema} do
-      expected =
-        {:error, %Xema.TypeError{
-          type: :string,
-          value: 1,
-          message: "Expected :string, got 1."
-        }}
+      expected = {:error, %{type: :string, value: 1}}
 
       assert validate(schema, 1) == expected
     end
 
     test "validate/2 with nil", %{schema: schema} do
-      expected =
-        {:error, %Xema.TypeError{
-          type: :string,
-          value: nil,
-          message: "Expected :string, got nil."
-        }}
+      expected = {:error, %{type: :string, value: nil}}
 
       assert validate(schema, nil) == expected
     end
@@ -93,12 +83,7 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a value that is not in the enum", %{schema: schema} do
-      expected =
-        {:error, %Xema.EnumError{
-          message: ~s(Value "foo" is not in enum ["one", "two"].),
-          enum: ["one", "two"],
-          value: "foo"
-        }}
+      expected = {:error, %{enum: ["one", "two"], value: "foo"}}
 
       assert validate(schema, "foo") == expected
     end

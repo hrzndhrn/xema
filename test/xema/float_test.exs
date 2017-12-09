@@ -19,23 +19,13 @@ defmodule Xema.FloatTest do
     end
 
     test "validate/2 with an integer", %{schema: schema} do
-      expected =
-        {:error, %Xema.TypeError{
-          type: :float,
-          value: 2,
-          message: ~s(Expected :float, got 2.)
-        }}
+      expected = {:error, %{type: :float, value: 2}}
 
       assert validate(schema, 2) == expected
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      expected =
-        {:error, %Xema.TypeError{
-          type: :float,
-          value: "foo",
-          message: ~s(Expected :float, got "foo".)
-        }}
+      expected = {:error, %{type: :float, value: "foo"}}
 
       assert validate(schema, "foo") == expected
     end
@@ -61,23 +51,13 @@ defmodule Xema.FloatTest do
     end
 
     test "validate/2 with a too small float", %{schema: schema} do
-      expected =
-        {:error, %Xema.RangeError{
-          value: 1.0,
-          minimum: 2,
-          message: "Expected a value with a minimum of 2, got 1.0."
-        }}
+      expected = {:error, %{value: 1.0, minimum: 2}}
 
       assert validate(schema, 1.0) == expected
     end
 
     test "validate/2 with a too big float", %{schema: schema} do
-      expected =
-        {:error, %Xema.RangeError{
-          value: 5.0,
-          maximum: 4,
-          message: "Expected a value with a maximum of 4, got 5.0."
-        }}
+      expected = {:error, %{value: 5.0, maximum: 4}}
 
       assert validate(schema, 5.0) == expected
     end
@@ -102,49 +82,25 @@ defmodule Xema.FloatTest do
     end
 
     test "validate/2 with a too small float", %{schema: schema} do
-      expected =
-        {:error, %Xema.RangeError{
-          value: 1.0,
-          minimum: 2,
-          exclusive_minimum: true,
-          message: "Expected a value with an exclusive minimum of 2, got 1.0."
-        }}
+      expected = {:error, %{value: 1.0, minimum: 2, exclusive_minimum: true}}
 
       assert validate(schema, 1.0) == expected
     end
 
     test "validate/2 with a minimum float", %{schema: schema} do
-      expected =
-        {:error, %Xema.RangeError{
-          value: 2.0,
-          minimum: 2,
-          exclusive_minimum: true,
-          message: "Expected a value with an exclusive minimum of 2, got 2.0."
-        }}
+      expected = {:error, %{value: 2.0, minimum: 2, exclusive_minimum: true}}
 
       assert validate(schema, 2.0) == expected
     end
 
     test "validate/2 with a maximum float", %{schema: schema} do
-      expected =
-        {:error, %Xema.RangeError{
-          value: 4.0,
-          maximum: 4,
-          exclusive_maximum: true,
-          message: "Expected a value with an exclusive maximum of 4, got 4.0."
-        }}
+      expected = {:error, %{value: 4.0, maximum: 4, exclusive_maximum: true}}
 
       assert validate(schema, 4.0) == expected
     end
 
     test "validate/2 with a too big float", %{schema: schema} do
-      expected =
-        {:error, %Xema.RangeError{
-          value: 5.0,
-          maximum: 4,
-          exclusive_maximum: true,
-          message: "Expected a value with an exclusive maximum of 4, got 5.0."
-        }}
+      expected = {:error, %{value: 5.0, maximum: 4, exclusive_maximum: true}}
 
       assert validate(schema, 5.0) == expected
     end
@@ -175,12 +131,7 @@ defmodule Xema.FloatTest do
     end
 
     test "with a value that is not in the enum", %{schema: schema} do
-      expected =
-        {:error, %Xema.EnumError{
-          message: "Value 2.2 is not in enum [1.2, 1.3, 3.3].",
-          enum: [1.2, 1.3, 3.3],
-          value: 2.2
-        }}
+      expected = {:error, %{enum: [1.2, 1.3, 3.3], value: 2.2}}
 
       assert validate(schema, 2.2) == expected
     end

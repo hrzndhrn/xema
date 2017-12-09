@@ -82,11 +82,7 @@ iex> schema = xema :nil
 iex> validate schema, nil
 :ok
 iex> validate schema, 0
-{:error, %Xema.TypeError{
-  type: :nil,
-  value: 0,
-  message: "Expected nil, got 0."
-}}
+{:error, %{type: :nil, value: 0}}
 ```
 
 ### <a name="boolean"></a> Type boolean
@@ -102,11 +98,7 @@ iex> validate schema, true
 iex> is_valid? schema, false
 true
 iex> validate schema, 0
-{:error, %Xema.TypeError{
-  type: :boolean,
-  value: 0,
-  message: "Expected :boolean, got 0."
-}}
+{:error, %{type: :boolean, value: 0}}
 iex> is_valid? schema, nil
 false
 ```
@@ -123,11 +115,7 @@ iex> schema = xema :string
 iex> validate schema, "José"
 :ok
 iex> validate schema, 42
-{:error, %Xema.TypeError{
-  type: :string,
-  value: 42,
-  message: "Expected :string, got 42."
-}}
+{:error, %{type: :string, value: 42}}
 iex> is_valid? schema, "José"
 true
 iex> is_valid? schema, 42
@@ -185,11 +173,7 @@ iex> validate schema, 42
 iex> validate schema, 21.5
 :ok
 iex> validate schema, "foo"
-{:error, %Xema.TypeError{
-  type: :number,
-  value: "foo",
-  message: ~s(Expected :number, got "foo".)
-}}
+{:error, %{type: :number, value: "foo"}}
 ```
 
 The `integer` type is used for integral numbers.
@@ -201,11 +185,7 @@ iex> schema = xema :integer
 iex> validate schema, 42
 :ok
 iex> validate schema, 21.5
-{:error, %Xema.TypeError{
-  type: :integer,
-  value: 21.5,
-  message: "Expected :integer, got 21.5."
-}}
+{:error, %{type: :integer, value: 21.5}}
 ```
 
 The `float` type is used for floating point numbers.
@@ -215,11 +195,7 @@ Xema
 iex> schema = xema :float
 %Xema{type: %Xema.Float{}}
 iex> validate schema, 42
-{:error, %Xema.TypeError{
-  type: :float,
-  value: 42,
-  message: "Expected :float, got 42."
-}}
+{:error, %{type: :float, value: 42}}
 iex> validate schema, 21.5
 :ok
 ```
@@ -260,29 +236,15 @@ Xema
 iex> schema = xema :float, minimum: 1.2, maximum: 1.4, exclusive_maximum: true
 %Xema{type: %Xema.Float{minimum: 1.2, maximum: 1.4, exclusive_maximum: true}}
 iex> validate schema, 1.1
-{:error, %Xema.RangeError{
-  value: 1.1,
-  minimum: 1.2,
-  message: "Expected a value with a minimum of 1.2, got 1.1."
-}}
+{:error, %{value: 1.1, minimum: 1.2}}
 iex> validate schema, 1.2
 :ok
 iex> is_valid? schema, 1.3
 true
 iex> validate schema, 1.4
-{:error, %Xema.RangeError{
-  value: 1.4,
-  maximum: 1.4,
-  exclusive_maximum: true,
-  message: "Expected a value with an exclusive maximum of 1.4, got 1.4."
-}}
+{:error, %{value: 1.4, maximum: 1.4, exclusive_maximum: true}}
 iex> validate schema, 1.5
-{:error, %Xema.RangeError{
-  value: 1.5,
-  maximum: 1.4,
-  exclusive_maximum: true,
-  message: "Expected a value with an exclusive maximum of 1.4, got 1.5."
-}}
+{:error, %{value: 1.5, maximum: 1.4, exclusive_maximum: true}}
 ```
 
 ### <a name="list"></a> Type list
@@ -296,11 +258,7 @@ iex> schema = xema :list
 iex> is_valid? schema, [1, "two", 3.0]
 true
 iex> validate schema, 9
-{:error, %Xema.TypeError{
-  type: :list,
-  value: 9,
-  message: "Expected :list, got 9."
-}}
+{:error, %{type: :list, value: 9}}
 ```
 
 #### <a name="items"></a> Items
@@ -318,10 +276,8 @@ iex> validate schema, ["a", 1]
 {:error, %{
   reason: :invalid_item,
   at: 1,
-  error: %Xema.TypeError{
-    type: :string, value: 1, message: "Expected :string, got 1."
-  }
-}}
+  error: %{type: :string, value: 1}}
+}
 ```
 
 The next example shows how to add keywords to the items schema.
@@ -337,11 +293,7 @@ iex> validate schema, [3, 2, 1, 0]
 {:error, %{
   reason: :invalid_item,
   at: 3,
-  error: %Xema.RangeError{
-    value: 0,
-    minimum: 1,
-    message: "Expected a value with a minimum of 1, got 0."
-  }
+  error: %{value: 0, minimum: 1}
 }}
 ```
 
@@ -412,11 +364,7 @@ iex> validate schema, [1, "two", 3, "four"]
 {:error, %{
   reason: :invalid_item,
   at: 3,
-  error: %Xema.TypeError{
-    type: :integer,
-    value: "four",
-    message: ~s(Expected :integer, got "four".)
-  }
+  error: %{type: :integer, value: "four"}
 }}
 ```
 
@@ -468,11 +416,7 @@ iex> schema = xema :map
 iex> is_valid? schema, %{"foo" => "bar"}
 true
 iex> validate schema, "bar"
-{:error, %Xema.TypeError{
-  type: :map,
-  value: "bar",
-  message: ~s(Expected :map, got "bar".)
-}}
+{:error, %{type: :map, value: "bar"}}
 # Using non-strings as keys are also valid:
 iex> is_valid? schema, %{foo: "bar"}
 true
@@ -624,11 +568,7 @@ iex> validate schema, %{foo: "foo", add: "one"}
 {:error, %{
   reason: :invalid_property,
   property: :add,
-  error: %Xema.TypeError{
-    type: :integer,
-    value: "one",
-    message: ~s(Expected :integer, got "one".)
-  }
+  error: %{type: :integer, value: "one"}
 }}
 ```
 
