@@ -133,13 +133,13 @@ Xema
 iex> schema = xema :string, min_length: 2, max_length: 3
 %Xema{type: %Xema.String{min_length: 2, max_length: 3}}
 iex> validate schema, "a"
-{:error, %{reason: :too_short, min_length: 2}}
+{:error, %{value: "a", min_length: 2}}
 iex> validate schema, "ab"
 :ok
 iex> validate schema, "abc"
 :ok
 iex> validate schema, "abcd"
-{:error, %{reason: :too_long, max_length: 3}}
+{:error, %{value: "abcd", max_length: 3}}
 ```
 
 #### <a name="regex"></a> Regular Expression
@@ -155,7 +155,7 @@ iex> schema = xema :string, pattern: ~r/[0-9]-[A-B]+/
 iex> validate schema, "1-AB"
 :ok
 iex> validate schema, "foo"
-{:error, %{reason: :no_match, pattern: ~r/[0-9]-[A-B]+/}}
+{:error, %{value: "foo", pattern: ~r/[0-9]-[A-B]+/}}
 ```
 
 ### <a name="number"></a> Types number, integer and float
@@ -312,7 +312,7 @@ true
 iex> validate schema, [1, "five"]
 {
   :error,
-  %{reason: :invalid_item, at: 1, error: %{reason: :too_short, min_length: 5}}
+  %{reason: :invalid_item, at: 1, error: %{value: "five", min_length: 5}}
 }
 # It’s okay to not provide all of the items:
 iex> validate schema, [1]
@@ -379,13 +379,13 @@ Xema
 iex> schema = xema :list, min_items: 2, max_items: 3
 %Xema{type: %Xema.List{min_items: 2, max_items: 3}}
 iex> validate schema, [1]
-{:error, %{reason: :too_less_items, min_items: 2}}
+{:error, %{value: [1], min_items: 2}}
 iex> validate schema, [1, 2]
 :ok
 iex> validate schema, [1, 2, 3]
 :ok
 iex> validate schema, [1, 2, 3, 4]
-{:error, %{reason: :too_many_items, max_items: 3}}
+{:error, %{value: [1, 2, 3, 4], max_items: 3}}
 ```
 
 #### <a name="unique"></a> Uniqueness
@@ -400,7 +400,7 @@ iex> schema = xema :list, unique_items: true
 iex> is_valid? schema, [1, 2, 3]
 true
 iex> validate schema, [1, 2, 3, 2, 1]
-{:error, %{reason: :not_unique}}
+{:error, %{value: [1, 2, 3, 2, 1], unique_items: true}}
 ```
 
 ### <a name="map"></a> Type map
@@ -483,7 +483,7 @@ iex> validate schema, %{a: 5, b: "ups"}
   reason: :invalid_property,
   property: :b,
   error: %{
-    reason: :too_short,
+    value: "ups",
     min_length: 5
   }
 }}

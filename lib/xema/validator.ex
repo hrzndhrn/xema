@@ -41,8 +41,8 @@ defmodule Xema.Validator do
   def validate(%Xema.String{} = type, value) do
     with :ok <- type(type, value),
          length <- String.length(value),
-         :ok <- min_length(type, length),
-         :ok <- max_length(type, length),
+         :ok <- min_length(type, length, value),
+         :ok <- max_length(type, length, value),
          :ok <- pattern(type, value),
          :ok <- enum(type, value),
          do: :ok
@@ -184,21 +184,19 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec min_length(Xema.String.t(), integer) :: result
-  defp min_length(%{min_length: nil}, _), do: :ok
-  defp min_length(%{min_length: min}, len) when len >= min, do: :ok
+  @spec min_length(Xema.String.t(), integer, String.t()) :: result
+  defp min_length(%{min_length: nil}, _, _), do: :ok
+  defp min_length(%{min_length: min}, len, _) when len >= min, do: :ok
 
-  defp min_length(%{min_length: min}, _length) do
-    error(:too_short, min_length: min)
-  end
+  defp min_length(%{min_length: min}, _, value),
+    do: {:error, %{value: value, min_length: min}}
 
-  @spec max_length(Xema.String.t(), integer) :: result
-  defp max_length(%{max_length: nil}, _length), do: :ok
-  defp max_length(%{max_length: max}, len) when len <= max, do: :ok
+  @spec max_length(Xema.String.t(), integer, String.t()) :: result
+  defp max_length(%{max_length: nil}, _, _), do: :ok
+  defp max_length(%{max_length: max}, len, _) when len <= max, do: :ok
 
-  defp max_length(%{max_length: max}, _length) do
-    error(:too_long, max_length: max)
-  end
+  defp max_length(%{max_length: max}, _, value),
+    do: {:error, %{value: value, max_length: max}}
 
   @spec pattern(Xema.String.t(), String.t()) :: result
   defp pattern(%{pattern: nil}, _string), do: :ok
@@ -206,7 +204,7 @@ defmodule Xema.Validator do
   defp pattern(%{pattern: pattern}, string) do
     case Regex.match?(pattern, string) do
       true -> :ok
-      false -> error(:no_match, pattern: pattern)
+      false -> {:error, %{value: string, pattern: pattern}}
     end
   end
 
@@ -217,9 +215,8 @@ defmodule Xema.Validator do
     :ok
   end
 
-  defp min_items(%Xema.List{min_items: min}, _list) do
-    error(:too_less_items, min_items: min)
-  end
+  defp min_items(%Xema.List{min_items: min}, list),
+    do: {:error, %{value: list, min_items: min}}
 
   @spec max_items(Xema.List.t(), list) :: result
   defp max_items(%Xema.List{max_items: nil}, _list), do: :ok
@@ -228,9 +225,8 @@ defmodule Xema.Validator do
     :ok
   end
 
-  defp max_items(%Xema.List{max_items: max}, _list) do
-    error(:too_many_items, max_items: max)
-  end
+  defp max_items(%Xema.List{max_items: max}, list),
+    do: {:error, %{value: list, max_items: max}}
 
   @spec unique(Xema.List.t(), list) :: result
   defp unique(%Xema.List{unique_items: nil}, _list), do: :ok
@@ -238,7 +234,7 @@ defmodule Xema.Validator do
   defp unique(%Xema.List{unique_items: true}, list) do
     case is_unique?(list) do
       true -> :ok
-      false -> error(:not_unique)
+      false -> {:error, %{value: list, unique_items: true}}
     end
   end
 
@@ -277,21 +273,24 @@ defmodule Xema.Validator do
 
   @spec items_tuple(list, boolean | Xema.types(), list, integer) :: result
   defp items_tuple(_schemas, _additonal_items, [], _at), do: :ok
-  defp items_tuple([], false, _list, at), do: error(:additional_item, at: at)
+
+  defp items_tuple([], false, list, at),
+    do: {:error, %{additional_items: Enum.count(list), at: at}}
+
   defp items_tuple([], true, _list, _at), do: :ok
   defp items_tuple([], nil, _list, _at), do: :ok
 
   defp items_tuple([], schema, [item | list], at) do
     case Xema.validate(schema, item) do
       :ok -> items_tuple([], schema, list, at + 1)
-      {:error, reason} -> error(:invalid_item, at: at, error: reason)
+      {:error, reason} -> {:error, %{at: at, error: reason}}
     end
   end
 
   defp items_tuple([schema | schemas], additional_items, [item | list], at) do
     case Xema.validate(schema, item) do
       :ok -> items_tuple(schemas, additional_items, list, at + 1)
-      {:error, reason} -> error(:invalid_item, at: at, error: reason)
+      {:error, reason} -> {:error, %{at: at, error: reason}}
     end
   end
 
@@ -301,14 +300,14 @@ defmodule Xema.Validator do
   defp keys(%Xema.Map{keys: :atoms}, map) do
     case map |> Map.keys() |> Enum.all?(&is_atom/1) do
       true -> :ok
-      false -> error(:invalid_keys, keys: :atoms)
+      false -> {:error, %{keys: :atoms}}
     end
   end
 
   defp keys(%Xema.Map{keys: :strings}, map) do
     case map |> Map.keys() |> Enum.all?(&is_binary/1) do
       true -> :ok
-      false -> error(:invalid_keys, keys: :strings)
+      false -> {:error, %{keys: :strings}}
     end
   end
 
@@ -505,7 +504,6 @@ defmodule Xema.Validator do
 
   @spec error(atom | Xema.types()) :: {:error, map}
   defp error(atom) when is_atom(atom), do: error(atom, [])
-  defp error(type), do: error(:wrong_type, type: type.as)
 
   @spec error(atom, any) :: {:error, map}
   defp error(reason, info) when is_atom(reason) do

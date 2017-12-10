@@ -43,8 +43,7 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with too short list", %{schema: schema} do
-      expected = {:error, %{reason: :too_less_items, min_items: 2}}
-      assert validate(schema, [1]) == expected
+      assert validate(schema, [1]) == {:error, %{value: [1], min_items: 2}}
     end
 
     test "validate/2 with proper list", %{schema: schema} do
@@ -52,8 +51,8 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with to long list", %{schema: schema} do
-      expected = {:error, %{reason: :too_many_items, max_items: 3}}
-      assert validate(schema, [1, 2, 3, 4]) == expected
+      assert validate(schema, [1, 2, 3, 4]) ==
+               {:error, %{value: [1, 2, 3, 4], max_items: 3}}
     end
   end
 
@@ -120,8 +119,8 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with list of not unique items", %{schema: schema} do
-      expected = {:error, %{reason: :not_unique}}
-      assert validate(schema, [1, 2, 3, 3, 4]) == expected
+      assert validate(schema, [1, 2, 3, 3, 4]) ==
+               {:error, %{value: [1, 2, 3, 3, 4], unique_items: true}}
     end
   end
 
@@ -155,7 +154,7 @@ defmodule Xema.ListTest do
                {:error, %{
                  reason: :invalid_item,
                  at: 0,
-                 error: %{reason: :too_short, min_length: 3}
+                 error: %{value: "x", min_length: 3}
                }}
     end
 

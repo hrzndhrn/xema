@@ -47,13 +47,12 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a too short string", %{schema: schema} do
-      expected = {:error, %{min_length: 3, reason: :too_short}}
-      assert validate(schema, "f") == expected
+      assert validate(schema, "f") == {:error, %{min_length: 3, value: "f"}}
     end
 
     test "validate/2 with a too long string", %{schema: schema} do
-      expected = {:error, %{max_length: 4, reason: :too_long}}
-      assert validate(schema, "foobar") == expected
+      assert validate(schema, "foobar") ==
+               {:error, %{max_length: 4, value: "foobar"}}
     end
   end
 
@@ -67,9 +66,8 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a none matching string", %{schema: schema} do
-      regex = ~r/^.+match.+$/
-      expected = {:error, %{reason: :no_match, pattern: regex}}
-      assert validate(schema, "a to a") == expected
+      assert validate(schema, "a to a") ==
+               {:error, %{value: "a to a", pattern: ~r/^.+match.+$/}}
     end
   end
 
