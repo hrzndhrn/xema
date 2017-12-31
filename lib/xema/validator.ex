@@ -125,8 +125,8 @@ defmodule Xema.Validator do
   end
 
   @spec do_all_of(list, any) :: boolean
-  defp do_all_of(schemas, value), do:
-    Enum.all?(schemas, fn schema -> Xema.validate(schema, value) == :ok end)
+  defp do_all_of(schemas, value),
+    do: Enum.all?(schemas, fn schema -> Xema.validate(schema, value) == :ok end)
 
   @spec exclusive_maximum(Xema.types(), any) :: result
   defp exclusive_maximum(%{exclusive_maximum: nil}, _value), do: :ok

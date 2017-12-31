@@ -19,8 +19,7 @@ defmodule Xema.BoolLogicTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, 1) ==
-        {:error, :not}
+      assert validate(schema, 1) == {:error, :not}
     end
   end
 
@@ -28,12 +27,12 @@ defmodule Xema.BoolLogicTest do
     setup do
       %{
         schema:
-        xema(
-          :map,
-          properties: %{
-            foo: {:any, not: {:string, min_length: 3}}
-          }
-        )
+          xema(
+            :map,
+            properties: %{
+              foo: {:any, not: {:string, min_length: 3}}
+            }
+          )
       }
     end
 
@@ -42,8 +41,7 @@ defmodule Xema.BoolLogicTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, %{foo: "foo"}) ==
-        {:error, %{foo: :not}}
+      assert validate(schema, %{foo: "foo"}) == {:error, %{foo: :not}}
     end
   end
 
@@ -51,10 +49,10 @@ defmodule Xema.BoolLogicTest do
     setup do
       %{
         schema:
-        xema(
-          :any,
-          all_of: [:integer, {:integer, minimum: 0}]
-        )
+          xema(
+            :any,
+            all_of: [:integer, {:integer, minimum: 0}]
+          )
       }
     end
 
