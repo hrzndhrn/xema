@@ -14,8 +14,36 @@ defmodule Xema.BoolLogicTest do
       assert schema.type.as == :any
     end
 
-    test "validate/2 with a string", %{schema: schema} do
+    test "validate/2 with a valid value", %{schema: schema} do
       assert validate(schema, "foo") == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, 1) ==
+        {:error, :not}
+    end
+  end
+
+  describe "nested keyword not:" do
+    setup do
+      %{
+        schema:
+        xema(
+          :map,
+          properties: %{
+            foo: {:any, not: {:string, min_length: 3}}
+          }
+        )
+      }
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, %{foo: ""}) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, %{foo: "foo"}) ==
+        {:error, %{foo: :not}}
     end
   end
 end

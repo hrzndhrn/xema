@@ -22,8 +22,13 @@ defmodule Xema.Any do
   """
   @type t :: %Xema.Any{enum: list | nil, as: atom}
 
-  defstruct [:enum, as: :any]
+  defstruct [:enum, :not, as: :any]
 
   @spec new(keyword) :: Xema.Any.t()
-  def new(opts \\ []), do: struct(Xema.Any, opts)
+  def new(opts \\ []), do: struct(Xema.Any, update(opts))
+
+  defp update(opts) do
+    opts
+    |> Keyword.update(:not, nil, fn schema -> Xema.type(schema) end)
+  end
 end

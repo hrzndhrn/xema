@@ -37,6 +37,14 @@ defmodule Xema.SchemaValidatorTest do
         xema(:any, enum: [1, 2, 3, 2])
       end
     end
+
+    test "keyword not without a schema" do
+      expected = ~s("foo" is not a valid type.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:any, not: "foo")
+      end
+    end
   end
 
   describe "schema type boolean:" do

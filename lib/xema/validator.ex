@@ -28,7 +28,9 @@ defmodule Xema.Validator do
   end
 
   def validate(%Xema.Any{} = type, value) do
-    enum(type, value)
+    with :ok <- enum(type, value),
+         :ok <- do_not(type, value),
+         do: :ok
   end
 
   def validate(%Xema.Boolean{} = type, value) do
@@ -98,6 +100,16 @@ defmodule Xema.Validator do
     case Enum.member?(enum, value) do
       true -> :ok
       false -> {:error, %{enum: enum, value: value}}
+    end
+  end
+
+  @spec do_not(Xema.types(), any) :: result
+  defp do_not(%{not: nil}, _value), do: :ok
+
+  defp do_not(%{not: schema}, value) do
+    case Xema.validate(schema, value) do
+      :ok -> {:error, :not}
+      _ -> :ok
     end
   end
 
@@ -539,15 +551,5 @@ defmodule Xema.Validator do
       false ->
         {:error, %{key => %{dependency: dependency}}}
     end
-  end
-
-  @spec error(atom, any) :: {:error, map}
-  defp error(reason, info) when is_atom(reason) do
-    info =
-      info
-      |> Enum.into(%{})
-      |> Map.merge(%{reason: reason})
-
-    {:error, info}
   end
 end
