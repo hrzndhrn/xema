@@ -22,7 +22,7 @@ defmodule Xema.Any do
   """
   @type t :: %Xema.Any{enum: list | nil, as: atom}
 
-  defstruct [:all_of, :any_off, :enum, :not, :one_of, as: :any]
+  defstruct [:all_of, :any_of, :enum, :not, :one_of, as: :any]
 
   @spec new(keyword) :: Xema.Any.t()
   def new(opts \\ []), do: struct(Xema.Any, update(opts))

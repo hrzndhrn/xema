@@ -35,7 +35,8 @@ defmodule Xema.SchemaValidator do
   def validate(:any, opts) do
     with :ok <- validate_keywords(:any, opts),
          :ok <- enum(:any, opts[:enum]),
-         :ok <- all_of(opts[:all_of]),
+         :ok <- schemas(opts, :all_of),
+         :ok <- schemas(opts, :any_of),
          do: :ok
   end
 
@@ -130,6 +131,16 @@ defmodule Xema.SchemaValidator do
       |> MapSet.difference(@keys[type])
       |> MapSet.to_list()
 
+  # Check for a list
+
+  defp schemas(opts, key) do
+    case opts[key] do
+      nil -> :ok
+      items when is_list(items) -> :ok
+      _ -> {:error, "#{key} has to be a list."}
+    end
+  end
+
   # Keyword: additional_items
   # The value of `additional_items` must be either a boolean or a schema.
 
@@ -143,17 +154,7 @@ defmodule Xema.SchemaValidator do
 
   defp additional_items(_, _), do: :ok
 
-  # Keyword: all_of
-  defp all_of(nil), do: :ok
-
-  defp all_of(schemas) do
-    case is_list(schemas) do
-      true -> :ok
-      false -> {:error, "all_of has to be a list."}
-    end
-  end
-
-  # Keyword: additional_properties
+# Keyword: additional_properties
   # The value of `additional_properties` must be a boolean or a schema.
 
   defp additional_properties(nil, _, _), do: :ok
