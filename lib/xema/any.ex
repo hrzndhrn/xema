@@ -14,6 +14,8 @@ defmodule Xema.Any do
       true
   """
 
+  alias Xema.Utils
+
   @typedoc """
   The struct contains the keywords for the type `any`.
 
@@ -22,18 +24,18 @@ defmodule Xema.Any do
   """
   @type t :: %Xema.Any{enum: list | nil, as: atom}
 
-  defstruct [:all_of, :any_of, :enum, :not, :one_of, as: :any]
+  defstruct [
+    :all_of,
+    :any_of,
+    :enum,
+    :exclusive_minimum,
+    :minimum,
+    :multiple_of,
+    :not,
+    :one_of,
+    as: :any
+  ]
 
   @spec new(keyword) :: Xema.Any.t()
-  def new(opts \\ []), do: struct(Xema.Any, update(opts))
-
-  defp update(opts) do
-    opts
-    |> Keyword.update(:all_of, nil, &schemas/1)
-    |> Keyword.update(:any_of, nil, &schemas/1)
-    |> Keyword.update(:not, nil, fn schema -> Xema.type(schema) end)
-    |> Keyword.update(:one_of, nil, &schemas/1)
-  end
-
-  defp schemas(list), do: Enum.map(list, fn schema -> Xema.type(schema) end)
+  def new(opts \\ []), do: struct(Xema.Any, Utils.update(opts))
 end

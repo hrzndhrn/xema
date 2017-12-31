@@ -33,6 +33,8 @@ defmodule Xema.Validator do
          :ok <- all_of(type, value),
          :ok <- any_of(type, value),
          :ok <- one_of(type, value),
+         :ok <- minimum(type, value),
+         :ok <- multiple_of(type, value),
          do: :ok
   end
 
@@ -82,9 +84,9 @@ defmodule Xema.Validator do
          :ok <- exclusive_maximum(type, value),
          :ok <- exclusive_minimum(type, value),
          :ok <- multiple_of(type, value),
-         :ok <- enum(type, value) do
-      :ok
-    end
+         :ok <- enum(type, value),
+         :ok <- one_of(type, value),
+         do: :ok
   end
 
   @spec type(Xema.types(), any) :: result
@@ -199,8 +201,11 @@ defmodule Xema.Validator do
   defp minimum(
          %{minimum: minimum, exclusive_minimum: exclusive_minimum},
          value
-       ),
+       )
+       when is_number(value),
        do: minimum(minimum, exclusive_minimum, value)
+
+  defp minimum(_, _), do: :ok
 
   @spec minimum(number, boolean, number) :: result
   defp minimum(minimum, _exclusive, value) when value > minimum, do: :ok
@@ -235,7 +240,7 @@ defmodule Xema.Validator do
   @spec multiple_of(Xema.types(), number) :: result
   defp multiple_of(%{multiple_of: nil} = _keywords, _value), do: :ok
 
-  defp multiple_of(%{multiple_of: multiple_of}, value) do
+  defp multiple_of(%{multiple_of: multiple_of}, value) when is_number(value) do
     x = value / multiple_of
 
     case x - Float.floor(x) do
@@ -243,6 +248,8 @@ defmodule Xema.Validator do
       _ -> {:error, %{value: value, multiple_of: multiple_of}}
     end
   end
+
+  defp multiple_of(_, _), do: :ok
 
   @spec min_length(Xema.String.t(), integer, String.t()) :: result
   defp min_length(%{min_length: nil}, _, _), do: :ok

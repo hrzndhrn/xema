@@ -27,6 +27,8 @@ defmodule Xema.Float do
   * `minimum` the minimum value
   * `multiple_of` is a number greater 0. The value has to be a multiple of this
     number.
+  * `one_of` the given data must be valid against exactly one of the given
+    subschemas.
   """
 
   @type t :: %Xema.Float{
@@ -36,6 +38,7 @@ defmodule Xema.Float do
           exclusive_maximum: boolean | number | nil,
           multiple_of: number | nil,
           enum: list | nil,
+          one_of: list | nil,
           as: atom
         }
 
@@ -46,6 +49,7 @@ defmodule Xema.Float do
     :exclusive_minimum,
     :multiple_of,
     :enum,
+    :one_of,
     as: :float
   ]
 

@@ -27,6 +27,8 @@ defmodule Xema.Number do
   * `minimum` the minimum value
   * `multiple_of` is a number greater 0. The value has to be a multiple of this
     number.
+  * `one_of` the given data must be valid against exactly one of the given
+    subschemas.
   """
 
   @type t :: %Xema.Number{
@@ -36,6 +38,7 @@ defmodule Xema.Number do
           exclusive_maximum: boolean | number | nil,
           multiple_of: number | nil,
           enum: list | nil,
+          one_of: list | nil,
           as: atom
         }
 
@@ -46,7 +49,7 @@ defmodule Xema.Number do
     :exclusive_minimum,
     :multiple_of,
     :enum,
-    type: :number,
+    :one_of,
     as: :number
   ]
 

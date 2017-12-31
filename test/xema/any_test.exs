@@ -273,6 +273,35 @@ defmodule Xema.AnyTest do
     end
   end
 
+  describe "keyword one_of (multiple_of integer):" do
+    setup do
+      %{
+        schema:
+          xema(
+            :integer,
+            one_of: [
+              %{multiple_of: 3},
+              %{multiple_of: 5}
+            ]
+          )
+      }
+    end
+
+    test "type", %{schema: schema} do
+      assert schema.type.as == :integer
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, 9) == :ok
+      assert validate(schema, 10) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, 15) == {:error, :one_of}
+      assert validate(schema, 4) == {:error, :one_of}
+    end
+  end
+
   describe "keyword one_of (shortcut):" do
     setup do
       %{
@@ -286,6 +315,52 @@ defmodule Xema.AnyTest do
                  :any,
                  one_of: [{:integer, multiple_of: 3}, {:integer, multiple_of: 5}]
                )
+    end
+  end
+
+  describe "'any' schema with keyword minimum" do
+    setup do
+      %{schema: xema(:any, minimum: 2)}
+    end
+
+    test "equal shortcut", %{schema: schema} do
+      assert schema == xema(:minimum, 2)
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, 2) == :ok
+      assert validate(schema, 3) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, 0) == {:error, %{minimum: 2, value: 0}}
+    end
+
+    test "validate/2 ignore non-numbers", %{schema: schema} do
+      assert validate(schema, "foo") == :ok
+    end
+  end
+
+  describe "'any' schema with keywor multiple_of" do
+    setup do
+      %{schema: xema(:any, multiple_of: 2)}
+    end
+
+    test "equal shortcut", %{schema: schema} do
+      assert schema == xema(:multiple_of, 2)
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, 2) == :ok
+      assert validate(schema, 4) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, 3) == {:error, %{multiple_of: 2, value: 3}}
+    end
+
+    test "validate/2 ignore non-numbers", %{schema: schema} do
+      assert validate(schema, "foo") == :ok
     end
   end
 end
