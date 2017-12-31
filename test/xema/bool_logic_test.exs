@@ -46,4 +46,28 @@ defmodule Xema.BoolLogicTest do
         {:error, %{foo: :not}}
     end
   end
+
+  describe "keyword all_of:" do
+    setup do
+      %{
+        schema:
+        xema(
+          :any,
+          all_of: [:integer, {:integer, minimum: 0}]
+        )
+      }
+    end
+
+    test "type", %{schema: schema} do
+      assert schema.type.as == :any
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, 1) == :ok
+    end
+
+    test "validate/2 with an imvalid value", %{schema: schema} do
+      assert validate(schema, -1) == {:error, :all_of}
+    end
+  end
 end

@@ -45,6 +45,22 @@ defmodule Xema.SchemaValidatorTest do
         xema(:any, not: "foo")
       end
     end
+
+    test "keyword all_of without a list" do
+      expected = "all_of has to be a list."
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:any, all_of: "foo")
+      end
+    end
+
+    test "keyword all_of with an invalid list" do
+      expected = ~s("foo" is not a valid type.)
+
+      assert_raise SchemaError, expected, fn ->
+        xema(:any, all_of: [:integer, "foo"])
+      end
+    end
   end
 
   describe "schema type boolean:" do

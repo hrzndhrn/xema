@@ -34,9 +34,9 @@ defmodule Xema.SchemaValidator do
 
   def validate(:any, opts) do
     with :ok <- validate_keywords(:any, opts),
-         :ok <- enum(:any, opts[:enum]) do
-      :ok
-    end
+         :ok <- enum(:any, opts[:enum]),
+         :ok <- all_of(opts[:all_of]),
+         do: :ok
   end
 
   def validate(:boolean, opts) do
@@ -143,6 +143,16 @@ defmodule Xema.SchemaValidator do
        do: {:error, "additional_items has no effect if items is not a list."}
 
   defp additional_items(_, _), do: :ok
+
+  # Keyword: all_of
+  defp all_of(nil), do: :ok
+
+  defp all_of(schemas) do
+    case is_list(schemas) do
+      true -> :ok
+      false -> {:error, "all_of has to be a list."}
+    end
+  end
 
   # Keyword: additional_properties
   # The value of `additional_properties` must be a boolean or a schema.

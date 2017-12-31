@@ -30,6 +30,7 @@ defmodule Xema.Validator do
   def validate(%Xema.Any{} = type, value) do
     with :ok <- enum(type, value),
          :ok <- do_not(type, value),
+         :ok <- all_of(type, value),
          do: :ok
   end
 
@@ -112,6 +113,20 @@ defmodule Xema.Validator do
       _ -> :ok
     end
   end
+
+  @spec do_not(Xema.types(), any) :: result
+  defp all_of(%{all_of: nil}, _value), do: :ok
+
+  defp all_of(%{all_of: schemas}, value) do
+    case do_all_of(schemas, value) do
+      true -> :ok
+      false -> {:error, :all_of}
+    end
+  end
+
+  @spec do_all_of(list, any) :: boolean
+  defp do_all_of(schemas, value), do:
+    Enum.all?(schemas, fn schema -> Xema.validate(schema, value) == :ok end)
 
   @spec exclusive_maximum(Xema.types(), any) :: result
   defp exclusive_maximum(%{exclusive_maximum: nil}, _value), do: :ok
