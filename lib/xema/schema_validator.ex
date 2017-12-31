@@ -154,7 +154,7 @@ defmodule Xema.SchemaValidator do
 
   defp additional_items(_, _), do: :ok
 
-# Keyword: additional_properties
+  # Keyword: additional_properties
   # The value of `additional_properties` must be a boolean or a schema.
 
   defp additional_properties(nil, _, _), do: :ok

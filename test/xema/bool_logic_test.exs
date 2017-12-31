@@ -75,7 +75,7 @@ defmodule Xema.BoolLogicTest do
         schema:
           xema(
             :any,
-            any_of: [:nil, {:integer, minimum: 1}]
+            any_of: [nil, {:integer, minimum: 1}]
           )
       }
     end
