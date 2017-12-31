@@ -73,6 +73,8 @@ defmodule Xema do
     integer: Xema.Integer
   }
 
+  @shortcuts [:all_of, :any_of, :enum, :not, :one_of]
+
   @spec is_valid?(Xema.t(), any) :: boolean
   def is_valid?(xema, value), do: validate(xema, value) == :ok
 
@@ -154,6 +156,13 @@ defmodule Xema do
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
+  end
+
+  for keyword <- @shortcuts do
+    def xema(unquote(keyword), ops), do: xema(:any, Keyword.new([{unquote(keyword), ops}]))
+
+    def type({unquote(keyword), ops}, []),
+      do: type({:any, Keyword.new([{unquote(keyword), ops}])})
   end
 
   def type(type, _) do
