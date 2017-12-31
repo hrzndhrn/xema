@@ -587,7 +587,6 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    @tag :only
     test "keyword multiple_of with too small value" do
       msg = ~s(multiple_of must be strictly greater than 0.)
 

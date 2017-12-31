@@ -50,14 +50,14 @@ defmodule Xema.List do
   defp update(opts) do
     opts
     |> Keyword.update(:items, nil, fn
-         items when is_atom(items) -> Xema.type(items)
-         items when is_tuple(items) -> Xema.type(items)
-         items when is_list(items) -> Enum.map(items, &Xema.type/1)
-         items -> items
-       end)
+      items when is_atom(items) -> Xema.type(items)
+      items when is_tuple(items) -> Xema.type(items)
+      items when is_list(items) -> Enum.map(items, &Xema.type/1)
+      items -> items
+    end)
     |> Keyword.update(:additional_items, true, fn
-         additional_items when is_boolean(additional_items) -> additional_items
-         additional_items -> Xema.type(additional_items)
-       end)
+      additional_items when is_boolean(additional_items) -> additional_items
+      additional_items -> Xema.type(additional_items)
+    end)
   end
 end

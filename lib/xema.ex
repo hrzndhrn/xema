@@ -118,13 +118,10 @@ defmodule Xema do
       iex> validate(schema, [2, 3, 4])
       :ok
       iex> validate(schema, [2, 3, 1])
-      {:error,
-        %{
-          reason: :invalid_item,
+      {:error, [%{
           at: 2,
           error: %{value: 1, minimum: 2}
-        }
-      }
+      }]}
 
   """
 

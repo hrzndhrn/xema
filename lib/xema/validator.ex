@@ -257,40 +257,70 @@ defmodule Xema.Validator do
          list
        )
        when is_list(items),
-       do: items_tuple(items, additional_items, list, 0)
+       do: items_tuple(items, additional_items, list, 0, [])
 
-  defp items(%Xema.List{items: items}, list), do: items_list(items, list, 0)
+  defp items(%Xema.List{items: items}, list), do: items_list(items, list, 0, [])
 
-  @spec items_list(Xema.types(), list, integer) :: result
-  defp items_list(_schema, [], _at), do: :ok
+  @spec items_list(Xema.types(), list, integer, list) :: result
+  defp items_list(_schema, [], _at, []), do: :ok
+  defp items_list(_schema, [], _at, errors), do: {:error, Enum.reverse(errors)}
 
-  defp items_list(schema, [item | list], at) do
+  defp items_list(schema, [item | list], at, errors) do
     case Xema.validate(schema, item) do
-      :ok -> items_list(schema, list, at + 1)
-      {:error, reason} -> error(:invalid_item, at: at, error: reason)
+      :ok ->
+        items_list(schema, list, at + 1, errors)
+
+      {:error, reason} ->
+        items_list(schema, list, at + 1, [%{at: at, error: reason} | errors])
     end
   end
 
-  @spec items_tuple(list, boolean | Xema.types(), list, integer) :: result
-  defp items_tuple(_schemas, _additonal_items, [], _at), do: :ok
+  @spec items_tuple(list, nil | boolean | Xema.types(), list, integer, list) ::
+          result
+  defp items_tuple(_schemas, _additonal_items, [], _at, []), do: :ok
 
-  defp items_tuple([], false, list, at),
-    do: {:error, %{additional_items: Enum.count(list), at: at}}
+  defp items_tuple(_schemas, _additonal_items, [], _at, errors),
+    do: {:error, Enum.reverse(errors)}
 
-  defp items_tuple([], true, _list, _at), do: :ok
-  defp items_tuple([], nil, _list, _at), do: :ok
+  defp items_tuple([], false, [_ | list], at, errors),
+    do:
+      items_tuple([], false, list, at + 1, [
+        %{additional_items: false, at: at} | errors
+      ])
 
-  defp items_tuple([], schema, [item | list], at) do
+  # TODO: write test and fix
+  defp items_tuple([], true, _list, _at, []), do: :ok
+
+  defp items_tuple([], true, _list, _at, errors),
+    do: {:error, Enum.reverse(errors)}
+
+  defp items_tuple([], schema, [item | list], at, errors) do
     case Xema.validate(schema, item) do
-      :ok -> items_tuple([], schema, list, at + 1)
-      {:error, reason} -> {:error, %{at: at, error: reason}}
+      :ok ->
+        items_tuple([], schema, list, at + 1, errors)
+
+      {:error, reason} ->
+        items_tuple([], schema, list, at + 1, [
+          %{at: at, error: reason} | errors
+        ])
     end
   end
 
-  defp items_tuple([schema | schemas], additional_items, [item | list], at) do
+  defp items_tuple(
+         [schema | schemas],
+         additional_items,
+         [item | list],
+         at,
+         errors
+       ) do
     case Xema.validate(schema, item) do
-      :ok -> items_tuple(schemas, additional_items, list, at + 1)
-      {:error, reason} -> {:error, %{at: at, error: reason}}
+      :ok ->
+        items_tuple(schemas, additional_items, list, at + 1, errors)
+
+      {:error, reason} ->
+        items_tuple(schemas, additional_items, list, at + 1, [
+          %{at: at, error: reason} | errors
+        ])
     end
   end
 
@@ -315,31 +345,32 @@ defmodule Xema.Validator do
   defp properties(%Xema.Map{properties: nil}, map), do: {:ok, map}
 
   defp properties(%Xema.Map{properties: props}, map) do
-    do_properties(Map.to_list(props), map)
+    do_properties(Map.to_list(props), map, %{})
   end
 
-  @spec do_properties(list, map) :: result
-  defp do_properties([], map), do: {:ok, map}
+  @spec do_properties(list, map, map) :: result
+  defp do_properties([], map, errors) when errors == %{}, do: {:ok, map}
 
-  defp do_properties([{prop, schema} | props], map) do
+  defp do_properties([], _map, errors), do: {:error, errors}
+
+  defp do_properties([{prop, schema} | props], map, errors) do
     with {:ok, value} <- get_value(map, prop),
          :ok <- do_property(schema, value) do
-      do_properties(props, Map.delete(map, prop))
+      do_properties(props, Map.delete(map, prop), errors)
     else
       {:error, reason} ->
-        {:error, Map.merge(reason, %{property: get_key(map, prop)})}
+        do_properties(
+          props,
+          Map.delete(map, prop),
+          Map.put(errors, get_key(map, prop), reason)
+        )
     end
   end
 
   @spec do_property(Xema.types(), any) :: result
   defp do_property(_schema, nil), do: :ok
 
-  defp do_property(schema, value) do
-    case Xema.validate(schema, value) do
-      :ok -> :ok
-      {:error, reason} -> error(:invalid_property, error: reason)
-    end
-  end
+  defp do_property(schema, value), do: Xema.validate(schema, value)
 
   @spec get_value(map, String.t() | atom) :: any
   defp get_value(map, key) when is_atom(key) do
@@ -362,7 +393,7 @@ defmodule Xema.Validator do
         {:ok, value}
 
       _ ->
-        error(:mixed_map)
+        {:error, :mixed_map}
     end
   end
 
@@ -386,11 +417,13 @@ defmodule Xema.Validator do
         :ok
 
       false ->
-        error(
-          :missing_properties,
-          missing: required |> MapSet.difference(props) |> MapSet.to_list(),
-          required: MapSet.to_list(required)
-        )
+        {
+          :error,
+          required
+          |> MapSet.difference(props)
+          |> MapSet.to_list()
+          |> Enum.into(%{}, fn x -> {x, :required} end)
+        }
     end
   end
 
@@ -403,11 +436,11 @@ defmodule Xema.Validator do
 
   @spec do_size(number, number, number) :: result
   defp do_size(len, min, _max) when not is_nil(min) and len < min do
-    error(:too_less_properties, min_properties: min)
+    {:error, %{min_properties: min}}
   end
 
   defp do_size(len, _min, max) when not is_nil(max) and len > max do
-    error(:too_many_properties, max_properties: max)
+    {:error, %{max_properties: max}}
   end
 
   defp do_size(_len, _min, _max), do: :ok
@@ -422,7 +455,7 @@ defmodule Xema.Validator do
           key_match?(pattern, key),
           do: {key, schema}
 
-    do_properties(props, map)
+    do_properties(props, map, %{})
   end
 
   @spec key_match?(Regex.t(), String.t() | atom) :: boolean
@@ -439,24 +472,29 @@ defmodule Xema.Validator do
         :ok
 
       false ->
-        error(
-          :no_additional_properties_allowed,
-          additional_properties: Map.keys(map)
-        )
+        {
+          :error,
+          map
+          |> Map.keys()
+          |> Enum.into(%{}, fn x -> {x, %{additional_properties: false}} end)
+        }
     end
   end
 
   defp additionals(%Xema.Map{additional_properties: schema}, map)
        when is_map(schema) do
-    Enum.reduce_while(map, :ok, fn {key, value}, _ ->
-      case Xema.validate(schema, value) do
-        :ok ->
-          {:cont, :ok}
+    result =
+      Enum.reduce(map, %{}, fn {key, value}, acc ->
+        case Xema.validate(schema, value) do
+          :ok -> acc
+          {:error, reason} -> Map.put(acc, key, reason)
+        end
+      end)
 
-        {:error, reason} ->
-          {:halt, error(:invalid_property, property: key, error: reason)}
-      end
-    end)
+    case result == %{} do
+      true -> :ok
+      false -> {:error, result}
+    end
   end
 
   defp additionals(_schema, _map), do: :ok
@@ -481,11 +519,12 @@ defmodule Xema.Validator do
   end
 
   defp do_dependencies([{key, schema} | tail], map) do
-    with :ok <- Xema.validate(schema, map) do
-      do_dependencies(tail, map)
-    else
-      {:error, error} ->
-        error(:invalid_dependency, for: key, error: error)
+    case Xema.validate(schema, map) do
+      :ok ->
+        do_dependencies(tail, map)
+
+      {:error, _} ->
+        {:error, %{key => %{required: MapSet.to_list(schema.required)}}}
     end
   end
 
@@ -498,12 +537,9 @@ defmodule Xema.Validator do
         do_dependencies_list(key, dependencies, map)
 
       false ->
-        error(:missing_dependency, for: key, dependency: dependency)
+        {:error, %{key => %{dependency: dependency}}}
     end
   end
-
-  @spec error(atom | Xema.types()) :: {:error, map}
-  defp error(atom) when is_atom(atom), do: error(atom, [])
 
   @spec error(atom, any) :: {:error, map}
   defp error(reason, info) when is_atom(reason) do

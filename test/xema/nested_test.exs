@@ -53,17 +53,14 @@ defmodule Xema.NestedTest do
         {
           :error,
           %{
-            reason: :invalid_property,
-            property: :items,
-            error: %{
-              reason: :invalid_item,
-              at: 1,
-              error: %{
-                reason: :invalid_property,
-                property: :num,
-                error: %{value: -2, minimum: 0}
+            items: [
+              %{
+                at: 1,
+                error: %{
+                  num: %{value: -2, minimum: 0}
+                }
               }
-            }
+            ]
           }
         }
 
@@ -119,17 +116,14 @@ defmodule Xema.NestedTest do
         {
           :error,
           %{
-            reason: :invalid_property,
-            property: :items,
-            error: %{
-              reason: :invalid_item,
-              at: 1,
-              error: %{
-                reason: :invalid_property,
-                property: :num,
-                error: %{value: -2, minimum: 0}
+            items: [
+              %{
+                at: 1,
+                error: %{
+                  num: %{value: -2, minimum: 0}
+                }
               }
-            }
+            ]
           }
         }
 
