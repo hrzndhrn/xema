@@ -133,13 +133,13 @@ Xema
 iex> schema = xema :string, min_length: 2, max_length: 3
 %Xema{type: %Xema.String{min_length: 2, max_length: 3}}
 iex> validate schema, "a"
-{:error, %{reason: :too_short, min_length: 2}}
+{:error, %{value: "a", min_length: 2}}
 iex> validate schema, "ab"
 :ok
 iex> validate schema, "abc"
 :ok
 iex> validate schema, "abcd"
-{:error, %{reason: :too_long, max_length: 3}}
+{:error, %{value: "abcd", max_length: 3}}
 ```
 
 #### <a name="regex"></a> Regular Expression
@@ -155,7 +155,7 @@ iex> schema = xema :string, pattern: ~r/[0-9]-[A-B]+/
 iex> validate schema, "1-AB"
 :ok
 iex> validate schema, "foo"
-{:error, %{reason: :no_match, pattern: ~r/[0-9]-[A-B]+/}}
+{:error, %{value: "foo", pattern: ~r/[0-9]-[A-B]+/}}
 ```
 
 ### <a name="number"></a> Types number, integer and float
@@ -273,11 +273,10 @@ iex> schema = xema :list, items: :string
 iex> is_valid? schema, ["a", "b", "abc"]
 true
 iex> validate schema, ["a", 1]
-{:error, %{
-  reason: :invalid_item,
+{:error, [%{
   at: 1,
-  error: %{type: :string, value: 1}}
-}
+  error: %{type: :string, value: 1}
+}]}
 ```
 
 The next example shows how to add keywords to the items schema.
@@ -290,11 +289,10 @@ iex> schema = xema :list, items: {:integer, minimum: 1, maximum: 10}
 iex> validate schema, [1, 2, 3]
 :ok
 iex> validate schema, [3, 2, 1, 0]
-{:error, %{
-  reason: :invalid_item,
+{:error, [%{
   at: 3,
   error: %{value: 0, minimum: 1}
-}}
+}]}
 ```
 
 `items` can also be used to give each item a specific schema.
@@ -312,7 +310,7 @@ true
 iex> validate schema, [1, "five"]
 {
   :error,
-  %{reason: :invalid_item, at: 1, error: %{reason: :too_short, min_length: 5}}
+  [%{at: 1, error: %{value: "five", min_length: 5}}]
 }
 # It’s okay to not provide all of the items:
 iex> validate schema, [1]
@@ -342,9 +340,12 @@ iex> validate schema, [1]
 :ok
 # But, since additionalItems is false, we can’t provide extra items:
 iex> validate schema, [1, "hello", "foo"]
-{:error, %{reason: :additional_item, at: 2}}
+{:error, [%{additional_items: false, at: 2}]}
 iex> validate schema, [1, "hello", "foo", "bar"]
-{:error, %{reason: :additional_item, at: 2}}
+{:error, [
+  %{additional_items: false, at: 2},
+  %{additional_items: false, at: 3}
+]}
 ```
 
 The keyword can also contain a schema to specify the type of additional items.
@@ -361,11 +362,10 @@ iex> schema = xema :list,
 iex> is_valid? schema, [1, "two", 3, 4]
 true
 iex> validate schema, [1, "two", 3, "four"]
-{:error, %{
-  reason: :invalid_item,
+{:error, [%{
   at: 3,
   error: %{type: :integer, value: "four"}
-}}
+}]}
 ```
 
 #### <a name="list_length"></a> Length
@@ -379,13 +379,13 @@ Xema
 iex> schema = xema :list, min_items: 2, max_items: 3
 %Xema{type: %Xema.List{min_items: 2, max_items: 3}}
 iex> validate schema, [1]
-{:error, %{reason: :too_less_items, min_items: 2}}
+{:error, %{value: [1], min_items: 2}}
 iex> validate schema, [1, 2]
 :ok
 iex> validate schema, [1, 2, 3]
 :ok
 iex> validate schema, [1, 2, 3, 4]
-{:error, %{reason: :too_many_items, max_items: 3}}
+{:error, %{value: [1, 2, 3, 4], max_items: 3}}
 ```
 
 #### <a name="unique"></a> Uniqueness
@@ -400,7 +400,7 @@ iex> schema = xema :list, unique_items: true
 iex> is_valid? schema, [1, 2, 3]
 true
 iex> validate schema, [1, 2, 3, 2, 1]
-{:error, %{reason: :not_unique}}
+{:error, %{value: [1, 2, 3, 2, 1], unique_items: true}}
 ```
 
 ### <a name="map"></a> Type map
@@ -480,10 +480,8 @@ iex> is_valid? schema, %{a: 5, b: "hello"}
 true
 iex> validate schema, %{a: 5, b: "ups"}
 {:error, %{
-  reason: :invalid_property,
-  property: :b,
-  error: %{
-    reason: :too_short,
+  b: %{
+    value: "ups",
     min_length: 5
   }
 }}
@@ -511,7 +509,7 @@ iex> schema = xema :map, properties: %{foo: :string}, required: [:foo]
 iex> validate schema, %{foo: "bar"}
 :ok
 iex> validate schema, %{bar: "foo"}
-{:error, %{reason: :missing_properties, missing: [:foo], required: [:foo]}}
+{:error, %{foo: :required}}
 ```
 
 #### <a name="additional_properties"></a> Additional Properties
@@ -542,9 +540,8 @@ iex> validate schema, %{foo: "bar"}
 :ok
 iex> validate schema, %{foo: "bar", bar: "foo"}
 {:error, %{
-  reason: :no_additional_properties_allowed,
-  additional_properties: [:bar]}
-}
+  bar: %{additional_properties: false}
+}}
 ```
 
 `additional_properties` can also contain a schema to specify the type of
@@ -566,9 +563,7 @@ iex> is_valid? schema, %{foo: "foo", add: 1}
 true
 iex> validate schema, %{foo: "foo", add: "one"}
 {:error, %{
-  reason: :invalid_property,
-  property: :add,
-  error: %{type: :integer, value: "one"}
+  add: %{type: :integer, value: "one"}
 }}
 ```
 
@@ -599,8 +594,7 @@ iex> is_valid? schema, %{s_0: "foo", i_1: 6}
 true
 iex> validate schema, %{s_0: "foo", f_1: 6.6}
 {:error, %{
-  reason: :no_additional_properties_allowed,
-  additional_properties: [:f_1]
+  f_1: %{additional_properties: false}
 }}
 ```
 
@@ -622,9 +616,9 @@ iex> schema = xema :map,
 iex> is_valid? schema, %{a: 1, b: 2}
 true
 iex> validate schema, %{}
-{:error, %{reason: :too_less_properties, min_properties: 2}}
+{:error, %{min_properties: 2}}
 iex> validate schema, %{a: 1, b: 2, c: 3, d: 4}
-{:error, %{reason: :too_many_properties, max_properties: 3}}
+{:error, %{max_properties: 3}}
 ```
 
 #### <a name="dependencies"></a> Dependencies

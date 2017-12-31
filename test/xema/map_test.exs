@@ -69,30 +69,28 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid values (atom keys)", %{schema: schema} do
-      expected =
-        {:error, %{
-          reason: :invalid_property,
-          property: :foo,
-          error: %{type: :number, value: "foo"}
-        }}
+      assert validate(schema, %{foo: "foo", bar: "bar"}) ==
+               {:error, %{
+                 foo: %{type: :number, value: "foo"}
+               }}
 
-      assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
+      assert validate(schema, %{foo: "foo", bar: 2}) ==
+               {:error, %{
+                 foo: %{type: :number, value: "foo"},
+                 bar: %{type: :string, value: 2}
+               }}
     end
 
     test "validate/2 with invalid values (string keys)", %{schema: schema} do
-      expected =
-        {:error, %{
-          reason: :invalid_property,
-          property: "foo",
-          error: %{type: :number, value: "foo"}
-        }}
-
-      assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) == expected
+      assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) ==
+               {:error, %{
+                 "foo" => %{type: :number, value: "foo"}
+               }}
     end
 
     test "validate/2 with mixed map", %{schema: schema} do
-      expected = {:error, %{reason: :mixed_map, property: :foo}}
-      assert validate(schema, %{"foo" => 1, foo: 2}) == expected
+      assert validate(schema, %{"foo" => 1, foo: 2}) ==
+               {:error, %{foo: :mixed_map}}
     end
   end
 
@@ -116,30 +114,22 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid values (atom keys)", %{schema: schema} do
-      expected =
-        {:error, %{
-          reason: :invalid_property,
-          property: :foo,
-          error: %{type: :number, value: "foo"}
-        }}
-
-      assert validate(schema, %{foo: "foo", bar: "bar"}) == expected
+      assert validate(schema, %{foo: "foo", bar: "bar"}) ==
+               {:error, %{
+                 foo: %{type: :number, value: "foo"}
+               }}
     end
 
     test "validate/2 with invalid values (string keys)", %{schema: schema} do
-      expected =
-        {:error, %{
-          reason: :invalid_property,
-          property: "foo",
-          error: %{type: :number, value: "foo"}
-        }}
-
-      assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) == expected
+      assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) ==
+               {:error, %{
+                 "foo" => %{type: :number, value: "foo"}
+               }}
     end
 
     test "validate/2 with mixed map", %{schema: schema} do
-      expected = {:error, %{reason: :mixed_map, property: "foo"}}
-      assert validate(schema, %{"foo" => 1, foo: 2}) == expected
+      assert validate(schema, %{"foo" => 1, foo: 2}) ==
+               {:error, %{"foo" => :mixed_map}}
     end
   end
 
@@ -163,8 +153,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key type", %{schema: schema} do
-      expected = {:error, %{reason: :invalid_keys, keys: :atoms}}
-      assert validate(schema, %{"foo" => 1}) == expected
+      assert validate(schema, %{"foo" => 1}) == {:error, %{keys: :atoms}}
     end
   end
 
@@ -184,8 +173,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with valid key type", %{schema: schema} do
-      expected = {:error, %{reason: :invalid_keys, keys: :strings}}
-      assert validate(schema, %{foo: 1}) == expected
+      assert validate(schema, %{foo: 1}) == {:error, %{keys: :strings}}
     end
 
     test "validate/2 invalid key type", %{schema: schema} do
@@ -199,8 +187,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with too less properties", %{schema: schema} do
-      expected = {:error, %{min_properties: 2, reason: :too_less_properties}}
-      assert validate(schema, %{foo: 42}) == expected
+      assert validate(schema, %{foo: 42}) == {:error, %{min_properties: 2}}
     end
 
     test "validate/2 with valid amount of properties", %{schema: schema} do
@@ -208,8 +195,8 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with too many properties", %{schema: schema} do
-      expected = {:error, %{max_properties: 3, reason: :too_many_properties}}
-      assert validate(schema, %{a: 1, b: 2, c: 3, d: 4}) == expected
+      assert validate(schema, %{a: 1, b: 2, c: 3, d: 4}) ==
+               {:error, %{max_properties: 3}}
     end
   end
 
@@ -230,13 +217,18 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with additional property", %{schema: schema} do
-      expected =
-        {:error, %{
-          additional_properties: [:add],
-          reason: :no_additional_properties_allowed
-        }}
+      assert validate(schema, %{foo: 44, add: 1}) ==
+               {:error, %{
+                 add: %{additional_properties: false}
+               }}
+    end
 
-      assert validate(schema, %{foo: 44, add: 1}) == expected
+    test "validate/2 with additional properties", %{schema: schema} do
+      assert validate(schema, %{foo: 44, add: 1, plus: 3}) ==
+               {:error, %{
+                 add: %{additional_properties: false},
+                 plus: %{additional_properties: false}
+               }}
     end
   end
 
@@ -257,21 +249,28 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid additional property", %{schema: schema} do
-      expected =
-        {
-          :error,
-          %{
-            reason: :invalid_property,
-            property: :add,
-            error: %{type: :integer, value: "invalid"}
-          }
-        }
+      assert validate(schema, %{foo: "foo", add: "invalid"}) ==
+               {
+                 :error,
+                 %{
+                   add: %{type: :integer, value: "invalid"}
+                 }
+               }
+    end
 
-      assert validate(schema, %{foo: "foo", add: "invalid"}) == expected
+    test "validate/2 with invalid additional properties", %{schema: schema} do
+      assert validate(schema, %{foo: "foo", add: "invalid", plus: "+"}) ==
+               {
+                 :error,
+                 %{
+                   add: %{type: :integer, value: "invalid"},
+                   plus: %{type: :integer, value: "+"}
+                 }
+               }
     end
   end
 
-  describe "'map' schema with required properties (atom keys)" do
+  describe "'map' schema with required property (atom keys)" do
     setup do
       %{schema: xema(:map, properties: %{foo: :number}, required: [:foo])}
     end
@@ -281,29 +280,42 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key", %{schema: schema} do
-      expected =
-        {:error, %{
-          missing: [:foo],
-          reason: :missing_properties,
-          required: [:foo]
-        }}
-
-      assert validate(schema, %{"foo" => 44}) == expected
+      assert validate(schema, %{"foo" => 44}) ==
+               {:error, %{
+                 foo: :required
+               }}
     end
 
     test "validate/2 with missing key", %{schema: schema} do
-      expected =
-        {:error, %{
-          missing: [:foo],
-          reason: :missing_properties,
-          required: [:foo]
-        }}
-
-      assert validate(schema, %{missing: 44}) == expected
+      assert validate(schema, %{missing: 44}) ==
+               {:error, %{
+                 foo: :required
+               }}
     end
   end
 
-  describe "'map' schema with required properties (string keys)" do
+  describe "'map' schema with required properties (atom keys)" do
+    setup do
+      %{
+        schema:
+          xema(
+            :map,
+            properties: %{a: :number, b: :number, c: :number},
+            required: [:a, :b, :c]
+          )
+      }
+    end
+
+    test "validate/2 without required properties", %{schema: schema} do
+      assert validate(schema, %{b: 3, d: 8}) ==
+               {:error, %{
+                 a: :required,
+                 c: :required
+               }}
+    end
+  end
+
+  describe "'map' schema with required property (string keys)" do
     setup do
       %{schema: xema(:map, properties: %{foo: :number}, required: ["foo"])}
     end
@@ -313,25 +325,17 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key", %{schema: schema} do
-      expected =
-        {:error, %{
-          missing: ["foo"],
-          reason: :missing_properties,
-          required: ["foo"]
-        }}
-
-      assert validate(schema, %{foo: 44}) == expected
+      assert validate(schema, %{foo: 44}) ==
+               {:error, %{
+                 "foo" => :required
+               }}
     end
 
     test "validate/2 with missing key", %{schema: schema} do
-      expected =
-        {:error, %{
-          missing: ["foo"],
-          reason: :missing_properties,
-          required: ["foo"]
-        }}
-
-      assert validate(schema, %{missing: 44}) == expected
+      assert validate(schema, %{missing: 44}) ==
+               {:error, %{
+                 "foo" => :required
+               }}
     end
   end
 
@@ -355,13 +359,10 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid map", %{schema: schema} do
-      expected =
-        {:error, %{
-          additional_properties: [:x_1],
-          reason: :no_additional_properties_allowed
-        }}
-
-      assert validate(schema, %{x_1: 44}) == expected
+      assert validate(schema, %{x_1: 44}) ==
+               {:error, %{
+                 x_1: %{additional_properties: false}
+               }}
     end
   end
 
@@ -412,14 +413,10 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with missing dependency", %{schema: schema} do
-      expected =
-        {:error, %{
-          reason: :missing_dependency,
-          for: :b,
-          dependency: :c
-        }}
-
-      assert validate(schema, %{a: 1, b: 2}) == expected
+      assert validate(schema, %{a: 1, b: 2}) ==
+               {:error, %{
+                 b: %{dependency: :c}
+               }}
     end
   end
 
@@ -455,20 +452,12 @@ defmodule Xema.MapTest do
       assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
     end
 
-    @tag :deps
+    @tag :only
     test "validate/2 with missing dependency", %{schema: schema} do
-      expected =
-        {:error, %{
-          reason: :invalid_dependency,
-          for: :b,
-          error: %{
-            reason: :missing_properties,
-            missing: [:c],
-            required: [:c]
-          }
-        }}
-
-      assert validate(schema, %{a: 1, b: 2}) == expected
+      assert validate(schema, %{a: 1, b: 2}) ==
+               {:error, %{
+                 b: %{required: [:c]}
+               }}
     end
   end
 
@@ -498,17 +487,8 @@ defmodule Xema.MapTest do
     end
 
     test "a penny", %{schema: schema} do
-      expected =
-        {
-          :error,
-          %{
-            reason: :missing_dependency,
-            dependency: :pound,
-            for: :penny
-          }
-        }
-
-      assert validate(schema, %{penny: 1}) == expected
+      assert validate(schema, %{penny: 1}) ==
+               {:error, %{penny: %{dependency: :pound}}}
     end
   end
 end
