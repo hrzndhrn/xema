@@ -64,8 +64,7 @@ defmodule Xema.Map do
     |> Keyword.update(:required, nil, &MapSet.new(&1))
   end
 
-  defp properties(map),
-    do: Enum.into(map, %{}, fn {key, prop} -> {key, Xema.type(prop)} end)
+  defp properties(map), do: Enum.into(map, %{}, fn {key, prop} -> {key, Xema.type(prop)} end)
 
   defp dependencies(map),
     do:
@@ -78,6 +77,5 @@ defmodule Xema.Map do
        when is_boolean(additional_properties),
        do: additional_properties
 
-  defp additional_properties(additional_properties),
-    do: Xema.type(additional_properties)
+  defp additional_properties(additional_properties), do: Xema.type(additional_properties)
 end

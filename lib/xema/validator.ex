@@ -170,13 +170,11 @@ defmodule Xema.Validator do
   defp minimum(minimum, nil, value) when value == minimum, do: :ok
   defp minimum(minimum, false, value) when value == minimum, do: :ok
 
-  defp minimum(minimum, nil, value),
-    do: {:error, %{value: value, minimum: minimum}}
+  defp minimum(minimum, nil, value), do: {:error, %{value: value, minimum: minimum}}
 
   @spec maximum(Xema.types(), any) :: result
   defp minimum(minimum, exclusive, value),
-    do:
-      {:error, %{value: value, minimum: minimum, exclusive_minimum: exclusive}}
+    do: {:error, %{value: value, minimum: minimum, exclusive_minimum: exclusive}}
 
   @spec maximum(Xema.types(), any) :: result
   defp maximum(%{maximum: nil}, _value), do: :ok
@@ -192,12 +190,10 @@ defmodule Xema.Validator do
   defp maximum(maximum, nil, value) when value == maximum, do: :ok
   defp maximum(maximum, false, value) when value == maximum, do: :ok
 
-  defp maximum(maximum, nil, value),
-    do: {:error, %{value: value, maximum: maximum}}
+  defp maximum(maximum, nil, value), do: {:error, %{value: value, maximum: maximum}}
 
   defp maximum(maximum, exclusive, value),
-    do:
-      {:error, %{value: value, maximum: maximum, exclusive_maximum: exclusive}}
+    do: {:error, %{value: value, maximum: maximum, exclusive_maximum: exclusive}}
 
   @spec multiple_of(Xema.types(), number) :: result
   defp multiple_of(%{multiple_of: nil} = _keywords, _value), do: :ok
@@ -215,15 +211,13 @@ defmodule Xema.Validator do
   defp min_length(%{min_length: nil}, _, _), do: :ok
   defp min_length(%{min_length: min}, len, _) when len >= min, do: :ok
 
-  defp min_length(%{min_length: min}, _, value),
-    do: {:error, %{value: value, min_length: min}}
+  defp min_length(%{min_length: min}, _, value), do: {:error, %{value: value, min_length: min}}
 
   @spec max_length(Xema.String.t(), integer, String.t()) :: result
   defp max_length(%{max_length: nil}, _, _), do: :ok
   defp max_length(%{max_length: max}, len, _) when len <= max, do: :ok
 
-  defp max_length(%{max_length: max}, _, value),
-    do: {:error, %{value: value, max_length: max}}
+  defp max_length(%{max_length: max}, _, value), do: {:error, %{value: value, max_length: max}}
 
   @spec pattern(Xema.String.t(), String.t()) :: result
   defp pattern(%{pattern: nil}, _string), do: :ok
@@ -242,8 +236,7 @@ defmodule Xema.Validator do
     :ok
   end
 
-  defp min_items(%Xema.List{min_items: min}, list),
-    do: {:error, %{value: list, min_items: min}}
+  defp min_items(%Xema.List{min_items: min}, list), do: {:error, %{value: list, min_items: min}}
 
   @spec max_items(Xema.List.t(), list) :: result
   defp max_items(%Xema.List{max_items: nil}, _list), do: :ok
@@ -252,8 +245,7 @@ defmodule Xema.Validator do
     :ok
   end
 
-  defp max_items(%Xema.List{max_items: max}, list),
-    do: {:error, %{value: list, max_items: max}}
+  defp max_items(%Xema.List{max_items: max}, list), do: {:error, %{value: list, max_items: max}}
 
   @spec unique(Xema.List.t(), list) :: result
   defp unique(%Xema.List{unique_items: nil}, _list), do: :ok
@@ -302,8 +294,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec items_tuple(list, nil | boolean | Xema.types(), list, integer, list) ::
-          result
+  @spec items_tuple(list, nil | boolean | Xema.types(), list, integer, list) :: result
   defp items_tuple(_schemas, _additonal_items, [], _at, []), do: :ok
 
   defp items_tuple(_schemas, _additonal_items, [], _at, errors),
@@ -318,8 +309,7 @@ defmodule Xema.Validator do
   # TODO: write test and fix
   defp items_tuple([], true, _list, _at, []), do: :ok
 
-  defp items_tuple([], true, _list, _at, errors),
-    do: {:error, Enum.reverse(errors)}
+  defp items_tuple([], true, _list, _at, errors), do: {:error, Enum.reverse(errors)}
 
   defp items_tuple([], schema, [item | list], at, errors) do
     case Xema.validate(schema, item) do

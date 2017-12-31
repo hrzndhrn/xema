@@ -51,8 +51,7 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a too long string", %{schema: schema} do
-      assert validate(schema, "foobar") ==
-               {:error, %{max_length: 4, value: "foobar"}}
+      assert validate(schema, "foobar") == {:error, %{max_length: 4, value: "foobar"}}
     end
   end
 
@@ -66,8 +65,7 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a none matching string", %{schema: schema} do
-      assert validate(schema, "a to a") ==
-               {:error, %{value: "a to a", pattern: ~r/^.+match.+$/}}
+      assert validate(schema, "a to a") == {:error, %{value: "a to a", pattern: ~r/^.+match.+$/}}
     end
   end
 

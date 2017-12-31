@@ -89,8 +89,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with mixed map", %{schema: schema} do
-      assert validate(schema, %{"foo" => 1, foo: 2}) ==
-               {:error, %{foo: :mixed_map}}
+      assert validate(schema, %{"foo" => 1, foo: 2}) == {:error, %{foo: :mixed_map}}
     end
   end
 
@@ -128,8 +127,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with mixed map", %{schema: schema} do
-      assert validate(schema, %{"foo" => 1, foo: 2}) ==
-               {:error, %{"foo" => :mixed_map}}
+      assert validate(schema, %{"foo" => 1, foo: 2}) == {:error, %{"foo" => :mixed_map}}
     end
   end
 
@@ -195,8 +193,7 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with too many properties", %{schema: schema} do
-      assert validate(schema, %{a: 1, b: 2, c: 3, d: 4}) ==
-               {:error, %{max_properties: 3}}
+      assert validate(schema, %{a: 1, b: 2, c: 3, d: 4}) == {:error, %{max_properties: 3}}
     end
   end
 
@@ -487,8 +484,7 @@ defmodule Xema.MapTest do
     end
 
     test "a penny", %{schema: schema} do
-      assert validate(schema, %{penny: 1}) ==
-               {:error, %{penny: %{dependency: :pound}}}
+      assert validate(schema, %{penny: 1}) == {:error, %{penny: %{dependency: :pound}}}
     end
   end
 end

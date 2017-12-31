@@ -51,8 +51,7 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with to long list", %{schema: schema} do
-      assert validate(schema, [1, 2, 3, 4]) ==
-               {:error, %{value: [1, 2, 3, 4], max_items: 3}}
+      assert validate(schema, [1, 2, 3, 4]) == {:error, %{value: [1, 2, 3, 4], max_items: 3}}
     end
   end
 
@@ -189,8 +188,7 @@ defmodule Xema.ListTest do
     end
 
     test "validate/2 with additional item", %{schema: schema} do
-      assert validate(schema, ["foo", 42, "add"]) ==
-               {:error, [%{at: 2, additional_items: false}]}
+      assert validate(schema, ["foo", 42, "add"]) == {:error, [%{at: 2, additional_items: false}]}
     end
   end
 

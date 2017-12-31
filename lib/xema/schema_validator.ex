@@ -135,8 +135,7 @@ defmodule Xema.SchemaValidator do
 
   defp additional_items(nil, _), do: :ok
 
-  defp additional_items(_, nil),
-    do: {:error, "additional_items has no effect if items not set."}
+  defp additional_items(_, nil), do: {:error, "additional_items has no effect if items not set."}
 
   defp additional_items(_, items)
        when not is_list(items),
@@ -289,8 +288,7 @@ defmodule Xema.SchemaValidator do
        do: :ok
 
   defp items(value),
-    do:
-      {:error, "Expected a schema or a list of schemas, got #{inspect(value)}."}
+    do: {:error, "Expected a schema or a list of schemas, got #{inspect(value)}."}
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
@@ -368,8 +366,7 @@ defmodule Xema.SchemaValidator do
     |> Enum.reduce_while(:ok, &property_key/2)
   end
 
-  defp properties(value),
-    do: {:error, "Expected a map for properties, got #{inspect(value)}."}
+  defp properties(value), do: {:error, "Expected a map for properties, got #{inspect(value)}."}
 
   @spec property_key(any, any) :: result
   defp property_key(key, _)
@@ -397,16 +394,13 @@ defmodule Xema.SchemaValidator do
       [key | _] ->
         {
           :error,
-          "Expected a regular expression for key in pattern_properties, got #{
-            inspect(key)
-          }."
+          "Expected a regular expression for key in pattern_properties, got #{inspect(key)}."
         }
     end
   end
 
   defp pattern_properties(value),
-    do:
-      {:error, "Expected a map for pattern_properties, got #{inspect(value)}."}
+    do: {:error, "Expected a map for pattern_properties, got #{inspect(value)}."}
 
   @spec regex(atom, any) :: result
   defp regex(_, nil), do: :ok
