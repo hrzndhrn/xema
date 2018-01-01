@@ -45,14 +45,14 @@ defmodule Xema.Schema do
   * `unique_items` disallow duplicate items, if set to true
   """
   @type t :: %Xema.Schema{
-          additional_items: Xema.t() | Xema.types() | boolean | nil,
+          additional_items: Xema.t() | Xema.Schema.t() | boolean | nil,
           additional_properties: map | boolean | nil,
           as: atom,
           dependencies: list | map | nil,
           enum: list | nil,
           exclusive_maximum: boolean | number | nil,
           exclusive_minimum: boolean | number | nil,
-          items: list | Xema.t() | Xema.types() | nil,
+          items: list | Xema.t() | Xema.Schema.t() | nil,
           keys: atom | nil,
           max_items: pos_integer | nil,
           max_length: pos_integer | nil,
@@ -102,7 +102,7 @@ defmodule Xema.Schema do
     :unique_items
   ]
 
-  @spec new(keyword) :: Xema.Any.t()
+  @spec new(keyword) :: Xema.Schema.t()
   def new(opts \\ []), do: struct(Xema.Schema, update(opts))
 
   @spec update(keyword) :: keyword

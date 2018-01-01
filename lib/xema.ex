@@ -3,6 +3,7 @@ defmodule Xema do
   A schema validator inspired by [JSON Schema](http://json-schema.org)
   """
 
+  alias Xema.Schema
   alias Xema.Schema.Validator, as: SchemaValidator
   alias Xema.SchemaError
   alias Xema.Validator
@@ -186,21 +187,21 @@ defmodule Xema do
 
   for type <- @schema_types do
     def xema(unquote(type), []) do
-      new(Xema.Schema.new(type: unquote(type)))
+      new(Schema.new(type: unquote(type)))
     end
 
     def xema(unquote(type), opts) do
       case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> new(Xema.Schema.new(Keyword.put(opts, :type, unquote(type))), opts)
+        :ok -> new(Schema.new(Keyword.put(opts, :type, unquote(type))), opts)
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
 
-    def type(unquote(type), []), do: Xema.Schema.new(type: unquote(type))
+    def type(unquote(type), []), do: Schema.new(type: unquote(type))
 
     def type({unquote(type), opts}, []) do
       case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> Xema.Schema.new(Keyword.put(opts, :type, unquote(type)))
+        :ok -> Schema.new(Keyword.put(opts, :type, unquote(type)))
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
