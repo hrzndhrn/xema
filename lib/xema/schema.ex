@@ -23,6 +23,7 @@ defmodule Xema.Schema do
   @type t :: %Xema.Any{enum: list | nil, as: atom}
 
   defstruct [
+    :additional_items,
     :additional_properties,
     :all_of,
     :any_of,
@@ -52,8 +53,7 @@ defmodule Xema.Schema do
     :properties,
     :required,
     :type,
-    :unique_items,
-    additional_items: true
+    :unique_items
   ]
 
   @spec new(keyword) :: Xema.Any.t()
@@ -62,18 +62,18 @@ defmodule Xema.Schema do
   @spec update(keyword) :: keyword
   def update(opts) do
     opts
+    |> Keyword.put_new(:as, opts[:type])
+    |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
+    |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
     |> Keyword.update(:all_of, nil, &schemas/1)
     |> Keyword.update(:any_of, nil, &schemas/1)
+    |> Keyword.update(:dependencies, nil, &dependencies/1)
+    |> Keyword.update(:items, nil, &items/1)
     |> Keyword.update(:not, nil, fn schema -> Xema.type(schema) end)
     |> Keyword.update(:one_of, nil, &schemas/1)
-    |> Keyword.update(:properties, nil, &properties/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
-    |> Keyword.update(:dependencies, nil, &dependencies/1)
-    |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
+    |> Keyword.update(:properties, nil, &properties/1)
     |> Keyword.update(:required, nil, &MapSet.new(&1))
-    |> Keyword.put_new(:as, opts[:type])
-    |> Keyword.update(:items, nil, &items/1)
-    |> Keyword.update(:additional_items, true, &bool_or_schema/1)
   end
 
   @spec schemas(list) :: list

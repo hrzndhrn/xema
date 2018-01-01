@@ -331,12 +331,9 @@ defmodule Xema.Validator do
   @spec items(Xema.List.t(), list) :: result
   defp items(%{items: nil}, _list), do: :ok
 
-  defp items(
-         %{items: items, additional_items: additional_items},
-         list
-       )
+  defp items(%{items: items, additional_items: additional_items}, list)
        when is_list(items),
-       do: items_tuple(items, additional_items, list, 0, [])
+       do: items_tuple(items, update_nil(additional_items, true), list, 0, [])
 
   defp items(%{items: items}, list), do: items_list(items, list, 0, [])
 
@@ -366,7 +363,6 @@ defmodule Xema.Validator do
         %{additional_items: false, at: at} | errors
       ])
 
-  # TODO: write test and fix
   defp items_tuple([], true, _list, _at, []), do: :ok
 
   defp items_tuple([], true, _list, _at, errors), do: {:error, Enum.reverse(errors)}
@@ -617,4 +613,8 @@ defmodule Xema.Validator do
         {:error, %{key => %{dependency: dependency}}}
     end
   end
+
+  @spec update_nil(any, any) :: any
+  defp update_nil(nil, b), do: b
+  defp update_nil(a, _b), do: a
 end
