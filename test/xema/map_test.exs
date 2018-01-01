@@ -1,8 +1,6 @@
 defmodule Xema.MapTest do
   use ExUnit.Case, async: true
 
-  doctest Xema.Map
-
   import Xema
 
   describe "empty 'map' schema" do
@@ -449,7 +447,6 @@ defmodule Xema.MapTest do
       assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
     end
 
-    @tag :only
     test "validate/2 with missing dependency", %{schema: schema} do
       assert validate(schema, %{a: 1, b: 2}) ==
                {:error, %{

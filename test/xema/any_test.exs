@@ -1,8 +1,6 @@
 defmodule Xema.AnyTest do
   use ExUnit.Case
 
-  doctest Xema.Any
-
   import Xema
 
   describe "'any' schema" do

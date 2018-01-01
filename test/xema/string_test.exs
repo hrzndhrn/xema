@@ -3,7 +3,7 @@ defmodule Xema.StringTest do
 
   import Xema
 
-  describe "'string' schema" do
+  describe "'string' schema:" do
     setup do
       %{schema: xema(:string)}
     end
@@ -16,6 +16,7 @@ defmodule Xema.StringTest do
       assert validate(schema, "foo") == :ok
     end
 
+    @tag :only
     test "validate/2 with a number", %{schema: schema} do
       expected = {:error, %{type: :string, value: 1}}
 

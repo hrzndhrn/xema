@@ -1,8 +1,6 @@
 defmodule Xema.IntegerTest do
   use ExUnit.Case, async: true
 
-  doctest Xema.Integer
-
   import Xema
 
   describe "'integer' schema" do

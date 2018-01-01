@@ -106,9 +106,11 @@ defmodule Xema do
       Xema
       iex> xema :string, min_length: 3, max_length: 12
       %Xema{
-        type: %Xema.String{
+        type: %Xema.Schema{
           max_length: 12,
           min_length: 3,
+          type: :string,
+          as: :string
         }
       }
 
@@ -119,8 +121,12 @@ defmodule Xema do
       Xema
       iex> schema = xema :list, items: {:number, minimum: 2}
       %Xema{
-        type: %Xema.List{
-          items: %Xema.Number{
+        type: %Xema.Schema{
+          type: :list,
+          as: :list,
+          items: %Xema.Schema{
+            type: :number,
+            as: :number,
             minimum: 2
           }
         }
@@ -144,36 +150,34 @@ defmodule Xema do
 
   for {type, module} <- @types do
     def xema(unquote(type), []) do
-      new(unquote(module).new([]))
+      new(Xema.Schema.new(type: unquote(type)))
     end
 
     def xema(unquote(type), opts) do
       case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> new(unquote(module).new(opts), opts)
+        :ok -> new(Xema.Schema.new(Keyword.put(opts, :type, unquote(type))), opts)
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
 
-    def type(unquote(type), []) do
-      unquote(module).new()
-    end
+    def type(unquote(type), []), do: Xema.Schema.new(type: unquote(type))
 
     def type({unquote(type), opts}, []) do
       case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> unquote(module).new(opts)
+        :ok -> Xema.Schema.new(Keyword.put(opts, :type, unquote(type)))
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
   end
 
   for keyword <- @shortcuts do
-    def xema(unquote(keyword), ops), do: xema(:any, Keyword.new([{unquote(keyword), ops}]))
+    def xema(unquote(keyword), opts), do: xema(:any, Keyword.new([{unquote(keyword), opts}]))
 
-    def type({unquote(keyword), ops}, []),
-      do: type({:any, Keyword.new([{unquote(keyword), ops}])})
+    def type({unquote(keyword), opts}, []),
+      do: type({:any, Keyword.new([{unquote(keyword), opts}])})
 
-    def type(%{unquote(keyword) => ops}, []),
-      do: type({:any, Keyword.new([{unquote(keyword), ops}])})
+    def type(%{unquote(keyword) => opts}, []),
+      do: type({:any, Keyword.new([{unquote(keyword), opts}])})
   end
 
   def type(type, _) do

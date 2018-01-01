@@ -8,6 +8,7 @@ defmodule Xema.Utils do
     |> Keyword.update(:any_of, nil, &schemas/1)
     |> Keyword.update(:not, nil, fn schema -> Xema.type(schema) end)
     |> Keyword.update(:one_of, nil, &schemas/1)
+    |> Keyword.put_new(:as, opts[:type])
   end
 
   @spec schemas(list) :: list
