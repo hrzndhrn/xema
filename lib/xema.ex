@@ -4,7 +4,7 @@ defmodule Xema do
   """
 
   alias Xema.SchemaError
-  alias Xema.SchemaValidator
+  alias Xema.Schema.Validator, as: SchemaValidator
   alias Xema.Validator
 
   defstruct [

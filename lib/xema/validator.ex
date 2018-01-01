@@ -289,7 +289,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec min_items(Xema.List.t(), list) :: result
+  @spec min_items(Xema.Schema.t(), list) :: result
   defp min_items(%{min_items: nil}, _list), do: :ok
 
   defp min_items(%{min_items: min}, list) when length(list) >= min do
@@ -298,7 +298,7 @@ defmodule Xema.Validator do
 
   defp min_items(%{min_items: min}, list), do: {:error, %{value: list, min_items: min}}
 
-  @spec max_items(Xema.List.t(), list) :: result
+  @spec max_items(Xema.Schema.t(), list) :: result
   defp max_items(%{max_items: nil}, _list), do: :ok
 
   defp max_items(%{max_items: max}, list) when length(list) <= max do
@@ -307,7 +307,7 @@ defmodule Xema.Validator do
 
   defp max_items(%{max_items: max}, list), do: {:error, %{value: list, max_items: max}}
 
-  @spec unique(Xema.List.t(), list) :: result
+  @spec unique(Xema.Schema.t(), list) :: result
   defp unique(%{unique_items: nil}, _list), do: :ok
 
   defp unique(%{unique_items: true}, list) do
@@ -328,7 +328,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec items(Xema.List.t(), list) :: result
+  @spec items(Xema.Schema.t(), list) :: result
   defp items(%{items: nil}, _list), do: :ok
 
   defp items(%{items: items, additional_items: additional_items}, list)

@@ -1,6 +1,6 @@
 defmodule Xema.Schema do
   @moduledoc """
-  This module contains the struct for the keywords of type `any`.
+  This module contains the struct for the keywords of a schema.
 
   Usually this struct will be just used by `xema`.
 
@@ -15,12 +15,61 @@ defmodule Xema.Schema do
   """
 
   @typedoc """
-  The struct contains the keywords for the type `any`.
+  The struct contains the keywords for a schema.
 
-  * `as` is used in an error report. Default of `as` is `:any`
+  * `additional_items` disallow additional items, if set to false. The keyword can also contain a schema to specify the type of additional items.
+  * `additional_properties` disallow additional properties, if set to true
+  * `as` is used in an error report.
+  * `as` is used in an error report. Default of `as` is `:list`
+  * `dependencies` allows the schema of the map to change based on the presence of certain special properties
   * `enum` specifies an enumeration
+  * `exclusive_maximum` is a boolean. When true, it indicates that the range excludes the maximum value.
+  * `exclusive_minimum` is a boolean. When true, it indicates that the range excludes the minimum value.
+  * `items` specifies the type(s) of the items
+  * `keys` could be `:atoms` or `:strings`
+  * `max_items` the maximum length of list
+  * `max_length` the maximum length of string
+  * `max_properties` the maximum count of properties for the map
+  * `maximum` the maximum value
+  * `min_items` the minimal length of list
+  * `min_length` the minimal length of string
+  * `min_properties` the minimal count of properties for the map
+  * `minimum` the minimum value
+  * `multiple_of` is a number greater 0. The value has to be a multiple of this number.
+  * `one_of` the given data must be valid against exactly one of the given subschemas.
+  * `pattern_properties` specifies schemas for properties by patterns
+  * `pattern` restrict a string to a particular regular expression.
+  * `properties` specifies schemas for properties
+  * `required` contains a set of required properties
+  * `type` specifies the data type for a schema.
+  * `unique_items` disallow duplicate items, if set to true
   """
-  @type t :: %Xema.Any{enum: list | nil, as: atom}
+  @type t :: %Xema.Schema{
+          additional_items: Xema.t() | Xema.types() | boolean | nil,
+          additional_properties: map | boolean | nil,
+          as: atom,
+          dependencies: list | map | nil,
+          enum: list | nil,
+          exclusive_maximum: boolean | number | nil,
+          exclusive_minimum: boolean | number | nil,
+          items: list | Xema.t() | Xema.types() | nil,
+          keys: atom | nil,
+          max_items: pos_integer | nil,
+          max_length: pos_integer | nil,
+          max_properties: pos_integer | nil,
+          maximum: number | nil,
+          min_items: pos_integer | nil,
+          min_length: pos_integer | nil,
+          min_properties: pos_integer | nil,
+          minimum: number | nil,
+          multiple_of: number | nil,
+          pattern: Regex.t() | nil,
+          pattern_properties: map | nil,
+          properties: map | nil,
+          required: MapSet.t() | nil,
+          type: atom,
+          unique_items: boolean | nil
+        }
 
   defstruct [
     :additional_items,
