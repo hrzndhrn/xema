@@ -8,7 +8,7 @@ defmodule Xema.Validator do
     validate(xema.type, value)
   end
 
-  def validate(%Xema.Schema{type: :any} = schema, value) do
+  def validate(%{type: :any} = schema, value) do
     with :ok <- enum(schema, value),
          :ok <- do_not(schema, value),
          :ok <- all_of(schema, value),
@@ -42,32 +42,11 @@ defmodule Xema.Validator do
 
   def validate(%{type: :float} = schema, value), do: validate_number(schema, value)
 
-  def validate(%{type: :any} = type, value) do
-    with :ok <- enum(type, value),
-         :ok <- do_not(type, value),
-         :ok <- all_of(type, value),
-         :ok <- any_of(type, value),
-         :ok <- one_of(type, value),
-         :ok <- minimum(type, value),
-         :ok <- multiple_of(type, value),
-         do: :ok
-  end
-
   def validate(%Xema.Schema{type: :boolean} = schema, value) do
     case is_boolean(value) do
       true -> :ok
       false -> {:error, %{value: value, type: schema.as}}
     end
-  end
-
-  def validate(%{type: :string} = schema, value) do
-    with :ok <- type(schema, value),
-         length <- String.length(value),
-         :ok <- min_length(schema, length, value),
-         :ok <- max_length(schema, length, value),
-         :ok <- pattern(schema, value),
-         :ok <- enum(schema, value),
-         do: :ok
   end
 
   def validate(%{type: :list} = schema, value) do
