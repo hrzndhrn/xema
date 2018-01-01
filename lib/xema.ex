@@ -30,63 +30,99 @@ defmodule Xema do
           id: String.t() | nil,
           schema: String.t() | nil,
           title: String.t() | nil,
-          type: types
+          type: Xema.Schema.t()
         }
 
   @typedoc """
   The available type notations.
   """
-  @type type ::
-          nil
-          | :any
+  @type schema_types ::
+          :any
           | :boolean
-          | :map
-          | :list
-          | :string
-          | :number
           | :float
           | :integer
+          | :list
+          | :map
+          | nil
+          | :number
+          | :string
+
+  @schema_types [
+    :any,
+    :boolean,
+    :float,
+    :integer,
+    :list,
+    :map,
+    nil,
+    :number,
+    :string
+  ]
 
   @typedoc """
-  The `keywords` for the schema types.
+  The available schema keywords.
   """
-  @type types ::
-          Xema.Any.t()
-          | Xema.Nil.t()
-          | Xema.Boolean.t()
-          | Xema.Map.t()
-          | Xema.List.t()
-          | Xema.Number.t()
-          | Xema.Integer.t()
-          | Xema.Float.t()
-          | Xema.String.t()
+  @type schema_keywords ::
+          :additional_items
+          | :additional_properties
+          | :all_of
+          | :any_of
+          | :dependencies
+          | :enum
+          | :exclusive_maximum
+          | :exclusive_minimum
+          | :items
+          | :keys
+          | :max_items
+          | :max_length
+          | :max_properties
+          | :maximum
+          | :min_items
+          | :min_length
+          | :min_properties
+          | :minimum
+          | :multiple_of
+          | :not
+          | :one_of
+          | :pattern
+          | :pattern_properties
+          | :properties
+          | :required
+          | :unique_items
 
-  @types %{
-    any: Xema.Any,
-    nil: Xema.Nil,
-    boolean: Xema.Boolean,
-    map: Xema.Map,
-    list: Xema.List,
-    string: Xema.String,
-    number: Xema.Number,
-    float: Xema.Float,
-    integer: Xema.Integer
-  }
-
-  @shortcuts [
+  @schema_keywords [
+    :additional_items,
+    :additional_properties,
     :all_of,
     :any_of,
+    :dependencies,
     :enum,
+    :exclusive_maximum,
+    :exclusive_minimum,
+    :items,
+    :keys,
+    :max_items,
+    :max_length,
+    :max_properties,
+    :maximum,
+    :min_items,
+    :min_length,
+    :min_properties,
     :minimum,
     :multiple_of,
     :not,
-    :one_of
+    :one_of,
+    :pattern,
+    :pattern_properties,
+    :properties,
+    :required,
+    :unique_items
   ]
 
   @spec is_valid?(Xema.t(), any) :: boolean
   def is_valid?(xema, value), do: validate(xema, value) == :ok
 
-  @spec validate(Xema.t() | Xema.types(), any) :: Validator.result()
+  @spec validate(Xema.t() | Xema.Schema.t(), any) :: Validator.result()
   def validate(xema, value), do: Validator.validate(xema, value)
 
   @doc """
@@ -141,14 +177,14 @@ defmodule Xema do
 
   """
 
-  @spec xema(type, keyword) :: Xema.t()
+  @spec xema(schema_types, keyword) :: Xema.t()
   def xema(type, keywords \\ [])
 
   @doc false
-  @spec type(type, keyword) :: types
+  @spec type(schema_types, keyword) :: Xema.Schema.t()
   def type(type, keywords \\ [])
 
-  for {type, module} <- @types do
+  for type <- @schema_types do
     def xema(unquote(type), []) do
       new(Xema.Schema.new(type: unquote(type)))
     end
@@ -170,7 +206,7 @@ defmodule Xema do
     end
   end
 
-  for keyword <- @shortcuts do
+  for keyword <- @schema_keywords do
     def xema(unquote(keyword), opts), do: xema(:any, Keyword.new([{unquote(keyword), opts}]))
 
     def type({unquote(keyword), opts}, []),
