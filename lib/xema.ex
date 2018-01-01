@@ -3,17 +3,17 @@ defmodule Xema do
   A schema validator inspired by [JSON Schema](http://json-schema.org)
   """
 
-  alias Xema.SchemaError
   alias Xema.Schema.Validator, as: SchemaValidator
+  alias Xema.SchemaError
   alias Xema.Validator
 
   defstruct [
+    :description,
     :id,
+    :keywords,
     :schema,
     :title,
-    :description,
-    :type,
-    :keywords
+    :type
   ]
 
   @typedoc """
@@ -26,10 +26,10 @@ defmodule Xema do
   * `type` contains the specification of the schema.
   """
   @type t :: %Xema{
+          description: String.t() | nil,
           id: String.t() | nil,
           schema: String.t() | nil,
           title: String.t() | nil,
-          description: String.t() | nil,
           type: types
         }
 
