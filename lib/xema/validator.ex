@@ -19,7 +19,7 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  def validate(%Xema.Schema{type: :string} = schema, value) do
+  def validate(%{type: :string} = schema, value) do
     with :ok <- type(schema, value),
          length <- String.length(value),
          :ok <- min_length(schema, length, value),
@@ -29,20 +29,20 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  def validate(%Xema.Schema{type: nil} = type, value) do
+  def validate(%{type: nil} = type, value) do
     case value == nil do
       true -> :ok
       false -> {:error, %{value: value, type: type.as}}
     end
   end
 
-  def validate(%Xema.Schema{type: :number} = schema, value), do: validate_number(schema, value)
+  def validate(%{type: :number} = schema, value), do: validate_number(schema, value)
 
-  def validate(%Xema.Schema{type: :integer} = schema, value), do: validate_number(schema, value)
+  def validate(%{type: :integer} = schema, value), do: validate_number(schema, value)
 
-  def validate(%Xema.Schema{type: :float} = schema, value), do: validate_number(schema, value)
+  def validate(%{type: :float} = schema, value), do: validate_number(schema, value)
 
-  def validate(%Xema.Any{} = type, value) do
+  def validate(%{type: :any} = type, value) do
     with :ok <- enum(type, value),
          :ok <- do_not(type, value),
          :ok <- all_of(type, value),
@@ -60,17 +60,17 @@ defmodule Xema.Validator do
     end
   end
 
-  def validate(%Xema.String{} = type, value) do
-    with :ok <- type(type, value),
+  def validate(%{type: :string} = schema, value) do
+    with :ok <- type(schema, value),
          length <- String.length(value),
-         :ok <- min_length(type, length, value),
-         :ok <- max_length(type, length, value),
-         :ok <- pattern(type, value),
-         :ok <- enum(type, value),
+         :ok <- min_length(schema, length, value),
+         :ok <- max_length(schema, length, value),
+         :ok <- pattern(schema, value),
+         :ok <- enum(schema, value),
          do: :ok
   end
 
-  def validate(%Xema.Schema{type: :list} = schema, value) do
+  def validate(%{type: :list} = schema, value) do
     with :ok <- type(schema, value),
          :ok <- min_items(schema, value),
          :ok <- max_items(schema, value),
@@ -79,7 +79,7 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  def validate(%Xema.Schema{type: :map} = schema, value) do
+  def validate(%{type: :map} = schema, value) do
     with :ok <- type(schema, value),
          :ok <- size(schema, value),
          :ok <- keys(schema, value),
