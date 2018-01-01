@@ -20,7 +20,7 @@ defmodule Xema do
   @typedoc """
   The Xema base struct contains the meta data of a schema.
 
-  * `id` a unique idenfifier.
+  * `id` a unique identifier.
   * `schema` declares the used schema.
   * `title` of the schema.
   * `description` of the schema.
@@ -186,9 +186,7 @@ defmodule Xema do
   def type(type, keywords \\ [])
 
   for type <- @schema_types do
-    def xema(unquote(type), []) do
-      new(Schema.new(type: unquote(type)))
-    end
+    def xema(unquote(type), []), do: new(Schema.new(type: unquote(type)))
 
     def xema(unquote(type), opts) do
       case SchemaValidator.validate(unquote(type), opts) do
