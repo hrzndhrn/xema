@@ -74,7 +74,7 @@ defmodule Xema.Schema do
     |> Keyword.put_new(:as, opts[:type])
     |> Keyword.update(:items, nil, &items/1)
     |> Keyword.update(:additional_items, true, &bool_or_schema/1)
-    end
+  end
 
   @spec schemas(list) :: list
   defp schemas(list), do: Enum.map(list, fn schema -> Xema.type(schema) end)
@@ -90,7 +90,7 @@ defmodule Xema.Schema do
         {key, dep} -> {key, Xema.type(dep)}
       end)
 
-  @spec bool_or_schema(boolean | atom) :: boolean | Xema.Schema.t
+  @spec bool_or_schema(boolean | atom) :: boolean | Xema.Schema.t()
   defp bool_or_schema(bool) when is_boolean(bool), do: bool
 
   defp bool_or_schema(schema), do: Xema.type(schema)
