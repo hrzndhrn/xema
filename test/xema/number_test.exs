@@ -1,7 +1,7 @@
 defmodule Xema.NumberTest do
   use ExUnit.Case, async: true
 
-  doctest Xema.Number
+  doctest Xema.Schema
 
   import Xema
 

@@ -3,82 +3,127 @@ defmodule Xema do
   A schema validator inspired by [JSON Schema](http://json-schema.org)
   """
 
+  alias Xema.Schema
+  alias Xema.Schema.Validator, as: SchemaValidator
   alias Xema.SchemaError
-  alias Xema.SchemaValidator
   alias Xema.Validator
 
   defstruct [
+    :description,
     :id,
+    :keywords,
     :schema,
     :title,
-    :description,
-    :type,
-    :keywords
+    :type
   ]
 
   @typedoc """
   The Xema base struct contains the meta data of a schema.
 
-  * `id` a unique idenfifier.
+  * `id` a unique identifier.
   * `schema` declares the used schema.
   * `title` of the schema.
   * `description` of the schema.
   * `type` contains the specification of the schema.
   """
   @type t :: %Xema{
+          description: String.t() | nil,
           id: String.t() | nil,
           schema: String.t() | nil,
           title: String.t() | nil,
-          description: String.t() | nil,
-          type: types
+          type: Xema.Schema.t()
         }
 
   @typedoc """
   The available type notations.
   """
-  @type type ::
-          nil
-          | :any
+  @type schema_types ::
+          :any
           | :boolean
-          | :map
-          | :list
-          | :string
-          | :number
           | :float
           | :integer
+          | :list
+          | :map
+          | nil
+          | :number
+          | :string
+
+  @schema_types [
+    :any,
+    :boolean,
+    :float,
+    :integer,
+    :list,
+    :map,
+    nil,
+    :number,
+    :string
+  ]
 
   @typedoc """
-  The `keywords` for the schema types.
+  The available schema keywords.
   """
-  @type types ::
-          Xema.Any.t()
-          | Xema.Nil.t()
-          | Xema.Boolean.t()
-          | Xema.Map.t()
-          | Xema.List.t()
-          | Xema.Number.t()
-          | Xema.Integer.t()
-          | Xema.Float.t()
-          | Xema.String.t()
+  @type schema_keywords ::
+          :additional_items
+          | :additional_properties
+          | :all_of
+          | :any_of
+          | :dependencies
+          | :enum
+          | :exclusive_maximum
+          | :exclusive_minimum
+          | :items
+          | :keys
+          | :max_items
+          | :max_length
+          | :max_properties
+          | :maximum
+          | :min_items
+          | :min_length
+          | :min_properties
+          | :minimum
+          | :multiple_of
+          | :not
+          | :one_of
+          | :pattern
+          | :pattern_properties
+          | :properties
+          | :required
+          | :unique_items
 
-  @types %{
-    any: Xema.Any,
-    nil: Xema.Nil,
-    boolean: Xema.Boolean,
-    map: Xema.Map,
-    list: Xema.List,
-    string: Xema.String,
-    number: Xema.Number,
-    float: Xema.Float,
-    integer: Xema.Integer
-  }
-
-  @shortcuts [:all_of, :any_of, :enum, :not, :one_of]
+  @schema_keywords [
+    :additional_items,
+    :additional_properties,
+    :all_of,
+    :any_of,
+    :dependencies,
+    :enum,
+    :exclusive_maximum,
+    :exclusive_minimum,
+    :items,
+    :keys,
+    :max_items,
+    :max_length,
+    :max_properties,
+    :maximum,
+    :min_items,
+    :min_length,
+    :min_properties,
+    :minimum,
+    :multiple_of,
+    :not,
+    :one_of,
+    :pattern,
+    :pattern_properties,
+    :properties,
+    :required,
+    :unique_items
+  ]
 
   @spec is_valid?(Xema.t(), any) :: boolean
   def is_valid?(xema, value), do: validate(xema, value) == :ok
 
-  @spec validate(Xema.t() | Xema.types(), any) :: Validator.result()
+  @spec validate(Xema.t() | Xema.Schema.t(), any) :: Validator.result()
   def validate(xema, value), do: Validator.validate(xema, value)
 
   @doc """
@@ -98,9 +143,11 @@ defmodule Xema do
       Xema
       iex> xema :string, min_length: 3, max_length: 12
       %Xema{
-        type: %Xema.String{
+        type: %Xema.Schema{
           max_length: 12,
           min_length: 3,
+          type: :string,
+          as: :string
         }
       }
 
@@ -111,8 +158,12 @@ defmodule Xema do
       Xema
       iex> schema = xema :list, items: {:number, minimum: 2}
       %Xema{
-        type: %Xema.List{
-          items: %Xema.Number{
+        type: %Xema.Schema{
+          type: :list,
+          as: :list,
+          items: %Xema.Schema{
+            type: :number,
+            as: :number,
             minimum: 2
           }
         }
@@ -127,42 +178,41 @@ defmodule Xema do
 
   """
 
-  @spec xema(type, keyword) :: Xema.t()
+  @spec xema(schema_types, keyword) :: Xema.t()
   def xema(type, keywords \\ [])
 
   @doc false
-  @spec type(type, keyword) :: types
+  @spec type(schema_types, keyword) :: Xema.Schema.t()
   def type(type, keywords \\ [])
 
-  for {type, module} <- @types do
-    def xema(unquote(type), []) do
-      new(unquote(module).new([]))
-    end
+  for type <- @schema_types do
+    def xema(unquote(type), []), do: new(Schema.new(type: unquote(type)))
 
     def xema(unquote(type), opts) do
       case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> new(unquote(module).new(opts), opts)
+        :ok -> new(Schema.new(Keyword.put(opts, :type, unquote(type))), opts)
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
 
-    def type(unquote(type), []) do
-      unquote(module).new()
-    end
+    def type(unquote(type), []), do: Schema.new(type: unquote(type))
 
     def type({unquote(type), opts}, []) do
       case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> unquote(module).new(opts)
+        :ok -> Schema.new(Keyword.put(opts, :type, unquote(type)))
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
   end
 
-  for keyword <- @shortcuts do
-    def xema(unquote(keyword), ops), do: xema(:any, Keyword.new([{unquote(keyword), ops}]))
+  for keyword <- @schema_keywords do
+    def xema(unquote(keyword), opts), do: xema(:any, Keyword.new([{unquote(keyword), opts}]))
 
-    def type({unquote(keyword), ops}, []),
-      do: type({:any, Keyword.new([{unquote(keyword), ops}])})
+    def type({unquote(keyword), opts}, []),
+      do: type({:any, Keyword.new([{unquote(keyword), opts}])})
+
+    def type(%{unquote(keyword) => opts}, []),
+      do: type({:any, Keyword.new([{unquote(keyword), opts}])})
   end
 
   def type(type, _) do

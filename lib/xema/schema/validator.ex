@@ -2,31 +2,86 @@ defmodule Xema.SchemaError do
   defexception [:message]
 end
 
-defmodule Xema.SchemaValidator do
+defmodule Xema.Schema.Validator do
   @moduledoc false
 
   import Xema.Validator, only: [is_unique?: 1]
 
   @type result :: :ok | {:error, String.t()}
 
-  @xema %Xema{} |> Map.keys() |> MapSet.new()
+  @default_keys MapSet.new([
+                  :all_of,
+                  :any_of,
+                  :as,
+                  :description,
+                  :enum,
+                  :id,
+                  :not,
+                  :one_of,
+                  :schema,
+                  :title,
+                  :type
+                ])
 
-  @get_keys fn type ->
-    type
-    |> Map.keys()
-    |> MapSet.new()
-    |> MapSet.union(@xema)
-  end
+  @list_keys @default_keys
+             |> MapSet.union(
+               MapSet.new([
+                 :items,
+                 :max_items,
+                 :min_items,
+                 :additional_items,
+                 :unique_items
+               ])
+             )
+
+  @number_keys @default_keys
+               |> MapSet.union(
+                 MapSet.new([
+                   :minimum,
+                   :maximum,
+                   :exclusive_maximum,
+                   :exclusive_minimum,
+                   :multiple_of
+                 ])
+               )
+
+  @string_keys @default_keys
+               |> MapSet.union(
+                 MapSet.new([
+                   :max_length,
+                   :min_length,
+                   :pattern
+                 ])
+               )
+
+  @map_keys @default_keys
+            |> MapSet.union(
+              MapSet.new([
+                :additional_properties,
+                :dependencies,
+                :keys,
+                :max_properties,
+                :min_properties,
+                :pattern_properties,
+                :properties,
+                :required
+              ])
+            )
+
+  @any_keys @number_keys
+            |> MapSet.union(@string_keys)
+            |> MapSet.union(@list_keys)
+            |> MapSet.union(@map_keys)
 
   @keys [
-    any: @get_keys.(%Xema.Any{}),
-    boolean: @get_keys.(%Xema.Boolean{}),
-    float: @get_keys.(%Xema.Float{}),
-    integer: @get_keys.(%Xema.Integer{}),
-    list: @get_keys.(%Xema.List{}),
-    map: @get_keys.(%Xema.Map{}),
-    number: @get_keys.(%Xema.Number{}),
-    string: @get_keys.(%Xema.String{})
+    any: @any_keys,
+    boolean: @default_keys,
+    float: @number_keys,
+    integer: @number_keys,
+    list: @list_keys,
+    map: @map_keys,
+    number: @number_keys,
+    string: @string_keys
   ]
 
   @spec validate(atom, keyword) :: :ok | {:error, String.t()}
@@ -369,7 +424,7 @@ defmodule Xema.SchemaValidator do
 
   defp properties(value), do: {:error, "Expected a map for properties, got #{inspect(value)}."}
 
-  @spec property_key(any, any) :: result
+  @spec property_key(any, any) :: {:cont, :ok} | {:error, String.t()}
   defp property_key(key, _)
        when is_binary(key) or is_atom(key),
        do: {:cont, :ok}

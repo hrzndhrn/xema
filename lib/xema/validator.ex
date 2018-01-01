@@ -3,100 +3,96 @@ defmodule Xema.Validator do
 
   @type result :: :ok | {:error, map}
 
-  @spec validate(Xema.t() | Xema.types(), any) :: result
+  @spec validate(Xema.t() | Xema.Schema.t(), any) :: result
   def validate(%Xema{} = xema, value) do
     validate(xema.type, value)
   end
 
-  def validate(%Xema.Nil{} = type, value) do
+  def validate(%{type: :any} = schema, value) do
+    with :ok <- enum(schema, value),
+         :ok <- do_not(schema, value),
+         :ok <- all_of(schema, value),
+         :ok <- any_of(schema, value),
+         :ok <- one_of(schema, value),
+         :ok <- minimum(schema, value),
+         :ok <- multiple_of(schema, value),
+         do: :ok
+  end
+
+  def validate(%{type: :string} = schema, value) do
+    with :ok <- type(schema, value),
+         length <- String.length(value),
+         :ok <- min_length(schema, length, value),
+         :ok <- max_length(schema, length, value),
+         :ok <- pattern(schema, value),
+         :ok <- enum(schema, value),
+         do: :ok
+  end
+
+  def validate(%{type: nil} = type, value) do
     case value == nil do
       true -> :ok
       false -> {:error, %{value: value, type: type.as}}
     end
   end
 
-  def validate(%Xema.Number{} = type, value) do
-    validate_number(type, value)
-  end
+  def validate(%{type: :number} = schema, value), do: validate_number(schema, value)
 
-  def validate(%Xema.Integer{} = type, value) do
-    validate_number(type, value)
-  end
+  def validate(%{type: :integer} = schema, value), do: validate_number(schema, value)
 
-  def validate(%Xema.Float{} = type, value) do
-    validate_number(type, value)
-  end
+  def validate(%{type: :float} = schema, value), do: validate_number(schema, value)
 
-  def validate(%Xema.Any{} = type, value) do
-    with :ok <- enum(type, value),
-         :ok <- do_not(type, value),
-         :ok <- all_of(type, value),
-         :ok <- any_of(type, value),
-         :ok <- one_of(type, value),
-         do: :ok
-  end
-
-  def validate(%Xema.Boolean{} = type, value) do
+  def validate(%Xema.Schema{type: :boolean} = schema, value) do
     case is_boolean(value) do
       true -> :ok
-      false -> {:error, %{value: value, type: type.as}}
+      false -> {:error, %{value: value, type: schema.as}}
     end
   end
 
-  def validate(%Xema.String{} = type, value) do
-    with :ok <- type(type, value),
-         length <- String.length(value),
-         :ok <- min_length(type, length, value),
-         :ok <- max_length(type, length, value),
-         :ok <- pattern(type, value),
-         :ok <- enum(type, value),
+  def validate(%{type: :list} = schema, value) do
+    with :ok <- type(schema, value),
+         :ok <- min_items(schema, value),
+         :ok <- max_items(schema, value),
+         :ok <- items(schema, value),
+         :ok <- unique(schema, value),
          do: :ok
   end
 
-  def validate(%Xema.List{} = type, value) do
-    with :ok <- type(type, value),
-         :ok <- min_items(type, value),
-         :ok <- max_items(type, value),
-         :ok <- items(type, value),
-         :ok <- unique(type, value),
+  def validate(%{type: :map} = schema, value) do
+    with :ok <- type(schema, value),
+         :ok <- size(schema, value),
+         :ok <- keys(schema, value),
+         :ok <- required(schema, value),
+         :ok <- dependencies(schema, value),
+         {:ok, value} <- properties(schema, value),
+         {:ok, value} <- patterns(schema, value),
+         :ok <- additionals(schema, value),
          do: :ok
   end
 
-  def validate(%Xema.Map{} = type, value) do
-    with :ok <- type(type, value),
-         :ok <- size(type, value),
-         :ok <- keys(type, value),
-         :ok <- required(type, value),
-         :ok <- dependencies(type, value),
-         {:ok, value} <- properties(type, value),
-         {:ok, value} <- patterns(type, value),
-         :ok <- additionals(type, value),
+  @spec validate_number(Xema.Schema.t(), any) :: result
+  defp validate_number(schema, value) do
+    with :ok <- type(schema, value),
+         :ok <- minimum(schema, value),
+         :ok <- maximum(schema, value),
+         :ok <- exclusive_maximum(schema, value),
+         :ok <- exclusive_minimum(schema, value),
+         :ok <- multiple_of(schema, value),
+         :ok <- enum(schema, value),
+         :ok <- one_of(schema, value),
          do: :ok
   end
 
-  @spec validate_number(Xema.types(), any) :: result
-  defp validate_number(type, value) do
-    with :ok <- type(type, value),
-         :ok <- minimum(type, value),
-         :ok <- maximum(type, value),
-         :ok <- exclusive_maximum(type, value),
-         :ok <- exclusive_minimum(type, value),
-         :ok <- multiple_of(type, value),
-         :ok <- enum(type, value) do
-      :ok
-    end
-  end
-
-  @spec type(Xema.types(), any) :: result
-  defp type(%Xema.Integer{}, value) when is_integer(value), do: :ok
-  defp type(%Xema.Float{}, value) when is_float(value), do: :ok
-  defp type(%Xema.Number{}, value) when is_number(value), do: :ok
-  defp type(%Xema.String{}, value) when is_binary(value), do: :ok
-  defp type(%Xema.List{}, value) when is_list(value), do: :ok
-  defp type(%Xema.Map{}, value) when is_map(value), do: :ok
+  @spec type(Xema.Schema.t(), any) :: result
+  defp type(%{type: :string}, value) when is_binary(value), do: :ok
+  defp type(%{type: :number}, value) when is_number(value), do: :ok
+  defp type(%{type: :integer}, value) when is_integer(value), do: :ok
+  defp type(%{type: :float}, value) when is_float(value), do: :ok
+  defp type(%{type: :map}, value) when is_map(value), do: :ok
+  defp type(%{type: :list}, value) when is_list(value), do: :ok
   defp type(type, value), do: {:error, %{type: type.as, value: value}}
 
-  @spec enum(Xema.types(), any) :: result
+  @spec enum(Xema.Schema.t(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok
 
   defp enum(%{enum: enum}, value) do
@@ -106,7 +102,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_not(Xema.types(), any) :: result
+  @spec do_not(Xema.Schema.t(), any) :: result
   defp do_not(%{not: nil}, _value), do: :ok
 
   defp do_not(%{not: schema}, value) do
@@ -116,7 +112,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec all_of(Xema.types(), any) :: result
+  @spec all_of(Xema.Schema.t(), any) :: result
   defp all_of(%{all_of: nil}, _value), do: :ok
 
   defp all_of(%{all_of: schemas}, value) do
@@ -130,7 +126,7 @@ defmodule Xema.Validator do
   defp do_all_of(schemas, value),
     do: Enum.all?(schemas, fn schema -> Xema.validate(schema, value) == :ok end)
 
-  @spec any_of(Xema.types(), any) :: result
+  @spec any_of(Xema.Schema.t(), any) :: result
   defp any_of(%{any_of: nil}, _value), do: :ok
 
   defp any_of(%{any_of: schemas}, value) do
@@ -144,7 +140,7 @@ defmodule Xema.Validator do
   defp do_any_of(schemas, value),
     do: Enum.any?(schemas, fn schema -> Xema.validate(schema, value) == :ok end)
 
-  @spec one_of(Xema.types(), any) :: result
+  @spec one_of(Xema.Schema.t(), any) :: result
   defp one_of(%{one_of: nil}, _value), do: :ok
 
   defp one_of(%{one_of: schemas}, value) do
@@ -156,7 +152,8 @@ defmodule Xema.Validator do
 
   @spec do_one_of(list, any) :: integer
   defp do_one_of(schemas, value) do
-    Enum.filter(schemas, fn schema ->
+    schemas
+    |> Enum.filter(fn schema ->
       case Xema.validate(schema, value) do
         :ok -> true
         {:error, _} -> false
@@ -165,7 +162,7 @@ defmodule Xema.Validator do
     |> Enum.count()
   end
 
-  @spec exclusive_maximum(Xema.types(), any) :: result
+  @spec exclusive_maximum(Xema.Schema.t(), any) :: result
   defp exclusive_maximum(%{exclusive_maximum: nil}, _value), do: :ok
 
   defp exclusive_maximum(%{exclusive_maximum: max}, _value)
@@ -179,7 +176,7 @@ defmodule Xema.Validator do
   defp exclusive_maximum(%{exclusive_maximum: max}, value),
     do: {:error, %{exclusive_maximum: max, value: value}}
 
-  @spec exclusive_minimum(Xema.types(), any) :: result
+  @spec exclusive_minimum(Xema.Schema.t(), any) :: result
   defp exclusive_minimum(%{exclusive_minimum: nil}, _value), do: :ok
 
   defp exclusive_minimum(%{exclusive_minimum: min}, _value)
@@ -193,14 +190,17 @@ defmodule Xema.Validator do
   defp exclusive_minimum(%{exclusive_minimum: min}, value),
     do: {:error, %{value: value, exclusive_minimum: min}}
 
-  @spec minimum(Xema.types(), any) :: result
+  @spec minimum(Xema.Schema.t(), any) :: result
   defp minimum(%{minimum: nil}, _value), do: :ok
 
   defp minimum(
          %{minimum: minimum, exclusive_minimum: exclusive_minimum},
          value
-       ),
+       )
+       when is_number(value),
        do: minimum(minimum, exclusive_minimum, value)
+
+  defp minimum(_, _), do: :ok
 
   @spec minimum(number, boolean, number) :: result
   defp minimum(minimum, _exclusive, value) when value > minimum, do: :ok
@@ -209,11 +209,10 @@ defmodule Xema.Validator do
 
   defp minimum(minimum, nil, value), do: {:error, %{value: value, minimum: minimum}}
 
-  @spec maximum(Xema.types(), any) :: result
   defp minimum(minimum, exclusive, value),
     do: {:error, %{value: value, minimum: minimum, exclusive_minimum: exclusive}}
 
-  @spec maximum(Xema.types(), any) :: result
+  @spec maximum(Xema.Schema.t(), any) :: result
   defp maximum(%{maximum: nil}, _value), do: :ok
 
   defp maximum(
@@ -232,10 +231,10 @@ defmodule Xema.Validator do
   defp maximum(maximum, exclusive, value),
     do: {:error, %{value: value, maximum: maximum, exclusive_maximum: exclusive}}
 
-  @spec multiple_of(Xema.types(), number) :: result
+  @spec multiple_of(Xema.Schema.t(), number) :: result
   defp multiple_of(%{multiple_of: nil} = _keywords, _value), do: :ok
 
-  defp multiple_of(%{multiple_of: multiple_of}, value) do
+  defp multiple_of(%{multiple_of: multiple_of}, value) when is_number(value) do
     x = value / multiple_of
 
     case x - Float.floor(x) do
@@ -244,19 +243,21 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec min_length(Xema.String.t(), integer, String.t()) :: result
+  defp multiple_of(_, _), do: :ok
+
+  @spec min_length(Xema.Schema.t(), integer, String.t()) :: result
   defp min_length(%{min_length: nil}, _, _), do: :ok
   defp min_length(%{min_length: min}, len, _) when len >= min, do: :ok
 
   defp min_length(%{min_length: min}, _, value), do: {:error, %{value: value, min_length: min}}
 
-  @spec max_length(Xema.String.t(), integer, String.t()) :: result
+  @spec max_length(Xema.Schema.t(), integer, String.t()) :: result
   defp max_length(%{max_length: nil}, _, _), do: :ok
   defp max_length(%{max_length: max}, len, _) when len <= max, do: :ok
 
   defp max_length(%{max_length: max}, _, value), do: {:error, %{value: value, max_length: max}}
 
-  @spec pattern(Xema.String.t(), String.t()) :: result
+  @spec pattern(Xema.Schema.t(), String.t()) :: result
   defp pattern(%{pattern: nil}, _string), do: :ok
 
   defp pattern(%{pattern: pattern}, string) do
@@ -266,28 +267,28 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec min_items(Xema.List.t(), list) :: result
-  defp min_items(%Xema.List{min_items: nil}, _list), do: :ok
+  @spec min_items(Xema.Schema.t(), list) :: result
+  defp min_items(%{min_items: nil}, _list), do: :ok
 
-  defp min_items(%Xema.List{min_items: min}, list) when length(list) >= min do
+  defp min_items(%{min_items: min}, list) when length(list) >= min do
     :ok
   end
 
-  defp min_items(%Xema.List{min_items: min}, list), do: {:error, %{value: list, min_items: min}}
+  defp min_items(%{min_items: min}, list), do: {:error, %{value: list, min_items: min}}
 
-  @spec max_items(Xema.List.t(), list) :: result
-  defp max_items(%Xema.List{max_items: nil}, _list), do: :ok
+  @spec max_items(Xema.Schema.t(), list) :: result
+  defp max_items(%{max_items: nil}, _list), do: :ok
 
-  defp max_items(%Xema.List{max_items: max}, list) when length(list) <= max do
+  defp max_items(%{max_items: max}, list) when length(list) <= max do
     :ok
   end
 
-  defp max_items(%Xema.List{max_items: max}, list), do: {:error, %{value: list, max_items: max}}
+  defp max_items(%{max_items: max}, list), do: {:error, %{value: list, max_items: max}}
 
-  @spec unique(Xema.List.t(), list) :: result
-  defp unique(%Xema.List{unique_items: nil}, _list), do: :ok
+  @spec unique(Xema.Schema.t(), list) :: result
+  defp unique(%{unique_items: nil}, _list), do: :ok
 
-  defp unique(%Xema.List{unique_items: true}, list) do
+  defp unique(%{unique_items: true}, list) do
     case is_unique?(list) do
       true -> :ok
       false -> {:error, %{value: list, unique_items: true}}
@@ -305,19 +306,16 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec items(Xema.List.t(), list) :: result
-  defp items(%Xema.List{items: nil}, _list), do: :ok
+  @spec items(Xema.Schema.t(), list) :: result
+  defp items(%{items: nil}, _list), do: :ok
 
-  defp items(
-         %Xema.List{items: items, additional_items: additional_items},
-         list
-       )
+  defp items(%{items: items, additional_items: additional_items}, list)
        when is_list(items),
-       do: items_tuple(items, additional_items, list, 0, [])
+       do: items_tuple(items, update_nil(additional_items, true), list, 0, [])
 
-  defp items(%Xema.List{items: items}, list), do: items_list(items, list, 0, [])
+  defp items(%{items: items}, list), do: items_list(items, list, 0, [])
 
-  @spec items_list(Xema.types(), list, integer, list) :: result
+  @spec items_list(Xema.Schema.t(), list, integer, list) :: result
   defp items_list(_schema, [], _at, []), do: :ok
   defp items_list(_schema, [], _at, errors), do: {:error, Enum.reverse(errors)}
 
@@ -331,7 +329,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec items_tuple(list, nil | boolean | Xema.types(), list, integer, list) :: result
+  @spec items_tuple(list, nil | boolean | Xema.Schema.t(), list, integer, list) :: result
   defp items_tuple(_schemas, _additonal_items, [], _at, []), do: :ok
 
   defp items_tuple(_schemas, _additonal_items, [], _at, errors),
@@ -343,7 +341,6 @@ defmodule Xema.Validator do
         %{additional_items: false, at: at} | errors
       ])
 
-  # TODO: write test and fix
   defp items_tuple([], true, _list, _at, []), do: :ok
 
   defp items_tuple([], true, _list, _at, errors), do: {:error, Enum.reverse(errors)}
@@ -378,27 +375,27 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec keys(Xema.Map.t(), any) :: result
-  defp keys(%Xema.Map{keys: nil}, _value), do: :ok
+  @spec keys(Xema.Schema.t(), any) :: result
+  defp keys(%{keys: nil}, _value), do: :ok
 
-  defp keys(%Xema.Map{keys: :atoms}, map) do
+  defp keys(%{keys: :atoms}, map) do
     case map |> Map.keys() |> Enum.all?(&is_atom/1) do
       true -> :ok
       false -> {:error, %{keys: :atoms}}
     end
   end
 
-  defp keys(%Xema.Map{keys: :strings}, map) do
+  defp keys(%{keys: :strings}, map) do
     case map |> Map.keys() |> Enum.all?(&is_binary/1) do
       true -> :ok
       false -> {:error, %{keys: :strings}}
     end
   end
 
-  @spec properties(Xema.Map.t(), map) :: result
-  defp properties(%Xema.Map{properties: nil}, map), do: {:ok, map}
+  @spec properties(Xema.Schema.t(), map) :: result
+  defp properties(%{properties: nil}, map), do: {:ok, map}
 
-  defp properties(%Xema.Map{properties: props}, map) do
+  defp properties(%{properties: props}, map) do
     do_properties(Map.to_list(props), map, %{})
   end
 
@@ -421,7 +418,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_property(Xema.types(), any) :: result
+  @spec do_property(Xema.Schema.t(), any) :: result
   defp do_property(_schema, nil), do: :ok
 
   defp do_property(schema, value), do: Xema.validate(schema, value)
@@ -460,10 +457,10 @@ defmodule Xema.Validator do
     if Map.has_key?(map, key), do: key, else: String.to_existing_atom(key)
   end
 
-  @spec required(Xema.Map.t(), map) :: result
-  defp required(%Xema.Map{required: nil}, _map), do: :ok
+  @spec required(Xema.Schema.t(), map) :: result
+  defp required(%{required: nil}, _map), do: :ok
 
-  defp required(%Xema.Map{required: required}, map) do
+  defp required(%{required: required}, map) do
     props = map |> Map.keys() |> MapSet.new()
 
     case MapSet.subset?(required, props) do
@@ -481,10 +478,10 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec size(Xema.Map.t(), map) :: result
-  defp size(%Xema.Map{min_properties: nil, max_properties: nil}, _map), do: :ok
+  @spec size(Xema.Schema.t(), map) :: result
+  defp size(%{min_properties: nil, max_properties: nil}, _map), do: :ok
 
-  defp size(%Xema.Map{min_properties: min, max_properties: max}, map) do
+  defp size(%{min_properties: min, max_properties: max}, map) do
     do_size(length(Map.keys(map)), min, max)
   end
 
@@ -499,10 +496,10 @@ defmodule Xema.Validator do
 
   defp do_size(_len, _min, _max), do: :ok
 
-  @spec patterns(Xema.Map.t(), map) :: result
-  defp patterns(%Xema.Map{pattern_properties: nil}, map), do: {:ok, map}
+  @spec patterns(Xema.Schema.t(), map) :: result
+  defp patterns(%{pattern_properties: nil}, map), do: {:ok, map}
 
-  defp patterns(%Xema.Map{pattern_properties: patterns}, map) do
+  defp patterns(%{pattern_properties: patterns}, map) do
     props =
       for {pattern, schema} <- Map.to_list(patterns),
           key <- Map.keys(map),
@@ -519,8 +516,8 @@ defmodule Xema.Validator do
 
   defp key_match?(regex, string), do: Regex.match?(regex, string)
 
-  @spec additionals(Xema.Map.t(), map) :: result
-  defp additionals(%Xema.Map{additional_properties: false}, map) do
+  @spec additionals(Xema.Schema.t(), map) :: result
+  defp additionals(%{additional_properties: false}, map) do
     case Map.equal?(map, %{}) do
       true ->
         :ok
@@ -535,7 +532,7 @@ defmodule Xema.Validator do
     end
   end
 
-  defp additionals(%Xema.Map{additional_properties: schema}, map)
+  defp additionals(%{additional_properties: schema}, map)
        when is_map(schema) do
     result =
       Enum.reduce(map, %{}, fn {key, value}, acc ->
@@ -553,10 +550,10 @@ defmodule Xema.Validator do
 
   defp additionals(_schema, _map), do: :ok
 
-  @spec dependencies(Xema.Map.t(), map) :: result
-  defp dependencies(%Xema.Map{dependencies: nil}, _map), do: :ok
+  @spec dependencies(Xema.Schema.t(), map) :: result
+  defp dependencies(%{dependencies: nil}, _map), do: :ok
 
-  defp dependencies(%Xema.Map{dependencies: dependencies}, map) do
+  defp dependencies(%{dependencies: dependencies}, map) do
     dependencies
     |> Map.to_list()
     |> Enum.filter(fn {key, _} -> Map.has_key?(map, key) end)
@@ -594,4 +591,8 @@ defmodule Xema.Validator do
         {:error, %{key => %{dependency: dependency}}}
     end
   end
+
+  @spec update_nil(any, any) :: any
+  defp update_nil(nil, b), do: b
+  defp update_nil(a, _b), do: a
 end
