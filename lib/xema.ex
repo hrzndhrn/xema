@@ -186,7 +186,7 @@ defmodule Xema do
   def xema({type, keywords}, []), do: xema(type, keywords)
 
   def xema(tuple, keywords) when is_tuple(tuple),
-    do: raise ArgumentError, message: "Invalid argument #{inspect keywords}"
+    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}")
 
   @doc false
   @spec type(schema_types, keyword) :: Xema.Schema.t()
@@ -196,8 +196,16 @@ defmodule Xema do
     def xema(unquote(type), []), do: new(Schema.new(type: unquote(type)))
 
     def xema(unquote(type), opts) do
-      case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> new(Schema.new(Keyword.put(opts, :type, unquote(type))), opts)
+      schema_opts =
+        opts
+        |> Keyword.put(:type, unquote(type))
+        |> Keyword.delete(:id)
+        |> Keyword.delete(:title)
+        |> Keyword.delete(:description)
+        |> Keyword.delete(:schema)
+
+      case SchemaValidator.validate(unquote(type), schema_opts) do
+        :ok -> new(Schema.new(schema_opts), opts)
         {:error, msg} -> raise SchemaError, message: msg
       end
     end

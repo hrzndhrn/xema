@@ -17,32 +17,38 @@ defmodule Xema.Schema do
   @typedoc """
   The struct contains the keywords for a schema.
 
-  * `additional_items` disallow additional items, if set to false. The keyword can also contain a schema to specify the type of additional items.
-  * `additional_properties` disallow additional properties, if set to true
+  * `additional_items` disallow additional items, if set to false. The keyword
+    can also contain a schema to specify the type of additional items.
+  * `additional_properties` disallow additional properties, if set to true.
   * `as` is used in an error report.
-  * `as` is used in an error report. Default of `as` is `:list`
-  * `dependencies` allows the schema of the map to change based on the presence of certain special properties
+  * `as` is used in an error report. Default of `as` is `:list`.
+  * `dependencies` allows the schema of the map to change based on the presence
+    of certain special properties
   * `enum` specifies an enumeration
-  * `exclusive_maximum` is a boolean. When true, it indicates that the range excludes the maximum value.
-  * `exclusive_minimum` is a boolean. When true, it indicates that the range excludes the minimum value.
-  * `items` specifies the type(s) of the items
-  * `keys` could be `:atoms` or `:strings`
-  * `max_items` the maximum length of list
-  * `max_length` the maximum length of string
-  * `max_properties` the maximum count of properties for the map
-  * `maximum` the maximum value
-  * `min_items` the minimal length of list
-  * `min_length` the minimal length of string
-  * `min_properties` the minimal count of properties for the map
-  * `minimum` the minimum value
-  * `multiple_of` is a number greater 0. The value has to be a multiple of this number.
-  * `one_of` the given data must be valid against exactly one of the given subschemas.
+  * `exclusive_maximum` is a boolean. When true, it indicates that the range
+    excludes the maximum value.
+  * `exclusive_minimum` is a boolean. When true, it indicates that the range
+    excludes the minimum value.
+  * `items` specifies the type(s) of the items.
+  * `keys` could be `:atoms` or `:strings`.
+  * `max_items` the maximum length of list.
+  * `max_length` the maximum length of string.
+  * `max_properties` the maximum count of properties for the map.
+  * `maximum` the maximum value.
+  * `min_items` the minimal length of list.
+  * `min_length` the minimal length of string.
+  * `min_properties` the minimal count of properties for the map.
+  * `minimum` the minimum value.
+  * `multiple_of` is a number greater 0. The value has to be a multiple of this
+    number.
+  * `one_of` the given data must be valid against exactly one of the given
+    subschemas.
   * `pattern_properties` specifies schemas for properties by patterns
   * `pattern` restrict a string to a particular regular expression.
-  * `properties` specifies schemas for properties
-  * `required` contains a set of required properties
+  * `properties` specifies schemas for properties.
+  * `required` contains a set of required properties.
   * `type` specifies the data type for a schema.
-  * `unique_items` disallow duplicate items, if set to true
+  * `unique_items` disallow duplicate items, if set to true.
   """
   @type t :: %Xema.Schema{
           additional_items: Xema.t() | Xema.Schema.t() | boolean | nil,
