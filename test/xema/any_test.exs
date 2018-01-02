@@ -316,7 +316,7 @@ defmodule Xema.AnyTest do
     end
   end
 
-  describe "'any' schema with keyword minimum" do
+  describe "'any' schema with keyword minimum:" do
     setup do
       %{schema: xema(:any, minimum: 2)}
     end
@@ -339,7 +339,7 @@ defmodule Xema.AnyTest do
     end
   end
 
-  describe "'any' schema with keywor multiple_of" do
+  describe "any-schema with keyword multiple_of:" do
     setup do
       %{schema: xema(:any, multiple_of: 2)}
     end
@@ -359,6 +359,20 @@ defmodule Xema.AnyTest do
 
     test "validate/2 ignore non-numbers", %{schema: schema} do
       assert validate(schema, "foo") == :ok
+    end
+  end
+
+  describe "any-schema with keyword additional_items:" do
+    setup do
+      %{schema: xema(:any, additional_items: false)}
+    end
+
+    test "validate/2 with a list", %{schema: schema} do
+      assert validate(schema, [1, "2"]) == :ok
+    end
+
+    test "validate/2 with a map", %{schema: schema} do
+      assert validate(schema, %{a: 1}) == :ok
     end
   end
 end

@@ -178,8 +178,15 @@ defmodule Xema do
 
   """
 
-  @spec xema(schema_types, keyword) :: Xema.t()
+  @spec xema(schema_types | tuple, keyword) :: Xema.t()
   def xema(type, keywords \\ [])
+
+  def xema({type}, []), do: xema(type, [])
+
+  def xema({type, keywords}, []), do: xema(type, keywords)
+
+  def xema(tuple, keywords) when is_tuple(tuple),
+    do: raise ArgumentError, message: "Invalid argument #{inspect keywords}"
 
   @doc false
   @spec type(schema_types, keyword) :: Xema.Schema.t()
