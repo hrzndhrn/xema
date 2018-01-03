@@ -9,7 +9,7 @@ defmodule Xema.ListTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :list
+      assert schema.content.as == :list
     end
 
     @tag :only

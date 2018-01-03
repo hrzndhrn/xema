@@ -9,7 +9,7 @@ defmodule Xema.MapTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :map
+      assert schema.content.as == :map
     end
 
     test "validate/2 with an empty map", %{schema: schema} do
@@ -37,7 +37,7 @@ defmodule Xema.MapTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :object
+      assert schema.content.as == :object
     end
 
     test "validate/2 with a string", %{schema: schema} do

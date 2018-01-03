@@ -5,7 +5,7 @@ defmodule Xema.Validator do
 
   @spec validate(Xema.t() | Xema.Schema.t(), any) :: result
   def validate(%Xema{} = xema, value) do
-    validate(xema.type, value)
+    validate(xema.content, value)
   end
 
   def validate(%{type: :any} = schema, value) do

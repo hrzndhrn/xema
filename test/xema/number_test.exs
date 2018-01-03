@@ -1,8 +1,6 @@
 defmodule Xema.NumberTest do
   use ExUnit.Case, async: true
 
-  doctest Xema.Schema
-
   import Xema
 
   describe "'number' schema" do
@@ -11,7 +9,7 @@ defmodule Xema.NumberTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :number
+      assert schema.content.as == :number
     end
 
     test "validate/2 with a float", %{schema: schema} do

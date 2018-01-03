@@ -39,7 +39,7 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword not without a schema" do
-      expected = ~s("foo" is not a valid type.)
+      expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
         xema(:any, not: "foo")
@@ -55,7 +55,7 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword all_of with an invalid list" do
-      expected = ~s("foo" is not a valid type.)
+      expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
         xema(:any, all_of: [:integer, "foo"])
@@ -71,7 +71,7 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword any_of with an invalid list" do
-      expected = ~s("foo" is not a valid type.)
+      expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
         xema(:any, any_of: [:integer, "foo"])
@@ -89,7 +89,7 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "supported keyword" do
-      assert xema(:boolean, as: :bool) == %Xema{type: %Xema.Schema{type: :boolean, as: :bool}}
+      assert xema(:boolean, as: :bool) == %Xema{content: %Xema.Schema{type: :boolean, as: :bool}}
     end
   end
 
@@ -119,7 +119,7 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword additional_items with invalid value" do
-      expected = ~s("foo" is not a valid type.)
+      expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
         xema(:list, items: [:string], additional_items: "foo")
@@ -205,7 +205,7 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword additional_properties with invalid value" do
-      expected = ~s("foo" is not a valid type.)
+      expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
         xema(:map, properties: %{a: :string}, additional_properties: "foo")
@@ -233,7 +233,7 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword dependencies with invalid property" do
-      expected = ~s("invalid" is not a valid type.)
+      expected = ~s("invalid" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
         xema(:map, dependencies: %{foo: "invalid"})

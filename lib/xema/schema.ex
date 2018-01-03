@@ -9,8 +9,8 @@ defmodule Xema.Schema do
       iex> import Xema
       Xema
       iex> schema = xema :any
-      %Xema{type: %Xema.Schema{type: :any, as: :any}}
-      iex> schema.type == %Xema.Schema{type: :any, as: :any}
+      %Xema{content: %Xema.Schema{type: :any, as: :any}}
+      iex> schema.content == %Xema.Schema{type: :any, as: :any}
       true
   """
 
@@ -121,7 +121,7 @@ defmodule Xema.Schema do
     |> Keyword.update(:any_of, nil, &schemas/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
     |> Keyword.update(:items, nil, &items/1)
-    |> Keyword.update(:not, nil, fn schema -> Xema.type(schema) end)
+    |> Keyword.update(:not, nil, fn schema -> Xema.schema(schema) end)
     |> Keyword.update(:one_of, nil, &schemas/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:properties, nil, &properties/1)
@@ -129,27 +129,27 @@ defmodule Xema.Schema do
   end
 
   @spec schemas(list) :: list
-  defp schemas(list), do: Enum.map(list, fn schema -> Xema.type(schema) end)
+  defp schemas(list), do: Enum.map(list, fn schema -> Xema.schema(schema) end)
 
   @spec properties(map) :: map
-  defp properties(map), do: Enum.into(map, %{}, fn {key, prop} -> {key, Xema.type(prop)} end)
+  defp properties(map), do: Enum.into(map, %{}, fn {key, prop} -> {key, Xema.schema(prop)} end)
 
   @spec dependencies(map) :: map
   defp dependencies(map),
     do:
       Enum.into(map, %{}, fn
         {key, dep} when is_list(dep) -> {key, dep}
-        {key, dep} -> {key, Xema.type(dep)}
+        {key, dep} -> {key, Xema.schema(dep)}
       end)
 
   @spec bool_or_schema(boolean | atom) :: boolean | Xema.Schema.t()
   defp bool_or_schema(bool) when is_boolean(bool), do: bool
 
-  defp bool_or_schema(schema), do: Xema.type(schema)
+  defp bool_or_schema(schema), do: Xema.schema(schema)
 
-  defp items(schema) when is_atom(schema), do: Xema.type(schema)
+  defp items(schema) when is_atom(schema), do: Xema.schema(schema)
 
-  defp items(schema) when is_tuple(schema), do: Xema.type(schema)
+  defp items(schema) when is_tuple(schema), do: Xema.schema(schema)
 
   defp items(schemas) when is_list(schemas), do: schemas(schemas)
 

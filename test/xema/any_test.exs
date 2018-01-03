@@ -9,7 +9,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :any
+      assert schema.content.as == :any
     end
 
     test "is_valid?/2 with a string", %{schema: schema} do
@@ -92,7 +92,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :any
+      assert schema.content.as == :any
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -110,7 +110,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :any
+      assert schema.content.as == :any
     end
 
     test "equal long version", %{schema: schema} do
@@ -176,7 +176,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :any
+      assert schema.content.as == :any
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -216,7 +216,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :any
+      assert schema.content.as == :any
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -257,7 +257,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :any
+      assert schema.content.as == :any
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -286,7 +286,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :integer
+      assert schema.content.as == :integer
     end
 
     test "validate/2 with a valid value", %{schema: schema} do

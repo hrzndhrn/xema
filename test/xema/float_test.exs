@@ -9,7 +9,7 @@ defmodule Xema.FloatTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :float
+      assert schema.content.as == :float
     end
 
     test "validate/2 with a float", %{schema: schema} do

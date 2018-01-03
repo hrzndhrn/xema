@@ -9,7 +9,7 @@ defmodule Xema.NilTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == nil
+      assert schema.content.as == nil
     end
 
     test "validate/2 with nil value", %{schema: schema} do

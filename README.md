@@ -61,7 +61,7 @@ The schema any will accept any data.
 iex> import Xema
 Xema
 iex> schema = xema :any
-%Xema{type: %Xema.Schema{type: :any, as: :any}}
+%Xema{content: %Xema.Schema{type: :any, as: :any}}
 iex> validate schema, 42
 :ok
 iex> validate schema, "foo"
@@ -78,7 +78,7 @@ The nil type matches only `nil`.
 iex> import Xema
 Xema
 iex> schema = xema :nil
-%Xema{type: %Xema.Schema{type: :nil, as: :nil}}
+%Xema{content: %Xema.Schema{type: :nil, as: :nil}}
 iex> validate schema, nil
 :ok
 iex> validate schema, 0
@@ -92,7 +92,7 @@ The boolean type matches only `true` and `false`.
 iex> import Xema
 Xema
 iex> schema = xema :boolean
-%Xema{type: %Xema.Schema{type: :boolean, as: :boolean}}
+%Xema{content: %Xema.Schema{type: :boolean, as: :boolean}}
 iex> validate schema, true
 :ok
 iex> is_valid? schema, false
@@ -111,7 +111,7 @@ The string type is used for strings.
 iex> import Xema
 Xema
 iex> schema = xema :string
-%Xema{type: %Xema.Schema{type: :string, as: :string}}
+%Xema{content: %Xema.Schema{type: :string, as: :string}}
 iex> validate schema, "José"
 :ok
 iex> validate schema, 42
@@ -131,7 +131,7 @@ keywords. For both keywords, the value must be a non-negative number.
 iex> import Xema
 Xema
 iex> schema = xema :string, min_length: 2, max_length: 3
-%Xema{type:
+%Xema{content:
   %Xema.Schema{min_length: 2, max_length: 3, type: :string, as: :string}
 }
 iex> validate schema, "a"
@@ -153,7 +153,7 @@ expression.
 iex> import Xema
 Xema
 iex> schema = xema :string, pattern: ~r/[0-9]-[A-B]+/
-%Xema{type: %Xema.Schema{type: :string, as: :string, pattern: ~r/[0-9]-[A-B]+/}}
+%Xema{content: %Xema.Schema{type: :string, as: :string, pattern: ~r/[0-9]-[A-B]+/}}
 iex> validate schema, "1-AB"
 :ok
 iex> validate schema, "foo"
@@ -169,7 +169,7 @@ The `number` type is used for numbers.
 iex> import Xema
 Xema
 iex> schema = xema :number
-%Xema{type: %Xema.Schema{type: :number, as: :number}}
+%Xema{content: %Xema.Schema{type: :number, as: :number}}
 iex> validate schema, 42
 :ok
 iex> validate schema, 21.5
@@ -183,7 +183,7 @@ The `integer` type is used for integral numbers.
 iex> import Xema
 Xema
 iex> schema = xema :integer
-%Xema{type: %Xema.Schema{type: :integer, as: :integer}}
+%Xema{content: %Xema.Schema{type: :integer, as: :integer}}
 iex> validate schema, 42
 :ok
 iex> validate schema, 21.5
@@ -195,7 +195,7 @@ The `float` type is used for floating point numbers.
 iex> import Xema
 Xema
 iex> schema = xema :float
-%Xema{type: %Xema.Schema{type: :float, as: :float}}
+%Xema{content: %Xema.Schema{type: :float, as: :float}}
 iex> validate schema, 42
 {:error, %{type: :float, value: 42}}
 iex> validate schema, 21.5
@@ -210,7 +210,7 @@ Numbers can be restricted to a multiple of a given number, using the
 iex> import Xema
 Xema
 iex> schema = xema :number, multiple_of: 2
-%Xema{type: %Xema.Schema{type: :number, as: :number, multiple_of: 2}}
+%Xema{content: %Xema.Schema{type: :number, as: :number, multiple_of: 2}}
 iex> validate schema, 8
 :ok
 iex> validate schema, 7
@@ -236,7 +236,7 @@ Ranges of numbers are specified using a combination of the `minimum`, `maximum`,
 iex> import Xema
 Xema
 iex> schema = xema :float, minimum: 1.2, maximum: 1.4, exclusive_maximum: true
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :float,
   as: :float,
   minimum: 1.2,
@@ -262,7 +262,7 @@ List are used for ordered elements, each element may be of a different type.
 iex> import Xema
 Xema
 iex> schema = xema :list
-%Xema{type: %Xema.Schema{type: :list, as: :list}}
+%Xema{content: %Xema.Schema{type: :list, as: :list}}
 iex> is_valid? schema, [1, "two", 3.0]
 true
 iex> validate schema, 9
@@ -277,7 +277,7 @@ schema.
 iex> import Xema
 Xema
 iex> schema = xema :list, items: :string
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :list,
   as: :list,
   items: %Xema.Schema{type: :string, as: :string}
@@ -297,7 +297,7 @@ The next example shows how to add keywords to the items schema.
 iex> import Xema
 Xema
 iex> schema = xema :list, items: {:integer, minimum: 1, maximum: 10}
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :list,
   as: :list,
   items: %Xema.Schema{type: :integer, as: :integer, minimum: 1, maximum: 10}
@@ -318,7 +318,7 @@ iex> import Xema
 Xema
 iex> schema = xema :list,
 ...>   items: [:integer, {:string, min_length: 5}]
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :list,
   as: :list,
   items: [
@@ -352,7 +352,7 @@ Xema
 iex> schema = xema :list,
 ...>   items: [:integer, {:string, min_length: 5}],
 ...>   additional_items: false
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :list,
   as: :list,
   items: [
@@ -381,7 +381,7 @@ Xema
 iex> schema = xema :list,
 ...>   items: [:integer, {:string, min_length: 3}],
 ...>   additional_items: :integer
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :list,
   as: :list,
   items: [
@@ -408,7 +408,7 @@ keywords. The value of each keyword must be a non-negative number.
 iex> import Xema
 Xema
 iex> schema = xema :list, min_items: 2, max_items: 3
-%Xema{type: %Xema.Schema{min_items: 2, max_items: 3, type: :list, as: :list}}
+%Xema{content: %Xema.Schema{min_items: 2, max_items: 3, type: :list, as: :list}}
 iex> validate schema, [1]
 {:error, %{value: [1], min_items: 2}}
 iex> validate schema, [1, 2]
@@ -427,7 +427,7 @@ A schema can ensure that each of the items in an array is unique.
 iex> import Xema
 Xema
 iex> schema = xema :list, unique_items: true
-%Xema{type: %Xema.Schema{type: :list, as: :list, unique_items: true}}
+%Xema{content: %Xema.Schema{type: :list, as: :list, unique_items: true}}
 iex> is_valid? schema, [1, 2, 3]
 true
 iex> validate schema, [1, 2, 3, 2, 1]
@@ -443,7 +443,7 @@ Elixir. Each of these pairs is conventionally referred to as a “property”.
 iex> import Xema
 Xema
 iex> schema = xema :map
-%Xema{type: %Xema.Schema{type: :map, as: :map}}
+%Xema{content: %Xema.Schema{type: :map, as: :map}}
 iex> is_valid? schema, %{"foo" => "bar"}
 true
 iex> validate schema, "bar"
@@ -464,7 +464,7 @@ Atoms as keys:
 iex> import Xema
 Xema
 iex> schema = xema :map, keys: :atoms
-%Xema{type: %Xema.Schema{type: :map, as: :map, keys: :atoms}}
+%Xema{content: %Xema.Schema{type: :map, as: :map, keys: :atoms}}
 iex> is_valid? schema, %{"foo" => "bar"}
 false
 iex> is_valid? schema, %{foo: "bar"}
@@ -478,7 +478,7 @@ Strings as keys:
 iex> import Xema
 Xema
 iex> schema = xema :map, keys: :strings
-%Xema{type: %Xema.Schema{type: :map, as: :map, keys: :strings}}
+%Xema{content: %Xema.Schema{type: :map, as: :map, keys: :strings}}
 iex> is_valid? schema, %{"foo" => "bar"}
 true
 iex> is_valid? schema, %{foo: "bar"}
@@ -501,7 +501,7 @@ iex> schema = xema :map,
 ...>     a: :integer,
 ...>     b: {:string, min_length: 5}
 ...>   }
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :map,
   as: :map,
   properties: %{
@@ -534,7 +534,7 @@ iex> import Xema
 Xema
 iex> schema = xema :map, properties: %{foo: :string}, required: [:foo]
 %Xema{
-  type: %Xema.Schema{
+  content: %Xema.Schema{
     type: :map,
     as: :map,
     properties: %{
@@ -567,7 +567,7 @@ iex> schema = xema :map,
 ...>   required: [:foo],
 ...>   additional_properties: false
 %Xema{
-  type: %Xema.Schema{
+  content: %Xema.Schema{
     type: :map,
     as: :map,
     properties: %{foo: %Xema.Schema{type: :string, as: :string}},
@@ -593,7 +593,7 @@ iex> schema = xema :map,
 ...>   properties: %{foo: :string},
 ...>   additional_properties: :integer
 %Xema{
-  type: %Xema.Schema{
+  content: %Xema.Schema{
     type: :map,
     as: :map,
     properties: %{foo: %Xema.Schema{type: :string, as: :string}},
@@ -622,7 +622,7 @@ iex> schema = xema :map,
 ...>   ~r/^s_/ => :string,
 ...>   ~r/^i_/ => :integer
 ...> }
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :map,
   as: :map,
   additional_properties: false,
@@ -652,7 +652,7 @@ Xema
 iex> schema = xema :map,
 ...>   min_properties: 2,
 ...>   max_properties: 3
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :map,
   as: :map,
   min_properties: 2,
@@ -683,7 +683,7 @@ iex> schema = xema :map,
 ...>   dependencies: %{
 ...>     b: [:c]
 ...>   }
-%Xema{type: %Xema.Schema{
+%Xema{content: %Xema.Schema{
   type: :map,
   as: :map,
   properties: %{
@@ -712,7 +712,7 @@ be an array with at least one element, where each element is unique.
 iex> import Xema
 Xema
 iex> schema = xema :any, enum: [1, "foo", :bar]
-%Xema{type: %Xema.Schema{enum: [1, "foo", :bar], type: :any, as: :any}}
+%Xema{content: %Xema.Schema{enum: [1, "foo", :bar], type: :any, as: :any}}
 iex> is_valid? schema, :bar
 true
 iex> is_valid? schema, 42

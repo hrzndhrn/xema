@@ -9,12 +9,12 @@ defmodule Xema do
   alias Xema.Validator
 
   defstruct [
+    :content,
     :description,
     :id,
     :keywords,
     :schema,
-    :title,
-    :type
+    :title
   ]
 
   @typedoc """
@@ -27,11 +27,11 @@ defmodule Xema do
   * `type` contains the specification of the schema.
   """
   @type t :: %Xema{
+          content: Xema.Schema.t(),
           description: String.t() | nil,
           id: String.t() | nil,
           schema: String.t() | nil,
-          title: String.t() | nil,
-          type: Xema.Schema.t()
+          title: String.t() | nil
         }
 
   @typedoc """
@@ -143,7 +143,7 @@ defmodule Xema do
       Xema
       iex> xema :string, min_length: 3, max_length: 12
       %Xema{
-        type: %Xema.Schema{
+        content: %Xema.Schema{
           max_length: 12,
           min_length: 3,
           type: :string,
@@ -158,7 +158,7 @@ defmodule Xema do
       Xema
       iex> schema = xema :list, items: {:number, minimum: 2}
       %Xema{
-        type: %Xema.Schema{
+        content: %Xema.Schema{
           type: :list,
           as: :list,
           items: %Xema.Schema{
@@ -189,8 +189,8 @@ defmodule Xema do
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}")
 
   @doc false
-  @spec type(schema_types, keyword) :: Xema.Schema.t()
-  def type(type, keywords \\ [])
+  @spec schema(schema_types, keyword) :: Xema.Schema.t()
+  def schema(type, keywords \\ [])
 
   for type <- @schema_types do
     def xema(unquote(type), []), do: new(Schema.new(type: unquote(type)))
@@ -210,9 +210,9 @@ defmodule Xema do
       end
     end
 
-    def type(unquote(type), []), do: Schema.new(type: unquote(type))
+    def schema(unquote(type), []), do: Schema.new(type: unquote(type))
 
-    def type({unquote(type), opts}, []) do
+    def schema({unquote(type), opts}, []) do
       case SchemaValidator.validate(unquote(type), opts) do
         :ok -> Schema.new(Keyword.put(opts, :type, unquote(type)))
         {:error, msg} -> raise SchemaError, message: msg
@@ -223,18 +223,18 @@ defmodule Xema do
   for keyword <- @schema_keywords do
     def xema(unquote(keyword), opts), do: xema(:any, Keyword.new([{unquote(keyword), opts}]))
 
-    def type({unquote(keyword), opts}, []),
-      do: type({:any, Keyword.new([{unquote(keyword), opts}])})
+    def schema({unquote(keyword), opts}, []),
+      do: schema({:any, Keyword.new([{unquote(keyword), opts}])})
 
-    def type(%{unquote(keyword) => opts}, []),
-      do: type({:any, Keyword.new([{unquote(keyword), opts}])})
+    def schema(%{unquote(keyword) => opts}, []),
+      do: schema({:any, Keyword.new([{unquote(keyword), opts}])})
   end
 
-  def type(type, _) do
-    raise SchemaError, message: "#{inspect(type)} is not a valid type."
+  def schema(type, _) do
+    raise SchemaError, message: "#{inspect(type)} is not a valid type or keyword."
   end
 
-  defp new(type), do: struct(Xema, type: type)
+  defp new(schema), do: struct(Xema, content: schema)
 
-  defp new(type, fields), do: struct(Xema, Keyword.put(fields, :type, type))
+  defp new(schema, fields), do: struct(Xema, Keyword.put(fields, :content, schema))
 end

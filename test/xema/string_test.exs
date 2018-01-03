@@ -9,7 +9,7 @@ defmodule Xema.StringTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.type.as == :string
+      assert schema.content.as == :string
     end
 
     test "validate/2 with a string", %{schema: schema} do
