@@ -1,11 +1,11 @@
 defmodule Xema.IntegerTest do
   use ExUnit.Case, async: true
 
-  import Xema
+  import Xema, only: [is_valid?: 2, validate: 2]
 
   describe "'integer' schema" do
     setup do
-      %{schema: xema(:integer)}
+      %{schema: Xema.new(:integer)}
     end
 
     test "type", %{schema: schema} do
@@ -35,7 +35,7 @@ defmodule Xema.IntegerTest do
 
   describe "'integer' schema with range" do
     setup do
-      %{schema: xema(:integer, minimum: 2, maximum: 4)}
+      %{schema: Xema.new(:integer, minimum: 2, maximum: 4)}
     end
 
     test "validate/2 with a integer in range", %{schema: schema} do
@@ -61,7 +61,7 @@ defmodule Xema.IntegerTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :integer,
             minimum: 2,
             maximum: 4,
@@ -102,7 +102,7 @@ defmodule Xema.IntegerTest do
 
   describe "'integer' schema with multiple-of" do
     setup do
-      %{schema: xema(:integer, multiple_of: 2)}
+      %{schema: Xema.new(:integer, multiple_of: 2)}
     end
 
     test "validate/2 with a valid integer", %{schema: schema} do
@@ -117,7 +117,7 @@ defmodule Xema.IntegerTest do
 
   describe "'integer' schema with enum" do
     setup do
-      %{schema: xema(:integer, enum: [1, 3])}
+      %{schema: Xema.new(:integer, enum: [1, 3])}
     end
 
     test "with a value from the enum", %{schema: schema} do

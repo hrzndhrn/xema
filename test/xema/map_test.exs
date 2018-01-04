@@ -1,11 +1,11 @@
 defmodule Xema.MapTest do
   use ExUnit.Case, async: true
 
-  import Xema
+  import Xema, only: [is_valid?: 2, validate: 2]
 
   describe "empty 'map' schema" do
     setup do
-      %{schema: xema(:map)}
+      %{schema: Xema.new(:map)}
     end
 
     test "type", %{schema: schema} do
@@ -33,7 +33,7 @@ defmodule Xema.MapTest do
 
   describe "empty 'map' schema as object" do
     setup do
-      %{schema: xema(:map, as: :object)}
+      %{schema: Xema.new(:map, as: :object)}
     end
 
     test "type", %{schema: schema} do
@@ -51,7 +51,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               foo: :number,
@@ -95,7 +95,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               "foo" => :number,
@@ -133,7 +133,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             keys: :atoms,
             properties: %{
@@ -157,7 +157,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             keys: :strings,
             properties: %{
@@ -179,7 +179,7 @@ defmodule Xema.MapTest do
 
   describe "'map' schema with min/max properties" do
     setup do
-      %{schema: xema(:map, min_properties: 2, max_properties: 3)}
+      %{schema: Xema.new(:map, min_properties: 2, max_properties: 3)}
     end
 
     test "validate/2 with too less properties", %{schema: schema} do
@@ -199,7 +199,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{foo: :number},
             additional_properties: false
@@ -231,7 +231,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{foo: {:string, min_length: 3}},
             additional_properties: :integer
@@ -267,7 +267,7 @@ defmodule Xema.MapTest do
 
   describe "'map' schema with required property (atom keys)" do
     setup do
-      %{schema: xema(:map, properties: %{foo: :number}, required: [:foo])}
+      %{schema: Xema.new(:map, properties: %{foo: :number}, required: [:foo])}
     end
 
     test "validate/2 with required property", %{schema: schema} do
@@ -293,7 +293,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{a: :number, b: :number, c: :number},
             required: [:a, :b, :c]
@@ -312,7 +312,7 @@ defmodule Xema.MapTest do
 
   describe "'map' schema with required property (string keys)" do
     setup do
-      %{schema: xema(:map, properties: %{foo: :number}, required: ["foo"])}
+      %{schema: Xema.new(:map, properties: %{foo: :number}, required: ["foo"])}
     end
 
     test "validate/2 with required property", %{schema: schema} do
@@ -338,7 +338,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             pattern_properties: %{
               ~r/^s_/ => :string,
@@ -365,7 +365,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               map: :number,
@@ -385,7 +385,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               a: :number,
@@ -419,7 +419,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               a: :number,
@@ -459,7 +459,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             dependencies: %{
               penny: [:pound]

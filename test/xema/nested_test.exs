@@ -1,13 +1,13 @@
 defmodule Xema.NestedTest do
   use ExUnit.Case, async: true
 
-  import Xema
+  import Xema, only: [validate: 2]
 
   describe "list of objects in one schema" do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               id: {:number, minimum: 1},
@@ -71,7 +71,7 @@ defmodule Xema.NestedTest do
   describe "list of objects in two schemas" do
     setup do
       item =
-        xema(
+        Xema.new(
           :map,
           properties: %{
             num: {:number, minimum: 0},
@@ -81,7 +81,7 @@ defmodule Xema.NestedTest do
 
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               id: {:number, minimum: 1},

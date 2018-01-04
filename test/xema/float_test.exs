@@ -1,11 +1,11 @@
 defmodule Xema.FloatTest do
   use ExUnit.Case, async: true
 
-  import Xema
+  import Xema, only: [is_valid?: 2, validate: 2]
 
   describe "'float' schema" do
     setup do
-      %{schema: xema(:float)}
+      %{schema: Xema.new(:float)}
     end
 
     test "type", %{schema: schema} do
@@ -39,7 +39,7 @@ defmodule Xema.FloatTest do
 
   describe "'float' schema with range" do
     setup do
-      %{schema: xema(:float, minimum: 2, maximum: 4)}
+      %{schema: Xema.new(:float, minimum: 2, maximum: 4)}
     end
 
     test "validate/2 with a float in range", %{schema: schema} do
@@ -65,7 +65,7 @@ defmodule Xema.FloatTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :float,
             minimum: 2,
             maximum: 4,
@@ -106,7 +106,7 @@ defmodule Xema.FloatTest do
 
   describe "'float' schema with multiple-of" do
     setup do
-      %{schema: xema(:float, multiple_of: 1.2)}
+      %{schema: Xema.new(:float, multiple_of: 1.2)}
     end
 
     test "validate/2 with a valid float", %{schema: schema} do
@@ -121,7 +121,7 @@ defmodule Xema.FloatTest do
 
   describe "'float' schema with enum" do
     setup do
-      %{schema: xema(:float, enum: [1.2, 1.3, 3.3])}
+      %{schema: Xema.new(:float, enum: [1.2, 1.3, 3.3])}
     end
 
     test "with a value from the enum", %{schema: schema} do

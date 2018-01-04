@@ -1,11 +1,11 @@
 defmodule Xema.AnyTest do
   use ExUnit.Case
 
-  import Xema
+  import Xema, only: [is_valid?: 2, validate: 2]
 
   describe "'any' schema" do
     setup do
-      %{schema: xema(:any)}
+      %{schema: Xema.new(:any)}
     end
 
     test "type", %{schema: schema} do
@@ -48,7 +48,7 @@ defmodule Xema.AnyTest do
   describe "'any' schema with enum:" do
     setup do
       %{
-        schema: xema(:any, enum: [1, 1.2, [1], "foo"])
+        schema: Xema.new(:any, enum: [1, 1.2, [1], "foo"])
       }
     end
 
@@ -77,18 +77,18 @@ defmodule Xema.AnyTest do
   describe "'any' schema with enum (shortcut):" do
     setup do
       %{
-        schema: xema(:enum, [1, 1.2, [1], "foo"])
+        schema: Xema.new(:enum, [1, 1.2, [1], "foo"])
       }
     end
 
     test "equal long version", %{schema: schema} do
-      assert schema == xema(:any, enum: [1, 1.2, [1], "foo"])
+      assert schema == Xema.new(:any, enum: [1, 1.2, [1], "foo"])
     end
   end
 
   describe "keyword not:" do
     setup do
-      %{schema: xema(:any, not: :integer)}
+      %{schema: Xema.new(:any, not: :integer)}
     end
 
     test "type", %{schema: schema} do
@@ -106,7 +106,7 @@ defmodule Xema.AnyTest do
 
   describe "keyword not (shortcut):" do
     setup do
-      %{schema: xema(:not, :integer)}
+      %{schema: Xema.new(:not, :integer)}
     end
 
     test "type", %{schema: schema} do
@@ -114,7 +114,7 @@ defmodule Xema.AnyTest do
     end
 
     test "equal long version", %{schema: schema} do
-      assert schema == xema(:any, not: :integer)
+      assert schema == Xema.new(:any, not: :integer)
     end
   end
 
@@ -122,7 +122,7 @@ defmodule Xema.AnyTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               foo: {:any, not: {:string, min_length: 3}}
@@ -144,7 +144,7 @@ defmodule Xema.AnyTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :map,
             properties: %{
               foo: {:not, {:string, min_length: 3}}
@@ -155,7 +155,7 @@ defmodule Xema.AnyTest do
 
     test "equal long version", %{schema: schema} do
       assert schema ==
-               xema(
+               Xema.new(
                  :map,
                  properties: %{
                    foo: {:any, not: {:string, min_length: 3}}
@@ -168,7 +168,7 @@ defmodule Xema.AnyTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :any,
             all_of: [:integer, {:integer, minimum: 0}]
           )
@@ -191,13 +191,13 @@ defmodule Xema.AnyTest do
   describe "keyword all_of (shortcut):" do
     setup do
       %{
-        schema: xema(:all_of, [:integer, {:integer, minimum: 0}])
+        schema: Xema.new(:all_of, [:integer, {:integer, minimum: 0}])
       }
     end
 
     test "equal long version", %{schema: schema} do
       assert schema ==
-               xema(
+               Xema.new(
                  :any,
                  all_of: [:integer, {:integer, minimum: 0}]
                )
@@ -208,7 +208,7 @@ defmodule Xema.AnyTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :any,
             any_of: [nil, {:integer, minimum: 1}]
           )
@@ -232,13 +232,13 @@ defmodule Xema.AnyTest do
   describe "keyword any_of (shortcut):" do
     setup do
       %{
-        schema: xema(:any_of, [nil, {:integer, minimum: 1}])
+        schema: Xema.new(:any_of, [nil, {:integer, minimum: 1}])
       }
     end
 
     test "equal long version", %{schema: schema} do
       assert schema ==
-               xema(
+               Xema.new(
                  :any,
                  any_of: [nil, {:integer, minimum: 1}]
                )
@@ -249,7 +249,7 @@ defmodule Xema.AnyTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :any,
             one_of: [{:integer, multiple_of: 3}, {:integer, multiple_of: 5}]
           )
@@ -275,7 +275,7 @@ defmodule Xema.AnyTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :integer,
             one_of: [
               %{multiple_of: 3},
@@ -303,13 +303,13 @@ defmodule Xema.AnyTest do
   describe "keyword one_of (shortcut):" do
     setup do
       %{
-        schema: xema(:one_of, [{:integer, multiple_of: 3}, {:integer, multiple_of: 5}])
+        schema: Xema.new(:one_of, [{:integer, multiple_of: 3}, {:integer, multiple_of: 5}])
       }
     end
 
     test "type", %{schema: schema} do
       assert schema ==
-               xema(
+               Xema.new(
                  :any,
                  one_of: [{:integer, multiple_of: 3}, {:integer, multiple_of: 5}]
                )
@@ -318,11 +318,11 @@ defmodule Xema.AnyTest do
 
   describe "'any' schema with keyword minimum:" do
     setup do
-      %{schema: xema(:any, minimum: 2)}
+      %{schema: Xema.new(:any, minimum: 2)}
     end
 
     test "equal shortcut", %{schema: schema} do
-      assert schema == xema(:minimum, 2)
+      assert schema == Xema.new(:minimum, 2)
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -341,11 +341,11 @@ defmodule Xema.AnyTest do
 
   describe "any-schema with keyword multiple_of:" do
     setup do
-      %{schema: xema(:any, multiple_of: 2)}
+      %{schema: Xema.new(:any, multiple_of: 2)}
     end
 
     test "equal shortcut", %{schema: schema} do
-      assert schema == xema(:multiple_of, 2)
+      assert schema == Xema.new(:multiple_of, 2)
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -364,7 +364,7 @@ defmodule Xema.AnyTest do
 
   describe "any-schema with keyword additional_items:" do
     setup do
-      %{schema: xema(:any, additional_items: false)}
+      %{schema: Xema.new(:any, additional_items: false)}
     end
 
     test "validate/2 with a list", %{schema: schema} do

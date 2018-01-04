@@ -1,11 +1,11 @@
 defmodule Xema.ListTest do
   use ExUnit.Case, async: true
 
-  import Xema
+  import Xema, only: [is_valid?: 2, validate: 2]
 
   describe "'list' schema" do
     setup do
-      %{schema: xema(:list)}
+      %{schema: Xema.new(:list)}
     end
 
     test "type", %{schema: schema} do
@@ -38,7 +38,7 @@ defmodule Xema.ListTest do
 
   describe "'list' schema with size" do
     setup do
-      %{schema: xema(:list, min_items: 2, max_items: 3)}
+      %{schema: Xema.new(:list, min_items: 2, max_items: 3)}
     end
 
     test "validate/2 with too short list", %{schema: schema} do
@@ -57,8 +57,8 @@ defmodule Xema.ListTest do
   describe "'list' schema with typed items" do
     setup do
       %{
-        integers: xema(:list, items: :integer),
-        strings: xema(:list, items: :string)
+        integers: Xema.new(:list, items: :integer),
+        strings: Xema.new(:list, items: :string)
       }
     end
 
@@ -103,7 +103,7 @@ defmodule Xema.ListTest do
 
   describe "'list' schema with unique items" do
     setup do
-      %{schema: xema(:list, unique_items: true)}
+      %{schema: Xema.new(:list, unique_items: true)}
     end
 
     test "validate/2 with list of unique items", %{schema: schema} do
@@ -120,7 +120,7 @@ defmodule Xema.ListTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :list,
             items: [
               {:string, min_length: 3},
@@ -175,7 +175,7 @@ defmodule Xema.ListTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :list,
             additional_items: false,
             items: [
@@ -195,7 +195,7 @@ defmodule Xema.ListTest do
     setup do
       %{
         schema:
-          xema(
+          Xema.new(
             :list,
             additional_items: :string,
             items: [

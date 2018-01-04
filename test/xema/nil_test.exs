@@ -1,11 +1,11 @@
 defmodule Xema.NilTest do
   use ExUnit.Case, async: true
 
-  import Xema
+  import Xema, only: [validate: 2]
 
   describe "'nil' schema" do
     setup do
-      %{schema: xema(nil)}
+      %{schema: Xema.new(nil)}
     end
 
     test "type", %{schema: schema} do

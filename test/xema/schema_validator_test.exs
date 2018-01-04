@@ -3,14 +3,12 @@ defmodule Xema.SchemaValidatorTest do
 
   alias Xema.SchemaError
 
-  import Xema
-
   describe "schema type any:" do
     test "unsupported keyword" do
       expected = "Keywords [:foo] are not supported by :any."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, foo: false)
+        Xema.new(:any, foo: false)
       end
     end
 
@@ -18,7 +16,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "enum must be a list."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, enum: "foo")
+        Xema.new(:any, enum: "foo")
       end
     end
 
@@ -26,7 +24,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "enum can not be an empty list."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, enum: [])
+        Xema.new(:any, enum: [])
       end
     end
 
@@ -34,7 +32,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "enum must be unique."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, enum: [1, 2, 3, 2])
+        Xema.new(:any, enum: [1, 2, 3, 2])
       end
     end
 
@@ -42,7 +40,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, not: "foo")
+        Xema.new(:any, not: "foo")
       end
     end
 
@@ -50,7 +48,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "all_of has to be a list."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, all_of: "foo")
+        Xema.new(:any, all_of: "foo")
       end
     end
 
@@ -58,7 +56,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, all_of: [:integer, "foo"])
+        Xema.new(:any, all_of: [:integer, "foo"])
       end
     end
 
@@ -66,7 +64,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "any_of has to be a list."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, any_of: "foo")
+        Xema.new(:any, any_of: "foo")
       end
     end
 
@@ -74,7 +72,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:any, any_of: [:integer, "foo"])
+        Xema.new(:any, any_of: [:integer, "foo"])
       end
     end
   end
@@ -84,12 +82,12 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Keywords [:foo] are not supported by :boolean."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:boolean, foo: false)
+        Xema.new(:boolean, foo: false)
       end
     end
 
     test "supported keyword" do
-      assert xema(:boolean, as: :bool) == %Xema{content: %Xema.Schema{type: :boolean, as: :bool}}
+      assert Xema.new(:boolean, as: :bool) == %Xema{content: %Xema.Schema{type: :boolean, as: :bool}}
     end
   end
 
@@ -98,7 +96,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Keywords [:foo] are not supported by :list."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, foo: false)
+        Xema.new(:list, foo: false)
       end
     end
 
@@ -106,7 +104,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "additional_items has no effect if items not set."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, additional_items: false)
+        Xema.new(:list, additional_items: false)
       end
     end
 
@@ -114,7 +112,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "additional_items has no effect if items is not a list."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, items: :string, additional_items: false)
+        Xema.new(:list, items: :string, additional_items: false)
       end
     end
 
@@ -122,7 +120,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, items: [:string], additional_items: "foo")
+        Xema.new(:list, items: [:string], additional_items: "foo")
       end
     end
 
@@ -130,7 +128,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected an Integer for minimum, got "1".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(
+        Xema.new(
           :list,
           items: [:string],
           additional_items: {:integer, minimum: "1"}
@@ -142,7 +140,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a schema or a list of schemas, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, items: "foo")
+        Xema.new(:list, items: "foo")
       end
     end
 
@@ -150,7 +148,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a non negative integer for max_items, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, max_items: "foo")
+        Xema.new(:list, max_items: "foo")
       end
     end
 
@@ -158,7 +156,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a non negative integer for max_items, got -1.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, max_items: -1)
+        Xema.new(:list, max_items: -1)
       end
     end
 
@@ -166,7 +164,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a non negative integer for min_items, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, min_items: "foo")
+        Xema.new(:list, min_items: "foo")
       end
     end
 
@@ -174,7 +172,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a non negative integer for min_items, got -2.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:list, min_items: -2)
+        Xema.new(:list, min_items: -2)
       end
     end
   end
@@ -184,7 +182,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Keywords [:foo] are not supported by :map."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, foo: false)
+        Xema.new(:map, foo: false)
       end
     end
 
@@ -192,7 +190,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "additional_properties has no effect if properties not set."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, additional_properties: false)
+        Xema.new(:map, additional_properties: false)
       end
     end
 
@@ -200,7 +198,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "additional_properties has no effect if properties is not a map."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, properties: :string, additional_properties: false)
+        Xema.new(:map, properties: :string, additional_properties: false)
       end
     end
 
@@ -208,7 +206,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s("foo" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, properties: %{a: :string}, additional_properties: "foo")
+        Xema.new(:map, properties: %{a: :string}, additional_properties: "foo")
       end
     end
 
@@ -216,7 +214,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected an Integer for minimum, got "1".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(
+        Xema.new(
           :map,
           properties: %{a: :string},
           additional_properties: {:integer, minimum: "1"}
@@ -228,7 +226,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "dependencies must be a map."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, dependencies: "invalid")
+        Xema.new(:map, dependencies: "invalid")
       end
     end
 
@@ -236,7 +234,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s("invalid" is not a valid type or keyword.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, dependencies: %{foo: "invalid"})
+        Xema.new(:map, dependencies: %{foo: "invalid"})
       end
     end
 
@@ -244,7 +242,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a non negative integer for max_properties, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, max_properties: "foo")
+        Xema.new(:map, max_properties: "foo")
       end
     end
 
@@ -252,7 +250,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a non negative integer for max_properties, got -2.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, max_properties: -2)
+        Xema.new(:map, max_properties: -2)
       end
     end
 
@@ -260,7 +258,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a non negative integer for min_properties, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, min_properties: "foo")
+        Xema.new(:map, min_properties: "foo")
       end
     end
 
@@ -268,7 +266,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a non negative integer for min_properties, got -2.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, min_properties: -2)
+        Xema.new(:map, min_properties: -2)
       end
     end
 
@@ -276,7 +274,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a map for properties, got 12.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, properties: 12)
+        Xema.new(:map, properties: 12)
       end
     end
 
@@ -284,7 +282,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Expected a string or atom for key in properties, got 7."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, properties: %{7 => :string})
+        Xema.new(:map, properties: %{7 => :string})
       end
     end
 
@@ -292,7 +290,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a map for pattern_properties, got 12.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, pattern_properties: 12)
+        Xema.new(:map, pattern_properties: 12)
       end
     end
 
@@ -300,7 +298,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Expected a regular expression for key in pattern_properties, got :a."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, pattern_properties: %{a: :string})
+        Xema.new(:map, pattern_properties: %{a: :string})
       end
     end
   end
@@ -312,7 +310,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Keywords [:foo] are not supported by :number."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, foo: false)
+        Xema.new(:number, foo: false)
       end
     end
 
@@ -324,7 +322,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a number for exclusive_maximum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, exclusive_maximum: "1")
+        Xema.new(:number, exclusive_maximum: "1")
       end
     end
 
@@ -334,7 +332,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a boolean for exclusive_maximum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, exclusive_maximum: "1", maximum: 1)
+        Xema.new(:number, exclusive_maximum: "1", maximum: 1)
       end
     end
 
@@ -344,7 +342,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(No maximum value found for exclusive_maximum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, exclusive_maximum: true)
+        Xema.new(:number, exclusive_maximum: true)
       end
     end
 
@@ -354,7 +352,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(The exclusive_maximum overwrites maximum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, exclusive_maximum: 1, maximum: 1)
+        Xema.new(:number, exclusive_maximum: 1, maximum: 1)
       end
     end
 
@@ -364,7 +362,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a number for exclusive_minimum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, exclusive_minimum: "1")
+        Xema.new(:number, exclusive_minimum: "1")
       end
     end
 
@@ -372,7 +370,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a boolean for exclusive_minimum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, exclusive_minimum: "1", minimum: 1)
+        Xema.new(:number, exclusive_minimum: "1", minimum: 1)
       end
     end
 
@@ -380,7 +378,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(No minimum value found for exclusive_minimum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, exclusive_minimum: true)
+        Xema.new(:number, exclusive_minimum: true)
       end
     end
 
@@ -388,7 +386,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(The exclusive_minimum overwrites minimum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, exclusive_minimum: 1, minimum: 1)
+        Xema.new(:number, exclusive_minimum: 1, minimum: 1)
       end
     end
 
@@ -396,7 +394,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a number for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, maximum: "5", minimum: 1)
+        Xema.new(:number, maximum: "5", minimum: 1)
       end
     end
 
@@ -406,11 +404,11 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a number for minimum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:number, minimum: "5")
+        Xema.new(:number, minimum: "5")
       end
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, properties: %{foo: {:number, minimum: "5"}})
+        Xema.new(:map, properties: %{foo: {:number, minimum: "5"}})
       end
     end
 
@@ -418,7 +416,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = ~s(Expected a number for multiple_of, got "1".)
 
       assert_raise SchemaError, msg, fn ->
-        xema(:number, multiple_of: "1")
+        Xema.new(:number, multiple_of: "1")
       end
     end
 
@@ -426,7 +424,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = ~s(multiple_of must be strictly greater than 0.)
 
       assert_raise SchemaError, msg, fn ->
-        xema(:number, multiple_of: 0)
+        Xema.new(:number, multiple_of: 0)
       end
     end
 
@@ -434,7 +432,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = "Entries of enum have to be Integers or Floats."
 
       assert_raise SchemaError, msg, fn ->
-        xema(:number, enum: [1, "two"])
+        Xema.new(:number, enum: [1, "two"])
       end
     end
   end
@@ -444,7 +442,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Keywords [:foo] are not supported by :string."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:string, foo: false)
+        Xema.new(:string, foo: false)
       end
     end
 
@@ -452,7 +450,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Entries of enum have to be Strings."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:string, enum: ["one", 2])
+        Xema.new(:string, enum: ["one", 2])
       end
     end
 
@@ -460,7 +458,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Expected a non negative integer for max_length, got 1.1."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:string, max_length: 1.1)
+        Xema.new(:string, max_length: 1.1)
       end
     end
 
@@ -468,7 +466,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Expected a non negative integer for max_length, got -1."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:string, max_length: -1)
+        Xema.new(:string, max_length: -1)
       end
     end
 
@@ -476,7 +474,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Expected a non negative integer for min_length, got [1]."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:string, min_length: [1])
+        Xema.new(:string, min_length: [1])
       end
     end
 
@@ -484,7 +482,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Expected a non negative integer for min_length, got -1."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:string, min_length: -1)
+        Xema.new(:string, min_length: -1)
       end
     end
 
@@ -492,7 +490,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a regular expression for pattern, got %{}.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:string, pattern: %{})
+        Xema.new(:string, pattern: %{})
       end
     end
   end
@@ -505,7 +503,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Keywords [:foo] are not supported by :integer."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, foo: false)
+        Xema.new(:integer, foo: false)
       end
     end
 
@@ -517,7 +515,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a integer for exclusive_maximum, got 1.1)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, exclusive_maximum: 1.1)
+        Xema.new(:integer, exclusive_maximum: 1.1)
       end
     end
 
@@ -527,7 +525,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a boolean for exclusive_maximum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, exclusive_maximum: "1", maximum: 1)
+        Xema.new(:integer, exclusive_maximum: "1", maximum: 1)
       end
     end
 
@@ -537,7 +535,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(No maximum value found for exclusive_maximum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, exclusive_maximum: true)
+        Xema.new(:integer, exclusive_maximum: true)
       end
     end
 
@@ -547,7 +545,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(The exclusive_maximum overwrites maximum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, exclusive_maximum: 1, maximum: 1)
+        Xema.new(:integer, exclusive_maximum: 1, maximum: 1)
       end
     end
 
@@ -559,7 +557,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a integer for exclusive_minimum, got 1.2)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, exclusive_minimum: 1.2)
+        Xema.new(:integer, exclusive_minimum: 1.2)
       end
     end
 
@@ -569,7 +567,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a boolean for exclusive_minimum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, exclusive_minimum: "1", minimum: 1)
+        Xema.new(:integer, exclusive_minimum: "1", minimum: 1)
       end
     end
 
@@ -579,7 +577,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(No minimum value found for exclusive_minimum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, exclusive_minimum: true)
+        Xema.new(:integer, exclusive_minimum: true)
       end
     end
 
@@ -589,7 +587,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(The exclusive_minimum overwrites minimum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, exclusive_minimum: 1, minimum: 1)
+        Xema.new(:integer, exclusive_minimum: 1, minimum: 1)
       end
     end
 
@@ -599,7 +597,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected an Integer for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, maximum: "5")
+        Xema.new(:integer, maximum: "5")
       end
     end
 
@@ -607,11 +605,11 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected an Integer for minimum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:integer, minimum: "5")
+        Xema.new(:integer, minimum: "5")
       end
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, properties: %{foo: {:integer, minimum: "5"}})
+        Xema.new(:map, properties: %{foo: {:integer, minimum: "5"}})
       end
     end
 
@@ -619,7 +617,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = ~s(Expected an Integer for multiple_of, got "1".)
 
       assert_raise SchemaError, msg, fn ->
-        xema(:integer, multiple_of: "1")
+        Xema.new(:integer, multiple_of: "1")
       end
     end
 
@@ -627,7 +625,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = ~s(multiple_of must be strictly greater than 0.)
 
       assert_raise SchemaError, msg, fn ->
-        xema(:integer, multiple_of: 0)
+        Xema.new(:integer, multiple_of: 0)
       end
     end
 
@@ -635,7 +633,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = "Entries of enum have to be Integers."
 
       assert_raise SchemaError, msg, fn ->
-        xema(:integer, enum: [1, "two"])
+        Xema.new(:integer, enum: [1, "two"])
       end
     end
   end
@@ -647,7 +645,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = "Keywords [:foo] are not supported by :float."
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, foo: false)
+        Xema.new(:float, foo: false)
       end
     end
 
@@ -659,7 +657,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a number for exclusive_maximum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, exclusive_maximum: "1")
+        Xema.new(:float, exclusive_maximum: "1")
       end
     end
 
@@ -669,7 +667,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a boolean for exclusive_maximum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, exclusive_maximum: "1", maximum: 1)
+        Xema.new(:float, exclusive_maximum: "1", maximum: 1)
       end
     end
 
@@ -679,7 +677,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(No maximum value found for exclusive_maximum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, exclusive_maximum: true)
+        Xema.new(:float, exclusive_maximum: true)
       end
     end
 
@@ -689,7 +687,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(The exclusive_maximum overwrites maximum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, exclusive_maximum: 1, maximum: 1)
+        Xema.new(:float, exclusive_maximum: 1, maximum: 1)
       end
     end
 
@@ -701,7 +699,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a number for exclusive_minimum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, exclusive_minimum: "1")
+        Xema.new(:float, exclusive_minimum: "1")
       end
     end
 
@@ -711,7 +709,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a boolean for exclusive_minimum, got "1")
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, exclusive_minimum: "1", minimum: 1)
+        Xema.new(:float, exclusive_minimum: "1", minimum: 1)
       end
     end
 
@@ -721,7 +719,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(No minimum value found for exclusive_minimum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, exclusive_minimum: true)
+        Xema.new(:float, exclusive_minimum: true)
       end
     end
 
@@ -731,7 +729,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(The exclusive_minimum overwrites minimum.)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, exclusive_minimum: 1, minimum: 1)
+        Xema.new(:float, exclusive_minimum: 1, minimum: 1)
       end
     end
 
@@ -741,7 +739,7 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a number for maximum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, maximum: "5")
+        Xema.new(:float, maximum: "5")
       end
     end
 
@@ -751,11 +749,11 @@ defmodule Xema.SchemaValidatorTest do
       expected = ~s(Expected a number for minimum, got "5".)
 
       assert_raise SchemaError, expected, fn ->
-        xema(:float, minimum: "5")
+        Xema.new(:float, minimum: "5")
       end
 
       assert_raise SchemaError, expected, fn ->
-        xema(:map, properties: %{foo: {:float, minimum: "5"}})
+        Xema.new(:map, properties: %{foo: {:float, minimum: "5"}})
       end
     end
 
@@ -765,7 +763,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = ~s(Expected a number for multiple_of, got "1".)
 
       assert_raise SchemaError, msg, fn ->
-        xema(:float, multiple_of: "1")
+        Xema.new(:float, multiple_of: "1")
       end
     end
 
@@ -773,7 +771,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = ~s(multiple_of must be strictly greater than 0.)
 
       assert_raise SchemaError, msg, fn ->
-        xema(:float, multiple_of: 0)
+        Xema.new(:float, multiple_of: 0)
       end
     end
 
@@ -783,7 +781,7 @@ defmodule Xema.SchemaValidatorTest do
       msg = "Entries of enum have to be Floats."
 
       assert_raise SchemaError, msg, fn ->
-        xema(:float, enum: [1.0, "two"])
+        Xema.new(:float, enum: [1.0, "two"])
       end
     end
   end

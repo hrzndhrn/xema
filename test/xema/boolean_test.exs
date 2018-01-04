@@ -1,11 +1,11 @@
 defmodule Xema.BooleanTest do
   use ExUnit.Case, async: true
 
-  import Xema
+  import Xema, only: [is_valid?: 2, validate: 2]
 
   describe "'boolean' schema" do
     setup do
-      %{schema: xema(:boolean)}
+      %{schema: Xema.new(:boolean)}
     end
 
     test "type", %{schema: schema} do

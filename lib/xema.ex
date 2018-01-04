@@ -141,9 +141,7 @@ defmodule Xema do
 
   ## Examples
 
-      iex> import Xema
-      Xema
-      iex> xema :string, min_length: 3, max_length: 12
+      iex> Xema.new :string, min_length: 3, max_length: 12
       %Xema{
         content: %Xema.Schema{
           max_length: 12,
@@ -156,9 +154,9 @@ defmodule Xema do
   For nested schemas you can use `{:type, opts: ...}` like here.
 
   ## Examples
-      iex> import Xema
+      iex> import Xema, only: [is_valid?: 2, validate: 2]
       Xema
-      iex> schema = xema :list, items: {:number, minimum: 2}
+      iex> schema = Xema.new :list, items: {:number, minimum: 2}
       %Xema{
         content: %Xema.Schema{
           type: :list,
@@ -172,6 +170,8 @@ defmodule Xema do
       }
       iex> validate(schema, [2, 3, 4])
       :ok
+      iex> is_valid?(schema, [2, 3, 4])
+      true
       iex> validate(schema, [2, 3, 1])
       {:error, [%{
           at: 2,
@@ -180,14 +180,14 @@ defmodule Xema do
 
   """
 
-  @spec xema(schema_types | tuple, keyword) :: Xema.t()
-  def xema(type, keywords \\ [])
+  @spec new(schema_types | tuple, keyword) :: Xema.t()
+  def new(type, keywords \\ [])
 
-  def xema({type}, []), do: xema(type, [])
+  def new({type}, []), do: new(type, [])
 
-  def xema({type, keywords}, []), do: xema(type, keywords)
+  def new({type, keywords}, []), do: new(type, keywords)
 
-  def xema(tuple, keywords) when is_tuple(tuple),
+  def new(tuple, keywords) when is_tuple(tuple),
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}")
 
   @doc false
@@ -195,9 +195,9 @@ defmodule Xema do
   def schema(type, keywords \\ [])
 
   for type <- @schema_types do
-    def xema(unquote(type), []), do: create(Schema.new(type: unquote(type)))
+    def new(unquote(type), []), do: create(Schema.new(type: unquote(type)))
 
-    def xema(unquote(type), opts) do
+    def new(unquote(type), opts) do
       schema_opts =
         opts
         |> Keyword.put(:type, unquote(type))
@@ -223,7 +223,7 @@ defmodule Xema do
   end
 
   for keyword <- @schema_keywords do
-    def xema(unquote(keyword), opts), do: xema(:any, Keyword.new([{unquote(keyword), opts}]))
+    def new(unquote(keyword), opts), do: new(:any, Keyword.new([{unquote(keyword), opts}]))
 
     def schema({unquote(keyword), opts}, []),
       do: schema({:any, Keyword.new([{unquote(keyword), opts}])})

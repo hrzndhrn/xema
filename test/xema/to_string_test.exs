@@ -105,8 +105,8 @@ defmodule Xema.ToStringTest do
 
   defp xema(str) do
     case String.starts_with?(str, "{") do
-      true -> Xema.xema(Code.eval_string(str))
-      false -> Xema.xema(Code.eval_string("{#{str}}"))
+      true -> Xema.new(Code.eval_string(str))
+      false -> Xema.new(Code.eval_string("{#{str}}"))
     end
   end
 end

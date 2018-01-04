@@ -1,11 +1,11 @@
 defmodule Xema.StringTest do
   use ExUnit.Case, async: true
 
-  import Xema
+  import Xema, only: [is_valid?: 2, validate: 2]
 
   describe "'string' schema:" do
     setup do
-      %{schema: xema(:string)}
+      %{schema: Xema.new(:string)}
     end
 
     test "type", %{schema: schema} do
@@ -40,7 +40,7 @@ defmodule Xema.StringTest do
 
   describe "'string' schema with restricted length" do
     setup do
-      %{schema: xema(:string, min_length: 3, max_length: 4)}
+      %{schema: Xema.new(:string, min_length: 3, max_length: 4)}
     end
 
     test "validate/2 with a proper string", %{schema: schema} do
@@ -58,7 +58,7 @@ defmodule Xema.StringTest do
 
   describe "'string' schema with pattern" do
     setup do
-      %{schema: xema(:string, pattern: ~r/^.+match.+$/)}
+      %{schema: Xema.new(:string, pattern: ~r/^.+match.+$/)}
     end
 
     test "validate/2 with a matching string", %{schema: schema} do
@@ -72,7 +72,7 @@ defmodule Xema.StringTest do
 
   describe "'string' schema with enum" do
     setup do
-      %{schema: xema(:string, enum: ["one", "two"])}
+      %{schema: Xema.new(:string, enum: ["one", "two"])}
     end
 
     test "validate/2 with a value from the enum", %{schema: schema} do

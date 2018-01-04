@@ -6,9 +6,7 @@ defmodule Xema.Schema do
 
   ## Examples
 
-      iex> import Xema
-      Xema
-      iex> schema = xema :any
+      iex> schema = Xema.new :any
       %Xema{content: %Xema.Schema{type: :any, as: :any}}
       iex> schema.content == %Xema.Schema{type: :any, as: :any}
       true
