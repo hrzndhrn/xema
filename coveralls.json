@@ -4,6 +4,6 @@
   ],
   "coverage_options": {
     "treat_no_relevant_lines_as_covered": true,
-    "minimum_coverage": 99
+    "minimum_coverage": 100
   }
 }
