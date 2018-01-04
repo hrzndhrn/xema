@@ -123,10 +123,10 @@ defmodule Xema do
   ]
 
   @spec is_valid?(Xema.t(), any) :: boolean
-  def is_valid?(xema, value), do: validate(xema, value) == :ok
+  def is_valid?(schema, value), do: validate(schema, value) == :ok
 
   @spec validate(Xema.t() | Xema.Schema.t(), any) :: Validator.result()
-  def validate(xema, value), do: Validator.validate(xema, value)
+  def validate(schema, value), do: Validator.validate(schema, value)
 
   @doc """
   This function defines the schemas.
@@ -195,7 +195,7 @@ defmodule Xema do
   def schema(type, keywords \\ [])
 
   for type <- @schema_types do
-    def xema(unquote(type), []), do: new(Schema.new(type: unquote(type)))
+    def xema(unquote(type), []), do: create(Schema.new(type: unquote(type)))
 
     def xema(unquote(type), opts) do
       schema_opts =
@@ -207,7 +207,7 @@ defmodule Xema do
         |> Keyword.delete(:schema)
 
       case SchemaValidator.validate(unquote(type), schema_opts) do
-        :ok -> new(Schema.new(schema_opts), opts)
+        :ok -> create(Schema.new(schema_opts), opts)
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
@@ -236,16 +236,28 @@ defmodule Xema do
     raise SchemaError, message: "#{inspect(type)} is not a valid type or keyword."
   end
 
-  defp new(schema), do: struct(Xema, content: schema)
+  defp create(schema), do: struct(Xema, content: schema)
 
-  defp new(schema, fields), do: struct(Xema, Keyword.put(fields, :content, schema))
+  defp create(schema, fields), do: struct(Xema, Keyword.put(fields, :content, schema))
 
-  @spec to_string(Xema.t) :: String.t
-  def to_string(%Xema{} = xema) do
+  @spec to_string(Xema.t(), keyword) :: String.t()
+  def to_string(%Xema{} = xema, opts \\ []) do
+    format = Keyword.get(opts, :format, :call)
     {schema, keywords} = to_tuple(xema)
+
+    to_string(format, schema, keywords)
+  end
+
+  @spec to_string(atom, Schema.t, keyword) :: String.t
+  defp to_string(:call = format, schema, keywords) do
+    "xema(#{Schema.to_string(schema, root: true, keywords: keywords, format: format)})"
+  end
+
+  defp to_string(:data, schema, keywords) do
     Schema.to_string(schema, root: true, keywords: keywords)
   end
 
+  @spec to_tuple(Xema.t) :: {Schema.t, keyword}
   defp to_tuple(xema) do
     {
       xema.content,
@@ -255,4 +267,9 @@ defmodule Xema do
       |> Enum.filter(fn {_key, value} -> value != nil end)
     }
   end
+end
+
+defimpl String.Chars, for: Xema do
+  @spec to_string(Xema.t) :: String.t
+  def to_string(xema), do: Xema.to_string(xema)
 end

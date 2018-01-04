@@ -157,20 +157,35 @@ defmodule Xema.Schema do
 
   defp items(items), do: items
 
-  @spec to_string(Xema.Schema.t(), keyword) :: String.t()
-  def to_string(schema, opts \\ [root: true])
+  @spec to_string(any, keyword) :: String.t()
+  def to_string(schema, opts \\ [])
 
   def to_string(%Xema.Schema{} = schema, opts) do
-    root = opts[:root]
+    format = Keyword.get(opts, :format, :data)
+    keywords = Keyword.get(opts, :keywords, [])
+    root = Keyword.get(opts, :root, true)
+    tuple = to_tuple(schema, keywords)
 
-    case to_tuple(schema, Keyword.get(opts, :keywords, [])) do
+    do_to_string(format, tuple, root)
+  end
+
+  def to_string(value, _opts), do: inspect(value)
+
+  @spec do_to_string(atom, tuple, atom) :: String.t
+  defp do_to_string(:data, tuple, root) do
+    case tuple do
       {type, []} when root -> inspect({type})
-      {type, []} -> ":#{type}"
+      {type, []} -> inspect type
       {type, keywords} -> "{:#{type}, #{keywords_to_string(keywords)}}"
     end
   end
 
-  def to_string(value, _opts), do: inspect(value)
+  defp do_to_string(:call, tuple, _root) do
+    case tuple do
+      {type, []} -> inspect type
+      {type, keywords} -> ":#{type}, #{keywords_to_string(keywords)}"
+    end
+  end
 
   @spec keywords_to_string(keyword) :: String.t()
   defp keywords_to_string(keywords) do
@@ -180,6 +195,7 @@ defmodule Xema.Schema do
     |> Enum.join(", ")
   end
 
+  @spec value_to_string(any) :: String.t
   defp value_to_string(list) when is_list(list) do
     list
     |> Enum.map(fn value -> Schema.to_string(value, root: false) end)
@@ -196,12 +212,14 @@ defmodule Xema.Schema do
 
   defp value_to_string(value), do: inspect(value)
 
+  @spec key_value_to_string({atom | String.t, any}) :: String.t
   defp key_value_to_string({key, value}) when is_atom(key),
     do: "#{key}: #{Schema.to_string(value, root: false)}"
 
   defp key_value_to_string({key, value}) when is_binary(key),
     do: ~s("#{key}" => #{Schema.to_string(value, root: false)})
 
+  @spec wrap(String.t, String.t, String.t) :: String.t
   defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
 
   @spec to_tuple(Xema.Schema.t(), keyword) :: tuple
@@ -209,8 +227,8 @@ defmodule Xema.Schema do
     schema
     |> Map.from_struct()
     |> delete_as()
-    |> extract_type()
     |> delete_nils()
+    |> extract_type()
     |> merge(keywords)
   end
 
@@ -219,12 +237,12 @@ defmodule Xema.Schema do
 
   defp delete_as(schema), do: schema
 
-  @spec extract_type(map) :: {atom, map}
-  defp extract_type(%{type: type} = schema), do: {type, Map.delete(schema, :type)}
+  @spec delete_nils(map) :: map
+  defp delete_nils(schema), do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
 
-  @spec delete_nils({atom, map}) :: {atom, keyword}
-  defp delete_nils({type, keywords}),
-    do: {type, Enum.filter(keywords, fn {_key, value} -> value != nil end)}
+  @spec extract_type(map) :: {atom, keyword}
+  defp extract_type(%{type: type} = schema),
+    do: {type, schema |> Map.delete(:type) |> Map.to_list()}
 
   @spec merge({atom, keyword}, keyword) :: {atom, keyword}
   defp merge({type, keywords}, add), do: {type, Keyword.merge(keywords, add)}
