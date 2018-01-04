@@ -169,18 +169,18 @@ defmodule Xema.Schema do
 
   def to_string(value, _opts), do: inspect(value)
 
-  @spec do_to_string(atom, tuple, atom) :: String.t
+  @spec do_to_string(atom, tuple, atom) :: String.t()
   defp do_to_string(:data, tuple, root) do
     case tuple do
       {type, []} when root -> inspect({type})
-      {type, []} -> inspect type
+      {type, []} -> inspect(type)
       {type, keywords} -> "{:#{type}, #{keywords_to_string(keywords)}}"
     end
   end
 
   defp do_to_string(:call, tuple, _root) do
     case tuple do
-      {type, []} -> inspect type
+      {type, []} -> inspect(type)
       {type, keywords} -> ":#{type}, #{keywords_to_string(keywords)}"
     end
   end
@@ -193,7 +193,7 @@ defmodule Xema.Schema do
     |> Enum.join(", ")
   end
 
-  @spec value_to_string(any) :: String.t
+  @spec value_to_string(any) :: String.t()
   defp value_to_string(list) when is_list(list) do
     list
     |> Enum.map(fn value -> Schema.to_string(value, root: false) end)
@@ -210,14 +210,14 @@ defmodule Xema.Schema do
 
   defp value_to_string(value), do: inspect(value)
 
-  @spec key_value_to_string({atom | String.t, any}) :: String.t
+  @spec key_value_to_string({atom | String.t(), any}) :: String.t()
   defp key_value_to_string({key, value}) when is_atom(key),
     do: "#{key}: #{Schema.to_string(value, root: false)}"
 
   defp key_value_to_string({key, value}) when is_binary(key),
     do: ~s("#{key}" => #{Schema.to_string(value, root: false)})
 
-  @spec wrap(String.t, String.t, String.t) :: String.t
+  @spec wrap(String.t(), String.t(), String.t()) :: String.t()
   defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
 
   @spec to_tuple(Xema.Schema.t(), keyword) :: tuple

@@ -87,7 +87,9 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "supported keyword" do
-      assert Xema.new(:boolean, as: :bool) == %Xema{content: %Xema.Schema{type: :boolean, as: :bool}}
+      assert Xema.new(:boolean, as: :bool) == %Xema{
+               content: %Xema.Schema{type: :boolean, as: :bool}
+             }
     end
   end
 

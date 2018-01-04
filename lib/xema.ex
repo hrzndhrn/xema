@@ -248,7 +248,7 @@ defmodule Xema do
     to_string(format, schema, keywords)
   end
 
-  @spec to_string(atom, Schema.t, keyword) :: String.t
+  @spec to_string(atom, Schema.t(), keyword) :: String.t()
   defp to_string(:call = format, schema, keywords) do
     "xema(#{Schema.to_string(schema, root: true, keywords: keywords, format: format)})"
   end
@@ -257,7 +257,7 @@ defmodule Xema do
     Schema.to_string(schema, root: true, keywords: keywords)
   end
 
-  @spec to_tuple(Xema.t) :: {Schema.t, keyword}
+  @spec to_tuple(Xema.t()) :: {Schema.t(), keyword}
   defp to_tuple(xema) do
     {
       xema.content,
@@ -270,6 +270,6 @@ defmodule Xema do
 end
 
 defimpl String.Chars, for: Xema do
-  @spec to_string(Xema.t) :: String.t
+  @spec to_string(Xema.t()) :: String.t()
   def to_string(xema), do: Xema.to_string(xema)
 end
