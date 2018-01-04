@@ -16,7 +16,7 @@ First, add Xema to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
-  [{:xema, "~> 0.1"}]
+  [{:xema, "~> 0.2"}]
 end
 ```
 
