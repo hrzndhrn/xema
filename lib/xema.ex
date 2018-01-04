@@ -8,6 +8,8 @@ defmodule Xema do
   alias Xema.SchemaError
   alias Xema.Validator
 
+  @enforce_keys [:content]
+
   defstruct [
     :content,
     :description,
@@ -237,4 +239,20 @@ defmodule Xema do
   defp new(schema), do: struct(Xema, content: schema)
 
   defp new(schema, fields), do: struct(Xema, Keyword.put(fields, :content, schema))
+
+  @spec to_string(Xema.t) :: String.t
+  def to_string(%Xema{} = xema) do
+    {schema, keywords} = to_tuple(xema)
+    Schema.to_string(schema, root: true, keywords: keywords)
+  end
+
+  defp to_tuple(xema) do
+    {
+      xema.content,
+      xema
+      |> Map.from_struct()
+      |> Map.delete(:content)
+      |> Enum.filter(fn {_key, value} -> value != nil end)
+    }
+  end
 end

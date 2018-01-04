@@ -14,6 +14,8 @@ defmodule Xema.Schema do
       true
   """
 
+  alias Xema.Schema
+
   @typedoc """
   The struct contains the keywords for a schema.
 
@@ -154,4 +156,76 @@ defmodule Xema.Schema do
   defp items(schemas) when is_list(schemas), do: schemas(schemas)
 
   defp items(items), do: items
+
+  @spec to_string(Xema.Schema.t(), keyword) :: String.t()
+  def to_string(schema, opts \\ [root: true])
+
+  def to_string(%Xema.Schema{} = schema, opts) do
+    root = opts[:root]
+
+    case to_tuple(schema, Keyword.get(opts, :keywords, [])) do
+      {type, []} when root -> inspect({type})
+      {type, []} -> ":#{type}"
+      {type, keywords} -> "{:#{type}, #{keywords_to_string(keywords)}}"
+    end
+  end
+
+  def to_string(value, _opts), do: inspect(value)
+
+  @spec keywords_to_string(keyword) :: String.t()
+  defp keywords_to_string(keywords) do
+    keywords
+    |> Enum.sort()
+    |> Enum.map(fn {key, value} -> "#{key}: #{value_to_string(value)}" end)
+    |> Enum.join(", ")
+  end
+
+  defp value_to_string(list) when is_list(list) do
+    list
+    |> Enum.map(fn value -> Schema.to_string(value, root: false) end)
+    |> Enum.join(", ")
+    |> wrap("[", "]")
+  end
+
+  defp value_to_string(map) when is_map(map),
+    do:
+      map
+      |> Enum.map(&key_value_to_string/1)
+      |> Enum.join(", ")
+      |> wrap("%{", "}")
+
+  defp value_to_string(value), do: inspect(value)
+
+  defp key_value_to_string({key, value}) when is_atom(key),
+    do: "#{key}: #{Schema.to_string(value, root: false)}"
+
+  defp key_value_to_string({key, value}) when is_binary(key),
+    do: ~s("#{key}" => #{Schema.to_string(value, root: false)})
+
+  defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
+
+  @spec to_tuple(Xema.Schema.t(), keyword) :: tuple
+  defp to_tuple(%Xema.Schema{} = schema, keywords) do
+    schema
+    |> Map.from_struct()
+    |> delete_as()
+    |> extract_type()
+    |> delete_nils()
+    |> merge(keywords)
+  end
+
+  @spec delete_as(map) :: map
+  defp delete_as(%{type: type, as: type} = schema), do: Map.delete(schema, :as)
+
+  defp delete_as(schema), do: schema
+
+  @spec extract_type(map) :: {atom, map}
+  defp extract_type(%{type: type} = schema), do: {type, Map.delete(schema, :type)}
+
+  @spec delete_nils({atom, map}) :: {atom, keyword}
+  defp delete_nils({type, keywords}),
+    do: {type, Enum.filter(keywords, fn {_key, value} -> value != nil end)}
+
+  @spec merge({atom, keyword}, keyword) :: {atom, keyword}
+  defp merge({type, keywords}, add), do: {type, Keyword.merge(keywords, add)}
 end
