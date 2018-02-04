@@ -197,7 +197,8 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword additional_properties with properties set to schema" do
-      expected = "additional_properties has no effect if properties is not a map."
+      expected =
+        "additional_properties has no effect if properties is not a map."
 
       assert_raise SchemaError, expected, fn ->
         Xema.new(:map, properties: :string, additional_properties: false)
@@ -241,7 +242,8 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword max_properties with a wrong type" do
-      expected = ~s(Expected a non negative integer for max_properties, got "foo".)
+      expected =
+        ~s(Expected a non negative integer for max_properties, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
         Xema.new(:map, max_properties: "foo")
@@ -257,7 +259,8 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword min_properties with a wrong type" do
-      expected = ~s(Expected a non negative integer for min_properties, got "foo".)
+      expected =
+        ~s(Expected a non negative integer for min_properties, got "foo".)
 
       assert_raise SchemaError, expected, fn ->
         Xema.new(:map, min_properties: "foo")
@@ -297,7 +300,8 @@ defmodule Xema.SchemaValidatorTest do
     end
 
     test "keyword pattern_properties with a wrong key" do
-      expected = "Expected a regular expression for key in pattern_properties, got :a."
+      expected =
+        "Expected a regular expression for key in pattern_properties, got :a."
 
       assert_raise SchemaError, expected, fn ->
         Xema.new(:map, pattern_properties: %{a: :string})

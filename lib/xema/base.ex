@@ -1,4 +1,6 @@
 defmodule Xema.Base do
+  @moduledoc false
+
   defmacro __using__(_opts) do
     quote do
       @behaviour Xema.Base
@@ -8,13 +10,14 @@ defmodule Xema.Base do
       @enforce_keys [:content]
 
       @type t :: %__MODULE__{
-        content: Xema.Schema.t(),
-      }
+              content: Xema.Schema.t()
+            }
 
       defstruct [
-        :content,
+        :content
       ]
 
+      @spec create(keyword) :: struct
       def create(schema), do: struct(__MODULE__, content: schema)
     end
   end

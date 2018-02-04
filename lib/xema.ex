@@ -169,7 +169,7 @@ defmodule Xema do
   def schema(type, keywords \\ [])
 
   for type <- @schema_types do
-    def new(unquote(type), opts), do: create schema(unquote(type), opts)
+    def new(unquote(type), opts), do: unquote(type) |> schema(opts) |> create
 
     def schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
 
@@ -184,18 +184,18 @@ defmodule Xema do
   end
 
   for keyword <- @schema_keywords do
-    def new(unquote(keyword), opts),
-      do: new :any, [{unquote(keyword), opts}]
+    def new(unquote(keyword), opts), do: new(:any, [{unquote(keyword), opts}])
 
     def schema({unquote(keyword), opts}, []),
-      do: schema :any, [{unquote(keyword), opts}]
+      do: schema(:any, [{unquote(keyword), opts}])
 
     def schema(%{unquote(keyword) => opts}, []),
-      do: schema :any, [{unquote(keyword), opts}]
+      do: schema(:any, [{unquote(keyword), opts}])
   end
 
   def schema(type, _) do
-    raise SchemaError, message: "#{inspect(type)} is not a valid type or keyword."
+    raise SchemaError,
+      message: "#{inspect(type)} is not a valid type or keyword."
   end
 
   @spec to_string(Xema.t(), keyword) :: String.t()
@@ -208,7 +208,9 @@ defmodule Xema do
 
   @spec to_string(atom, Schema.t(), keyword) :: String.t()
   defp to_string(:call = format, schema, keywords) do
-    "xema(#{Schema.to_string(schema, root: true, keywords: keywords, format: format)})"
+    "xema(#{
+      Schema.to_string(schema, root: true, keywords: keywords, format: format)
+    })"
   end
 
   defp to_string(:data, schema, keywords) do

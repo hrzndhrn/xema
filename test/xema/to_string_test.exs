@@ -34,7 +34,9 @@ defmodule Xema.ToStringTest do
     end
 
     test "with a map-schema and properties (keys: strings)" do
-      schema = ~s({:map, properties: %{"a" => {:integer, minimum: 2}, "b" => :string}})
+      schema =
+        ~s({:map, properties: %{"a" => {:integer, minimum: 2}, "b" => :string}})
+
       xema = xema(schema)
 
       assert Schema.to_string(xema.content) == schema
@@ -87,7 +89,9 @@ defmodule Xema.ToStringTest do
     end
 
     test "with a map-schema and properties (keys: strings)" do
-      schema = ~s(:map, properties: %{"a" => {:integer, minimum: 2}, "b" => :string})
+      schema =
+        ~s(:map, properties: %{"a" => {:integer, minimum: 2}, "b" => :string})
+
       xema = xema(schema)
 
       assert to_string(xema) == "xema(#{schema})"

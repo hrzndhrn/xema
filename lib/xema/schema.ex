@@ -144,7 +144,8 @@ defmodule Xema.Schema do
   defp schemas(list), do: Enum.map(list, fn schema -> Xema.schema(schema) end)
 
   @spec properties(map) :: map
-  defp properties(map), do: Enum.into(map, %{}, fn {key, prop} -> {key, Xema.schema(prop)} end)
+  defp properties(map),
+    do: Enum.into(map, %{}, fn {key, prop} -> {key, Xema.schema(prop)} end)
 
   @spec dependencies(map) :: map
   defp dependencies(map),
@@ -248,7 +249,8 @@ defmodule Xema.Schema do
   defp delete_as(schema), do: schema
 
   @spec delete_nils(map) :: map
-  defp delete_nils(schema), do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
+  defp delete_nils(schema),
+    do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
 
   @spec extract_type(map) :: {atom, keyword}
   defp extract_type(%{type: type} = schema),

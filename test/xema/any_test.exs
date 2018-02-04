@@ -303,7 +303,11 @@ defmodule Xema.AnyTest do
   describe "keyword one_of (shortcut):" do
     setup do
       %{
-        schema: Xema.new(:one_of, [{:integer, multiple_of: 3}, {:integer, multiple_of: 5}])
+        schema:
+          Xema.new(:one_of, [
+            {:integer, multiple_of: 3},
+            {:integer, multiple_of: 5}
+          ])
       }
     end
 
@@ -311,7 +315,10 @@ defmodule Xema.AnyTest do
       assert schema ==
                Xema.new(
                  :any,
-                 one_of: [{:integer, multiple_of: 3}, {:integer, multiple_of: 5}]
+                 one_of: [
+                   {:integer, multiple_of: 3},
+                   {:integer, multiple_of: 5}
+                 ]
                )
     end
   end

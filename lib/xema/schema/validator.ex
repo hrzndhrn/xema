@@ -87,7 +87,7 @@ defmodule Xema.Schema.Validator do
   @spec validate(atom, keyword) :: :ok | {:error, String.t()}
   def validate(_, []), do: :ok
 
-  def validate(nil, [type: nil]), do: :ok
+  def validate(nil, type: nil), do: :ok
 
   def validate(:any, opts) do
     with :ok <- validate_keywords(:any, opts),
@@ -203,7 +203,8 @@ defmodule Xema.Schema.Validator do
 
   defp additional_items(nil, _), do: :ok
 
-  defp additional_items(_, nil), do: {:error, "additional_items has no effect if items not set."}
+  defp additional_items(_, nil),
+    do: {:error, "additional_items has no effect if items not set."}
 
   defp additional_items(_, items)
        when not is_list(items),
@@ -221,11 +222,10 @@ defmodule Xema.Schema.Validator do
 
   defp additional_properties(_, properties, nil)
        when not is_map(properties),
-       do:
-         {
-           :error,
-           "additional_properties has no effect if properties is not a map."
-         }
+       do: {
+         :error,
+         "additional_properties has no effect if properties is not a map."
+       }
 
   defp additional_properties(_, _, _), do: :ok
 
@@ -346,7 +346,8 @@ defmodule Xema.Schema.Validator do
        do: :ok
 
   defp items(value),
-    do: {:error, "Expected a schema or a list of schemas, got #{inspect(value)}."}
+    do:
+      {:error, "Expected a schema or a list of schemas, got #{inspect(value)}."}
 
   # Keyword: maximum
   # The value of `maximum` must be a number, representing an inclusive upper
@@ -388,18 +389,16 @@ defmodule Xema.Schema.Validator do
        do: do_multiple_of(value)
 
   defp multiple_of(:integer, value),
-    do:
-      {
-        :error,
-        "Expected an Integer for multiple_of, got #{inspect(value)}."
-      }
+    do: {
+      :error,
+      "Expected an Integer for multiple_of, got #{inspect(value)}."
+    }
 
   defp multiple_of(_, value),
-    do:
-      {
-        :error,
-        "Expected a number for multiple_of, got #{inspect(value)}."
-      }
+    do: {
+      :error,
+      "Expected a number for multiple_of, got #{inspect(value)}."
+    }
 
   @spec non_negative_integer(atom, any) :: result
   defp non_negative_integer(_, nil), do: :ok
@@ -409,11 +408,10 @@ defmodule Xema.Schema.Validator do
        do: :ok
 
   defp non_negative_integer(keyword, value),
-    do:
-      {
-        :error,
-        "Expected a non negative integer for #{keyword}, got #{inspect(value)}."
-      }
+    do: {
+      :error,
+      "Expected a non negative integer for #{keyword}, got #{inspect(value)}."
+    }
 
   @spec properties(any) :: result
   defp properties(nil), do: :ok
@@ -424,7 +422,8 @@ defmodule Xema.Schema.Validator do
     |> Enum.reduce_while(:ok, &property_key/2)
   end
 
-  defp properties(value), do: {:error, "Expected a map for properties, got #{inspect(value)}."}
+  defp properties(value),
+    do: {:error, "Expected a map for properties, got #{inspect(value)}."}
 
   @spec property_key(any, any) :: {:cont, :ok} | {:error, String.t()}
   defp property_key(key, _)
@@ -432,14 +431,13 @@ defmodule Xema.Schema.Validator do
        do: {:cont, :ok}
 
   defp property_key(key, _),
-    do:
+    do: {
+      :halt,
       {
-        :halt,
-        {
-          :error,
-          "Expected a string or atom for key in properties, got #{inspect(key)}."
-        }
+        :error,
+        "Expected a string or atom for key in properties, got #{inspect(key)}."
       }
+    }
 
   @spec pattern_properties(any) :: result
   defp pattern_properties(nil), do: :ok
@@ -452,13 +450,16 @@ defmodule Xema.Schema.Validator do
       [key | _] ->
         {
           :error,
-          "Expected a regular expression for key in pattern_properties, got #{inspect(key)}."
+          "Expected a regular expression for key in pattern_properties, got #{
+            inspect(key)
+          }."
         }
     end
   end
 
   defp pattern_properties(value),
-    do: {:error, "Expected a map for pattern_properties, got #{inspect(value)}."}
+    do:
+      {:error, "Expected a map for pattern_properties, got #{inspect(value)}."}
 
   @spec regex(atom, any) :: result
   defp regex(_, nil), do: :ok

@@ -11,18 +11,16 @@ defmodule Xema.NestedTest do
             :map,
             properties: %{
               id: {:number, minimum: 1},
-              items:
-                {
-                  :list,
-                  items:
-                    {
-                      :map,
-                      properties: %{
-                        num: {:number, minimum: 0},
-                        desc: :string
-                      }
-                    }
+              items: {
+                :list,
+                items: {
+                  :map,
+                  properties: %{
+                    num: {:number, minimum: 0},
+                    desc: :string
+                  }
                 }
+              }
             }
           )
       }
@@ -49,20 +47,19 @@ defmodule Xema.NestedTest do
         ]
       }
 
-      error =
-        {
-          :error,
-          %{
-            items: [
-              %{
-                at: 1,
-                error: %{
-                  num: %{value: -2, minimum: 0}
-                }
+      error = {
+        :error,
+        %{
+          items: [
+            %{
+              at: 1,
+              error: %{
+                num: %{value: -2, minimum: 0}
               }
-            ]
-          }
+            }
+          ]
         }
+      }
 
       assert validate(schema, data) == error
     end
@@ -112,20 +109,19 @@ defmodule Xema.NestedTest do
         ]
       }
 
-      error =
-        {
-          :error,
-          %{
-            items: [
-              %{
-                at: 1,
-                error: %{
-                  num: %{value: -2, minimum: 0}
-                }
+      error = {
+        :error,
+        %{
+          items: [
+            %{
+              at: 1,
+              error: %{
+                num: %{value: -2, minimum: 0}
               }
-            ]
-          }
+            }
+          ]
         }
+      }
 
       assert validate(schema, data) == error
     end
