@@ -3,38 +3,12 @@ defmodule Xema do
   A schema validator inspired by [JSON Schema](http://json-schema.org)
   """
 
+  use Xema.Base
+
   alias Xema.Schema
   alias Xema.Schema.Validator, as: SchemaValidator
   alias Xema.SchemaError
   alias Xema.Validator
-
-  @enforce_keys [:content]
-
-  defstruct [
-    :content,
-    :description,
-    :id,
-    :keywords,
-    :schema,
-    :title
-  ]
-
-  @typedoc """
-  The Xema base struct contains the meta data of a schema.
-
-  * `id` a unique identifier.
-  * `schema` declares the used schema.
-  * `title` of the schema.
-  * `description` of the schema.
-  * `type` contains the specification of the schema.
-  """
-  @type t :: %Xema{
-          content: Xema.Schema.t(),
-          description: String.t() | nil,
-          id: String.t() | nil,
-          schema: String.t() | nil,
-          title: String.t() | nil
-        }
 
   @typedoc """
   The available type notations.
@@ -198,16 +172,10 @@ defmodule Xema do
     def new(unquote(type), []), do: create(Schema.new(type: unquote(type)))
 
     def new(unquote(type), opts) do
-      schema_opts =
-        opts
-        |> Keyword.put(:type, unquote(type))
-        |> Keyword.delete(:id)
-        |> Keyword.delete(:title)
-        |> Keyword.delete(:description)
-        |> Keyword.delete(:schema)
+      opts = Keyword.put(opts, :type, unquote(type))
 
-      case SchemaValidator.validate(unquote(type), schema_opts) do
-        :ok -> create(Schema.new(schema_opts), opts)
+      case SchemaValidator.validate(unquote(type), opts) do
+        :ok -> create(Schema.new(opts))
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
@@ -235,10 +203,6 @@ defmodule Xema do
   def schema(type, _) do
     raise SchemaError, message: "#{inspect(type)} is not a valid type or keyword."
   end
-
-  defp create(schema), do: struct(Xema, content: schema)
-
-  defp create(schema, fields), do: struct(Xema, Keyword.put(fields, :content, schema))
 
   @spec to_string(Xema.t(), keyword) :: String.t()
   def to_string(%Xema{} = xema, opts \\ []) do

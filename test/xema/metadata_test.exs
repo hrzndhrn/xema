@@ -11,9 +11,9 @@ defmodule Xema.MetadataTest do
         description: "Code for fun"
       )
 
-    assert schema.id == "ID"
-    assert schema.schema == "elixir-schema"
-    assert schema.title == "Just for fun"
-    assert schema.description == "Code for fun"
+    assert schema.content.id == "ID"
+    assert schema.content.schema == "elixir-schema"
+    assert schema.content.title == "Just for fun"
+    assert schema.content.description == "Code for fun"
   end
 end

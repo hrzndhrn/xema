@@ -13,9 +13,13 @@ defmodule Xema.Schema.Validator do
                   :all_of,
                   :any_of,
                   :as,
+                  :description,
                   :enum,
+                  :id,
                   :not,
                   :one_of,
+                  :schema,
+                  :title,
                   :type
                 ])
 
