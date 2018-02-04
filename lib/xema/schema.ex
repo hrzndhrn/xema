@@ -123,85 +123,11 @@ defmodule Xema.Schema do
   @spec new(keyword) :: Xema.Schema.t()
   def new(opts \\ []), do: struct(Xema.Schema, opts)
 
-  @spec to_string(any, keyword) :: String.t()
-  def to_string(schema, opts \\ [])
-
-  def to_string(%Xema.Schema{} = schema, opts) do
-    format = Keyword.get(opts, :format, :data)
-    root = Keyword.get(opts, :root, true)
-    tuple = to_tuple(schema)
-
-    do_to_string(format, tuple, root)
-  end
-
-  def to_string(value, _opts), do: inspect(value)
-
-  @spec do_to_string(atom, tuple, atom) :: String.t()
-  defp do_to_string(:data, tuple, root) do
-    case tuple do
-      {type, []} when root -> inspect({type})
-      {type, []} -> inspect(type)
-      {type, keywords} -> "{:#{type}, #{keywords_to_string(keywords)}}"
-    end
-  end
-
-  defp do_to_string(:call, tuple, _root) do
-    case tuple do
-      {type, []} -> inspect(type)
-      {type, keywords} -> ":#{type}, #{keywords_to_string(keywords)}"
-    end
-  end
-
-  @spec keywords_to_string(keyword) :: String.t()
-  defp keywords_to_string(keywords) do
-    keywords
-    |> Enum.sort()
-    |> Enum.map(fn {key, value} -> "#{key}: #{value_to_string(value)}" end)
-    |> Enum.join(", ")
-  end
-
-  @spec value_to_string(any) :: String.t()
-  defp value_to_string(list) when is_list(list) do
-    list
-    |> Enum.map(fn value -> Schema.to_string(value, root: false) end)
-    |> Enum.join(", ")
-    |> wrap("[", "]")
-  end
-
-  defp value_to_string(map) when is_map(map),
-    do:
-      map
-      |> Enum.map(&key_value_to_string/1)
-      |> Enum.join(", ")
-      |> wrap("%{", "}")
-
-  defp value_to_string(value), do: inspect(value)
-
-  @spec key_value_to_string({atom | String.t(), any}) :: String.t()
-  defp key_value_to_string({key, value}) when is_atom(key),
-    do: "#{key}: #{Schema.to_string(value, root: false)}"
-
-  defp key_value_to_string({key, value}) when is_binary(key),
-    do: ~s("#{key}" => #{Schema.to_string(value, root: false)})
-
-  @spec wrap(String.t(), String.t(), String.t()) :: String.t()
-  defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
-
-
   def to_map(schema) do
     schema
     |> Map.from_struct()
     |> delete_as()
     |> delete_nils()
-  end
-
-  @spec to_tuple(Xema.Schema.t()) :: tuple
-  defp to_tuple(%Xema.Schema{} = schema) do
-    schema
-    |> Map.from_struct()
-    |> delete_as()
-    |> delete_nils()
-    |> extract_type()
   end
 
   @spec delete_as(map) :: map
@@ -212,8 +138,4 @@ defmodule Xema.Schema do
   @spec delete_nils(map) :: map
   defp delete_nils(schema),
     do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
-
-  @spec extract_type(map) :: {atom, keyword}
-  defp extract_type(%{type: type} = schema),
-    do: {type, schema |> Map.delete(:type) |> Map.to_list()}
 end

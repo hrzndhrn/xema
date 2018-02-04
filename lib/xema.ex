@@ -292,7 +292,7 @@ defmodule Xema do
   @spec value_to_string(any) :: String.t()
   defp value_to_string(list) when is_list(list) do
     list
-    |> Enum.map(fn value -> Schema.to_string(value, root: false) end)
+    |> Enum.map(&value_to_string/1)
     |> Enum.join(", ")
     |> wrap("[", "]")
   end
