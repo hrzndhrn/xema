@@ -128,9 +128,8 @@ defmodule Xema.Schema do
 
   def to_string(%Xema.Schema{} = schema, opts) do
     format = Keyword.get(opts, :format, :data)
-    keywords = Keyword.get(opts, :keywords, [])
     root = Keyword.get(opts, :root, true)
-    tuple = to_tuple(schema, keywords)
+    tuple = to_tuple(schema)
 
     do_to_string(format, tuple, root)
   end
@@ -188,14 +187,13 @@ defmodule Xema.Schema do
   @spec wrap(String.t(), String.t(), String.t()) :: String.t()
   defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
 
-  @spec to_tuple(Xema.Schema.t(), keyword) :: tuple
-  defp to_tuple(%Xema.Schema{} = schema, keywords) do
+  @spec to_tuple(Xema.Schema.t()) :: tuple
+  defp to_tuple(%Xema.Schema{} = schema) do
     schema
     |> Map.from_struct()
     |> delete_as()
     |> delete_nils()
     |> extract_type()
-    |> merge(keywords)
   end
 
   @spec delete_as(map) :: map
@@ -210,7 +208,4 @@ defmodule Xema.Schema do
   @spec extract_type(map) :: {atom, keyword}
   defp extract_type(%{type: type} = schema),
     do: {type, schema |> Map.delete(:type) |> Map.to_list()}
-
-  @spec merge({atom, keyword}, keyword) :: {atom, keyword}
-  defp merge({type, keywords}, add), do: {type, Keyword.merge(keywords, add)}
 end
