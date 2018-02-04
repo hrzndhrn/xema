@@ -160,9 +160,8 @@ defmodule Xema.Schema do
 
   defp bool_or_schema(schema), do: Xema.schema(schema)
 
-  defp items(schema) when is_atom(schema), do: Xema.schema(schema)
-
-  defp items(schema) when is_tuple(schema), do: Xema.schema(schema)
+  defp items(schema) when is_atom(schema) or is_tuple(schema),
+    do: Xema.schema(schema)
 
   defp items(schemas) when is_list(schemas), do: schemas(schemas)
 
