@@ -207,7 +207,7 @@ defmodule Xema do
     |> Keyword.update(:any_of, nil, &schemas/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
     |> Keyword.update(:items, nil, &items/1)
-    |> Keyword.update(:not, nil, fn schema -> Xema.schema(schema) end)
+    |> Keyword.update(:not, nil, fn schema -> schema(schema) end)
     |> Keyword.update(:one_of, nil, &schemas/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:properties, nil, &properties/1)
@@ -215,7 +215,7 @@ defmodule Xema do
   end
 
   @spec schemas(list) :: list
-  defp schemas(list), do: Enum.map(list, fn schema -> Xema.schema(schema) end)
+  defp schemas(list), do: Enum.map(list, fn schema -> schema(schema) end)
 
   @spec properties(map) :: map
   defp properties(map),
