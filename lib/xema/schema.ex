@@ -123,6 +123,7 @@ defmodule Xema.Schema do
   @spec new(keyword) :: Xema.Schema.t()
   def new(opts \\ []), do: struct(Xema.Schema, opts)
 
+  @spec to_map(Xema.Schema.t()) :: map
   def to_map(schema) do
     schema
     |> Map.from_struct()

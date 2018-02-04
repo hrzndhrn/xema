@@ -17,10 +17,11 @@ defmodule Xema.Base do
         :content
       ]
 
-      @spec create(keyword) :: struct
+      @spec create(Xema.Schema.t()) :: __MODULE__.t()
       def create(schema), do: struct(__MODULE__, content: schema)
     end
   end
 
-  @callback is_valid?(Struct, any) :: Boolean
+  @callback is_valid?(struct, any) :: boolean
+  @callback validate(struct, any) :: Xema.Validator.result()
 end

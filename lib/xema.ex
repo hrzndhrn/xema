@@ -154,7 +154,7 @@ defmodule Xema do
 
   """
 
-  @spec new(schema_types | tuple, keyword) :: Xema.t()
+  @spec new(schema_types | schema_keywords | tuple, keyword) :: Xema.t()
   def new(type, keywords \\ [])
 
   def new({type}, []), do: new(type, [])
@@ -164,16 +164,15 @@ defmodule Xema do
   def new(tuple, keywords) when is_tuple(tuple),
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}")
 
-  @doc false
-  @spec schema(schema_types, keyword) :: Xema.Schema.t()
-  def schema(type, keywords \\ [])
+  @spec schema(schema_types | schema_keywords, keyword) :: Xema.Schema.t()
+  defp schema(type, keywords \\ [])
 
   for type <- @schema_types do
     def new(unquote(type), opts), do: unquote(type) |> schema(opts) |> create
 
-    def schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
+    defp schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
 
-    def schema(unquote(type), opts) do
+    defp schema(unquote(type), opts) do
       opts = Keyword.put(opts, :type, unquote(type))
 
       case SchemaValidator.validate(unquote(type), opts) do
@@ -186,14 +185,14 @@ defmodule Xema do
   for keyword <- @schema_keywords do
     def new(unquote(keyword), opts), do: new(:any, [{unquote(keyword), opts}])
 
-    def schema({unquote(keyword), opts}, []),
+    defp schema({unquote(keyword), opts}, []),
       do: schema(:any, [{unquote(keyword), opts}])
 
-    def schema(%{unquote(keyword) => opts}, []),
+    defp schema(%{unquote(keyword) => opts}, []),
       do: schema(:any, [{unquote(keyword), opts}])
   end
 
-  def schema(type, _) do
+  defp schema(type, _) do
     raise SchemaError,
       message: "#{inspect(type)} is not a valid type or keyword."
   end
@@ -220,23 +219,24 @@ defmodule Xema do
 
   @spec properties(map) :: map
   defp properties(map),
-    do: Enum.into(map, %{}, fn {key, prop} -> {key, Xema.schema(prop)} end)
+    do: Enum.into(map, %{}, fn {key, prop} -> {key, schema(prop)} end)
 
   @spec dependencies(map) :: map
   defp dependencies(map),
     do:
       Enum.into(map, %{}, fn
         {key, dep} when is_list(dep) -> {key, dep}
-        {key, dep} -> {key, Xema.schema(dep)}
+        {key, dep} -> {key, schema(dep)}
       end)
 
   @spec bool_or_schema(boolean | atom) :: boolean | Xema.Schema.t()
   defp bool_or_schema(bool) when is_boolean(bool), do: bool
 
-  defp bool_or_schema(schema), do: Xema.schema(schema)
+  defp bool_or_schema(schema), do: schema(schema)
 
+  @spec items(any) :: list
   defp items(schema) when is_atom(schema) or is_tuple(schema),
-    do: Xema.schema(schema)
+    do: schema(schema)
 
   defp items(schemas) when is_list(schemas), do: schemas(schemas)
 
@@ -254,15 +254,14 @@ defmodule Xema do
 
   @spec do_to_string(atom, Schema.t()) :: String.t()
   defp do_to_string(:call, schema) do
-    "xema(#{
-      schema_to_string(schema, true)
-    })"
+    "xema(#{schema_to_string(schema, true)})"
   end
 
   defp do_to_string(:data, schema) do
     "{#{schema_to_string(schema, true)}}"
   end
 
+  @spec schema_to_string(Schema.t() | map, atom) :: String.t()
   defp schema_to_string(schema, root \\ false)
 
   defp schema_to_string(%Schema{type: type} = schema, root) do
@@ -277,17 +276,16 @@ defmodule Xema do
   end
 
   defp schema_to_string(type, schema, _root) when schema == %{} do
-    inspect type
+    inspect(type)
   end
 
   defp schema_to_string(type, schema, true) do
-    "#{inspect type}, #{schema_to_string(schema)}"
+    "#{inspect(type)}, #{schema_to_string(schema)}"
   end
 
   defp schema_to_string(type, schema, false) do
     "{#{schema_to_string(type, schema, true)}}"
   end
-
 
   @spec value_to_string(any) :: String.t()
   defp value_to_string(list) when is_list(list) do
@@ -310,6 +308,7 @@ defmodule Xema do
 
   defp value_to_string(value), do: inspect(value)
 
+  @spec key_value_to_string({atom | String.t(), any}) :: String.t()
   defp key_value_to_string({key, value}) when is_atom(key) do
     "#{key}: #{value_to_string(value)}"
   end
@@ -320,7 +319,6 @@ defmodule Xema do
 
   @spec wrap(String.t(), String.t(), String.t()) :: String.t()
   defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
-
 end
 
 defimpl String.Chars, for: Xema do
