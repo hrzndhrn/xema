@@ -87,6 +87,8 @@ defmodule Xema.Schema.Validator do
   @spec validate(atom, keyword) :: :ok | {:error, String.t()}
   def validate(_, []), do: :ok
 
+  def validate(nil, [type: nil]), do: :ok
+
   def validate(:any, opts) do
     with :ok <- validate_keywords(:any, opts),
          :ok <- enum(:any, opts[:enum]),

@@ -124,7 +124,7 @@ defmodule Xema.Schema do
   def new(opts \\ []), do: struct(Xema.Schema, update(opts))
 
   @spec update(keyword) :: keyword
-  def update(opts) do
+  defp update(opts) do
     opts
     |> Keyword.put_new(:as, opts[:type])
     |> Keyword.update(:additional_items, nil, &bool_or_schema/1)

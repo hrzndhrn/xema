@@ -169,35 +169,29 @@ defmodule Xema do
   def schema(type, keywords \\ [])
 
   for type <- @schema_types do
-    def new(unquote(type), []), do: create(Schema.new(type: unquote(type)))
+    def new(unquote(type), opts), do: create schema(unquote(type), opts)
 
-    def new(unquote(type), opts) do
+    def schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
+
+    def schema(unquote(type), opts) do
       opts = Keyword.put(opts, :type, unquote(type))
 
       case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> create(Schema.new(opts))
-        {:error, msg} -> raise SchemaError, message: msg
-      end
-    end
-
-    def schema(unquote(type), []), do: Schema.new(type: unquote(type))
-
-    def schema({unquote(type), opts}, []) do
-      case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> Schema.new(Keyword.put(opts, :type, unquote(type)))
+        :ok -> Schema.new(opts)
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
   end
 
   for keyword <- @schema_keywords do
-    def new(unquote(keyword), opts), do: new(:any, Keyword.new([{unquote(keyword), opts}]))
+    def new(unquote(keyword), opts),
+      do: new :any, [{unquote(keyword), opts}]
 
     def schema({unquote(keyword), opts}, []),
-      do: schema({:any, Keyword.new([{unquote(keyword), opts}])})
+      do: schema :any, [{unquote(keyword), opts}]
 
     def schema(%{unquote(keyword) => opts}, []),
-      do: schema({:any, Keyword.new([{unquote(keyword), opts}])})
+      do: schema :any, [{unquote(keyword), opts}]
   end
 
   def schema(type, _) do
