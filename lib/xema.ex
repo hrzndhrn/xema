@@ -247,33 +247,80 @@ defmodule Xema do
   #
   @spec to_string(Xema.t(), keyword) :: String.t()
   def to_string(%Xema{} = xema, opts \\ []) do
-    format = Keyword.get(opts, :format, :call)
-    {schema, keywords} = to_tuple(xema)
-
-    to_string(format, schema, keywords)
+    opts
+    |> Keyword.get(:format, :call)
+    |> do_to_string(xema.content)
   end
 
-  @spec to_string(atom, Schema.t(), keyword) :: String.t()
-  defp to_string(:call = format, schema, keywords) do
+  @spec do_to_string(atom, Schema.t()) :: String.t()
+  defp do_to_string(:call, schema) do
     "xema(#{
-      Schema.to_string(schema, root: true, keywords: keywords, format: format)
+      schema_to_string(schema, true)
     })"
   end
 
-  defp to_string(:data, schema, keywords) do
-    Schema.to_string(schema, root: true, keywords: keywords)
+  defp do_to_string(:data, schema) do
+    "{#{schema_to_string(schema, true)}}"
   end
 
-  @spec to_tuple(Xema.t()) :: {Schema.t(), keyword}
-  defp to_tuple(xema) do
-    {
-      xema.content,
-      xema
-      |> Map.from_struct()
-      |> Map.delete(:content)
-      |> Enum.filter(fn {_key, value} -> value != nil end)
-    }
+  defp schema_to_string(schema, root \\ false)
+
+  defp schema_to_string(%Schema{type: type} = schema, root) do
+    schema_to_string(type, schema |> Schema.to_map() |> Map.delete(:type), root)
   end
+
+  defp schema_to_string(schema, _root) do
+    schema
+    |> Enum.sort()
+    |> Enum.map(&key_value_to_string/1)
+    |> Enum.join(", ")
+  end
+
+  defp schema_to_string(type, schema, _root) when schema == %{} do
+    inspect type
+  end
+
+  defp schema_to_string(type, schema, true) do
+    "#{inspect type}, #{schema_to_string(schema)}"
+  end
+
+  defp schema_to_string(type, schema, false) do
+    "{#{schema_to_string(type, schema, true)}}"
+  end
+
+
+  @spec value_to_string(any) :: String.t()
+  defp value_to_string(list) when is_list(list) do
+    list
+    |> Enum.map(fn value -> Schema.to_string(value, root: false) end)
+    |> Enum.join(", ")
+    |> wrap("[", "]")
+  end
+
+  defp value_to_string(%Schema{} = schema) do
+    schema_to_string(schema)
+  end
+
+  defp value_to_string(map) when is_map(map) do
+    map
+    |> Enum.map(&key_value_to_string/1)
+    |> Enum.join(", ")
+    |> wrap("%{", "}")
+  end
+
+  defp value_to_string(value), do: inspect(value)
+
+  defp key_value_to_string({key, value}) when is_atom(key) do
+    "#{key}: #{value_to_string(value)}"
+  end
+
+  defp key_value_to_string({key, value}) do
+    ~s("#{key}" => #{value_to_string(value)})
+  end
+
+  @spec wrap(String.t(), String.t(), String.t()) :: String.t()
+  defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
+
 end
 
 defimpl String.Chars, for: Xema do

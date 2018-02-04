@@ -187,6 +187,14 @@ defmodule Xema.Schema do
   @spec wrap(String.t(), String.t(), String.t()) :: String.t()
   defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
 
+
+  def to_map(schema) do
+    schema
+    |> Map.from_struct()
+    |> delete_as()
+    |> delete_nils()
+  end
+
   @spec to_tuple(Xema.Schema.t()) :: tuple
   defp to_tuple(%Xema.Schema{} = schema) do
     schema
