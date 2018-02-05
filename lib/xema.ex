@@ -99,7 +99,7 @@ defmodule Xema do
   @spec is_valid?(Xema.t(), any) :: boolean
   def is_valid?(schema, value), do: validate(schema, value) == :ok
 
-  @spec validate(Xema.t() | Xema.Schema.t(), any) :: Validator.result()
+  @spec validate(Xema.t() | Schema.t(), any) :: Validator.result()
   def validate(schema, value), do: Validator.validate(schema, value)
 
   @doc """

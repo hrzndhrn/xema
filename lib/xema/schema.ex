@@ -120,10 +120,10 @@ defmodule Xema.Schema do
     :unique_items
   ]
 
-  @spec new(keyword) :: Xema.Schema.t()
+  @spec new(keyword) :: Schema.t()
   def new(opts \\ []), do: struct(Xema.Schema, opts)
 
-  @spec to_map(Xema.Schema.t()) :: map
+  @spec to_map(Schema.t()) :: map
   def to_map(schema) do
     schema
     |> Map.from_struct()

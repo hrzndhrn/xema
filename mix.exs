@@ -9,10 +9,10 @@ defmodule Xema.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      elixirc_paths: elixirc_paths(Mix.env()),
-      test_coverage: [tool: ExCoveralls],
       description: description(),
       package: package(),
+      elixirc_paths: elixirc_paths(Mix.env()),
+      test_coverage: [tool: ExCoveralls],
       source_url: "https://github.com/hrzndhrn/xema",
       preferred_cli_env: [
         coveralls: :test,
