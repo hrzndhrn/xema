@@ -4,8 +4,8 @@ defmodule Xema.Validator do
   @type result :: :ok | {:error, map}
 
   @spec validate(Xema.t() | Xema.Schema.t(), any) :: result
-  def validate(%Xema{} = xema, value) do
-    validate(xema.content, value)
+  def validate(%{content: schema}, value) do
+    validate(schema, value)
   end
 
   def validate(%{type: :any} = schema, value) do
@@ -420,7 +420,7 @@ defmodule Xema.Validator do
   defp do_properties([{prop, schema} | props], map, errors) do
     with {:ok, value} <- get_value(map, prop),
          :ok <- do_property(schema, value) do
-      do_properties(props, Map.delete(map, prop), errors)
+      do_properties(props, delete_property(map, prop), errors)
     else
       {:error, reason} ->
         do_properties(
@@ -435,6 +435,21 @@ defmodule Xema.Validator do
   defp do_property(_schema, nil), do: :ok
 
   defp do_property(schema, value), do: Xema.validate(schema, value)
+
+  @spec delete_property(map, String.t | atom) :: map
+  defp delete_property(map, prop) when is_map(map) and is_atom(prop) do
+    case Map.has_key?(map, prop) do
+      true -> Map.delete(map, prop)
+      false -> Map.delete(map, Atom.to_string(prop))
+    end
+  end
+
+  defp delete_property(map, prop) when is_map(map) and is_binary(prop) do
+    case Map.has_key?(map, prop) do
+      true -> Map.delete(map, prop)
+      false -> Map.delete(map, String.to_existing_atom(prop))
+    end
+  end
 
   @spec get_value(map, String.t() | atom) :: any
   defp get_value(map, key) when is_atom(key) do
