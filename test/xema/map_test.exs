@@ -203,7 +203,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema without additional properties" do
+  describe "'map' schema without additional properties (atom properties)" do
     setup do
       %{
         schema:
@@ -217,6 +217,7 @@ defmodule Xema.MapTest do
 
     test "validate/2 with valid map", %{schema: schema} do
       assert validate(schema, %{foo: 44}) == :ok
+      assert validate(schema, %{"foo" => 44}) == :ok
     end
 
     test "validate/2 with additional property", %{schema: schema} do
@@ -234,6 +235,24 @@ defmodule Xema.MapTest do
                   add: %{additional_properties: false},
                   plus: %{additional_properties: false}
                 }}
+    end
+  end
+
+  describe "'map' schema without additional properties (string properties)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            properties: %{"foo" => :number},
+            additional_properties: false
+          )
+      }
+    end
+
+    test "validate/2 with valid map", %{schema: schema} do
+      assert validate(schema, %{"foo" => 44}) == :ok
+      assert validate(schema, %{foo: 44}) == :ok
     end
   end
 

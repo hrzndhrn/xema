@@ -211,7 +211,7 @@ defmodule Xema do
     |> Keyword.update(:one_of, nil, &schemas/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:properties, nil, &properties/1)
-    |> Keyword.update(:required, nil, &MapSet.new(&1))
+    |> Keyword.update(:required, nil, &MapSet.new/1)
   end
 
   @spec schemas(list) :: list
