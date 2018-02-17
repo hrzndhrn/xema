@@ -128,8 +128,6 @@ defmodule Xema do
   For nested schemas you can use `{:type, opts: ...}` like here.
 
   ## Examples
-      iex> import Xema, only: [is_valid?: 2, validate: 2]
-      Xema
       iex> schema = Xema.new :list, items: {:number, minimum: 2}
       %Xema{
         content: %Xema.Schema{
@@ -142,11 +140,11 @@ defmodule Xema do
           }
         }
       }
-      iex> validate(schema, [2, 3, 4])
+      iex> Xema.validate(schema, [2, 3, 4])
       :ok
-      iex> is_valid?(schema, [2, 3, 4])
+      iex> Xema.is_valid?(schema, [2, 3, 4])
       true
-      iex> validate(schema, [2, 3, 1])
+      iex> Xema.validate(schema, [2, 3, 1])
       {:error, [%{
           at: 2,
           error: %{value: 1, minimum: 2}
