@@ -436,7 +436,7 @@ defmodule Xema.Validator do
 
   defp do_property(schema, value), do: Xema.validate(schema, value)
 
-  @spec delete_property(map, String.t | atom) :: map
+  @spec delete_property(map, String.t() | atom) :: map
   defp delete_property(map, prop) when is_map(map) and is_atom(prop) do
     case Map.has_key?(map, prop) do
       true -> Map.delete(map, prop)
@@ -489,22 +489,46 @@ defmodule Xema.Validator do
   defp required(%{required: nil}, _map), do: :ok
 
   defp required(%{required: required}, map) do
-    props = map |> Map.keys() |> MapSet.new()
-
-    case MapSet.subset?(required, props) do
-      true ->
+    case Enum.filter(required, fn key -> !exist_required_key?(map, key) end) do
+      [] ->
         :ok
 
-      false ->
+      missing ->
         {
           :error,
-          required
-          |> MapSet.difference(props)
-          |> MapSet.to_list()
-          |> Enum.into(%{}, fn x -> {x, :required} end)
+          Enum.into(missing, %{}, fn key -> {key, :required} end)
         }
     end
   end
+
+  @spec exist_required_key?(map, String.t() | atom) :: boolean
+  defp exist_required_key?(map, key) do
+    Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
+  end
+
+  @spec toggle_key(String.t() | atom) :: atom | String.t()
+  defp toggle_key(key) when is_binary(key), do: to_existing_atom(key)
+
+  defp toggle_key(key) when is_atom(key), do: Atom.to_string(key)
+
+  # TODO: function for strict mode
+  # defp required(%{required: required}, map) do
+  #   props = map |> Map.keys() |> MapSet.new()
+  #
+  #   case MapSet.subset?(required, props) do
+  #     true ->
+  #       :ok
+  #
+  #     false ->
+  #       {
+  #         :error,
+  #         required
+  #         |> MapSet.difference(props)
+  #         |> MapSet.to_list()
+  #         |> Enum.into(%{}, fn x -> {x, :required} end)
+  #       }
+  #   end
+  # end
 
   @spec size(Xema.Schema.t(), map) :: result
   defp size(%{min_properties: nil, max_properties: nil}, _map), do: :ok
@@ -623,4 +647,11 @@ defmodule Xema.Validator do
   @spec update_nil(any, any) :: any
   defp update_nil(nil, b), do: b
   defp update_nil(a, _b), do: a
+
+  @spec to_existing_atom(String.t()) :: atom | nil
+  defp to_existing_atom(str) do
+    String.to_existing_atom(str)
+  catch
+    _ -> nil
+  end
 end

@@ -131,6 +131,21 @@ defmodule Xema.Schema do
     |> delete_nils()
   end
 
+  @spec update(keyword) :: keyword
+  defp update(opts), do: Keyword.update(opts, :required, nil, &required/1)
+
+  @spec required(MapSet.t() | nil) :: MapSet.t() | nil
+  defp required(nil), do: nil
+
+  defp required(opts),
+    do:
+      opts
+      |> Enum.map(fn
+        x when is_atom(x) -> Atom.to_string(x)
+        x -> x
+      end)
+      |> MapSet.new()
+
   @spec delete_as(map) :: map
   defp delete_as(%{type: type, as: type} = schema), do: Map.delete(schema, :as)
 
