@@ -299,12 +299,21 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword pattern_properties with a wrong key" do
+    test "keyword patter_properties with a invalid regex string" do
       expected =
-        "Expected a regular expression for key in pattern_properties, got :a."
+        ~s(Expected a regular expression for key in pattern_properties, got "(".)
 
       assert_raise SchemaError, expected, fn ->
-        Xema.new(:map, pattern_properties: %{a: :string})
+        Xema.new(:map, pattern_properties: %{"(" => :string})
+      end
+    end
+
+    test "keyword pattern_properties with a wrong key" do
+      expected =
+        "Expected a regular expression for key in pattern_properties, got 42."
+
+      assert_raise SchemaError, expected, fn ->
+        Xema.new(:map, pattern_properties: %{42 => :string})
       end
     end
   end

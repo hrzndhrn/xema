@@ -360,7 +360,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with pattern properties" do
+  describe "map schema with pattern properties" do
     setup do
       %{
         schema:
@@ -369,6 +369,62 @@ defmodule Xema.MapTest do
             pattern_properties: %{
               ~r/^s_/ => :string,
               ~r/^i_/ => :number
+            },
+            additional_properties: false
+          )
+      }
+    end
+
+    test "validate/2 with valid map", %{schema: schema} do
+      assert validate(schema, %{s_1: "foo", i_1: 42}) == :ok
+    end
+
+    test "validate/2 with invalid map", %{schema: schema} do
+      assert validate(schema, %{x_1: 44}) ==
+               {:error,
+                %{
+                  x_1: %{additional_properties: false}
+                }}
+    end
+  end
+
+  describe "map schema with pattern properties (string key)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            pattern_properties: %{
+              "^s_" => :string,
+              "^i_" => :number
+            },
+            additional_properties: false
+          )
+      }
+    end
+
+    test "validate/2 with valid map", %{schema: schema} do
+      assert validate(schema, %{s_1: "foo", i_1: 42}) == :ok
+    end
+
+    test "validate/2 with invalid map", %{schema: schema} do
+      assert validate(schema, %{x_1: 44}) ==
+               {:error,
+                %{
+                  x_1: %{additional_properties: false}
+                }}
+    end
+  end
+
+  describe "map schema with pattern properties (atom key)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            pattern_properties: %{
+              "^s_": :string,
+              "^i_": :number
             },
             additional_properties: false
           )

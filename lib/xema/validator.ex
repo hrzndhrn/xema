@@ -451,45 +451,11 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec get_value(map, String.t() | atom) :: any
-  defp get_value(map, key) when is_atom(key) do
-    do_get_value(map, to_string(key), key)
-  end
-
-  defp get_value(map, key) do
-    do_get_value(map, key, String.to_atom(key))
-  end
-
-  defp do_get_value(map, key_string, key_atom) do
-    case {Map.get(map, key_string), Map.get(map, key_atom)} do
-      {nil, nil} ->
-        {:ok, nil}
-
-      {nil, value} ->
-        {:ok, value}
-
-      {value, nil} ->
-        {:ok, value}
-
-      _ ->
-        {:error, :mixed_map}
-    end
-  end
-
-  @spec get_key(map, String.t() | atom) :: atom | String.t()
-  defp get_key(map, key) when is_atom(key) do
-    if Map.has_key?(map, key), do: key, else: to_string(key)
-  end
-
-  defp get_key(map, key) do
-    if Map.has_key?(map, key), do: key, else: String.to_existing_atom(key)
-  end
-
   @spec required(Xema.Schema.t(), map) :: result
   defp required(%{required: nil}, _map), do: :ok
 
   defp required(%{required: required}, map) do
-    case Enum.filter(required, fn key -> !exist_required_key?(map, key) end) do
+    case Enum.filter(required, fn key -> !has_key?(map, key) end) do
       [] ->
         :ok
 
@@ -500,16 +466,6 @@ defmodule Xema.Validator do
         }
     end
   end
-
-  @spec exist_required_key?(map, String.t() | atom) :: boolean
-  defp exist_required_key?(map, key) do
-    Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
-  end
-
-  @spec toggle_key(String.t() | atom) :: atom | String.t()
-  defp toggle_key(key) when is_binary(key), do: to_existing_atom(key)
-
-  defp toggle_key(key) when is_atom(key), do: Atom.to_string(key)
 
   # TODO: function for strict mode
   # defp required(%{required: required}, map) do
@@ -608,7 +564,7 @@ defmodule Xema.Validator do
   defp dependencies(%{dependencies: dependencies}, map) do
     dependencies
     |> Map.to_list()
-    |> Enum.filter(fn {key, _} -> Map.has_key?(map, key) end)
+    |> Enum.filter(fn {key, _} -> has_key?(map, key) end)
     |> do_dependencies(map)
   end
 
@@ -635,7 +591,7 @@ defmodule Xema.Validator do
   defp do_dependencies_list(_key, [], _map), do: :ok
 
   defp do_dependencies_list(key, [dependency | dependencies], map) do
-    case Map.has_key?(map, dependency) do
+    case has_key?(map, dependency) do
       true ->
         do_dependencies_list(key, dependencies, map)
 
@@ -644,9 +600,57 @@ defmodule Xema.Validator do
     end
   end
 
+  #
+  # helper functions
+  #
+
   @spec update_nil(any, any) :: any
   defp update_nil(nil, b), do: b
   defp update_nil(a, _b), do: a
+
+  @spec get_value(map, String.t() | atom) :: any
+  defp get_value(map, key) when is_atom(key) do
+    do_get_value(map, to_string(key), key)
+  end
+
+  defp get_value(map, key) do
+    do_get_value(map, key, String.to_atom(key))
+  end
+
+  defp do_get_value(map, key_string, key_atom) do
+    case {Map.get(map, key_string), Map.get(map, key_atom)} do
+      {nil, nil} ->
+        {:ok, nil}
+
+      {nil, value} ->
+        {:ok, value}
+
+      {value, nil} ->
+        {:ok, value}
+
+      _ ->
+        {:error, :mixed_map}
+    end
+  end
+
+  @spec get_key(map, String.t() | atom) :: atom | String.t()
+  defp get_key(map, key) when is_atom(key) do
+    if Map.has_key?(map, key), do: key, else: to_string(key)
+  end
+
+  defp get_key(map, key) do
+    if Map.has_key?(map, key), do: key, else: String.to_existing_atom(key)
+  end
+
+  @spec has_key?(map, String.t() | atom) :: boolean
+  defp has_key?(map, key) do
+    Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
+  end
+
+  @spec toggle_key(String.t() | atom) :: atom | String.t()
+  defp toggle_key(key) when is_binary(key), do: to_existing_atom(key)
+
+  defp toggle_key(key) when is_atom(key), do: Atom.to_string(key)
 
   @spec to_existing_atom(String.t()) :: atom | nil
   defp to_existing_atom(str) do

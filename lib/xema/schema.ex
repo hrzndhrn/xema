@@ -121,7 +121,7 @@ defmodule Xema.Schema do
   ]
 
   @spec new(keyword) :: Schema.t()
-  def new(opts \\ []), do: struct(Xema.Schema, opts)
+  def new(opts \\ []), do: struct(Xema.Schema, update(opts))
 
   @spec to_map(Schema.t()) :: map
   def to_map(schema) do
@@ -132,19 +132,25 @@ defmodule Xema.Schema do
   end
 
   @spec update(keyword) :: keyword
-  defp update(opts), do: Keyword.update(opts, :required, nil, &required/1)
+  defp update(opts),
+    do: Keyword.update(opts, :pattern_properties, nil, &pattern_properties/1)
 
-  @spec required(MapSet.t() | nil) :: MapSet.t() | nil
-  defp required(nil), do: nil
+  @spec pattern_properties(map) :: map
+  defp pattern_properties(nil), do: nil
 
-  defp required(opts),
-    do:
-      opts
-      |> Enum.map(fn
-        x when is_atom(x) -> Atom.to_string(x)
-        x -> x
-      end)
-      |> MapSet.new()
+  defp pattern_properties(map) do
+    for key_value <- map, into: %{}, do: pattern_property(key_value)
+  end
+
+  defp pattern_property({pattern, property}) when is_binary(pattern) do
+    {Regex.compile!(pattern), property}
+  end
+
+  defp pattern_property({pattern, property}) when is_atom(pattern) do
+    pattern_property({Atom.to_string(pattern), property})
+  end
+
+  defp pattern_property(key_value), do: key_value
 
   @spec delete_as(map) :: map
   defp delete_as(%{type: type, as: type} = schema), do: Map.delete(schema, :as)

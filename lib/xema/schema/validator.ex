@@ -478,6 +478,15 @@ defmodule Xema.Schema.Validator do
   end
 
   @spec is_regex(any) :: boolean
+  defp is_regex(value) when is_binary(value) do
+    case Regex.compile(value) do
+      {:ok, _} -> true
+      {:error, _} -> false
+    end
+  end
+
+  defp is_regex(value) when is_atom(value), do: is_regex(Atom.to_string(value))
+
   defp is_regex(value) when is_map(value),
     do: Map.has_key?(value, :__struct__) && value.__struct__ == Regex
 
