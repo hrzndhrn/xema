@@ -294,21 +294,17 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with required property (atom keys)" do
+  describe "map schema with required property (atom keys)" do
     setup do
       %{schema: Xema.new(:map, properties: %{foo: :number}, required: [:foo])}
     end
 
-    test "validate/2 with required property", %{schema: schema} do
+    test "validate/2 with required property (atom key)", %{schema: schema} do
       assert validate(schema, %{foo: 44}) == :ok
     end
 
-    test "validate/2 with invalid key", %{schema: schema} do
-      assert validate(schema, %{"foo" => 44}) ==
-               {:error,
-                %{
-                  foo: :required
-                }}
+    test "validate/2 with required property (string key)", %{schema: schema} do
+      assert validate(schema, %{"foo" => 44}) == :ok
     end
 
     test "validate/2 with missing key", %{schema: schema} do
@@ -320,7 +316,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with required properties (atom keys)" do
+  describe "map schema with required properties (atom keys)" do
     setup do
       %{
         schema:
@@ -342,7 +338,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with required property (string keys)" do
+  describe "map schema with required property (string keys)" do
     setup do
       %{schema: Xema.new(:map, properties: %{foo: :number}, required: ["foo"])}
     end
@@ -351,12 +347,8 @@ defmodule Xema.MapTest do
       assert validate(schema, %{"foo" => 44}) == :ok
     end
 
-    test "validate/2 with invalid key", %{schema: schema} do
-      assert validate(schema, %{foo: 44}) ==
-               {:error,
-                %{
-                  "foo" => :required
-                }}
+    test "validate/2 with required property (atom key)", %{schema: schema} do
+      assert validate(schema, %{foo: 44}) == :ok
     end
 
     test "validate/2 with missing key", %{schema: schema} do
