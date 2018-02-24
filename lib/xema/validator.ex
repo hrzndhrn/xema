@@ -22,7 +22,7 @@ defmodule Xema.Validator do
          :ok <- one_of(schema, value),
          :ok <- minimum(schema, value),
          :ok <- multiple_of(schema, value),
-         {:ok, value} <- properties(schema, value),
+         {:ok, _value} <- properties(schema, value),
          do: :ok
   end
 
@@ -437,7 +437,7 @@ defmodule Xema.Validator do
   @spec do_properties(list, map, map) :: result
   defp do_properties([], map, errors) when errors == %{}, do: {:ok, map}
 
-  defp do_properties([], _map, errors), do: {:error, errors}
+  defp do_properties([], _map, errors), do: {:error, %{properties: errors}}
 
   defp do_properties([{prop, schema} | props], map, errors) do
     with {:ok, value} <- get_value(map, prop),

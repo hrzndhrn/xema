@@ -466,12 +466,12 @@ iex> schema = Xema.new :map,
 iex> Xema.is_valid? schema, %{a: 5, b: "hello"}
 true
 iex> Xema.validate schema, %{a: 5, b: "ups"}
-{:error, %{
+{:error, %{properties: %{
   b: %{
     value: "ups",
     min_length: 5
   }
-}}
+}}}
 # Additinonal properties are allowed by default:
 iex> Xema.is_valid? schema, %{a: 5, b: "hello", add: :prop}
 true

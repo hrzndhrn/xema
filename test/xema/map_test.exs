@@ -70,14 +70,18 @@ defmodule Xema.MapTest do
       assert validate(schema, %{foo: "foo", bar: "bar"}) ==
                {:error,
                 %{
-                  foo: %{type: :number, value: "foo"}
+                  properties: %{
+                    foo: %{type: :number, value: "foo"}
+                  }
                 }}
 
       assert validate(schema, %{foo: "foo", bar: 2}) ==
                {:error,
                 %{
-                  foo: %{type: :number, value: "foo"},
-                  bar: %{type: :string, value: 2}
+                  properties: %{
+                    foo: %{type: :number, value: "foo"},
+                    bar: %{type: :string, value: 2}
+                  }
                 }}
     end
 
@@ -85,13 +89,15 @@ defmodule Xema.MapTest do
       assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) ==
                {:error,
                 %{
-                  "foo" => %{type: :number, value: "foo"}
+                  properties: %{
+                    "foo" => %{type: :number, value: "foo"}
+                  }
                 }}
     end
 
     test "validate/2 with mixed map", %{schema: schema} do
       assert validate(schema, %{"foo" => 1, foo: 2}) ==
-               {:error, %{foo: :mixed_map}}
+               {:error, %{properties: %{foo: :mixed_map}}}
     end
   end
 
@@ -118,7 +124,9 @@ defmodule Xema.MapTest do
       assert validate(schema, %{foo: "foo", bar: "bar"}) ==
                {:error,
                 %{
-                  foo: %{type: :number, value: "foo"}
+                  properties: %{
+                    foo: %{type: :number, value: "foo"}
+                  }
                 }}
     end
 
@@ -126,13 +134,15 @@ defmodule Xema.MapTest do
       assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) ==
                {:error,
                 %{
-                  "foo" => %{type: :number, value: "foo"}
+                  properties: %{
+                    "foo" => %{type: :number, value: "foo"}
+                  }
                 }}
     end
 
     test "validate/2 with mixed map", %{schema: schema} do
       assert validate(schema, %{"foo" => 1, foo: 2}) ==
-               {:error, %{"foo" => :mixed_map}}
+               {:error, %{properties: %{"foo" => :mixed_map}}}
     end
   end
 

@@ -136,7 +136,8 @@ defmodule Xema.AnyTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, %{foo: "foo"}) == {:error, %{foo: :not}}
+      assert validate(schema, %{foo: "foo"}) ==
+               {:error, %{properties: %{foo: :not}}}
     end
   end
 

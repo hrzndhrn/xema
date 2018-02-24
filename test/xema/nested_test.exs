@@ -50,14 +50,18 @@ defmodule Xema.NestedTest do
       error = {
         :error,
         %{
-          items: [
-            %{
-              at: 1,
-              error: %{
-                num: %{value: -2, minimum: 0}
+          properties: %{
+            items: [
+              %{
+                at: 1,
+                error: %{
+                  properties: %{
+                    num: %{value: -2, minimum: 0}
+                  }
+                }
               }
-            }
-          ]
+            ]
+          }
         }
       }
 
@@ -112,14 +116,18 @@ defmodule Xema.NestedTest do
       error = {
         :error,
         %{
-          items: [
-            %{
-              at: 1,
-              error: %{
-                num: %{value: -2, minimum: 0}
+          properties: %{
+            items: [
+              %{
+                at: 1,
+                error: %{
+                  properties: %{
+                    num: %{value: -2, minimum: 0}
+                  }
+                }
               }
-            }
-          ]
+            ]
+          }
         }
       }
 
