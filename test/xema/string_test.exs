@@ -38,7 +38,7 @@ defmodule Xema.StringTest do
     end
   end
 
-  describe "'string' schema with restricted length" do
+  describe "string schema with restricted length:" do
     setup do
       %{schema: Xema.new(:string, min_length: 3, max_length: 4)}
     end
@@ -57,7 +57,7 @@ defmodule Xema.StringTest do
     end
   end
 
-  describe "'string' schema with pattern" do
+  describe "string schema with a pattern:" do
     setup do
       %{schema: Xema.new(:string, pattern: ~r/^.+match.+$/)}
     end
@@ -72,7 +72,37 @@ defmodule Xema.StringTest do
     end
   end
 
-  describe "'string' schema with enum" do
+  describe "string schema with a string as pattern:" do
+    setup do
+      %{schema: Xema.new(:string, pattern: "^.+match.+$")}
+    end
+
+    test "validate/2 with a matching string", %{schema: schema} do
+      assert validate(schema, "a match a") == :ok
+    end
+
+    test "validate/2 with a none matching string", %{schema: schema} do
+      assert validate(schema, "a to a") ==
+               {:error, %{value: "a to a", pattern: ~r/^.+match.+$/}}
+    end
+  end
+
+  describe "string schema with an atom as pattern:" do
+    setup do
+      %{schema: Xema.new(:string, pattern: "^.+match.+$")}
+    end
+
+    test "validate/2 with a matching string", %{schema: schema} do
+      assert validate(schema, "a match a") == :ok
+    end
+
+    test "validate/2 with a none matching string", %{schema: schema} do
+      assert validate(schema, "a to a") ==
+               {:error, %{value: "a to a", pattern: ~r/^.+match.+$/}}
+    end
+  end
+
+  describe "string schema with enum:" do
     setup do
       %{schema: Xema.new(:string, enum: ["one", "two"])}
     end
