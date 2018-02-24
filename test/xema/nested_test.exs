@@ -52,9 +52,9 @@ defmodule Xema.NestedTest do
         %{
           properties: %{
             items: [
-              %{
-                at: 1,
-                error: %{
+              {
+                1,
+                %{
                   properties: %{
                     num: %{value: -2, minimum: 0}
                   }
@@ -118,9 +118,9 @@ defmodule Xema.NestedTest do
         %{
           properties: %{
             items: [
-              %{
-                at: 1,
-                error: %{
+              {
+                1,
+                %{
                   properties: %{
                     num: %{value: -2, minimum: 0}
                   }

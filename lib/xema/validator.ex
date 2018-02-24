@@ -113,7 +113,7 @@ defmodule Xema.Validator do
   defp types(%{type: list} = schema, value) do
     case Enum.find(list, :not_found, fn type -> is_type?(type, value) end) do
       :not_found -> {:error, %{type: schema.as, value: value}}
-      type -> {:ok, type}
+      found -> {:ok, found}
     end
   end
 
@@ -358,7 +358,7 @@ defmodule Xema.Validator do
         items_list(schema, list, at + 1, errors)
 
       {:error, reason} ->
-        items_list(schema, list, at + 1, [%{at: at, error: reason} | errors])
+        items_list(schema, list, at + 1, [{at, reason} | errors])
     end
   end
 

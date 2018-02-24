@@ -145,10 +145,7 @@ defmodule Xema do
       iex> Xema.is_valid?(schema, [2, 3, 4])
       true
       iex> Xema.validate(schema, [2, 3, 1])
-      {:error, [%{
-          at: 2,
-          error: %{value: 1, minimum: 2}
-      }]}
+      {:error, [{2, %{value: 1, minimum: 2}}]}
 
   """
 
@@ -180,7 +177,8 @@ defmodule Xema do
   defp schema(type, keywords \\ [])
 
   defp schema(list, opts) when is_list(list) do
-    Keyword.put(opts, :type, list)
+    opts
+    |> Keyword.put(:type, list)
     |> update()
     |> Schema.new()
   end

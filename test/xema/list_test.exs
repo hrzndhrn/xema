@@ -75,7 +75,7 @@ defmodule Xema.ListTest do
       expected =
         {:error,
          [
-           %{at: 2, error: %{type: :integer, value: "foo"}}
+           {2, %{type: :integer, value: "foo"}}
          ]}
 
       assert validate(schema, [1, 2, "foo"]) == expected
@@ -93,8 +93,8 @@ defmodule Xema.ListTest do
       expected = {
         :error,
         [
-          %{at: 0, error: %{type: :string, value: 1}},
-          %{at: 1, error: %{type: :string, value: 2}}
+          {0, %{type: :string, value: 1}},
+          {1, %{type: :string, value: 2}}
         ]
       }
 
