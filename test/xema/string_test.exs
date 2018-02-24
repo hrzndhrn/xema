@@ -89,7 +89,7 @@ defmodule Xema.StringTest do
 
   describe "string schema with an atom as pattern:" do
     setup do
-      %{schema: Xema.new(:string, pattern: "^.+match.+$")}
+      %{schema: Xema.new(:string, pattern: :"^.+match.+$")}
     end
 
     test "validate/2 with a matching string", %{schema: schema} do

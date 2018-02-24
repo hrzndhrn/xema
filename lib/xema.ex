@@ -159,11 +159,31 @@ defmodule Xema do
 
   def new({type, keywords}, []), do: new(type, keywords)
 
-  def new(tuple, keywords) when is_tuple(tuple),
-    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}")
+  def new(list, keywords) when is_list(list) do
+    case Enum.all?(list, fn type -> type in @schema_types end) do
+      true ->
+        list |> schema(keywords) |> create
 
-  @spec schema(schema_types | schema_keywords, keyword) :: Xema.Schema.t()
+      false ->
+        raise(
+          ArgumentError,
+          message: "Invalid type in argument list #{inspect(list)}."
+        )
+    end
+  end
+
+  def new(tuple, keywords) when is_tuple(tuple),
+    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
+
+  @spec schema(schema_types | schema_keywords | [schema_types], keyword) ::
+          Xema.Schema.t()
   defp schema(type, keywords \\ [])
+
+  defp schema(list, opts) when is_list(list) do
+    Keyword.put(opts, :type, list)
+    |> update()
+    |> Schema.new()
+  end
 
   for type <- @schema_types do
     def new(unquote(type), opts), do: unquote(type) |> schema(opts) |> create

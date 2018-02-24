@@ -14,7 +14,7 @@ defmodule XemaTest do
     end
 
     test "call with two arguments raised ArgumentError" do
-      assert_raise ArgumentError, "Invalid argument [maximum: 4]", fn ->
+      assert_raise ArgumentError, "Invalid argument [maximum: 4].", fn ->
         Xema.new({:any}, maximum: 4)
       end
     end

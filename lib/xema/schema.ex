@@ -133,13 +133,12 @@ defmodule Xema.Schema do
 
   @spec update(keyword) :: keyword
   defp update(opts),
-  do:
-  opts
-  |> Keyword.update(:pattern, nil, &pattern/1)
-  |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
+    do:
+      opts
+      |> Keyword.update(:pattern, nil, &pattern/1)
+      |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
 
-
-  @spec pattern(Regex.t | String.t | atom) :: Regex.t
+  @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
   defp pattern(string) when is_binary(string), do: Regex.compile!(string)
 
   defp pattern(atom) when is_atom(atom), do: pattern(Atom.to_string(atom))

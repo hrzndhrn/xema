@@ -8,6 +8,12 @@ defmodule Xema.Validator do
     validate(schema, value)
   end
 
+  def validate(%{type: list} = schema, value) when is_list(list) do
+    with {:ok, type} <- types(schema, value),
+         :ok <- validate(%{schema | type: type}, value),
+         do: :ok
+  end
+
   def validate(%{type: :any} = schema, value) do
     with :ok <- enum(schema, value),
          :ok <- do_not(schema, value),
@@ -16,6 +22,7 @@ defmodule Xema.Validator do
          :ok <- one_of(schema, value),
          :ok <- minimum(schema, value),
          :ok <- multiple_of(schema, value),
+         {:ok, value} <- properties(schema, value),
          do: :ok
   end
 
@@ -29,12 +36,10 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  def validate(%{type: nil} = type, value) do
-    case value == nil do
-      true -> :ok
-      false -> {:error, %{value: value, type: type.as}}
-    end
-  end
+  def validate(%{type: nil}, nil), do: :ok
+
+  def validate(%{type: nil} = schema, value),
+    do: {:error, %{value: value, type: schema.as}}
 
   def validate(%{type: :number} = schema, value),
     do: validate_number(schema, value)
@@ -86,14 +91,31 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  @spec type(Xema.Schema.t(), any) :: result
-  defp type(%{type: :string}, value) when is_binary(value), do: :ok
-  defp type(%{type: :number}, value) when is_number(value), do: :ok
-  defp type(%{type: :integer}, value) when is_integer(value), do: :ok
-  defp type(%{type: :float}, value) when is_float(value), do: :ok
-  defp type(%{type: :map}, value) when is_map(value), do: :ok
-  defp type(%{type: :list}, value) when is_list(value), do: :ok
-  defp type(type, value), do: {:error, %{type: type.as, value: value}}
+  @spec type(Xema.Schema.t() | atom, any) :: result
+  defp type(%{type: type} = schema, value) do
+    case is_type?(type, value) do
+      true -> :ok
+      false -> {:error, %{type: schema.as, value: value}}
+    end
+  end
+
+  @spec is_type?(atom, any) :: boolean
+  defp is_type?(:string, value), do: is_binary(value)
+  defp is_type?(:number, value), do: is_number(value)
+  defp is_type?(:integer, value), do: is_integer(value)
+  defp is_type?(:float, value), do: is_float(value)
+  defp is_type?(:map, value), do: is_map(value)
+  defp is_type?(:list, value), do: is_list(value)
+  defp is_type?(nil, nil), do: true
+  defp is_type?(_, _), do: false
+
+  @spec types([atom], any) :: {:ok, atom} | {:error, map}
+  defp types(%{type: list} = schema, value) do
+    case Enum.find(list, :not_found, fn type -> is_type?(type, value) end) do
+      :not_found -> {:error, %{type: schema.as, value: value}}
+      type -> {:ok, type}
+    end
+  end
 
   @spec enum(Xema.Schema.t(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok
