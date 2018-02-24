@@ -51,4 +51,22 @@ defmodule Xema.MultiTypeTest do
                 %{properties: %{foo: %{type: [:number, nil], value: "foo"}}}}
     end
   end
+
+  describe "keyword allow:" do
+    setup do
+      %{schema: Xema.new(:string, allow: nil)}
+    end
+
+    test "with a string", %{schema: schema} do
+      assert validate(schema, "string") == :ok
+    end
+
+    test "with nil", %{schema: schema} do
+      assert validate(schema, nil) == :ok
+    end
+
+    test "with a number", %{schema: schema} do
+      assert validate(schema, 42) == {:error, %{type: :string, value: 42}}
+    end
+  end
 end

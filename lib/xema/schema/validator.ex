@@ -11,6 +11,7 @@ defmodule Xema.Schema.Validator do
 
   @default_keys MapSet.new([
                   :all_of,
+                  :allow,
                   :any_of,
                   :as,
                   :description,

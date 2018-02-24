@@ -228,6 +228,7 @@ defmodule Xema do
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:properties, nil, &properties/1)
     |> Keyword.update(:required, nil, &MapSet.new/1)
+    |> update_allow()
   end
 
   @spec schemas(list) :: list
@@ -257,6 +258,19 @@ defmodule Xema do
   defp items(schemas) when is_list(schemas), do: schemas(schemas)
 
   defp items(items), do: items
+
+  defp update_allow(opts) do
+    case Keyword.get(opts, :allow, :undefined) do
+      :undefined ->
+        opts
+
+      value ->
+        Keyword.update!(opts, :type, fn
+          types when is_list(types) -> [value | types]
+          type -> [type, value]
+        end)
+    end
+  end
 
   #
   # to_string
