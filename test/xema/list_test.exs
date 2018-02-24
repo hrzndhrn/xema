@@ -137,33 +137,15 @@ defmodule Xema.ListTest do
 
     test "validate/2 with invalid values", %{schema: schema} do
       assert validate(schema, ["foo", "bar"]) ==
-               {:error,
-                [
-                  %{
-                    at: 1,
-                    error: %{type: :number, value: "bar"}
-                  }
-                ]}
+               {:error, [{1, %{type: :number, value: "bar"}}]}
 
       assert validate(schema, ["x", 33]) ==
-               {:error,
-                [
-                  %{
-                    at: 0,
-                    error: %{value: "x", min_length: 3}
-                  }
-                ]}
+               {:error, [{0, %{value: "x", min_length: 3}}]}
     end
 
     test "validate/2 with invalid value and additional item", %{schema: schema} do
       assert validate(schema, ["x", 33, 7]) ==
-               {:error,
-                [
-                  %{
-                    at: 0,
-                    error: %{value: "x", min_length: 3}
-                  }
-                ]}
+               {:error, [{0, %{value: "x", min_length: 3}}]}
     end
 
     test "validate/2 with additional item", %{schema: schema} do
@@ -192,7 +174,7 @@ defmodule Xema.ListTest do
 
     test "validate/2 with additional item", %{schema: schema} do
       assert validate(schema, ["foo", 42, "add"]) ==
-               {:error, [%{at: 2, additional_items: false}]}
+               {:error, [{2, %{additional_items: false}}]}
     end
   end
 
@@ -216,13 +198,7 @@ defmodule Xema.ListTest do
 
     test "validate/2 with invalid additional item", %{schema: schema} do
       assert validate(schema, [11, "twelve", 13]) ==
-               {:error,
-                [
-                  %{
-                    at: 2,
-                    error: %{type: :string, value: 13}
-                  }
-                ]}
+               {:error, [{2, %{type: :string, value: 13}}]}
     end
   end
 end

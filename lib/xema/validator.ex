@@ -372,7 +372,7 @@ defmodule Xema.Validator do
   defp items_tuple([], false, [_ | list], at, errors),
     do:
       items_tuple([], false, list, at + 1, [
-        %{additional_items: false, at: at} | errors
+        {at, %{additional_items: false}} | errors
       ])
 
   defp items_tuple([], true, _list, _at, []), do: :ok
@@ -386,9 +386,7 @@ defmodule Xema.Validator do
         items_tuple([], schema, list, at + 1, errors)
 
       {:error, reason} ->
-        items_tuple([], schema, list, at + 1, [
-          %{at: at, error: reason} | errors
-        ])
+        items_tuple([], schema, list, at + 1, [{at, reason} | errors])
     end
   end
 
@@ -405,7 +403,7 @@ defmodule Xema.Validator do
 
       {:error, reason} ->
         items_tuple(schemas, additional_items, list, at + 1, [
-          %{at: at, error: reason} | errors
+          {at, reason} | errors
         ])
     end
   end

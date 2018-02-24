@@ -295,7 +295,7 @@ true
 iex> Xema.validate schema, [1, "five"]
 {
   :error,
-  [%{at: 1, error: %{value: "five", min_length: 5}}]
+  [{1, %{value: "five", min_length: 5}}]
 }
 # It’s okay to not provide all of the items:
 iex> Xema.validate schema, [1]
@@ -328,11 +328,11 @@ iex> Xema.validate schema, [1]
 :ok
 # But, since additionalItems is false, we can’t provide extra items:
 iex> Xema.validate schema, [1, "hello", "foo"]
-{:error, [%{additional_items: false, at: 2}]}
+{:error, [{2, %{additional_items: false}}]}
 iex> Xema.validate schema, [1, "hello", "foo", "bar"]
 {:error, [
-  %{additional_items: false, at: 2},
-  %{additional_items: false, at: 3}
+  {2, %{additional_items: false}},
+  {3, %{additional_items: false}}
 ]}
 ```
 
@@ -353,10 +353,7 @@ iex> schema = Xema.new :list,
 iex> Xema.is_valid? schema, [1, "two", 3, 4]
 true
 iex> Xema.validate schema, [1, "two", 3, "four"]
-{:error, [%{
-  at: 3,
-  error: %{type: :integer, value: "four"}
-}]}
+{:error, [{3, %{type: :integer, value: "four"}}]}
 ```
 
 #### <a name="list_length"></a> Length
