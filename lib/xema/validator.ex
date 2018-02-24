@@ -553,9 +553,11 @@ defmodule Xema.Validator do
       false ->
         {
           :error,
+          %{properties:
           map
           |> Map.keys()
           |> Enum.into(%{}, fn x -> {x, %{additional_properties: false}} end)
+          }
         }
     end
   end

@@ -519,9 +519,9 @@ iex> schema = Xema.new :map,
 iex> Xema.validate schema, %{foo: "bar"}
 :ok
 iex> Xema.validate schema, %{foo: "bar", bar: "foo"}
-{:error, %{
+{:error, %{properties: %{
   bar: %{additional_properties: false}
-}}
+}}}
 ```
 
 `additional_properties` can also contain a schema to specify the type of
@@ -573,9 +573,9 @@ true
 iex> Xema.is_valid? schema, %{s_0: "foo", i_1: 6}
 true
 iex> Xema.validate schema, %{s_0: "foo", f_1: 6.6}
-{:error, %{
+{:error, %{properties: %{
   f_1: %{additional_properties: false}
-}}
+}}}
 ```
 
 #### <a name="map_size"></a> Size
