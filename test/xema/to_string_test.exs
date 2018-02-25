@@ -9,14 +9,14 @@ defmodule Xema.ToStringTest do
       xema = xema(schema)
 
       assert Xema.to_string(xema) == to_string(xema)
-      assert to_string(xema) == "xema(#{schema})"
+      assert to_string(xema) == "Xema.new(#{schema})"
     end
 
     test "with a simple any-schema with an id and as :bar" do
       schema = ~s(:any, as: :bar, id: "foo")
       xema = xema(schema)
 
-      assert to_string(xema) == "xema(#{schema})"
+      assert to_string(xema) == "Xema.new(#{schema})"
     end
 
     test "with an enum" do
@@ -24,28 +24,28 @@ defmodule Xema.ToStringTest do
       xema = xema(schema)
 
       # Shortcuts will expand to the equivalent schema.
-      assert to_string(xema) == "xema(:any, enum: [1, 2, 3])"
+      assert to_string(xema) == "Xema.new(:any, enum: [1, 2, 3])"
     end
 
     test "with a integer-schema and keywords" do
       schema = ~s(:integer, maximum: 2, minimum: 1)
       xema = xema(schema)
 
-      assert to_string(xema) == "xema(#{schema})"
+      assert to_string(xema) == "Xema.new(#{schema})"
     end
 
     test "with a list-schema and items as schemas" do
       schema = ~s(:list, items: [{:integer, minimum: 2}, :string])
       xema = xema(schema)
 
-      assert to_string(xema) == "xema(#{schema})"
+      assert to_string(xema) == "Xema.new(#{schema})"
     end
 
     test "with a map-schema and properties (keys: atoms)" do
       schema = ~s(:map, properties: %{a: {:integer, minimum: 2}, b: :string})
       xema = xema(schema)
 
-      assert to_string(xema) == "xema(#{schema})"
+      assert to_string(xema) == "Xema.new(#{schema})"
     end
 
     test "with a map-schema and properties (keys: strings)" do
@@ -54,7 +54,7 @@ defmodule Xema.ToStringTest do
 
       xema = xema(schema)
 
-      assert to_string(xema) == "xema(#{schema})"
+      assert to_string(xema) == "Xema.new(#{schema})"
     end
   end
 

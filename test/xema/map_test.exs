@@ -233,18 +233,22 @@ defmodule Xema.MapTest do
     test "validate/2 with additional property", %{schema: schema} do
       assert validate(schema, %{foo: 44, add: 1}) ==
                {:error,
-                %{properties: %{
-                  add: %{additional_properties: false}
-                }}}
+                %{
+                  properties: %{
+                    add: %{additional_properties: false}
+                  }
+                }}
     end
 
     test "validate/2 with additional properties", %{schema: schema} do
       assert validate(schema, %{foo: 44, add: 1, plus: 3}) ==
                {:error,
-                %{properties: %{
-                  add: %{additional_properties: false},
-                  plus: %{additional_properties: false}
-                }}}
+                %{
+                  properties: %{
+                    add: %{additional_properties: false},
+                    plus: %{additional_properties: false}
+                  }
+                }}
     end
   end
 
@@ -392,9 +396,11 @@ defmodule Xema.MapTest do
     test "validate/2 with invalid map", %{schema: schema} do
       assert validate(schema, %{x_1: 44}) ==
                {:error,
-                %{properties: %{
-                  x_1: %{additional_properties: false}
-                }}}
+                %{
+                  properties: %{
+                    x_1: %{additional_properties: false}
+                  }
+                }}
     end
   end
 
@@ -420,9 +426,11 @@ defmodule Xema.MapTest do
     test "validate/2 with invalid map", %{schema: schema} do
       assert validate(schema, %{x_1: 44}) ==
                {:error,
-                %{properties: %{
-                  x_1: %{additional_properties: false}
-                }}}
+                %{
+                  properties: %{
+                    x_1: %{additional_properties: false}
+                  }
+                }}
     end
   end
 
@@ -448,9 +456,11 @@ defmodule Xema.MapTest do
     test "validate/2 with invalid map", %{schema: schema} do
       assert validate(schema, %{x_1: 44}) ==
                {:error,
-                %{properties: %{
-                  x_1: %{additional_properties: false}
-                }}}
+                %{
+                  properties: %{
+                    x_1: %{additional_properties: false}
+                  }
+                }}
     end
   end
 

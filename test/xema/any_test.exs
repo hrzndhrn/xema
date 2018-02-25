@@ -1,5 +1,5 @@
 defmodule Xema.AnyTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2, validate: 2]
 

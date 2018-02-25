@@ -22,6 +22,7 @@ defmodule Xema.Validator do
          :ok <- one_of(schema, value),
          :ok <- minimum(schema, value),
          :ok <- multiple_of(schema, value),
+         :ok <- unique(schema, value),
          {:ok, _value} <- properties(schema, value),
          do: :ok
   end
@@ -553,10 +554,11 @@ defmodule Xema.Validator do
       false ->
         {
           :error,
-          %{properties:
-          map
-          |> Map.keys()
-          |> Enum.into(%{}, fn x -> {x, %{additional_properties: false}} end)
+          %{
+            properties:
+              map
+              |> Map.keys()
+              |> Enum.into(%{}, fn x -> {x, %{additional_properties: false}} end)
           }
         }
     end
