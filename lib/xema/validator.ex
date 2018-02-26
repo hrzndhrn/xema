@@ -8,6 +8,10 @@ defmodule Xema.Validator do
     validate(schema, value)
   end
 
+  def validate(%{type: true}, _value), do: :ok
+
+  def validate(%{type: false}, _value), do: {:error, %{type: false}}
+
   def validate(%{type: list} = schema, value) when is_list(list) do
     with {:ok, type} <- types(schema, value),
          :ok <- validate(%{schema | type: type}, value),

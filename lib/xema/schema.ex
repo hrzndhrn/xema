@@ -124,17 +124,18 @@ defmodule Xema.Schema do
   def new(opts \\ []), do: struct(Xema.Schema, update(opts))
 
   @spec to_map(Schema.t()) :: map
-  def to_map(schema) do
-    schema
-    |> Map.from_struct()
-    |> delete_as()
-    |> delete_nils()
-  end
+  def to_map(schema),
+    do:
+      schema
+      |> Map.from_struct()
+      |> delete_as()
+      |> delete_nils()
 
   @spec update(keyword) :: keyword
   defp update(opts),
     do:
       opts
+      |> Keyword.put_new(:as, opts[:type])
       |> Keyword.update(:pattern, nil, &pattern/1)
       |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
 
