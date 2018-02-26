@@ -22,6 +22,7 @@ defmodule Xema.Validator do
          :ok <- one_of(schema, value),
          :ok <- minimum(schema, value),
          :ok <- multiple_of(schema, value),
+         :ok <- dependencies(schema, value),
          :ok <- unique(schema, value),
          {:ok, _value} <- properties(schema, value),
          do: :ok
@@ -598,6 +599,16 @@ defmodule Xema.Validator do
   defp do_dependencies([{key, list} | tail], map) when is_list(list) do
     with :ok <- do_dependencies_list(key, list, map) do
       do_dependencies(tail, map)
+    end
+  end
+
+  defp do_dependencies([{_key, true} | tail], map),
+    do: do_dependencies(tail, map)
+
+  defp do_dependencies([{key, false} | tail], map) do
+    case Map.has_key?(map, key) do
+      true -> {:error, %{dependencies: %{key => false}}}
+      false -> do_dependencies(tail, map)
     end
   end
 

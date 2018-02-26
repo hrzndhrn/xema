@@ -464,7 +464,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with property names like keywords" do
+  describe "map schema with property names like keywords" do
     setup do
       %{
         schema:
@@ -481,6 +481,43 @@ defmodule Xema.MapTest do
 
     test "validate/2 with valid map", %{schema: schema} do
       assert validate(schema, %{map: 3, items: 5, properties: 4}) == :ok
+    end
+  end
+
+  describe "map schema with dependencies property" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            properties: %{
+              a: :number,
+              b: :number,
+              c: :number
+            },
+            dependencies: %{
+              b: :c
+            }
+          )
+      }
+    end
+
+    test "validate/2 without dependency", %{schema: schema} do
+      assert validate(schema, %{a: 1}) == :ok
+    end
+
+    test "validate/2 with dependency", %{schema: schema} do
+      assert validate(schema, %{a: 1, b: 2, c: 3}) == :ok
+    end
+
+    test "validate/2 with missing dependency", %{schema: schema} do
+      assert validate(schema, %{a: 1, b: 2}) ==
+               {:error,
+                %{
+                  dependencies: %{
+                    b: :c
+                  }
+                }}
     end
   end
 
