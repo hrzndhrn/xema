@@ -174,6 +174,10 @@ defmodule Xema do
   def new(tuple, keywords) when is_tuple(tuple),
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
 
+  def new(bool, [])
+      when is_boolean(bool),
+      do: bool |> schema([]) |> create()
+
   @spec schema(schema_types | schema_keywords | [schema_types], keyword) ::
           Xema.Schema.t()
   defp schema(type, keywords \\ [])
@@ -186,7 +190,7 @@ defmodule Xema do
   end
 
   for type <- @schema_types do
-    def new(unquote(type), opts), do: unquote(type) |> schema(opts) |> create
+    def new(unquote(type), opts), do: unquote(type) |> schema(opts) |> create()
 
     defp schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
 
@@ -209,6 +213,10 @@ defmodule Xema do
     defp schema(%{unquote(keyword) => opts}, []),
       do: schema(:any, [{unquote(keyword), opts}])
   end
+
+  defp schema(bool, [])
+       when is_boolean(bool),
+       do: Schema.new(type: bool)
 
   defp schema(type, _) do
     raise SchemaError,
