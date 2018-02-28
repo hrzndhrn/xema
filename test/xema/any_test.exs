@@ -225,7 +225,7 @@ defmodule Xema.AnyTest do
       assert validate(schema, nil) == :ok
     end
 
-    test "validate/2 with an imvalid value", %{schema: schema} do
+    test "validate/2 with an invalid value", %{schema: schema} do
       assert validate(schema, "foo") == {:error, :any_of}
     end
   end
@@ -402,11 +402,13 @@ defmodule Xema.AnyTest do
       assert validate(schema, %{foo: 1}) == :ok
     end
 
-    test "object with property having schema false is invalid", %{
-      schema: schema
-    } do
+    @tag :only
+    test """
+         object with property having schema false is invalid
+         """,
+         %{schema: schema} do
       assert validate(schema, %{bar: 2}) ==
-               {:error, %{dependencies: %{bar: false}}}
+               {:error, %{dependencies: %{bar: %{type: false}}}}
     end
   end
 end

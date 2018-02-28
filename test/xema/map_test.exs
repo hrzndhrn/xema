@@ -484,7 +484,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "map schema with dependencies property" do
+  describe "map schema with dependencies property: " do
     setup do
       %{
         schema:
@@ -551,7 +551,7 @@ defmodule Xema.MapTest do
       assert validate(schema, %{a: 1, b: 2}) ==
                {:error,
                 %{
-                  b: %{dependency: :c}
+                  dependencies: %{b: :c}
                 }}
     end
   end
@@ -589,10 +589,7 @@ defmodule Xema.MapTest do
 
     test "validate/2 with missing dependency", %{schema: schema} do
       assert validate(schema, %{a: 1, b: 2}) ==
-               {:error,
-                %{
-                  b: %{required: [:c]}
-                }}
+               {:error, %{dependencies: %{b: %{c: :required}}}}
     end
   end
 
@@ -623,7 +620,7 @@ defmodule Xema.MapTest do
 
     test "a penny", %{schema: schema} do
       assert validate(schema, %{penny: 1}) ==
-               {:error, %{penny: %{dependency: :pound}}}
+               {:error, %{dependencies: %{penny: :pound}}}
     end
   end
 end

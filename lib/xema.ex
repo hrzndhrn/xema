@@ -253,6 +253,7 @@ defmodule Xema do
     do:
       Enum.into(map, %{}, fn
         {key, dep} when is_list(dep) -> {key, dep}
+        {key, dep} when is_boolean(dep) -> {key, schema(dep)}
         {key, dep} when is_atom(dep) -> {key, [dep]}
         {key, dep} when is_binary(dep) -> {key, [dep]}
         {key, dep} -> {key, schema(dep)}
