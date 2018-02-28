@@ -69,8 +69,8 @@ defmodule Suite.Draft4.AnyOfTest do
       %{
         schema:
           Xema.new(:any_of, [
-            {:any, properties: %{"bar" => :integer}, required: ["bar"]},
-            {:any, properties: %{"foo" => :string}, required: ["foo"]}
+            {:any, properties: %{bar: :integer}, required: ["bar"]},
+            {:any, properties: %{foo: :string}, required: ["foo"]}
           ])
       }
     end
@@ -78,28 +78,28 @@ defmodule Suite.Draft4.AnyOfTest do
     @tag :draft4
     @tag :any_of
     test "first anyOf valid (complex)", %{schema: schema} do
-      data = %{"bar" => 2}
+      data = %{bar: 2}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :any_of
     test "second anyOf valid (complex)", %{schema: schema} do
-      data = %{"foo" => "baz"}
+      data = %{foo: "baz"}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :any_of
     test "both anyOf valid (complex)", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => "baz"}
+      data = %{bar: 2, foo: "baz"}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :any_of
     test "neither anyOf valid (complex)", %{schema: schema} do
-      data = %{"bar" => "quux", "foo" => 2}
+      data = %{bar: "quux", foo: 2}
       refute is_valid?(schema, data)
     end
   end

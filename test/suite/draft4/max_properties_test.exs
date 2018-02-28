@@ -11,21 +11,21 @@ defmodule Suite.Draft4.MaxPropertiesTest do
     @tag :draft4
     @tag :max_properties
     test "shorter is valid", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :max_properties
     test "exact length is valid", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1}
+      data = %{bar: 2, foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :max_properties
     test "too long is invalid", %{schema: schema} do
-      data = %{"bar" => 2, "baz" => 3, "foo" => 1}
+      data = %{bar: 2, baz: 3, foo: 1}
       refute is_valid?(schema, data)
     end
 

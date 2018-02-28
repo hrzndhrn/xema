@@ -7,25 +7,21 @@ defmodule Suite.Draft4.RequiredTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
-            properties: %{"bar" => :any, "foo" => :any},
-            required: ["foo"]
-          )
+          Xema.new(:any, properties: %{bar: :any, foo: :any}, required: ["foo"])
       }
     end
 
     @tag :draft4
     @tag :required
     test "present required property is valid", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :required
     test "non-present required property is invalid", %{schema: schema} do
-      data = %{"bar" => 1}
+      data = %{bar: 1}
       refute is_valid?(schema, data)
     end
 
@@ -53,7 +49,7 @@ defmodule Suite.Draft4.RequiredTest do
 
   describe "required default validation" do
     setup do
-      %{schema: Xema.new(:properties, %{"foo" => :any})}
+      %{schema: Xema.new(:properties, %{foo: :any})}
     end
 
     @tag :draft4

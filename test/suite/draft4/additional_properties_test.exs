@@ -11,7 +11,7 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
             :any,
             additional_properties: false,
             pattern_properties: %{"^v" => :any},
-            properties: %{"bar" => :any, "foo" => :any}
+            properties: %{bar: :any, foo: :any}
           )
       }
     end
@@ -19,14 +19,14 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
     @tag :draft4
     @tag :additional_properties
     test "no additional properties is valid", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :additional_properties
     test "an additional property is invalid", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1, "quux" => "boom"}
+      data = %{bar: 2, foo: 1, quux: "boom"}
       refute is_valid?(schema, data)
     end
 
@@ -54,7 +54,7 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
     @tag :draft4
     @tag :additional_properties
     test "patternProperties are not additional properties", %{schema: schema} do
-      data = %{"foo" => 1, "vroom" => 2}
+      data = %{foo: 1, vroom: 2}
       assert is_valid?(schema, data)
     end
   end
@@ -66,7 +66,7 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
           Xema.new(
             :any,
             additional_properties: :boolean,
-            properties: %{"bar" => :any, "foo" => :any}
+            properties: %{bar: :any, foo: :any}
           )
       }
     end
@@ -74,21 +74,21 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
     @tag :draft4
     @tag :additional_properties
     test "no additional properties is valid", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :additional_properties
     test "an additional valid property is valid", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1, "quux" => true}
+      data = %{bar: 2, foo: 1, quux: true}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :additional_properties
     test "an additional invalid property is invalid", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1, "quux" => 12}
+      data = %{bar: 2, foo: 1, quux: 12}
       refute is_valid?(schema, data)
     end
   end
@@ -101,27 +101,27 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
     @tag :draft4
     @tag :additional_properties
     test "an additional valid property is valid", %{schema: schema} do
-      data = %{"foo" => true}
+      data = %{foo: true}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :additional_properties
     test "an additional invalid property is invalid", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       refute is_valid?(schema, data)
     end
   end
 
   describe "additional_properties are allowed by default" do
     setup do
-      %{schema: Xema.new(:properties, %{"bar" => :any, "foo" => :any})}
+      %{schema: Xema.new(:properties, %{bar: :any, foo: :any})}
     end
 
     @tag :draft4
     @tag :additional_properties
     test "additional properties are allowed", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1, "quux" => true}
+      data = %{bar: 2, foo: 1, quux: true}
       assert is_valid?(schema, data)
     end
   end

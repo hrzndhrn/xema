@@ -32,36 +32,28 @@ defmodule Suite.Draft4.UniqueItemsTest do
     @tag :draft4
     @tag :unique_items
     test "unique array of objects is valid", %{schema: schema} do
-      data = [%{"foo" => "bar"}, %{"foo" => "baz"}]
+      data = [%{foo: "bar"}, %{foo: "baz"}]
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :unique_items
     test "non-unique array of objects is invalid", %{schema: schema} do
-      data = [%{"foo" => "bar"}, %{"foo" => "bar"}]
+      data = [%{foo: "bar"}, %{foo: "bar"}]
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :unique_items
     test "unique array of nested objects is valid", %{schema: schema} do
-      data = [
-        %{"foo" => %{"bar" => %{"baz" => true}}},
-        %{"foo" => %{"bar" => %{"baz" => false}}}
-      ]
-
+      data = [%{foo: %{bar: %{baz: true}}}, %{foo: %{bar: %{baz: false}}}]
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :unique_items
     test "non-unique array of nested objects is invalid", %{schema: schema} do
-      data = [
-        %{"foo" => %{"bar" => %{"baz" => true}}},
-        %{"foo" => %{"bar" => %{"baz" => true}}}
-      ]
-
+      data = [%{foo: %{bar: %{baz: true}}}, %{foo: %{bar: %{baz: true}}}]
       refute is_valid?(schema, data)
     end
 

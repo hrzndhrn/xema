@@ -5,13 +5,13 @@ defmodule Suite.Draft4.DefaultTest do
 
   describe "invalid type for default" do
     setup do
-      %{schema: Xema.new(:properties, %{"foo" => :integer})}
+      %{schema: Xema.new(:properties, %{foo: :integer})}
     end
 
     @tag :draft4
     @tag :default
     test "valid when property is specified", %{schema: schema} do
-      data = %{"foo" => 13}
+      data = %{foo: 13}
       assert is_valid?(schema, data)
     end
 
@@ -25,13 +25,13 @@ defmodule Suite.Draft4.DefaultTest do
 
   describe "invalid string value for default" do
     setup do
-      %{schema: Xema.new(:properties, %{"bar" => {:string, min_length: 4}})}
+      %{schema: Xema.new(:properties, %{bar: {:string, min_length: 4}})}
     end
 
     @tag :draft4
     @tag :default
     test "valid when property is specified", %{schema: schema} do
-      data = %{"bar" => "good"}
+      data = %{bar: "good"}
       assert is_valid?(schema, data)
     end
 

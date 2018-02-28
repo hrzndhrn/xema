@@ -83,7 +83,7 @@ defmodule Suite.Draft4.AdditionalItemsTest do
     @tag :draft4
     @tag :additional_items
     test "ignores non-arrays", %{schema: schema} do
-      data = %{"foo" => "bar"}
+      data = %{foo: "bar"}
       assert is_valid?(schema, data)
     end
   end

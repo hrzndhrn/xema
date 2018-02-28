@@ -25,7 +25,7 @@ defmodule Suite.Draft4.EnumTest do
 
   describe "heterogeneous enum validation" do
     setup do
-      %{schema: Xema.new(:enum, [6, "foo", [], true, %{"foo" => 12}])}
+      %{schema: Xema.new(:enum, [6, "foo", [], true, %{foo: 12}])}
     end
 
     @tag :draft4
@@ -45,7 +45,7 @@ defmodule Suite.Draft4.EnumTest do
     @tag :draft4
     @tag :enum
     test "objects are deep compared", %{schema: schema} do
-      data = %{"foo" => false}
+      data = %{foo: false}
       refute is_valid?(schema, data)
     end
   end
@@ -56,7 +56,7 @@ defmodule Suite.Draft4.EnumTest do
         schema:
           Xema.new(
             :map,
-            properties: %{"bar" => {:enum, ["bar"]}, "foo" => {:enum, ["foo"]}},
+            properties: %{bar: {:enum, ["bar"]}, foo: {:enum, ["foo"]}},
             required: ["bar"]
           )
       }
@@ -65,21 +65,21 @@ defmodule Suite.Draft4.EnumTest do
     @tag :draft4
     @tag :enum
     test "both properties are valid", %{schema: schema} do
-      data = %{"bar" => "bar", "foo" => "foo"}
+      data = %{bar: "bar", foo: "foo"}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :enum
     test "missing optional property is valid", %{schema: schema} do
-      data = %{"bar" => "bar"}
+      data = %{bar: "bar"}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :enum
     test "missing required property is invalid", %{schema: schema} do
-      data = %{"foo" => "foo"}
+      data = %{foo: "foo"}
       refute is_valid?(schema, data)
     end
 

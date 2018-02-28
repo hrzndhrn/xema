@@ -5,7 +5,7 @@ defmodule Suite.Draft4.DependenciesTest do
 
   describe "dependencies" do
     setup do
-      %{schema: Xema.new(:dependencies, %{"bar" => ["foo"]})}
+      %{schema: Xema.new(:dependencies, %{bar: ["foo"]})}
     end
 
     @tag :draft4
@@ -18,21 +18,21 @@ defmodule Suite.Draft4.DependenciesTest do
     @tag :draft4
     @tag :dependencies
     test "nondependant", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "with dependency", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1}
+      data = %{bar: 2, foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "missing dependency", %{schema: schema} do
-      data = %{"bar" => 2}
+      data = %{bar: 2}
       refute is_valid?(schema, data)
     end
 
@@ -60,7 +60,7 @@ defmodule Suite.Draft4.DependenciesTest do
 
   describe "multiple dependencies" do
     setup do
-      %{schema: Xema.new(:dependencies, %{"quux" => ["foo", "bar"]})}
+      %{schema: Xema.new(:dependencies, %{quux: ["foo", "bar"]})}
     end
 
     @tag :draft4
@@ -73,35 +73,35 @@ defmodule Suite.Draft4.DependenciesTest do
     @tag :draft4
     @tag :dependencies
     test "nondependants", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1}
+      data = %{bar: 2, foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "with dependencies", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1, "quux" => 3}
+      data = %{bar: 2, foo: 1, quux: 3}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "missing dependency", %{schema: schema} do
-      data = %{"foo" => 1, "quux" => 2}
+      data = %{foo: 1, quux: 2}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "missing other dependency", %{schema: schema} do
-      data = %{"bar" => 1, "quux" => 2}
+      data = %{bar: 1, quux: 2}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "missing both dependencies", %{schema: schema} do
-      data = %{"quux" => 1}
+      data = %{quux: 1}
       refute is_valid?(schema, data)
     end
   end
@@ -111,7 +111,7 @@ defmodule Suite.Draft4.DependenciesTest do
       %{
         schema:
           Xema.new(:dependencies, %{
-            "bar" => {:properties, %{"bar" => :integer, "foo" => :integer}}
+            bar: {:properties, %{bar: :integer, foo: :integer}}
           })
       }
     end
@@ -119,35 +119,35 @@ defmodule Suite.Draft4.DependenciesTest do
     @tag :draft4
     @tag :dependencies
     test "valid", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1}
+      data = %{bar: 2, foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "no dependency", %{schema: schema} do
-      data = %{"foo" => "quux"}
+      data = %{foo: "quux"}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "wrong type", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => "quux"}
+      data = %{bar: 2, foo: "quux"}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "wrong type other", %{schema: schema} do
-      data = %{"bar" => "quux", "foo" => 2}
+      data = %{bar: "quux", foo: 2}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :dependencies
     test "wrong type both", %{schema: schema} do
-      data = %{"bar" => "quux", "foo" => "quux"}
+      data = %{bar: "quux", foo: "quux"}
       refute is_valid?(schema, data)
     end
   end

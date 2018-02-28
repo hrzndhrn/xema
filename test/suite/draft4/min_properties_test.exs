@@ -11,14 +11,14 @@ defmodule Suite.Draft4.MinPropertiesTest do
     @tag :draft4
     @tag :min_properties
     test "longer is valid", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1}
+      data = %{bar: 2, foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :min_properties
     test "exact length is valid", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       assert is_valid?(schema, data)
     end
 

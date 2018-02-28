@@ -25,14 +25,14 @@ defmodule Suite.Draft4.ItemsTest do
     @tag :draft4
     @tag :items
     test "ignores non-arrays", %{schema: schema} do
-      data = %{"foo" => "bar"}
+      data = %{foo: "bar"}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :items
     test "JavaScript pseudo-array is valid", %{schema: schema} do
-      data = %{"0" => "invalid", "length" => 1}
+      data = %{"0": "invalid", length: 1}
       assert is_valid?(schema, data)
     end
   end
@@ -80,7 +80,7 @@ defmodule Suite.Draft4.ItemsTest do
     @tag :draft4
     @tag :items
     test "JavaScript pseudo-array is valid", %{schema: schema} do
-      data = %{"0" => "invalid", "1" => "valid", "length" => 2}
+      data = %{"0": "invalid", "1": "valid", length: 2}
       assert is_valid?(schema, data)
     end
   end

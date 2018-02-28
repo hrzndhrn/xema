@@ -52,7 +52,7 @@ defmodule Suite.Draft4.NotTest do
 
   describe "not more complex schema" do
     setup do
-      %{schema: Xema.new(:not, {:map, properties: %{"foo" => :string}})}
+      %{schema: Xema.new(:not, {:map, properties: %{foo: :string}})}
     end
 
     @tag :draft4
@@ -65,34 +65,34 @@ defmodule Suite.Draft4.NotTest do
     @tag :draft4
     @tag :not
     test "other match", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :not
     test "mismatch", %{schema: schema} do
-      data = %{"foo" => "bar"}
+      data = %{foo: "bar"}
       refute is_valid?(schema, data)
     end
   end
 
   describe "forbidden property" do
     setup do
-      %{schema: Xema.new(:properties, %{"foo" => {:not, :any}})}
+      %{schema: Xema.new(:properties, %{foo: {:not, :any}})}
     end
 
     @tag :draft4
     @tag :not
     test "property present", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => 1}
+      data = %{bar: 2, foo: 1}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :not
     test "property absent", %{schema: schema} do
-      data = %{"bar" => 1, "baz" => 2}
+      data = %{bar: 1, baz: 2}
       assert is_valid?(schema, data)
     end
   end

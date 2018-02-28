@@ -69,8 +69,8 @@ defmodule Suite.Draft4.OneOfTest do
       %{
         schema:
           Xema.new(:one_of, [
-            {:any, properties: %{"bar" => :integer}, required: ["bar"]},
-            {:any, properties: %{"foo" => :string}, required: ["foo"]}
+            {:any, properties: %{bar: :integer}, required: ["bar"]},
+            {:any, properties: %{foo: :string}, required: ["foo"]}
           ])
       }
     end
@@ -78,28 +78,28 @@ defmodule Suite.Draft4.OneOfTest do
     @tag :draft4
     @tag :one_of
     test "first oneOf valid (complex)", %{schema: schema} do
-      data = %{"bar" => 2}
+      data = %{bar: 2}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :one_of
     test "second oneOf valid (complex)", %{schema: schema} do
-      data = %{"foo" => "baz"}
+      data = %{foo: "baz"}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :one_of
     test "both oneOf valid (complex)", %{schema: schema} do
-      data = %{"bar" => 2, "foo" => "baz"}
+      data = %{bar: 2, foo: "baz"}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :one_of
     test "neither oneOf valid (complex)", %{schema: schema} do
-      data = %{"bar" => "quux", "foo" => 2}
+      data = %{bar: "quux", foo: 2}
       refute is_valid?(schema, data)
     end
   end

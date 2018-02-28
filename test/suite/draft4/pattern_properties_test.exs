@@ -11,28 +11,28 @@ defmodule Suite.Draft4.PatternPropertiesTest do
     @tag :draft4
     @tag :pattern_properties
     test "a single valid match is valid", %{schema: schema} do
-      data = %{"foo" => 1}
+      data = %{foo: 1}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "multiple valid matches is valid", %{schema: schema} do
-      data = %{"foo" => 1, "foooooo" => 2}
+      data = %{foo: 1, foooooo: 2}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "a single invalid match is invalid", %{schema: schema} do
-      data = %{"foo" => "bar", "fooooo" => 2}
+      data = %{foo: "bar", fooooo: 2}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "multiple invalid matches is invalid", %{schema: schema} do
-      data = %{"foo" => "bar", "foooooo" => "baz"}
+      data = %{foo: "bar", foooooo: "baz"}
       refute is_valid?(schema, data)
     end
 
@@ -72,42 +72,42 @@ defmodule Suite.Draft4.PatternPropertiesTest do
     @tag :draft4
     @tag :pattern_properties
     test "a single valid match is valid", %{schema: schema} do
-      data = %{"a" => 21}
+      data = %{a: 21}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "a simultaneous match is valid", %{schema: schema} do
-      data = %{"aaaa" => 18}
+      data = %{aaaa: 18}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "multiple matches is valid", %{schema: schema} do
-      data = %{"a" => 21, "aaaa" => 18}
+      data = %{a: 21, aaaa: 18}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "an invalid due to one is invalid", %{schema: schema} do
-      data = %{"a" => "bar"}
+      data = %{a: "bar"}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "an invalid due to the other is invalid", %{schema: schema} do
-      data = %{"aaaa" => 31}
+      data = %{aaaa: 31}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "an invalid due to both is invalid", %{schema: schema} do
-      data = %{"aaa" => "foo", "aaaa" => 31}
+      data = %{aaa: "foo", aaaa: 31}
       refute is_valid?(schema, data)
     end
   end
@@ -126,28 +126,28 @@ defmodule Suite.Draft4.PatternPropertiesTest do
     @tag :draft4
     @tag :pattern_properties
     test "non recognized members are ignored", %{schema: schema} do
-      data = %{"answer 1" => "42"}
+      data = %{"answer 1": "42"}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "recognized members are accounted for", %{schema: schema} do
-      data = %{"a31b" => nil}
+      data = %{a31b: nil}
       refute is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "regexes are case sensitive", %{schema: schema} do
-      data = %{"a_x_3" => 3}
+      data = %{a_x_3: 3}
       assert is_valid?(schema, data)
     end
 
     @tag :draft4
     @tag :pattern_properties
     test "regexes are case sensitive, 2", %{schema: schema} do
-      data = %{"a_X_3" => 3}
+      data = %{a_X_3: 3}
       refute is_valid?(schema, data)
     end
   end
