@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.PatternPropertiesTest do
+defmodule Draft4.PatternPropertiesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "pattern_properties validates properties matching a regex" do
+  describe "patternProperties validates properties matching a regex" do
     setup do
       %{schema: Xema.new(:pattern_properties, %{"f.*o" => :integer})}
     end
@@ -58,7 +58,7 @@ defmodule Suite.Draft4.PatternPropertiesTest do
     end
   end
 
-  describe "multiple simultaneous pattern_properties are validated" do
+  describe "multiple simultaneous patternProperties are validated" do
     setup do
       %{
         schema:
@@ -99,6 +99,7 @@ defmodule Suite.Draft4.PatternPropertiesTest do
 
     @tag :draft4
     @tag :pattern_properties
+    @tag :only
     test "an invalid due to the other is invalid", %{schema: schema} do
       data = %{aaaa: 31}
       refute is_valid?(schema, data)

@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.AnyOfTest do
+defmodule Draft4.AnyOfTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "any_of" do
+  describe "anyOf" do
     setup do
       %{schema: Xema.new(:any_of, [:integer, {:minimum, 2}])}
     end
@@ -37,7 +37,7 @@ defmodule Suite.Draft4.AnyOfTest do
     end
   end
 
-  describe "any_of with base schema" do
+  describe "anyOf with base schema" do
     setup do
       %{schema: Xema.new(:string, any_of: [{:max_length, 2}, {:min_length, 4}])}
     end
@@ -64,7 +64,7 @@ defmodule Suite.Draft4.AnyOfTest do
     end
   end
 
-  describe "any_of complex types" do
+  describe "anyOf complex types" do
     setup do
       %{
         schema:

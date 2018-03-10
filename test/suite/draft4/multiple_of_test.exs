@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.MultipleOfTest do
+defmodule Draft4.MultipleOfTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]

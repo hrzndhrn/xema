@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.MaximumTest do
+defmodule Draft4.MaximumTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -37,7 +37,7 @@ defmodule Suite.Draft4.MaximumTest do
     end
   end
 
-  describe "exclusive_maximum validation" do
+  describe "exclusiveMaximum validation" do
     setup do
       %{schema: Xema.new(:any, exclusive_maximum: true, maximum: 3.0)}
     end

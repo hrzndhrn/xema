@@ -325,7 +325,7 @@ defmodule Xema.MapTest do
       assert validate(schema, %{missing: 44}) ==
                {:error,
                 %{
-                  foo: :required
+                  required: [:foo]
                 }}
     end
   end
@@ -346,8 +346,7 @@ defmodule Xema.MapTest do
       assert validate(schema, %{b: 3, d: 8}) ==
                {:error,
                 %{
-                  a: :required,
-                  c: :required
+                  required: [:a, :c]
                 }}
     end
   end
@@ -369,7 +368,7 @@ defmodule Xema.MapTest do
       assert validate(schema, %{missing: 44}) ==
                {:error,
                 %{
-                  "foo" => :required
+                  required: ["foo"]
                 }}
     end
   end
@@ -589,7 +588,7 @@ defmodule Xema.MapTest do
 
     test "validate/2 with missing dependency", %{schema: schema} do
       assert validate(schema, %{a: 1, b: 2}) ==
-               {:error, %{dependencies: %{b: %{c: :required}}}}
+               {:error, %{dependencies: %{b: %{required: [:c]}}}}
     end
   end
 

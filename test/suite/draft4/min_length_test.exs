@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.MinLengthTest do
+defmodule Draft4.MinLengthTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "min_length validation" do
+  describe "minLength validation" do
     setup do
       %{schema: Xema.new(:min_length, 2)}
     end

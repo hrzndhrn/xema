@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.MinItemsTest do
+defmodule Draft4.MinItemsTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "min_items validation" do
+  describe "minItems validation" do
     setup do
       %{schema: Xema.new(:min_items, 1)}
     end

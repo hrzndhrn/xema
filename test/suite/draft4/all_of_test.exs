@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.AllOfTest do
+defmodule Draft4.AllOfTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "all_of" do
+  describe "allOf" do
     setup do
       %{
         schema:
@@ -43,7 +43,7 @@ defmodule Suite.Draft4.AllOfTest do
     end
   end
 
-  describe "all_of with base schema" do
+  describe "allOf with base schema" do
     setup do
       %{
         schema:
@@ -95,7 +95,7 @@ defmodule Suite.Draft4.AllOfTest do
     end
   end
 
-  describe "all_of simple types" do
+  describe "allOf simple types" do
     setup do
       %{schema: Xema.new(:all_of, [{:maximum, 30}, {:minimum, 20}])}
     end

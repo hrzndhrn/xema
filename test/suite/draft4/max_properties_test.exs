@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.MaxPropertiesTest do
+defmodule Draft4.MaxPropertiesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "max_properties validation" do
+  describe "maxProperties validation" do
     setup do
       %{schema: Xema.new(:max_properties, 2)}
     end

@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.OneOfTest do
+defmodule Draft4.OneOfTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "one_of" do
+  describe "oneOf" do
     setup do
       %{schema: Xema.new(:one_of, [:integer, {:minimum, 2}])}
     end
@@ -37,7 +37,7 @@ defmodule Suite.Draft4.OneOfTest do
     end
   end
 
-  describe "one_of with base schema" do
+  describe "oneOf with base schema" do
     setup do
       %{schema: Xema.new(:string, one_of: [{:min_length, 2}, {:max_length, 4}])}
     end
@@ -64,7 +64,7 @@ defmodule Suite.Draft4.OneOfTest do
     end
   end
 
-  describe "one_of complex types" do
+  describe "oneOf complex types" do
     setup do
       %{
         schema:

@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.MinimumTest do
+defmodule Draft4.MinimumTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -37,7 +37,7 @@ defmodule Suite.Draft4.MinimumTest do
     end
   end
 
-  describe "exclusive_minimum validation" do
+  describe "exclusiveMinimum validation" do
     setup do
       %{schema: Xema.new(:any, exclusive_minimum: true, minimum: 1.1)}
     end

@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.EnumTest do
+defmodule Draft4.EnumTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]

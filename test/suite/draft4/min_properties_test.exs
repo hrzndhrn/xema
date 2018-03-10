@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.MinPropertiesTest do
+defmodule Draft4.MinPropertiesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "min_properties validation" do
+  describe "minProperties validation" do
     setup do
       %{schema: Xema.new(:min_properties, 1)}
     end

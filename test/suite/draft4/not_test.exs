@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.NotTest do
+defmodule Draft4.NotTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -25,7 +25,7 @@ defmodule Suite.Draft4.NotTest do
 
   describe "not multiple types" do
     setup do
-      %{schema: Xema.new(:not, nil)}
+      %{schema: Xema.new(:not, [:integer, :boolean])}
     end
 
     @tag :draft4

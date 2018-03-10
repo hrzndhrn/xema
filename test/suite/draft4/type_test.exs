@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.TypeTest do
+defmodule Draft4.TypeTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -365,7 +365,7 @@ defmodule Suite.Draft4.TypeTest do
 
   describe "multiple types can be specified in an array" do
     setup do
-      %{schema: Xema.new(nil)}
+      %{schema: Xema.new([:integer, :string])}
     end
 
     @tag :draft4

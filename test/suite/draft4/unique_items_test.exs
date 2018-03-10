@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.UniqueItemsTest do
+defmodule Draft4.UniqueItemsTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "unique_items validation" do
+  describe "uniqueItems validation" do
     setup do
       %{schema: Xema.new(:unique_items, true)}
     end

@@ -75,11 +75,11 @@ defmodule Xema.ToStringTest do
     end
 
     test "with a pattern" do
-      schema = ~s(:pattern, "^a*$")
+      assert_to_string(~s(:pattern, "^a*$"))
+    end
 
-      xema = xema(schema)
-
-      assert to_string(xema) == "Xema.new(#{schema})"
+    test "multiple types" do
+      assert_to_string(~s([:integer, :string]))
     end
   end
 
@@ -90,6 +90,10 @@ defmodule Xema.ToStringTest do
 
       assert Xema.to_string(xema, format: :data) == schema
     end
+  end
+
+  defp assert_to_string(str) do
+    assert str |> xema() |> Xema.to_string() == "Xema.new(#{str})"
   end
 
   defp xema(str) do

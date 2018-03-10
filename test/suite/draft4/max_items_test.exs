@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.MaxItemsTest do
+defmodule Draft4.MaxItemsTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "max_items validation" do
+  describe "maxItems validation" do
     setup do
       %{schema: Xema.new(:max_items, 2)}
     end

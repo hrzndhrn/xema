@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.AdditionalPropertiesTest do
+defmodule Draft4.AdditionalPropertiesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "additional_properties being false does not allow other properties" do
+  describe "additionalProperties being false does not allow other properties" do
     setup do
       %{
         schema:
@@ -59,7 +59,7 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
     end
   end
 
-  describe "additional_properties allows a schema which should validate" do
+  describe "additionalProperties allows a schema which should validate" do
     setup do
       %{
         schema:
@@ -93,7 +93,7 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
     end
   end
 
-  describe "additional_properties can exist by itself" do
+  describe "additionalProperties can exist by itself" do
     setup do
       %{schema: Xema.new(:additional_properties, :boolean)}
     end
@@ -113,7 +113,7 @@ defmodule Suite.Draft4.AdditionalPropertiesTest do
     end
   end
 
-  describe "additional_properties are allowed by default" do
+  describe "additionalProperties are allowed by default" do
     setup do
       %{schema: Xema.new(:properties, %{bar: :any, foo: :any})}
     end

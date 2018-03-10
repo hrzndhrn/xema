@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.MaxLengthTest do
+defmodule Draft4.MaxLengthTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "max_length validation" do
+  describe "maxLength validation" do
     setup do
       %{schema: Xema.new(:max_length, 2)}
     end

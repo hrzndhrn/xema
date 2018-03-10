@@ -1,9 +1,9 @@
-defmodule Suite.Draft4.AdditionalItemsTest do
+defmodule Draft4.AdditionalItemsTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
 
-  describe "additional_items as schema" do
+  describe "additionalItems as schema" do
     setup do
       %{schema: Xema.new(:any, additional_items: :integer, items: [:any])}
     end
@@ -23,7 +23,7 @@ defmodule Suite.Draft4.AdditionalItemsTest do
     end
   end
 
-  describe "items is schema, no additional_items" do
+  describe "items is schema, no additionalItems" do
     setup do
       %{schema: Xema.new(:any, additional_items: false, items: :any)}
     end
@@ -36,7 +36,7 @@ defmodule Suite.Draft4.AdditionalItemsTest do
     end
   end
 
-  describe "array of items with no additional_items" do
+  describe "array of items with no additionalItems" do
     setup do
       %{
         schema:
@@ -66,7 +66,7 @@ defmodule Suite.Draft4.AdditionalItemsTest do
     end
   end
 
-  describe "additional_items as false without items" do
+  describe "additionalItems as false without items" do
     setup do
       %{schema: Xema.new(:additional_items, false)}
     end
@@ -88,7 +88,7 @@ defmodule Suite.Draft4.AdditionalItemsTest do
     end
   end
 
-  describe "additional_items are allowed by default" do
+  describe "additionalItems are allowed by default" do
     setup do
       %{schema: Xema.new(:items, [:integer])}
     end

@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.PropertiesTest do
+defmodule Draft4.PropertiesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -51,7 +51,7 @@ defmodule Suite.Draft4.PropertiesTest do
     end
   end
 
-  describe "properties, pattern_properties, additional_properties interaction" do
+  describe "properties, patternProperties, additionalProperties interaction" do
     setup do
       %{
         schema:

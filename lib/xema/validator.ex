@@ -3,7 +3,7 @@ defmodule Xema.Validator do
 
   @type result :: :ok | {:error, map}
 
-  @types [:boolean, :string, :integer, :float, :number, :list, :map, nil]
+  @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
 
   @spec validate(Xema.t() | Xema.Schema.t(), any) :: result
   def validate(%{content: schema}, value) do
@@ -96,8 +96,9 @@ defmodule Xema.Validator do
          :ok <- keys(schema, value),
          :ok <- required(schema, value),
          :ok <- dependencies(schema, value),
-         {:ok, value} <- properties(schema, value),
-         {:ok, value} <- patterns(schema, value),
+         {:ok, patts_rest} <- patterns(schema, value),
+         {:ok, props_rest} <- properties(schema, value),
+         value <- intersection(props_rest, patts_rest),
          :ok <- additionals(schema, value),
          do: :ok
   end
@@ -124,6 +125,8 @@ defmodule Xema.Validator do
          do: :ok
   end
 
+  defp validate(:atom, _, _), do: :ok
+
   defp get_type(value),
     do: Enum.find(@types, fn type -> is_type?(type, value) end)
 
@@ -137,6 +140,7 @@ defmodule Xema.Validator do
 
   @spec is_type?(atom, any) :: boolean
   defp is_type?(:any, _value), do: true
+  defp is_type?(:atom, value), do: is_atom(value)
   defp is_type?(:string, value), do: is_binary(value)
   defp is_type?(:number, value), do: is_number(value)
   defp is_type?(:integer, value), do: is_integer(value)
@@ -476,10 +480,18 @@ defmodule Xema.Validator do
   defp do_properties([], _map, errors), do: {:error, %{properties: errors}}
 
   defp do_properties([{prop, schema} | props], map, errors) do
-    with {:ok, value} <- get_value(map, prop),
-         :ok <- do_property(schema, value) do
-      do_properties(props, delete_property(map, prop), errors)
+    with true <- has_key?(map, prop),
+         {:ok, value} <- get_value(map, prop),
+         :ok <- Xema.validate(schema, value) do
+      case has_key?(props, prop) do
+        true -> do_properties(props, map, errors)
+        false -> do_properties(props, delete_property(map, prop), errors)
+      end
     else
+      # The property is not in the map.
+      false ->
+        do_properties(props, delete_property(map, prop), errors)
+
       {:error, reason} ->
         do_properties(
           props,
@@ -488,11 +500,6 @@ defmodule Xema.Validator do
         )
     end
   end
-
-  @spec do_property(Xema.Schema.t(), any) :: result
-  defp do_property(_schema, nil), do: :ok
-
-  defp do_property(schema, value), do: Xema.validate(schema, value)
 
   @spec delete_property(map, String.t() | atom) :: map
   defp delete_property(map, prop) when is_map(map) and is_atom(prop) do
@@ -520,7 +527,8 @@ defmodule Xema.Validator do
       missing ->
         {
           :error,
-          Enum.into(missing, %{}, fn key -> {key, :required} end)
+          %{required: missing}
+          # Enum.into(missing, %{}, fn key -> {:required, key} end)
         }
     end
   end
@@ -714,8 +722,11 @@ defmodule Xema.Validator do
   end
 
   @spec has_key?(map, String.t() | atom) :: boolean
-  defp has_key?(map, key) do
-    Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
+  defp has_key?(map, key) when is_map(map),
+    do: Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
+
+  defp has_key?(list, key) when is_list(list) do
+    Enum.any?(list, fn {k, _} -> k == key end)
   end
 
   @spec toggle_key(String.t() | atom) :: atom | String.t()
@@ -729,4 +740,14 @@ defmodule Xema.Validator do
   catch
     _ -> nil
   end
+
+  @spec intersection(map, map) :: map
+  defp intersection(a, b),
+    do:
+      for(
+        key <- Map.keys(a),
+        true == Map.has_key?(b, key),
+        into: %{},
+        do: {key, Map.get(b, key)}
+      )
 end

@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.DependenciesTest do
+defmodule Draft4.DependenciesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]

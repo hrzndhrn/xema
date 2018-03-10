@@ -1,4 +1,4 @@
-defmodule Suite.Draft4.Optional.ZeroTerminatedFloatsTest do
+defmodule Draft4.Optional.ZeroTerminatedFloatsTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
