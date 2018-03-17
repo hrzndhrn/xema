@@ -1,6 +1,8 @@
 defmodule Xema.Validator do
   @moduledoc false
 
+  use Xema.Format
+
   @type result :: :ok | {:error, map}
 
   @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
@@ -74,6 +76,7 @@ defmodule Xema.Validator do
          :ok <- min_length(schema, length, value),
          :ok <- max_length(schema, length, value),
          :ok <- pattern(schema, value),
+         :ok <- format(schema, value),
          :ok <- enum(schema, value),
          do: :ok
   end
@@ -678,6 +681,18 @@ defmodule Xema.Validator do
         {:error, %{dependencies: %{key => dependency}}}
     end
   end
+
+  # TODO: spec and doc
+  defp format(%{format: nil}, _str), do: :ok
+
+  defp format(%{format: fmt}, str) when Format.available?(fmt) do
+    case Format.is?(fmt, str) do
+      true -> :ok
+      false -> {:error, %{format: fmt, value: str}}
+    end
+  end
+
+  defp format(_, _str), do: :ok
 
   #
   # helper functions

@@ -48,6 +48,7 @@ defmodule Xema do
           | :enum
           | :exclusive_maximum
           | :exclusive_minimum
+          | :format
           | :id
           | :items
           | :keys
@@ -77,6 +78,7 @@ defmodule Xema do
     :enum,
     :exclusive_maximum,
     :exclusive_minimum,
+    :format,
     :id,
     :items,
     :keys,

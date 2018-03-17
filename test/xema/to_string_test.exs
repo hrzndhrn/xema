@@ -81,6 +81,10 @@ defmodule Xema.ToStringTest do
     test "multiple types" do
       assert_to_string(~s([:integer, :string]))
     end
+
+    test "format" do
+      assert_to_string(~s(:format, :email))
+    end
   end
 
   describe "Xema.to_string format :data" do

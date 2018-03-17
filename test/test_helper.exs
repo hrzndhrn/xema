@@ -1,1 +1,1 @@
-ExUnit.start(exclude: [:format])
+ExUnit.start(exclude: [])
