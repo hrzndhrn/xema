@@ -649,15 +649,15 @@ defmodule Xema.Validator do
     end
   end
 
-  defp do_dependencies([{_key, true} | tail], map),
-    do: do_dependencies(tail, map)
-
-  defp do_dependencies([{key, false} | tail], map) do
-    case Map.has_key?(map, key) do
-      true -> {:error, %{dependencies: %{key => false}}}
-      false -> do_dependencies(tail, map)
-    end
-  end
+  # defp do_dependencies([{_key, true} | tail], map),
+  #  do: do_dependencies(tail, map)
+  #
+  # defp do_dependencies([{key, false} | tail], map) do
+  #  case Map.has_key?(map, key) do
+  #    true -> {:error, %{dependencies: %{key => false}}}
+  #    false -> do_dependencies(tail, map)
+  #  end
+  # end
 
   defp do_dependencies([{key, schema} | tail], map) do
     case Xema.validate(schema, map) do
@@ -685,7 +685,7 @@ defmodule Xema.Validator do
   # TODO: spec and doc
   defp format(%{format: nil}, _str), do: :ok
 
-  defp format(%{format: fmt}, str) when Format.available?(fmt) do
+  defp format(%{format: fmt}, str) when Format.supports(fmt) do
     case Format.is?(fmt, str) do
       true -> :ok
       false -> {:error, %{format: fmt, value: str}}

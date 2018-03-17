@@ -1,5 +1,7 @@
 defmodule Xema.Format do
-  @moduledoc false
+  @moduledoc """
+  TODO: add docs
+  """
 
   @formats [:date_time, :email, :hostname, :ipv4, :ipv6, :uri]
 
@@ -10,7 +12,7 @@ defmodule Xema.Format do
     end
   end
 
-  defguard available?(fmt) when fmt in @formats
+  defguard supports(fmt) when fmt in @formats
 
   @spec is?(atom, any) :: boolean
   for fmt <- @formats do
@@ -160,8 +162,10 @@ defmodule Xema.Format do
 
   def is_uri?(%URI{scheme: "mailto", path: path}), do: is_email?(path)
 
+  # credo:disable-for-next-line
   def is_uri?(%URI{} = uri) do
     (is_nil(uri.host) || is_host?(uri.host)) &&
+      (is_nil(uri.userinfo) || is_uri_userinfo?(uri.userinfo)) &&
       (is_nil(uri.path) || is_uri_path?(uri.path)) &&
       (is_nil(uri.query) || is_uri_query?(uri.query)) &&
       (is_nil(uri.fragment) || is_uri_fragment?(uri.fragment))
@@ -174,56 +178,63 @@ defmodule Xema.Format do
 
   def is_host?(_), do: false
 
+  @spec is_uri_userinfo?(any) :: boolean
+  def is_uri_userinfo?(str) when is_binary(str) do
+    regex = ~r/
+      (?(DEFINE)
+        (?<pct_encoded> %[[:xdigit:]][[:xdigit:]] )
+        (?<chars>  [-._~[:alnum:]!$&'()*+,;=:] )
+      )
+      ^(?:(?&chars)|(?&pct_encoded))*$
+    /x
+
+    Regex.match?(regex, str)
+  end
+
+  def is_uri_userinfo?(_), do: false
+
   @spec is_uri_path?(any) :: boolean
   def is_uri_path?(str) when is_binary(str) do
-    # ; RFC-3086 - Uniform Resource Identifier (URI): Generic Syntax
-    #
-    # path          = path-abempty    ; begins with "/" or is empty
-    #               / path-absolute   ; begins with "/" but not "//"
-    #               / path-noscheme   ; begins with a non-colon segment
-    #               / path-rootless   ; begins with a segment
-    #               / path-empty      ; zero characters
-    #
-    # path-abempty  = *( "/" segment )
-    # path-absolute = "/" [ segment-nz *( "/" segment ) ]
-    # path-noscheme = segment-nz-nc *( "/" segment )
-    # path-rootless = segment-nz *( "/" segment )
-    # path-empty    = 0<pchar>
-    # segment       = *pchar
-    # segment-nz    = 1*pchar
-    # segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
-    #               ; non-zero-length segment without any colon ":"
-    #
-    # pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
-    # pct-encoded   = "%" HEXDIG HEXDIG
-    # sub-delims    = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";"
-    #               / "="
-    # unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
-    #
-    # ; RFC-2234 - Augmented BNF for Syntax Specifications: ABNF
-    #
-    # ALPHA         =  %x41-5A / %x61-7A   ; A-Z / a-z
-    # DIGIT         = %x30-39              ; 0-9
-    # HEXDIG        =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
-    # TODO
-    true
+    regex = ~r/
+      (?(DEFINE)
+        (?<unreserved>  [-._~[:alnum:]] )
+        (?<sub_delims>  [!$&'()*+,;=] )
+        (?<pct_encoded> %[[:xdigit:]][[:xdigit:]] )
+        (?<pchar>       @|(?&unreserved)|(?&pct_encoded)|(?&sub_delims) )
+        (?<seg_nz_nc>   (?&pchar)+ )
+        (?<seg_nz>      (?::|(?&pchar))+ )
+        (?<seg>         (?::|(?&pchar))* )
+        (?<rootless>    (?&seg_nz)(?:\/(?&seg))* )
+        (?<noscheme>    (?&seg_nz_nc)(?:\/(?&seg)*) )
+        (?<absolute>    \/(?:(?&seg_nz)(?:\/(?&seg))*)? )
+        (?<abempty>     (?:\/(?&seg))* )
+      )
+      ^(?:(?&rootless)|(?&noscheme)|(?&absolute)|(?&abempty))$
+    /x
+
+    Regex.match?(regex, str)
   end
 
   def is_uri_path?(_), do: false
 
   @spec is_uri_query?(any) :: boolean
   def is_uri_query?(str) when is_binary(str) do
-    # TODO
-    true
+    regex = ~r/
+      (?(DEFINE)
+        (?<pct_encoded> %[[:xdigit:]][[:xdigit:]] )
+        (?<chars>  [-._~[:alnum:]!$&'()*+,;=:@] )
+        (?<pchar> (?:(?&chars)|(?&pct_encoded)) )
+      )
+      ^(?:(?&pchar)|[\/?])*$
+    /x
+
+    Regex.match?(regex, str)
   end
 
   def is_uri_query?(_), do: false
 
   @spec is_uri_fragment?(any) :: boolean
-  def is_uri_fragment?(str) when is_binary(str) do
-    # TODO
-    true
-  end
+  def is_uri_fragment?(str) when is_binary(str), do: is_uri_query?(str)
 
   def is_uri_fragment?(_), do: false
 end

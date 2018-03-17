@@ -37,10 +37,10 @@ defmodule Xema.Mixfile do
 
   defp deps do
     [
-      {:credo, "~> 0.8", only: [:dev, :test]},
+      {:credo, "~> 0.9.0-rc8", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
-      {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.7", only: :test}
+      {:ex_doc, "~> 0.18", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.8", only: :test}
     ]
   end
 
