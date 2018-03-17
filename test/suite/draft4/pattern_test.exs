@@ -8,22 +8,16 @@ defmodule Draft4.PatternTest do
       %{schema: Xema.new(:pattern, "^a*$")}
     end
 
-    @tag :draft4
-    @tag :pattern
     test "a matching pattern is valid", %{schema: schema} do
       data = "aaa"
       assert is_valid?(schema, data)
     end
 
-    @tag :draft4
-    @tag :pattern
     test "a non-matching pattern is invalid", %{schema: schema} do
       data = "abc"
       refute is_valid?(schema, data)
     end
 
-    @tag :draft4
-    @tag :pattern
     test "ignores non-strings", %{schema: schema} do
       data = true
       assert is_valid?(schema, data)
@@ -35,8 +29,6 @@ defmodule Draft4.PatternTest do
       %{schema: Xema.new(:pattern, "a+")}
     end
 
-    @tag :draft4
-    @tag :pattern
     test "matches a substring", %{schema: schema} do
       data = "xxaayy"
       assert is_valid?(schema, data)

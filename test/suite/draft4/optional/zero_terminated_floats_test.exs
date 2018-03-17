@@ -8,8 +8,6 @@ defmodule Draft4.Optional.ZeroTerminatedFloatsTest do
       %{schema: Xema.new(:integer)}
     end
 
-    @tag :draft4
-    @tag :zero_terminated_floats
     test "a float is not an integer even without fractional part", %{
       schema: schema
     } do
