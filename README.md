@@ -489,7 +489,7 @@ iex> schema = Xema.new :map, properties: %{foo: :string}, required: [:foo]
 iex> Xema.validate schema, %{foo: "bar"}
 :ok
 iex> Xema.validate schema, %{bar: "foo"}
-{:error, %{foo: :required}}
+{:error, %{required: [:foo]}}
 ```
 
 #### <a name="additional_properties"></a> Additional Properties

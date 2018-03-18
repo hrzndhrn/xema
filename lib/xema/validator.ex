@@ -1,7 +1,11 @@
 defmodule Xema.Validator do
   @moduledoc false
 
+  use Xema.Format
+
   @type result :: :ok | {:error, map}
+
+  @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
 
   @spec validate(Xema.t() | Xema.Schema.t(), any) :: result
   def validate(%{content: schema}, value) do
@@ -19,82 +23,115 @@ defmodule Xema.Validator do
   end
 
   def validate(%{type: :any} = schema, value) do
-    with :ok <- enum(schema, value),
-         :ok <- do_not(schema, value),
-         :ok <- all_of(schema, value),
-         :ok <- any_of(schema, value),
-         :ok <- one_of(schema, value),
-         :ok <- minimum(schema, value),
-         :ok <- multiple_of(schema, value),
-         :ok <- unique(schema, value),
-         {:ok, _value} <- properties(schema, value),
+    with type <- get_type(value),
+         :ok <- validate(:default, schema, value),
+         :ok <- validate(type, schema, value),
          do: :ok
   end
 
   def validate(%{type: :string} = schema, value) do
     with :ok <- type(schema, value),
-         length <- String.length(value),
-         :ok <- min_length(schema, length, value),
-         :ok <- max_length(schema, length, value),
-         :ok <- pattern(schema, value),
-         :ok <- enum(schema, value),
+         :ok <- validate(:default, schema, value),
+         :ok <- validate(:string, schema, value),
          do: :ok
-  end
-
-  def validate(%{type: nil}, nil), do: :ok
-
-  def validate(%{type: nil} = schema, value),
-    do: {:error, %{value: value, type: schema.as}}
-
-  def validate(%{type: :number} = schema, value),
-    do: validate_number(schema, value)
-
-  def validate(%{type: :integer} = schema, value),
-    do: validate_number(schema, value)
-
-  def validate(%{type: :float} = schema, value),
-    do: validate_number(schema, value)
-
-  def validate(%Xema.Schema{type: :boolean} = schema, value) do
-    case is_boolean(value) do
-      true -> :ok
-      false -> {:error, %{value: value, type: schema.as}}
-    end
   end
 
   def validate(%{type: :list} = schema, value) do
     with :ok <- type(schema, value),
-         :ok <- min_items(schema, value),
+         :ok <- validate(:list, schema, value),
+         do: :ok
+  end
+
+  def validate(%{type: :map} = schema, value) do
+    with :ok <- type(schema, value),
+         :ok <- validate(:map, schema, value),
+         do: :ok
+  end
+
+  def validate(%{type: nil} = schema, value), do: validate(nil, schema, value)
+
+  def validate(%{type: :number} = schema, value),
+    do: validate(:number, schema, value)
+
+  def validate(%{type: :integer} = schema, value),
+    do: validate(:number, schema, value)
+
+  def validate(%{type: :float} = schema, value),
+    do: validate(:number, schema, value)
+
+  def validate(%{type: :boolean} = schema, value),
+    do: validate(:boolean, schema, value)
+
+  defp validate(:default, schema, value) do
+    with :ok <- enum(schema, value),
+         :ok <- do_not(schema, value),
+         :ok <- all_of(schema, value),
+         :ok <- any_of(schema, value),
+         :ok <- one_of(schema, value),
+         do: :ok
+  end
+
+  defp validate(:string, schema, value) do
+    with length <- String.length(value),
+         :ok <- min_length(schema, length, value),
+         :ok <- max_length(schema, length, value),
+         :ok <- pattern(schema, value),
+         :ok <- format(schema, value),
+         :ok <- enum(schema, value),
+         do: :ok
+  end
+
+  defp validate(nil, _schema, nil), do: :ok
+
+  defp validate(nil, schema, value),
+    do: {:error, %{value: value, type: schema.as}}
+
+  defp validate(:list, schema, value) do
+    with :ok <- min_items(schema, value),
          :ok <- max_items(schema, value),
          :ok <- items(schema, value),
          :ok <- unique(schema, value),
          do: :ok
   end
 
-  def validate(%{type: :map} = schema, value) do
-    with :ok <- type(schema, value),
-         :ok <- size(schema, value),
+  defp validate(:map, schema, value) do
+    with :ok <- size(schema, value),
          :ok <- keys(schema, value),
          :ok <- required(schema, value),
          :ok <- dependencies(schema, value),
-         {:ok, value} <- properties(schema, value),
-         {:ok, value} <- patterns(schema, value),
+         {:ok, patts_rest} <- patterns(schema, value),
+         {:ok, props_rest} <- properties(schema, value),
+         value <- intersection(props_rest, patts_rest),
          :ok <- additionals(schema, value),
          do: :ok
   end
 
-  @spec validate_number(Xema.Schema.t(), any) :: result
-  defp validate_number(schema, value) do
+  defp validate(:boolean, schema, value) do
+    case is_boolean(value) do
+      true -> :ok
+      false -> {:error, %{value: value, type: schema.as}}
+    end
+  end
+
+  defp validate(:integer, schema, value), do: validate(:number, schema, value)
+
+  defp validate(:float, schema, value), do: validate(:number, schema, value)
+
+  defp validate(:number, schema, value) do
     with :ok <- type(schema, value),
          :ok <- minimum(schema, value),
          :ok <- maximum(schema, value),
          :ok <- exclusive_maximum(schema, value),
          :ok <- exclusive_minimum(schema, value),
          :ok <- multiple_of(schema, value),
-         :ok <- enum(schema, value),
-         :ok <- one_of(schema, value),
+         :ok <- validate(:default, schema, value),
          do: :ok
   end
+
+  defp validate(:atom, _, _), do: :ok
+
+  defp get_type(value),
+    do: Enum.find(@types, fn type -> is_type?(type, value) end)
 
   @spec type(Xema.Schema.t() | atom, any) :: result
   defp type(%{type: type} = schema, value) do
@@ -105,12 +142,15 @@ defmodule Xema.Validator do
   end
 
   @spec is_type?(atom, any) :: boolean
+  defp is_type?(:any, _value), do: true
+  defp is_type?(:atom, value), do: is_atom(value)
   defp is_type?(:string, value), do: is_binary(value)
   defp is_type?(:number, value), do: is_number(value)
   defp is_type?(:integer, value), do: is_integer(value)
   defp is_type?(:float, value), do: is_float(value)
   defp is_type?(:map, value), do: is_map(value)
   defp is_type?(:list, value), do: is_list(value)
+  defp is_type?(:boolean, value), do: is_boolean(value)
   defp is_type?(nil, nil), do: true
   defp is_type?(_, _), do: false
 
@@ -443,10 +483,18 @@ defmodule Xema.Validator do
   defp do_properties([], _map, errors), do: {:error, %{properties: errors}}
 
   defp do_properties([{prop, schema} | props], map, errors) do
-    with {:ok, value} <- get_value(map, prop),
-         :ok <- do_property(schema, value) do
-      do_properties(props, delete_property(map, prop), errors)
+    with true <- has_key?(map, prop),
+         {:ok, value} <- get_value(map, prop),
+         :ok <- Xema.validate(schema, value) do
+      case has_key?(props, prop) do
+        true -> do_properties(props, map, errors)
+        false -> do_properties(props, delete_property(map, prop), errors)
+      end
     else
+      # The property is not in the map.
+      false ->
+        do_properties(props, delete_property(map, prop), errors)
+
       {:error, reason} ->
         do_properties(
           props,
@@ -455,11 +503,6 @@ defmodule Xema.Validator do
         )
     end
   end
-
-  @spec do_property(Xema.Schema.t(), any) :: result
-  defp do_property(_schema, nil), do: :ok
-
-  defp do_property(schema, value), do: Xema.validate(schema, value)
 
   @spec delete_property(map, String.t() | atom) :: map
   defp delete_property(map, prop) when is_map(map) and is_atom(prop) do
@@ -487,7 +530,8 @@ defmodule Xema.Validator do
       missing ->
         {
           :error,
-          Enum.into(missing, %{}, fn key -> {key, :required} end)
+          %{required: missing}
+          # Enum.into(missing, %{}, fn key -> {:required, key} end)
         }
     end
   end
@@ -605,13 +649,23 @@ defmodule Xema.Validator do
     end
   end
 
+  # defp do_dependencies([{_key, true} | tail], map),
+  #  do: do_dependencies(tail, map)
+  #
+  # defp do_dependencies([{key, false} | tail], map) do
+  #  case Map.has_key?(map, key) do
+  #    true -> {:error, %{dependencies: %{key => false}}}
+  #    false -> do_dependencies(tail, map)
+  #  end
+  # end
+
   defp do_dependencies([{key, schema} | tail], map) do
     case Xema.validate(schema, map) do
       :ok ->
         do_dependencies(tail, map)
 
-      {:error, _} ->
-        {:error, %{key => %{required: MapSet.to_list(schema.required)}}}
+      {:error, reason} ->
+        {:error, %{dependencies: %{key => reason}}}
     end
   end
 
@@ -624,9 +678,21 @@ defmodule Xema.Validator do
         do_dependencies_list(key, dependencies, map)
 
       false ->
-        {:error, %{key => %{dependency: dependency}}}
+        {:error, %{dependencies: %{key => dependency}}}
     end
   end
+
+  # TODO: spec and doc
+  defp format(%{format: nil}, _str), do: :ok
+
+  defp format(%{format: fmt}, str) when Format.supports(fmt) do
+    case Format.is?(fmt, str) do
+      true -> :ok
+      false -> {:error, %{format: fmt, value: str}}
+    end
+  end
+
+  defp format(_, _str), do: :ok
 
   #
   # helper functions
@@ -671,8 +737,11 @@ defmodule Xema.Validator do
   end
 
   @spec has_key?(map, String.t() | atom) :: boolean
-  defp has_key?(map, key) do
-    Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
+  defp has_key?(map, key) when is_map(map),
+    do: Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
+
+  defp has_key?(list, key) when is_list(list) do
+    Enum.any?(list, fn {k, _} -> k == key end)
   end
 
   @spec toggle_key(String.t() | atom) :: atom | String.t()
@@ -686,4 +755,14 @@ defmodule Xema.Validator do
   catch
     _ -> nil
   end
+
+  @spec intersection(map, map) :: map
+  defp intersection(a, b),
+    do:
+      for(
+        key <- Map.keys(a),
+        true == Map.has_key?(b, key),
+        into: %{},
+        do: {key, Map.get(b, key)}
+      )
 end

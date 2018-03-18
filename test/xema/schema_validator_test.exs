@@ -233,14 +233,6 @@ defmodule Xema.SchemaValidatorTest do
       end
     end
 
-    test "keyword dependencies with invalid property" do
-      expected = ~s("invalid" is not a valid type or keyword.)
-
-      assert_raise SchemaError, expected, fn ->
-        Xema.new(:map, dependencies: %{foo: "invalid"})
-      end
-    end
-
     test "keyword max_properties with a wrong type" do
       expected =
         ~s(Expected a non negative integer for max_properties, got "foo".)

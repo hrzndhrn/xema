@@ -49,6 +49,7 @@ defmodule Xema.Schema.Validator do
   @string_keys @default_keys
                |> MapSet.union(
                  MapSet.new([
+                   :format,
                    :max_length,
                    :min_length,
                    :pattern

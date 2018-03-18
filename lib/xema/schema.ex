@@ -30,6 +30,7 @@ defmodule Xema.Schema do
     excludes the maximum value.
   * `exclusive_minimum` is a boolean. When true, it indicates that the range
     excludes the minimum value.
+  * `format` semantic validation.
   * `id` a unique identifier.
   * `items` specifies the type(s) of the items.
   * `keys` could be `:atoms` or `:strings`.
@@ -63,6 +64,7 @@ defmodule Xema.Schema do
           enum: list | nil,
           exclusive_maximum: boolean | number | nil,
           exclusive_minimum: boolean | number | nil,
+          format: atom | nil,
           id: String.t() | nil,
           items: list | Xema.t() | Xema.Schema.t() | nil,
           keys: atom | nil,
@@ -96,6 +98,7 @@ defmodule Xema.Schema do
     :enum,
     :exclusive_maximum,
     :exclusive_minimum,
+    :format,
     :id,
     :items,
     :keys,

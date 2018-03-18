@@ -48,6 +48,8 @@ defmodule Xema do
           | :enum
           | :exclusive_maximum
           | :exclusive_minimum
+          | :format
+          | :id
           | :items
           | :keys
           | :max_items
@@ -76,6 +78,8 @@ defmodule Xema do
     :enum,
     :exclusive_maximum,
     :exclusive_minimum,
+    :format,
+    :id,
     :items,
     :keys,
     :max_items,
@@ -251,6 +255,9 @@ defmodule Xema do
     do:
       Enum.into(map, %{}, fn
         {key, dep} when is_list(dep) -> {key, dep}
+        {key, dep} when is_boolean(dep) -> {key, schema(dep)}
+        {key, dep} when is_atom(dep) -> {key, [dep]}
+        {key, dep} when is_binary(dep) -> {key, [dep]}
         {key, dep} -> {key, schema(dep)}
       end)
 
@@ -317,6 +324,13 @@ defmodule Xema do
   defp do_schema_to_string(type, schema, _root) when schema == %{},
     do: inspect(type)
 
+  defp do_schema_to_string(:any, schema, true) do
+    case Map.to_list(schema) do
+      [{key, value}] -> "#{inspect(key)}, #{value_to_string(value)}"
+      _ -> ":any, #{schema_to_string(schema)}"
+    end
+  end
+
   defp do_schema_to_string(type, schema, true),
     do: "#{inspect(type)}, #{schema_to_string(schema)}"
 
@@ -324,14 +338,20 @@ defmodule Xema do
     do: "{#{do_schema_to_string(type, schema, true)}}"
 
   @spec value_to_string(any) :: String.t()
+  defp value_to_string(%Schema{} = schema), do: schema_to_string(schema)
+
+  defp value_to_string(%{__struct__: MapSet} = map_set),
+    do: value_to_string(MapSet.to_list(map_set))
+
+  defp value_to_string(%{__struct__: Regex} = regex),
+    do: ~s("#{Regex.source(regex)}")
+
   defp value_to_string(list) when is_list(list),
     do:
       list
       |> Enum.map(&value_to_string/1)
       |> Enum.join(", ")
       |> wrap("[", "]")
-
-  defp value_to_string(%Schema{} = schema), do: schema_to_string(schema)
 
   defp value_to_string(map) when is_map(map),
     do:
@@ -345,6 +365,9 @@ defmodule Xema do
   @spec key_value_to_string({atom | String.t(), any}) :: String.t()
   defp key_value_to_string({key, value}) when is_atom(key),
     do: "#{key}: #{value_to_string(value)}"
+
+  defp key_value_to_string({%{__struct__: Regex} = regex, value}),
+    do: key_value_to_string({Regex.source(regex), value})
 
   defp key_value_to_string({key, value}),
     do: ~s("#{key}" => #{value_to_string(value)})

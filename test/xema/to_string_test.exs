@@ -24,7 +24,7 @@ defmodule Xema.ToStringTest do
       xema = xema(schema)
 
       # Shortcuts will expand to the equivalent schema.
-      assert to_string(xema) == "Xema.new(:any, enum: [1, 2, 3])"
+      assert to_string(xema) == "Xema.new(#{schema})"
     end
 
     test "with a integer-schema and keywords" do
@@ -56,15 +56,48 @@ defmodule Xema.ToStringTest do
 
       assert to_string(xema) == "Xema.new(#{schema})"
     end
+
+    test "with patter_properties" do
+      schema = ~s(:pattern_properties, %{"^v" => :any})
+
+      xema = xema(schema)
+
+      assert to_string(xema) == "Xema.new(#{schema})"
+    end
+
+    test "with a map schema and required properties" do
+      schema =
+        ~s(:map, properties: %{a: {:integer, minimum: 2}, b: :string}, required: [:x])
+
+      xema = xema(schema)
+
+      assert to_string(xema) == "Xema.new(#{schema})"
+    end
+
+    test "with a pattern" do
+      assert_to_string(~s(:pattern, "^a*$"))
+    end
+
+    test "multiple types" do
+      assert_to_string(~s([:integer, :string]))
+    end
+
+    test "format" do
+      assert_to_string(~s(:format, :email))
+    end
   end
 
   describe "Xema.to_string format :data" do
     test "with a simple any-schema and an id" do
-      schema = ~s({:any, id: "foo"})
+      schema = ~s({:id, "foo"})
       xema = xema(schema)
 
       assert Xema.to_string(xema, format: :data) == schema
     end
+  end
+
+  defp assert_to_string(str) do
+    assert str |> xema() |> Xema.to_string() == "Xema.new(#{str})"
   end
 
   defp xema(str) do

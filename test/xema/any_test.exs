@@ -225,7 +225,7 @@ defmodule Xema.AnyTest do
       assert validate(schema, nil) == :ok
     end
 
-    test "validate/2 with an imvalid value", %{schema: schema} do
+    test "validate/2 with an invalid value", %{schema: schema} do
       assert validate(schema, "foo") == {:error, :any_of}
     end
   end
@@ -381,6 +381,34 @@ defmodule Xema.AnyTest do
 
     test "validate/2 with a map", %{schema: schema} do
       assert validate(schema, %{a: 1}) == :ok
+    end
+  end
+
+  describe "dependencies with boolean subschemas:" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :any,
+            dependencies: %{
+              foo: true,
+              bar: false
+            }
+          )
+      }
+    end
+
+    test "map with property having schema true is valid", %{schema: schema} do
+      assert validate(schema, %{foo: 1}) == :ok
+    end
+
+    @tag :only
+    test """
+         object with property having schema false is invalid
+         """,
+         %{schema: schema} do
+      assert validate(schema, %{bar: 2}) ==
+               {:error, %{dependencies: %{bar: %{type: false}}}}
     end
   end
 end
