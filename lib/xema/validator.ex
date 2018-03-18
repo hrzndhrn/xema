@@ -8,63 +8,58 @@ defmodule Xema.Validator do
   @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
 
   @spec validate(Xema.t() | Xema.Schema.t(), any) :: result
-  def validate(%{content: schema}, value) do
-    validate(schema, value)
+  def validate(schema, value, opts \\ [])
+
+  def validate(%{content: schema}, value, opts) do
+    validate(schema, value, opts)
   end
 
-  def validate(%{type: true}, _value), do: :ok
+  def validate(%{type: true}, _value, _opts), do: :ok
 
-  def validate(%{type: false}, _value), do: {:error, %{type: false}}
+  def validate(%{type: false}, _value, _opts), do: {:error, %{type: false}}
 
-  def validate(%{type: list} = schema, value) when is_list(list) do
-    with {:ok, type} <- types(schema, value),
-         :ok <- validate(%{schema | type: type}, value),
-         do: :ok
+  def validate(schema, value, opts) do
+    # IO.inspect opts, label: "opts"
+    opts = Keyword.put(opts, :root, schema)
+
+    case schema.type do
+      list when is_list(list) ->
+        with {:ok, type} <- types(schema, value),
+             :ok <- validate(%{schema | type: type}, value, opts),
+             do: :ok
+
+      :any ->
+        with type <- get_type(value),
+             :ok <- validate(:default, schema, value, opts),
+             :ok <- validate(type, schema, value, opts),
+             do: :ok
+
+      :string ->
+        with :ok <- type(schema, value),
+             :ok <- validate(:default, schema, value, opts),
+             :ok <- validate(:string, schema, value, opts),
+             do: :ok
+
+      :list ->
+        with :ok <- type(schema, value),
+             :ok <- validate(:list, schema, value, opts),
+             do: :ok
+
+      :map ->
+        with :ok <- type(schema, value),
+             :ok <- validate(:map, schema, value, opts),
+             do: :ok
+
+      type when is_atom(type) ->
+        validate(type, schema, value, opts)
+    end
   end
 
-  def validate(%{type: :any} = schema, value) do
-    with type <- get_type(value),
-         :ok <- validate(:default, schema, value),
-         :ok <- validate(type, schema, value),
-         do: :ok
-  end
+  #
+  # Private validate function
+  #
 
-  def validate(%{type: :string} = schema, value) do
-    with :ok <- type(schema, value),
-         :ok <- validate(:default, schema, value),
-         :ok <- validate(:string, schema, value),
-         do: :ok
-  end
-
-  def validate(%{type: :list} = schema, value) do
-    with :ok <- type(schema, value),
-         :ok <- validate(:list, schema, value),
-         do: :ok
-  end
-
-  def validate(%{type: :map} = schema, value) do
-    with :ok <- type(schema, value),
-         :ok <- validate(:map, schema, value),
-         do: :ok
-  end
-
-  def validate(%{type: nil} = schema, value), do: validate(nil, schema, value)
-
-  def validate(%{type: :number} = schema, value),
-    do: validate(:number, schema, value)
-
-  def validate(%{type: :integer} = schema, value),
-    do: validate(:number, schema, value)
-
-  def validate(%{type: :float} = schema, value),
-    do: validate(:number, schema, value)
-
-  def validate(%{type: :boolean} = schema, value),
-    do: validate(:boolean, schema, value)
-
-  # private validate
-
-  defp validate(:default, schema, value) do
+  defp validate(:default, schema, value, _opts) do
     with :ok <- enum(schema, value),
          :ok <- do_not(schema, value),
          :ok <- all_of(schema, value),
@@ -73,7 +68,7 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp validate(:string, schema, value) do
+  defp validate(:string, schema, value, _opts) do
     with length <- String.length(value),
          :ok <- min_length(schema, length, value),
          :ok <- max_length(schema, length, value),
@@ -83,12 +78,12 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp validate(nil, _schema, nil), do: :ok
+  defp validate(nil, _schema, nil, _opts), do: :ok
 
-  defp validate(nil, schema, value),
+  defp validate(nil, schema, value, _opts),
     do: {:error, %{value: value, type: schema.as}}
 
-  defp validate(:list, schema, value) do
+  defp validate(:list, schema, value, _opts) do
     with :ok <- min_items(schema, value),
          :ok <- max_items(schema, value),
          :ok <- items(schema, value),
@@ -96,7 +91,7 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp validate(:map, schema, value) do
+  defp validate(:map, schema, value, _opts) do
     with :ok <- size(schema, value),
          :ok <- keys(schema, value),
          :ok <- required(schema, value),
@@ -108,29 +103,35 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp validate(:boolean, schema, value) do
+  defp validate(:boolean, schema, value, _opts) do
     case is_boolean(value) do
       true -> :ok
       false -> {:error, %{value: value, type: schema.as}}
     end
   end
 
-  defp validate(:integer, schema, value), do: validate(:number, schema, value)
+  defp validate(:integer, schema, value, opts),
+    do: validate(:number, schema, value, opts)
 
-  defp validate(:float, schema, value), do: validate(:number, schema, value)
+  defp validate(:float, schema, value, opts),
+    do: validate(:number, schema, value, opts)
 
-  defp validate(:number, schema, value) do
+  defp validate(:number, schema, value, opts) do
     with :ok <- type(schema, value),
          :ok <- minimum(schema, value),
          :ok <- maximum(schema, value),
          :ok <- exclusive_maximum(schema, value),
          :ok <- exclusive_minimum(schema, value),
          :ok <- multiple_of(schema, value),
-         :ok <- validate(:default, schema, value),
+         :ok <- validate(:default, schema, value, opts),
          do: :ok
   end
 
-  defp validate(:atom, _, _), do: :ok
+  defp validate(:atom, _, _, _), do: :ok
+
+  #
+  # Schema type handling
+  #
 
   defp get_type(value),
     do: Enum.find(@types, fn type -> is_type?(type, value) end)
@@ -163,6 +164,10 @@ defmodule Xema.Validator do
       found -> {:ok, found}
     end
   end
+
+  #
+  # Validators
+  #
 
   @spec enum(Xema.Schema.t(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok
