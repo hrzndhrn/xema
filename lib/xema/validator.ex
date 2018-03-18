@@ -62,6 +62,8 @@ defmodule Xema.Validator do
   def validate(%{type: :boolean} = schema, value),
     do: validate(:boolean, schema, value)
 
+  # private validate
+
   defp validate(:default, schema, value) do
     with :ok <- enum(schema, value),
          :ok <- do_not(schema, value),
@@ -176,7 +178,7 @@ defmodule Xema.Validator do
   defp do_not(%{not: nil}, _value), do: :ok
 
   defp do_not(%{not: schema}, value) do
-    case Xema.validate(schema, value) do
+    case validate(schema, value) do
       :ok -> {:error, :not}
       _ -> :ok
     end
@@ -194,7 +196,7 @@ defmodule Xema.Validator do
 
   @spec do_all_of(list, any) :: boolean
   defp do_all_of(schemas, value),
-    do: Enum.all?(schemas, fn schema -> Xema.validate(schema, value) == :ok end)
+    do: Enum.all?(schemas, fn schema -> validate(schema, value) == :ok end)
 
   @spec any_of(Xema.Schema.t(), any) :: result
   defp any_of(%{any_of: nil}, _value), do: :ok
@@ -208,7 +210,7 @@ defmodule Xema.Validator do
 
   @spec do_any_of(list, any) :: boolean
   defp do_any_of(schemas, value),
-    do: Enum.any?(schemas, fn schema -> Xema.validate(schema, value) == :ok end)
+    do: Enum.any?(schemas, fn schema -> validate(schema, value) == :ok end)
 
   @spec one_of(Xema.Schema.t(), any) :: result
   defp one_of(%{one_of: nil}, _value), do: :ok
@@ -224,7 +226,7 @@ defmodule Xema.Validator do
   defp do_one_of(schemas, value) do
     schemas
     |> Enum.filter(fn schema ->
-      case Xema.validate(schema, value) do
+      case validate(schema, value) do
         :ok -> true
         {:error, _} -> false
       end
@@ -398,7 +400,7 @@ defmodule Xema.Validator do
   defp items_list(_schema, [], _at, errors), do: {:error, Enum.reverse(errors)}
 
   defp items_list(schema, [item | list], at, errors) do
-    case Xema.validate(schema, item) do
+    case validate(schema, item) do
       :ok ->
         items_list(schema, list, at + 1, errors)
 
@@ -426,7 +428,7 @@ defmodule Xema.Validator do
     do: {:error, Enum.reverse(errors)}
 
   defp items_tuple([], schema, [item | list], at, errors) do
-    case Xema.validate(schema, item) do
+    case validate(schema, item) do
       :ok ->
         items_tuple([], schema, list, at + 1, errors)
 
@@ -442,7 +444,7 @@ defmodule Xema.Validator do
          at,
          errors
        ) do
-    case Xema.validate(schema, item) do
+    case validate(schema, item) do
       :ok ->
         items_tuple(schemas, additional_items, list, at + 1, errors)
 
@@ -485,7 +487,7 @@ defmodule Xema.Validator do
   defp do_properties([{prop, schema} | props], map, errors) do
     with true <- has_key?(map, prop),
          {:ok, value} <- get_value(map, prop),
-         :ok <- Xema.validate(schema, value) do
+         :ok <- validate(schema, value) do
       case has_key?(props, prop) do
         true -> do_properties(props, map, errors)
         false -> do_properties(props, delete_property(map, prop), errors)
@@ -616,7 +618,7 @@ defmodule Xema.Validator do
        when is_map(schema) do
     result =
       Enum.reduce(map, %{}, fn {key, value}, acc ->
-        case Xema.validate(schema, value) do
+        case validate(schema, value) do
           :ok -> acc
           {:error, reason} -> Map.put(acc, key, reason)
         end
@@ -660,7 +662,7 @@ defmodule Xema.Validator do
   # end
 
   defp do_dependencies([{key, schema} | tail], map) do
-    case Xema.validate(schema, map) do
+    case validate(schema, map) do
       :ok ->
         do_dependencies(tail, map)
 
