@@ -5,6 +5,7 @@ defmodule Xema do
 
   use Xema.Base
 
+  alias Xema.Ref
   alias Xema.Schema
   alias Xema.Schema.Validator, as: SchemaValidator
   alias Xema.SchemaError
@@ -183,6 +184,8 @@ defmodule Xema do
   @spec schema(schema_types | schema_keywords | [schema_types], keyword) ::
           Xema.Schema.t()
   defp schema(type, keywords \\ [])
+
+  defp schema({:ref, pointer}, _opts), do: Ref.new(pointer)
 
   defp schema(list, opts) when is_list(list) do
     opts

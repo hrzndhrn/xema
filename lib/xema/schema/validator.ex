@@ -19,6 +19,7 @@ defmodule Xema.Schema.Validator do
                   :id,
                   :not,
                   :one_of,
+                  :ref,
                   :schema,
                   :title,
                   :type
