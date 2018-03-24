@@ -192,4 +192,29 @@ defmodule Xema.RefTest do
       assert Xema.validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
     end
   end
+
+  describe "schema with ref to id" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            id: "http://foo.com",
+            ref: "pos",
+            definitions: %{
+              pos: {:integer, minimum: 0, id: "http://foo.com/pos"}
+            }
+          )
+      }
+    end
+
+    @tag :only
+    test "validate/2 with valid value", %{schema: schema} do
+      # IO.inspect(schema)
+      assert Xema.validate(schema, 42) == :ok
+    end
+
+    test "validate/2 with invalid value", %{schema: schema} do
+      assert Xema.validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
+    end
+  end
 end

@@ -801,6 +801,5 @@ defmodule Xema.SchemaValidatorTest do
         Xema.new(:any, ref: 5)
       end
     end
-
   end
 end
