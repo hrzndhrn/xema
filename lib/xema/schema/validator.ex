@@ -19,7 +19,6 @@ defmodule Xema.Schema.Validator do
                   :id,
                   :not,
                   :one_of,
-                  :ref,
                   :schema,
                   :title,
                   :type
@@ -75,6 +74,12 @@ defmodule Xema.Schema.Validator do
             |> MapSet.union(@string_keys)
             |> MapSet.union(@list_keys)
             |> MapSet.union(@map_keys)
+            |> MapSet.union(
+              MapSet.new([
+                :definitions,
+                :ref
+              ])
+            )
 
   @keys [
     any: @any_keys,
@@ -97,6 +102,7 @@ defmodule Xema.Schema.Validator do
          :ok <- enum(:any, opts[:enum]),
          :ok <- schemas(opts, :all_of),
          :ok <- schemas(opts, :any_of),
+         :ok <- string(opts, :ref),
          do: :ok
   end
 
@@ -165,6 +171,16 @@ defmodule Xema.Schema.Validator do
          :ok <- non_negative_integer(:min_length, opts[:min_length]),
          :ok <- regex(:pattern, opts[:pattern]) do
       :ok
+    end
+  end
+
+  # Check if keyword value a string
+
+  defp string(opts, key) do
+    case opts[key] do
+      nil -> :ok
+      value when is_binary(value) -> :ok
+      _ -> {:error, "The value for '#{key}' must be a string."}
     end
   end
 

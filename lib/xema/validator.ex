@@ -15,7 +15,8 @@ defmodule Xema.Validator do
   @spec validate(Xema.t() | Xema.Schema.t(), any) :: result
   def validate(schema, value, opts \\ [])
 
-  def validate(%Xema{content: schema}, value, opts) do
+  def validate(%Xema{content: schema} = xema, value, opts) do
+    opts = Keyword.put_new(opts, :root, xema)
     validate(schema, value, opts)
   end
 
@@ -31,37 +32,39 @@ defmodule Xema.Validator do
   def validate(%{type: false}, _value, _opts), do: {:error, %{type: false}}
 
   def validate(schema, value, opts) do
-    opts = Keyword.put(opts, :root, schema)
-
-    case schema.type do
-      list when is_list(list) ->
+    case schema do
+      %{type: list} when is_list(list) ->
         with {:ok, type} <- types(schema, value),
              :ok <- validate(%{schema | type: type}, value, opts),
              do: :ok
 
-      :any ->
+      %{type: :any, ref: nil} ->
         with type <- get_type(value),
              :ok <- validate(:default, schema, value, opts),
              :ok <- validate(type, schema, value, opts),
              do: :ok
 
-      :string ->
+      %{type: :any, ref: ref} ->
+        with {:ok, schema} <- Ref.get(ref, opts[:root]),
+             do: validate(schema, value, opts)
+
+      %{type: :string} ->
         with :ok <- type(schema, value),
              :ok <- validate(:default, schema, value, opts),
              :ok <- validate(:string, schema, value, opts),
              do: :ok
 
-      :list ->
+      %{type: :list} ->
         with :ok <- type(schema, value),
              :ok <- validate(:list, schema, value, opts),
              do: :ok
 
-      :map ->
+      %{type: :map} ->
         with :ok <- type(schema, value),
              :ok <- validate(:map, schema, value, opts),
              do: :ok
 
-      type when is_atom(type) ->
+      %{type: type} when is_atom(type) ->
         validate(type, schema, value, opts)
     end
   end

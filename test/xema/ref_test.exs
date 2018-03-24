@@ -77,7 +77,7 @@ defmodule Xema.RefTest do
     end
   end
 
-  describe "schema with ref" do
+  describe "schema with a ref to property" do
     setup do
       %{
         schema:
@@ -109,6 +109,87 @@ defmodule Xema.RefTest do
                     foo: %{type: :integer, value: "21"}
                   }
                 }}
+    end
+  end
+
+  describe "schema with ref and definitions" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            properties: %{
+              foo: {:ref, "#/definitions/pos"},
+              bar: {:ref, "#/definitions/neg"}
+            },
+            definitions: %{
+              pos: {:integer, minimum: 0},
+              neg: {:integer, maximum: 0}
+            }
+          )
+      }
+    end
+
+    test "validate/2 with valid values", %{schema: schema} do
+      assert Xema.validate(schema, %{foo: 5, bar: -1}) == :ok
+    end
+
+    test "validate/2 with invalid values", %{schema: schema} do
+      assert Xema.validate(schema, %{foo: -1, bar: 1}) ==
+               {:error,
+                %{
+                  properties: %{
+                    bar: %{maximum: 0, value: 1},
+                    foo: %{minimum: 0, value: -1}
+                  }
+                }}
+    end
+  end
+
+  describe "schema with ref chain" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            properties: %{
+              foo: {:ref, "#/definitions/bar"}
+            },
+            definitions: %{
+              bar: {:ref, "#/definitions/pos"},
+              pos: {:integer, minimum: 0}
+            }
+          )
+      }
+    end
+
+    test "validate/2 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{foo: 42}) == :ok
+    end
+
+    test "validate/2 with invalid value", %{schema: schema} do
+      assert Xema.validate(schema, %{foo: -21}) ==
+               {:error, %{properties: %{foo: %{minimum: 0, value: -21}}}}
+    end
+  end
+
+  describe "schema with ref as keyword" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            ref: "#/definitions/pos",
+            definitions: %{
+              pos: {:integer, minimum: 0}
+            }
+          )
+      }
+    end
+
+    test "validate/2 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, 42) == :ok
+    end
+
+    test "validate/2 with invalid value", %{schema: schema} do
+      assert Xema.validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
     end
   end
 end

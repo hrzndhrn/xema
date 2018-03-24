@@ -45,6 +45,7 @@ defmodule Xema do
           | :additional_properties
           | :all_of
           | :any_of
+          | :definitions
           | :dependencies
           | :enum
           | :exclusive_maximum
@@ -75,6 +76,7 @@ defmodule Xema do
     :additional_properties,
     :all_of,
     :any_of,
+    :definitions,
     :dependencies,
     :enum,
     :exclusive_maximum,
@@ -161,7 +163,23 @@ defmodule Xema do
 
   def new({type, keywords}, []), do: new(type, keywords)
 
-  def new(list, keywords) when is_list(list) do
+  def new(list, []) when is_list(list) do
+    case Keyword.keyword?(list) do
+      true -> new(:any, list)
+      false -> new_multi_type(list, [])
+    end
+  end
+
+  def new(list, keywords) when is_list(list), do: new_multi_type(list, keywords)
+
+  def new(tuple, keywords) when is_tuple(tuple),
+    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
+
+  def new(bool, [])
+      when is_boolean(bool),
+      do: bool |> schema([]) |> create()
+
+  defp new_multi_type(list, keywords) when is_list(list) do
     case Enum.all?(list, fn type -> type in @schema_types end) do
       true ->
         list |> schema(keywords) |> create
@@ -173,13 +191,6 @@ defmodule Xema do
         )
     end
   end
-
-  def new(tuple, keywords) when is_tuple(tuple),
-    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
-
-  def new(bool, [])
-      when is_boolean(bool),
-      do: bool |> schema([]) |> create()
 
   @spec schema(schema_types | schema_keywords | [schema_types], keyword) ::
           Xema.Schema.t()
@@ -242,6 +253,7 @@ defmodule Xema do
     |> Keyword.update(:one_of, nil, &schemas/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:properties, nil, &properties/1)
+    |> Keyword.update(:definitions, nil, &properties/1)
     |> Keyword.update(:required, nil, &MapSet.new/1)
     |> update_allow()
   end

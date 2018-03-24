@@ -791,5 +791,16 @@ defmodule Xema.SchemaValidatorTest do
         Xema.new(:float, enum: [1.0, "two"])
       end
     end
+
+    # Keyword: ref
+
+    test "keyord ref with invalid pointer" do
+      msg = "The value for 'ref' must be a string."
+
+      assert_raise SchemaError, msg, fn ->
+        Xema.new(:any, ref: 5)
+      end
+    end
+
   end
 end
