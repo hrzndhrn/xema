@@ -207,14 +207,189 @@ defmodule Xema.RefTest do
       }
     end
 
-    @tag :only
     test "validate/2 with valid value", %{schema: schema} do
-      # IO.inspect(schema)
       assert Xema.validate(schema, 42) == :ok
     end
 
     test "validate/2 with invalid value", %{schema: schema} do
       assert Xema.validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
+    end
+  end
+
+  describe "schema with ref to a list item" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            items: [
+              :integer,
+              {:ref, "#/items/0"},
+              {:ref, "#/items/1"},
+              {:ref, "#/items/11"}
+            ]
+          )
+      }
+    end
+
+    test "validate/2 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, [1, 2]) == :ok
+      assert Xema.validate(schema, [1, 2, 3]) == :ok
+    end
+
+    test "validate/2 with invalid value", %{schema: schema} do
+      assert Xema.validate(schema, [1, "2"]) ==
+               {:error, [{1, %{type: :integer, value: "2"}}]}
+
+      assert Xema.validate(schema, [1, 2, "3"]) ==
+               {:error, [{2, %{type: :integer, value: "3"}}]}
+    end
+
+    test "validate/2 an invalid ref", %{schema: schema} do
+      assert Xema.validate(schema, [1, 2, 3, 4]) ==
+               {:error, [{3, :ref_not_found}]}
+    end
+  end
+
+  describe "schema with ref for additional items" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            definitions: %{
+              str: :string
+            },
+            items: [:integer],
+            additional_items: {:ref, "#/definitions/str"}
+          )
+      }
+    end
+
+    test "validate/2 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, [1, "foo"]) == :ok
+    end
+
+    test "validate/2 with invalid value", %{schema: schema} do
+      assert Xema.validate(schema, [1, 2]) ==
+               {:error, [{1, %{type: :string, value: 2}}]}
+    end
+  end
+
+  describe "schema with recursive refs" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            id: "http://localhost:1234/tree",
+            description: "tree of nodes",
+            properties: %{
+              meta: :string,
+              nodes: {:list, items: {:ref, "node"}}
+            },
+            required: ["meta", "nodes"],
+            definitions: %{
+              node:
+                {:map,
+                 id: "http://localhost:1234/node",
+                 description: "node",
+                 properties: %{
+                   value: :number,
+                   subtree: {:ref, "tree"}
+                 },
+                 required: ["value"]}
+            }
+          )
+      }
+    end
+
+    test "validate/2 with a valid root", %{schema: schema} do
+      tree = %{
+        meta: "root",
+        nodes: []
+      }
+
+      assert Xema.validate(schema, tree) == :ok
+    end
+
+    test "validate/2 with a valid tree", %{schema: schema} do
+      tree = %{
+        meta: "root",
+        nodes: [
+          %{
+            value: 5,
+            subtree: %{
+              meta: "sub",
+              nodes: [
+                %{
+                  value: 42
+                },
+                %{
+                  value: 21,
+                  subtree: %{
+                    meta: "foo",
+                    value: 667,
+                    nodes: []
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      assert Xema.validate(schema, tree) == :ok
+    end
+
+    test "validate/2 with a missing nodes property", %{schema: schema} do
+      tree = %{
+        meta: "root",
+        nodes: [
+          %{
+            value: 5,
+            subtree: %{
+              meta: "sub",
+              nodes: [
+                %{
+                  value: 42
+                },
+                %{
+                  value: 21,
+                  subtree: %{
+                    meta: "foo",
+                    value: 667
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+
+      assert Xema.validate(schema, tree) ==
+               {:error,
+                %{
+                  properties: %{
+                    nodes: [
+                      {0,
+                       %{
+                         properties: %{
+                           subtree: %{
+                             properties: %{
+                               nodes: [
+                                 {1,
+                                  %{
+                                    properties: %{
+                                      subtree: %{required: ["nodes"]}
+                                    }
+                                  }}
+                               ]
+                             }
+                           }
+                         }
+                       }}
+                    ]
+                  }
+                }}
     end
   end
 end

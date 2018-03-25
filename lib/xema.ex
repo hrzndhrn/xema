@@ -361,6 +361,8 @@ defmodule Xema do
   defp value_to_string(%{__struct__: Regex} = regex),
     do: ~s("#{Regex.source(regex)}")
 
+  defp value_to_string(%{__struct__: Xema.Ref} = ref), do: inspect(ref.pointer)
+
   defp value_to_string(list) when is_list(list),
     do:
       list

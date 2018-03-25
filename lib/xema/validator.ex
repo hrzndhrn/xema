@@ -25,7 +25,7 @@ defmodule Xema.Validator do
   end
 
   defp do_validate(%Ref{} = ref, value, opts) do
-    case Ref.get(ref, opts[:root]) do
+    case Ref.get(ref, opts[:root], opts[:id]) do
       {:ok, schema} -> do_validate(schema, value, opts)
       {:error, :not_found} -> {:error, :ref_not_found}
     end
@@ -36,7 +36,11 @@ defmodule Xema.Validator do
   defp do_validate(%{type: false}, _value, _opts), do: {:error, %{type: false}}
 
   defp do_validate(schema, value, opts) do
-    opts = Keyword.put(opts, :id, schema.id)
+    opts =
+      case schema.id do
+        nil -> opts
+        id -> Keyword.put(opts, :id, id)
+      end
 
     case schema do
       %{type: list} when is_list(list) ->

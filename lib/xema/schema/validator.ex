@@ -14,6 +14,7 @@ defmodule Xema.Schema.Validator do
                   :allow,
                   :any_of,
                   :as,
+                  :definitions,
                   :description,
                   :enum,
                   :id,
@@ -76,7 +77,6 @@ defmodule Xema.Schema.Validator do
             |> MapSet.union(@map_keys)
             |> MapSet.union(
               MapSet.new([
-                :definitions,
                 :ref
               ])
             )

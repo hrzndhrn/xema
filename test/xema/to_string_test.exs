@@ -85,6 +85,14 @@ defmodule Xema.ToStringTest do
     test "format" do
       assert_to_string(~s(:format, :email))
     end
+
+    test "definitions" do
+      assert_to_string(~s(:definitions, %{foo: :integer}))
+    end
+
+    test "definitions and ref" do
+      assert_to_string(~s(:any, definitions: %{foo: :integer}, ref: "#/go"))
+    end
   end
 
   describe "Xema.to_string format :data" do
