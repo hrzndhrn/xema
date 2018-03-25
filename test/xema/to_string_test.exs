@@ -93,6 +93,14 @@ defmodule Xema.ToStringTest do
     test "definitions and ref" do
       assert_to_string(~s(:any, definitions: %{foo: :integer}, ref: "#/go"))
     end
+
+    test "definitions, properties, and ref" do
+      assert_to_string("""
+      :any,
+      definitions: %{foo: :integer},
+      properties: %{foo: {:ref, "#/definitions/foo"}}
+      """)
+    end
   end
 
   describe "Xema.to_string format :data" do
@@ -105,7 +113,8 @@ defmodule Xema.ToStringTest do
   end
 
   defp assert_to_string(str) do
-    assert str |> xema() |> Xema.to_string() == "Xema.new(#{str})"
+    str = trim(str)
+    assert str |> trim() |> xema() |> Xema.to_string() == "Xema.new(#{str})"
   end
 
   defp xema(str) do
@@ -114,4 +123,7 @@ defmodule Xema.ToStringTest do
       false -> Xema.new(Code.eval_string("{#{str}}"))
     end
   end
+
+  defp trim(str), do:
+    str |> String.trim() |> String.replace(~r/\s+/, " ")
 end

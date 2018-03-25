@@ -361,7 +361,9 @@ defmodule Xema do
   defp value_to_string(%{__struct__: Regex} = regex),
     do: ~s("#{Regex.source(regex)}")
 
-  defp value_to_string(%{__struct__: Xema.Ref} = ref), do: inspect(ref.pointer)
+    defp value_to_string(%{__struct__: Xema.Ref} = ref) do
+      "#{ref}"
+    end
 
   defp value_to_string(list) when is_list(list),
     do:
@@ -380,6 +382,9 @@ defmodule Xema do
   defp value_to_string(value), do: inspect(value)
 
   @spec key_value_to_string({atom | String.t(), any}) :: String.t()
+  defp key_value_to_string({:ref, %{__struct__: Xema.Ref} = ref}),
+    do: "ref: #{inspect ref.pointer}"
+
   defp key_value_to_string({key, value}) when is_atom(key),
     do: "#{key}: #{value_to_string(value)}"
 
