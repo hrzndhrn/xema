@@ -179,6 +179,23 @@ defmodule Xema do
       when is_boolean(bool),
       do: bool |> schema([]) |> create()
 
+  def new(:ref, remote) when is_binary(remote) do
+    uri = del_fragment(remote)
+
+    case remote_schema(uri) do
+      {:ok, schema} ->
+        [pointer: remote, schema: schema]
+        |> Ref.new()
+        |> create()
+
+      {:error, %SyntaxError{description: desc, line: line}} ->
+        raise SyntaxError, description: desc, line: line, file: uri
+
+      {:error, _error} ->
+        raise SchemaError, message: "Remote schema '#{remote}' not found."
+    end
+  end
+
   defp new_multi_type(list, keywords) when is_list(list) do
     case Enum.all?(list, fn type -> type in @schema_types end) do
       true ->
@@ -221,7 +238,7 @@ defmodule Xema do
 
     defp schema(unquote(type), _opts) do
       raise SchemaError,
-        message: "Wrong argument for #{inspect unquote(type)}."
+        message: "Wrong argument for #{inspect(unquote(type))}."
     end
   end
 
@@ -305,6 +322,37 @@ defmodule Xema do
           type -> [type, value]
         end)
     end
+  end
+
+  defp remote_schema(uri) do
+    with {:ok, str} <- get_remote(uri),
+         {:ok, data} <- eval(str) do
+      data =
+        case data do
+          type when is_atom(type) -> {type, id: uri}
+          {type, keywords} -> {type, Keyword.put(keywords, :id, uri)}
+          keywords -> Keyword.put(keywords, :id, uri)
+        end
+
+      {:ok, Xema.new(data)}
+    end
+  end
+
+  defp get_remote(uri) do
+    case HTTPoison.get(uri) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
+      error -> {:error, error}
+    end
+  end
+
+  defp del_fragment(uri),
+    do: uri |> URI.parse() |> Map.put(:fragment, nil) |> URI.to_string()
+
+  defp eval(str) do
+    {data, _} = Code.eval_string(str)
+    {:ok, data}
+  rescue
+    error -> {:error, error}
   end
 
   #

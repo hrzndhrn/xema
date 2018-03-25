@@ -15,9 +15,12 @@ defmodule Xema.ErrorHandlingTest do
     expected = "Wrong argument for :string."
 
     assert_raise SchemaError, expected, fn ->
-      Xema.new(:map, properties: %{
-        pos: {:string, %{min_length: 10}}
-      })
+      Xema.new(
+        :map,
+        properties: %{
+          pos: {:string, %{min_length: 10}}
+        }
+      )
     end
   end
 end

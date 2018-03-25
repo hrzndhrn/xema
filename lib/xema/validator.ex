@@ -24,9 +24,16 @@ defmodule Xema.Validator do
     do_validate(schema, value, opts)
   end
 
-  defp do_validate(%Ref{} = ref, value, opts) do
+  defp do_validate(%Ref{schema: nil} = ref, value, opts) do
     case Ref.get(ref, opts[:root], opts[:id]) do
       {:ok, schema} -> do_validate(schema, value, opts)
+      {:error, :not_found} -> {:error, :ref_not_found}
+    end
+  end
+
+  defp do_validate(%Ref{schema: root} = ref, value, opts) do
+    case Ref.get(ref, nil, opts[:id]) do
+      {:ok, schema} -> do_validate(schema, value, root: root)
       {:error, :not_found} -> {:error, :ref_not_found}
     end
   end
