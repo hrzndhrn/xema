@@ -124,6 +124,5 @@ defmodule Xema.ToStringTest do
     end
   end
 
-  defp trim(str), do:
-    str |> String.trim() |> String.replace(~r/\s+/, " ")
+  defp trim(str), do: str |> String.trim() |> String.replace(~r/\s+/, " ")
 end
