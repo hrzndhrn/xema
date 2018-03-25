@@ -274,6 +274,88 @@ defmodule Xema.RefTest do
     end
   end
 
+  describe "schema with escaped refs" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            definitions: %{
+              "tilda~field": :integer,
+              "slash/field": :integer,
+              "percent%field": :integer
+            },
+            properties: %{
+              tilda_1: {:ref, "#/definitions/tilda~field"},
+              tilda_2: {:ref, "#/definitions/tilda~0field"},
+              tilda_3: {:ref, "#/definitions/tilda%7Efield"},
+              percent_1: {:ref, "#/definitions/percent%field"},
+              percent_2: {:ref, "#/definitions/percent%25field"},
+              slash_1: {:ref, "#/definitions/slash~1field"},
+              slash_2: {:ref, "#/definitions/slash%2Ffield"}
+            }
+          )
+      }
+    end
+
+    test "validate/2 tilda_1 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{tilda_1: 1}) == :ok
+    end
+
+    test "validate/2 tilda_1 with invalid value", %{schema: schema} do
+      assert Xema.validate(schema, %{tilda_1: "1"}) ==
+               {:error,
+                %{properties: %{tilda_1: %{type: :integer, value: "1"}}}}
+    end
+
+    test "validate/2 tilda_2 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{tilda_2: 1}) == :ok
+    end
+
+    test "validate/2 tilda_3 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{tilda_3: 1}) == :ok
+    end
+
+    test "validate/2 percent_1 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{percent_1: 1}) == :ok
+    end
+
+    test "validate/2 percent_2 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{percent_2: 1}) == :ok
+    end
+
+    test "validate/2 slash_1 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{slash_1: 1}) == :ok
+    end
+
+    test "validate/2 slash_2 with valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{slash_2: 1}) == :ok
+    end
+
+    test "validate/2 with invalid values", %{schema: schema} do
+      assert Xema.validate(schema, %{
+               tilda_1: "1",
+               tilda_2: "1",
+               tilda_3: "1",
+               slash_1: "1",
+               slash_2: "1",
+               percent_1: "1",
+               percent_2: "1"
+             }) ==
+               {:error,
+                %{
+                  properties: %{
+                    percent_1: %{type: :integer, value: "1"},
+                    percent_2: %{type: :integer, value: "1"},
+                    slash_1: %{type: :integer, value: "1"},
+                    slash_2: %{type: :integer, value: "1"},
+                    tilda_1: %{type: :integer, value: "1"},
+                    tilda_2: %{type: :integer, value: "1"},
+                    tilda_3: %{type: :integer, value: "1"}
+                  }
+                }}
+    end
+  end
+
   describe "schema with recursive refs" do
     setup do
       %{

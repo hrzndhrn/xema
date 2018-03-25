@@ -56,7 +56,7 @@ defmodule Xema.Ref do
   defp do_get([], schema), do: {:ok, schema}
 
   defp do_get([step | steps], schema) when is_map(schema) do
-    case get_value(schema, step) do
+    case get_value(schema, decode(step)) do
       {:ok, value} -> do_get(steps, value)
       {:error, _} -> {:error, :not_found}
     end
@@ -69,6 +69,15 @@ defmodule Xema.Ref do
         value -> do_get(steps, value)
       end
     end
+  end
+
+  defp decode(str) do
+    str
+    |> String.replace("~0", "~")
+    |> String.replace("~1", "/")
+    |> URI.decode()
+  rescue
+    _ -> str
   end
 
   defp to_integer(str) do
