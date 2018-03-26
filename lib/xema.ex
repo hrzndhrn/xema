@@ -199,6 +199,15 @@ defmodule Xema do
     end
   end
 
+  for type <- @schema_types do
+    def new(unquote(type), opts),
+      do: {unquote(type), opts} |> schema() |> create()
+  end
+
+  for keyword <- @schema_keywords do
+    def new(unquote(keyword), opts), do: new(:any, [{unquote(keyword), opts}])
+  end
+
   defp new_multi_type(list, keywords) when is_list(list) do
     case Enum.all?(list, fn type -> type in @schema_types end) do
       true ->
@@ -218,7 +227,7 @@ defmodule Xema do
   defp schema(list) when is_list(list) do
     case Keyword.keyword?(list) do
       true ->
-           schema({:any, list})
+        schema({:any, list})
 
       false ->
         schema({list, []})
@@ -229,16 +238,14 @@ defmodule Xema do
 
   defp schema({:ref, pointer}), do: Ref.new(pointer)
 
-  defp schema({list, opts}) when is_list(list), do:
-    opts
-    |> Keyword.put(:type, list)
-    |> update()
-    |> Schema.new()
+  defp schema({list, opts}) when is_list(list),
+    do:
+      opts
+      |> Keyword.put(:type, list)
+      |> update()
+      |> Schema.new()
 
   for type <- @schema_types do
-    def new(unquote(type), opts),
-      do: {unquote(type), opts} |> schema() |> create()
-
     defp schema({unquote(type), opts}) when is_list(opts) do
       opts = Keyword.put(opts, :type, unquote(type))
 
@@ -255,8 +262,6 @@ defmodule Xema do
   end
 
   for keyword <- @schema_keywords do
-    def new(unquote(keyword), opts), do: new(:any, [{unquote(keyword), opts}])
-
     defp schema({unquote(keyword), opts}),
       do: schema({:any, [{unquote(keyword), opts}]})
   end
