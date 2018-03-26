@@ -415,7 +415,6 @@ defmodule Xema.AnyTest do
       assert validate(schema, %{foo: 1}) == :ok
     end
 
-    @tag :only
     test """
          object with property having schema false is invalid
          """,

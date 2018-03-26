@@ -13,7 +13,6 @@ defmodule Xema.RefRemoteTest do
   end
 
   describe "invalid exon" do
-    @tag capture_log: true
     test "compile error" do
       expected =
         "http://localhost:1234/compile-error.exon:3: " <>
@@ -120,7 +119,6 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
-    @tag :only
     test "schema", %{schema: _schema} do
       # IO.inspect(schema)
     end
