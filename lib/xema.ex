@@ -201,7 +201,7 @@ defmodule Xema do
 
   for type <- @schema_types do
     def new(unquote(type), opts),
-      do: {unquote(type), opts} |> schema() |> create()
+      do: {unquote(type), opts} |> schema([]) |> create()
   end
 
   for keyword <- @schema_keywords do
@@ -211,7 +211,7 @@ defmodule Xema do
   defp new_multi_type(list, keywords) when is_list(list) do
     case Enum.all?(list, fn type -> type in @schema_types end) do
       true ->
-        {list, keywords} |> schema() |> create()
+        {list, keywords} |> schema([]) |> create()
 
       false ->
         raise(
@@ -224,111 +224,114 @@ defmodule Xema do
   #
   # function: schema
   #
-  @spec schema(any) :: Xema.Schema.t()
+  @spec schema(any, keyword) :: Xema.Schema.t()
 
-  defp schema(list) when is_list(list) do
+  defp schema(list, opts) when is_list(list) do
     case Keyword.keyword?(list) do
       true ->
-        schema({:any, list})
+        schema({:any, list}, opts)
 
       false ->
-        schema({list, []})
+        schema({list, []}, opts)
     end
   end
 
-  defp schema(value) when not is_tuple(value), do: schema({value, []})
+  defp schema(value, opts)
+    when not is_tuple(value), do: schema({value, []}, opts)
 
-  defp schema({:ref, pointer}), do: Ref.new(pointer)
+  defp schema({:ref, pointer}, _opts), do: Ref.new(pointer)
 
-  defp schema({list, keywords}) when is_list(list),
+  defp schema({list, keywords}, opts) when is_list(list),
     do:
       keywords
       |> Keyword.put(:type, list)
-      |> update()
+      |> update(opts)
       |> Schema.new()
 
   for type <- @schema_types do
-    defp schema({unquote(type), keywords}) when is_list(keywords) do
+    defp schema({unquote(type), keywords}, opts) when is_list(keywords) do
       keywords = Keyword.put(keywords, :type, unquote(type))
-      # IO.inspect keywords[:id], label: :id
+      IO.inspect keywords[:id], label: :id
+      IO.inspect opts, label: :opts
 
       case SchemaValidator.validate(unquote(type), keywords) do
-        :ok -> keywords |> update() |> Schema.new()
+        :ok -> keywords |> update(opts) |> Schema.new()
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
 
-    defp schema({unquote(type), _keywords}) do
+    defp schema({unquote(type), _keywords}, _opts) do
       raise SchemaError,
         message: "Wrong argument for #{inspect(unquote(type))}."
     end
   end
 
   for keyword <- @schema_keywords do
-    defp schema({unquote(keyword), keywords}),
-      do: schema({:any, [{unquote(keyword), keywords}]})
+    defp schema({unquote(keyword), keywords}, opts),
+      do: schema({:any, [{unquote(keyword), keywords}]}, opts)
   end
 
-  defp schema({bool, _})
+  defp schema({bool, _}, _opts)
        when is_boolean(bool),
        do: Schema.new(type: bool)
 
-  defp schema({type, _}) do
+  defp schema({type, _}, _opts) do
     raise SchemaError,
       message: "#{inspect(type)} is not a valid type or keyword."
   end
 
   # function: update/1
   #
-  @spec update(keyword) :: keyword
-  defp update(keywords) do
+  @spec update(keyword, keyword) :: keyword
+  defp update(keywords, opts) do
     keywords
     |> Keyword.put_new(:as, keywords[:type])
-    |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
-    |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
-    |> Keyword.update(:all_of, nil, &schemas/1)
-    |> Keyword.update(:any_of, nil, &schemas/1)
-    |> Keyword.update(:dependencies, nil, &dependencies/1)
-    |> Keyword.update(:items, nil, &items/1)
-    |> Keyword.update(:not, nil, &schema(&1))
-    |> Keyword.update(:one_of, nil, &schemas/1)
-    |> Keyword.update(:pattern_properties, nil, &properties/1)
-    |> Keyword.update(:properties, nil, &properties/1)
-    |> Keyword.update(:definitions, nil, &properties/1)
+    |> Keyword.update(:additional_items, nil, &(bool_or_schema(&1, opts)))
+    |> Keyword.update(:additional_properties, nil, &(bool_or_schema(&1, opts)))
+    |> Keyword.update(:all_of, nil, &(schemas(&1, opts)))
+    |> Keyword.update(:any_of, nil, &(schemas(&1, opts)))
+    |> Keyword.update(:dependencies, nil, &(dependencies(&1, opts)))
+    |> Keyword.update(:items, nil, &(items(&1, opts)))
+    |> Keyword.update(:not, nil, &schema(&1, opts))
+    |> Keyword.update(:one_of, nil, &(schemas(&1, opts)))
+    |> Keyword.update(:pattern_properties, nil, &(properties(&1, opts)))
+    |> Keyword.update(:properties, nil, &(properties(&1, opts)))
+    |> Keyword.update(:definitions, nil, &(properties(&1, opts)))
     |> Keyword.update(:required, nil, &MapSet.new/1)
     |> update_allow()
   end
 
-  @spec schemas(list) :: list
-  defp schemas(list), do: Enum.map(list, fn schema -> schema(schema) end)
+  @spec schemas(list, keyword) :: list
+  defp schemas(list, opts),
+    do: Enum.map(list, fn schema -> schema(schema, opts) end)
 
-  @spec properties(map) :: map
-  defp properties(map),
-    do: Enum.into(map, %{}, fn {key, prop} -> {key, schema(prop)} end)
+  @spec properties(map, keyword) :: map
+  defp properties(map, opts),
+    do: Enum.into(map, %{}, fn {key, prop} -> {key, schema(prop, opts)} end)
 
-  @spec dependencies(map) :: map
-  defp dependencies(map),
+  @spec dependencies(map, keyword) :: map
+  defp dependencies(map, opts),
     do:
       Enum.into(map, %{}, fn
         {key, dep} when is_list(dep) -> {key, dep}
-        {key, dep} when is_boolean(dep) -> {key, schema(dep)}
+        {key, dep} when is_boolean(dep) -> {key, schema(dep, opts)}
         {key, dep} when is_atom(dep) -> {key, [dep]}
         {key, dep} when is_binary(dep) -> {key, [dep]}
-        {key, dep} -> {key, schema(dep)}
+        {key, dep} -> {key, schema(dep, opts)}
       end)
 
-  @spec bool_or_schema(boolean | atom) :: boolean | Xema.Schema.t()
-  defp bool_or_schema(bool) when is_boolean(bool), do: bool
+  @spec bool_or_schema(boolean | atom, keyword) :: boolean | Xema.Schema.t()
+  defp bool_or_schema(bool, _opts) when is_boolean(bool), do: bool
 
-  defp bool_or_schema(schema), do: schema(schema)
+  defp bool_or_schema(schema, opts), do: schema(schema, opts)
 
-  @spec items(any) :: list
-  defp items(schema) when is_atom(schema) or is_tuple(schema),
-    do: schema(schema)
+  @spec items(any, keyword) :: list
+  defp items(schema, opts) when is_atom(schema) or is_tuple(schema),
+    do: schema(schema, opts)
 
-  defp items(schemas) when is_list(schemas), do: schemas(schemas)
+  defp items(schemas, opts) when is_list(schemas), do: schemas(schemas, opts)
 
-  defp items(items), do: items
+  defp items(items, _opts), do: items
 
   defp update_allow(opts) do
     case Keyword.get(opts, :allow, :undefined) do
