@@ -1,0 +1,4 @@
+:string,
+definitions: %{
+  orNull: {:any_of, [:nil, {:ref, "#"}]}
+}
