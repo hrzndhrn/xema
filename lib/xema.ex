@@ -177,7 +177,7 @@ defmodule Xema do
 
   def new(bool, [])
       when is_boolean(bool),
-      do: bool |> schema([]) |> create()
+      do: [type: bool] |> Schema.new() |> create()
 
   def new(:ref, remote) when is_binary(remote) do
     uri = del_fragment(remote)
@@ -191,7 +191,11 @@ defmodule Xema do
       {:error, %SyntaxError{description: desc, line: line}} ->
         raise SyntaxError, description: desc, line: line, file: uri
 
-      {:error, _error} ->
+      {:error, %CompileError{description: desc, line: line}} ->
+        raise CompileError, description: desc, line: line, file: uri
+
+      {:error, error} ->
+        IO.inspect(error)
         raise SchemaError, message: "Remote schema '#{remote}' not found."
     end
   end
@@ -199,7 +203,7 @@ defmodule Xema do
   defp new_multi_type(list, keywords) when is_list(list) do
     case Enum.all?(list, fn type -> type in @schema_types end) do
       true ->
-        list |> schema(keywords) |> create
+        {list, keywords} |> schema() |> create()
 
       false ->
         raise(
@@ -209,25 +213,41 @@ defmodule Xema do
     end
   end
 
-  @spec schema(schema_types | schema_keywords | [schema_types], keyword) ::
+  @spec schema(schema_types | schema_keywords | [schema_types]) ::
           Xema.Schema.t()
-  defp schema(type, keywords \\ [])
+  # defp schema(type, keywords \\ [])
 
-  defp schema({:ref, pointer}, _opts), do: Ref.new(pointer)
+  defp schema(list) when is_list(list) do
+    case Keyword.keyword?(list) do
+      true ->
+           schema({:any, list})
 
-  defp schema(list, opts) when is_list(list) do
+      false ->
+        schema({list, []})
+    end
+  end
+
+  defp schema(value) when not is_tuple(value), do: schema({value, []})
+
+  defp schema({:ref, pointer}) do
+    # IO.inspect opts, label: :schema_ref_opts
+    Ref.new(pointer)
+  end
+
+  defp schema({list, opts}) when is_list(list), do:
     opts
     |> Keyword.put(:type, list)
     |> update()
     |> Schema.new()
-  end
 
   for type <- @schema_types do
-    def new(unquote(type), opts), do: unquote(type) |> schema(opts) |> create()
+    def new(unquote(type), opts),
+      do: {unquote(type), opts} |> schema() |> create()
 
-    defp schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
+    # defp schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
 
-    defp schema(unquote(type), opts) when is_list(opts) do
+    # defp schema({unquote(type), opts}), do: schema(unquote(type), opts)
+    defp schema({unquote(type), opts}) when is_list(opts) do
       opts = Keyword.put(opts, :type, unquote(type))
 
       case SchemaValidator.validate(unquote(type), opts) do
@@ -236,7 +256,17 @@ defmodule Xema do
       end
     end
 
-    defp schema(unquote(type), _opts) do
+    #defp schema(unquote(type), opts) when is_list(opts) do
+    #  raise RuntimeError, message: "deprecated"
+    #  opts = Keyword.put(opts, :type, unquote(type))
+    #
+    #  case SchemaValidator.validate(unquote(type), opts) do
+    #    :ok -> opts |> update() |> Schema.new()
+    #    {:error, msg} -> raise SchemaError, message: msg
+    #  end
+    #end
+
+    defp schema({unquote(type), _opts}) do
       raise SchemaError,
         message: "Wrong argument for #{inspect(unquote(type))}."
     end
@@ -245,18 +275,15 @@ defmodule Xema do
   for keyword <- @schema_keywords do
     def new(unquote(keyword), opts), do: new(:any, [{unquote(keyword), opts}])
 
-    defp schema({unquote(keyword), opts}, []),
-      do: schema(:any, [{unquote(keyword), opts}])
-
-    defp schema(%{unquote(keyword) => opts}, []),
-      do: schema(:any, [{unquote(keyword), opts}])
+    defp schema({unquote(keyword), opts}),
+      do: schema({:any, [{unquote(keyword), opts}]})
   end
 
-  defp schema(bool, [])
+  defp schema({bool, _})
        when is_boolean(bool),
        do: Schema.new(type: bool)
 
-  defp schema(type, _) do
+  defp schema({type, _}) do
     raise SchemaError,
       message: "#{inspect(type)} is not a valid type or keyword."
   end

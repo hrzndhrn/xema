@@ -279,11 +279,24 @@ defmodule Xema.AnyTest do
           Xema.new(
             :integer,
             one_of: [
-              %{multiple_of: 3},
-              %{multiple_of: 5}
+              {:multiple_of, 3},
+              {:multiple_of, 5}
             ]
           )
       }
+    end
+
+    test "alternative notation", %{schema: schema} do
+      alternative =
+        Xema.new(
+          :integer,
+          one_of: [
+            [multiple_of: 3],
+            [multiple_of: 5]
+          ]
+        )
+
+      assert schema == alternative
     end
 
     test "type", %{schema: schema} do
