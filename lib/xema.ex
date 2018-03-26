@@ -221,8 +221,10 @@ defmodule Xema do
     end
   end
 
-  @spec schema(schema_types | schema_keywords | [schema_types]) ::
-          Xema.Schema.t()
+  #
+  # function: schema
+  #
+  @spec schema(any) :: Xema.Schema.t()
 
   defp schema(list) when is_list(list) do
     case Keyword.keyword?(list) do
@@ -238,32 +240,33 @@ defmodule Xema do
 
   defp schema({:ref, pointer}), do: Ref.new(pointer)
 
-  defp schema({list, opts}) when is_list(list),
+  defp schema({list, keywords}) when is_list(list),
     do:
-      opts
+      keywords
       |> Keyword.put(:type, list)
       |> update()
       |> Schema.new()
 
   for type <- @schema_types do
-    defp schema({unquote(type), opts}) when is_list(opts) do
-      opts = Keyword.put(opts, :type, unquote(type))
+    defp schema({unquote(type), keywords}) when is_list(keywords) do
+      keywords = Keyword.put(keywords, :type, unquote(type))
+      # IO.inspect keywords[:id], label: :id
 
-      case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> opts |> update() |> Schema.new()
+      case SchemaValidator.validate(unquote(type), keywords) do
+        :ok -> keywords |> update() |> Schema.new()
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
 
-    defp schema({unquote(type), _opts}) do
+    defp schema({unquote(type), _keywords}) do
       raise SchemaError,
         message: "Wrong argument for #{inspect(unquote(type))}."
     end
   end
 
   for keyword <- @schema_keywords do
-    defp schema({unquote(keyword), opts}),
-      do: schema({:any, [{unquote(keyword), opts}]})
+    defp schema({unquote(keyword), keywords}),
+      do: schema({:any, [{unquote(keyword), keywords}]})
   end
 
   defp schema({bool, _})
@@ -275,10 +278,12 @@ defmodule Xema do
       message: "#{inspect(type)} is not a valid type or keyword."
   end
 
+  # function: update/1
+  #
   @spec update(keyword) :: keyword
-  defp update(opts) do
-    opts
-    |> Keyword.put_new(:as, opts[:type])
+  defp update(keywords) do
+    keywords
+    |> Keyword.put_new(:as, keywords[:type])
     |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
     |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
     |> Keyword.update(:all_of, nil, &schemas/1)

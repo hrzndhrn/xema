@@ -119,8 +119,18 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
-    test "schema", %{schema: _schema} do
-      # IO.inspect(schema)
+    @tag :only
+    test "schema", %{schema: schema} do
+      IO.inspect schema, label: :schema
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{list: [1]}) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert Xema.validate(schema, %{list: ["1"]}) ==
+               {:error, %{type: :integer, value: "1"}}
     end
   end
 end
