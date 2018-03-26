@@ -95,7 +95,11 @@ defmodule Xema.Schema.Validator do
   @spec validate(atom, keyword) :: :ok | {:error, String.t()}
   def validate(_, []), do: :ok
 
-  def validate(nil, type: nil), do: :ok
+  def validate(nil, keywords) do
+    case Keyword.has_key?(keywords, :type) && keywords[:type] == nil do
+      true -> :ok
+    end
+  end
 
   def validate(:any, opts) do
     with :ok <- validate_keywords(:any, opts),

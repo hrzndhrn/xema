@@ -14,9 +14,14 @@ defmodule Xema.Ref do
 
   @spec new(keyword | String.t()) :: Ref.t()
 
-  def new(str) when is_binary(str), do: %Ref{pointer: str}
+  def new(pointer) when is_binary(pointer), do: %Ref{pointer: pointer}
 
   def new(opts), do: struct(Ref, opts)
+
+  def new(%URI{} = uri, schema),
+    do: %Ref{pointer: URI.to_string(uri), schema: schema}
+
+  def new(pointer, schema), do: %Ref{pointer: pointer, schema: schema}
 
   @spec get(Ref.t(), Xema.t() | Schema.t() | String.t() | nil) ::
           {:ok, Schema.t()} | {:error, atom}

@@ -237,9 +237,28 @@ defmodule Xema do
   end
 
   defp schema(value, opts)
-    when not is_tuple(value), do: schema({value, []}, opts)
+       when not is_tuple(value),
+       do: schema({value, []}, opts)
 
-  defp schema({:ref, pointer}, _opts), do: Ref.new(pointer)
+  defp schema({:ref, "#" <> _ = pointer}, _opts), do: Ref.new(pointer)
+
+  defp schema({:ref, pointer}, opts) do
+    uri = opts[:id] |> URI.parse() |> update_path(pointer)
+
+    case String.ends_with?(uri.path, ".exon") do
+      true ->
+        case remote_schema(uri) do
+          {:ok, schema} ->
+            Ref.new(uri, schema)
+
+          {:error, :not_found} ->
+            raise SchemaError, message: "Schema '#{pointer}' not found."
+        end
+
+      false ->
+        Ref.new(pointer)
+    end
+  end
 
   defp schema({list, keywords}, opts) when is_list(list),
     do:
@@ -251,8 +270,7 @@ defmodule Xema do
   for type <- @schema_types do
     defp schema({unquote(type), keywords}, opts) when is_list(keywords) do
       keywords = Keyword.put(keywords, :type, unquote(type))
-      IO.inspect keywords[:id], label: :id
-      IO.inspect opts, label: :opts
+      {keywords, opts} = update_id(keywords, opts)
 
       case SchemaValidator.validate(unquote(type), keywords) do
         :ok -> keywords |> update(opts) |> Schema.new()
@@ -280,23 +298,62 @@ defmodule Xema do
       message: "#{inspect(type)} is not a valid type or keyword."
   end
 
+  defp update_path(uri, pointer) do
+    path =
+      case uri.path do
+        nil ->
+          Path.join("/", pointer)
+
+        path ->
+          if String.ends_with?(path, "/"),
+            do: Path.join(path, pointer),
+            else: Path.join("/", pointer)
+      end
+
+    Map.put(uri, :path, path) |> URI.to_string() |> URI.parse()
+  end
+
+  @spec update_id(keyword, keyword) :: {keyword, keyword}
+  defp update_id(keywords, opts) do
+    {kid, oid} = do_update_id(keywords[:id], opts[:id])
+
+    {Keyword.put(keywords, :id, kid), Keyword.put(opts, :id, oid)}
+  end
+
+  defp do_update_id(nil, oid) do
+    {nil, oid}
+  end
+
+  defp do_update_id("http" <> _ = kid, nil) do
+    {kid, kid}
+  end
+
+  defp do_update_id(kid, "http" <> _ = oid) do
+    id = oid |> URI.merge(kid) |> URI.to_string()
+    {id, id}
+  end
+
+  defp do_update_id(kid, oid) do
+    {kid, oid}
+  end
+
   # function: update/1
   #
   @spec update(keyword, keyword) :: keyword
   defp update(keywords, opts) do
     keywords
     |> Keyword.put_new(:as, keywords[:type])
-    |> Keyword.update(:additional_items, nil, &(bool_or_schema(&1, opts)))
-    |> Keyword.update(:additional_properties, nil, &(bool_or_schema(&1, opts)))
-    |> Keyword.update(:all_of, nil, &(schemas(&1, opts)))
-    |> Keyword.update(:any_of, nil, &(schemas(&1, opts)))
-    |> Keyword.update(:dependencies, nil, &(dependencies(&1, opts)))
-    |> Keyword.update(:items, nil, &(items(&1, opts)))
+    |> Keyword.update(:additional_items, nil, &bool_or_schema(&1, opts))
+    |> Keyword.update(:additional_properties, nil, &bool_or_schema(&1, opts))
+    |> Keyword.update(:all_of, nil, &schemas(&1, opts))
+    |> Keyword.update(:any_of, nil, &schemas(&1, opts))
+    |> Keyword.update(:dependencies, nil, &dependencies(&1, opts))
+    |> Keyword.update(:items, nil, &items(&1, opts))
     |> Keyword.update(:not, nil, &schema(&1, opts))
-    |> Keyword.update(:one_of, nil, &(schemas(&1, opts)))
-    |> Keyword.update(:pattern_properties, nil, &(properties(&1, opts)))
-    |> Keyword.update(:properties, nil, &(properties(&1, opts)))
-    |> Keyword.update(:definitions, nil, &(properties(&1, opts)))
+    |> Keyword.update(:one_of, nil, &schemas(&1, opts))
+    |> Keyword.update(:pattern_properties, nil, &properties(&1, opts))
+    |> Keyword.update(:properties, nil, &properties(&1, opts))
+    |> Keyword.update(:definitions, nil, &properties(&1, opts))
     |> Keyword.update(:required, nil, &MapSet.new/1)
     |> update_allow()
   end
@@ -346,6 +403,8 @@ defmodule Xema do
     end
   end
 
+  defp remote_schema(%URI{} = uri), do: remote_schema(URI.to_string(uri))
+
   defp remote_schema(uri) do
     with {:ok, str} <- get_remote(uri),
          {:ok, data} <- eval(str) do
@@ -357,12 +416,22 @@ defmodule Xema do
         end
 
       {:ok, Xema.new(data)}
+    else
+      {:error, %SyntaxError{description: desc, line: line}} ->
+        raise SyntaxError, description: desc, line: line, file: uri
+
+      {:error, %CompileError{description: desc, line: line}} ->
+        raise CompileError, description: desc, line: line, file: uri
+
+      {:error, :not_found} ->
+        raise SchemaError, message: "Remote schema '#{uri}' not found."
     end
   end
 
   defp get_remote(uri) do
     case HTTPoison.get(uri) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
+      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
       error -> {:error, error}
     end
   end

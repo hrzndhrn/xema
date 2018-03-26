@@ -119,18 +119,40 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
-    @tag :only
-    test "schema", %{schema: schema} do
-      # IO.inspect schema, label: :schema
-    end
-
     test "validate/2 with a valid value", %{schema: schema} do
       assert Xema.validate(schema, %{list: [1]}) == :ok
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, %{list: ["1"]}) ==
-               {:error, %{type: :integer, value: "1"}}
+               {:error,
+                %{properties: %{list: [{0, %{type: :integer, value: "1"}}]}}}
+    end
+  end
+
+  describe "root ref in remote ref" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            id: "http://localhost:1234/object",
+            properties: %{
+              name: {:ref, "name.exon#/definitions/or_nil"}
+            }
+          )
+      }
+    end
+
+    @tag :only
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{name: "foo"}) == :ok
+      assert Xema.validate(schema, %{name: nil}) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert Xema.validate(schema, %{name: 1}) ==
+               {:error, %{properties: %{name: :any_of}}}
     end
   end
 end
