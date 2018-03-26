@@ -121,7 +121,7 @@ defmodule Xema.RefRemoteTest do
 
     @tag :only
     test "schema", %{schema: schema} do
-      IO.inspect schema, label: :schema
+      # IO.inspect schema, label: :schema
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
