@@ -3,6 +3,8 @@ defmodule Xema.RefRemoteTest do
 
   alias Xema.SchemaError
 
+  require Logger
+
   test "http server" do
     assert %{body: body} =
              HTTPoison.get!("http://localhost:1234/folder/folderInteger.exon")
@@ -11,7 +13,7 @@ defmodule Xema.RefRemoteTest do
   end
 
   describe "invalid exon" do
-    @tag :syntax
+    @tag capture_log: true
     test "compile error" do
       expected =
         "http://localhost:1234/compile-error.exon:3: " <>
@@ -22,7 +24,6 @@ defmodule Xema.RefRemoteTest do
       end
     end
 
-    @tag :syntax
     test "syntax error" do
       expected =
         "http://localhost:1234/syntax-error.exon:2: " <>
@@ -120,8 +121,8 @@ defmodule Xema.RefRemoteTest do
     end
 
     @tag :only
-    test "schema", %{schema: schema} do
-      IO.inspect(schema)
+    test "schema", %{schema: _schema} do
+      # IO.inspect(schema)
     end
   end
 end

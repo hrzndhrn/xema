@@ -14,15 +14,9 @@ defmodule Xema.Ref do
 
   @spec new(keyword | String.t()) :: Ref.t()
 
-  def new(str) when is_binary(str) do
-    IO.inspect(str, label: :pointer)
-    %Ref{pointer: str}
-  end
+  def new(str) when is_binary(str), do: %Ref{pointer: str}
 
-  def new(opts) do
-    IO.inspect(opts, label: :ref)
-    struct(Ref, opts)
-  end
+  def new(opts), do: struct(Ref, opts)
 
   @spec get(Ref.t(), Xema.t() | Schema.t() | String.t() | nil) ::
           {:ok, Schema.t()} | {:error, atom}

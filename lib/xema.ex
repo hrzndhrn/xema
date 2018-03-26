@@ -194,8 +194,7 @@ defmodule Xema do
       {:error, %CompileError{description: desc, line: line}} ->
         raise CompileError, description: desc, line: line, file: uri
 
-      {:error, error} ->
-        IO.inspect(error)
+      {:error, _error} ->
         raise SchemaError, message: "Remote schema '#{remote}' not found."
     end
   end
@@ -215,7 +214,6 @@ defmodule Xema do
 
   @spec schema(schema_types | schema_keywords | [schema_types]) ::
           Xema.Schema.t()
-  # defp schema(type, keywords \\ [])
 
   defp schema(list) when is_list(list) do
     case Keyword.keyword?(list) do
@@ -229,10 +227,7 @@ defmodule Xema do
 
   defp schema(value) when not is_tuple(value), do: schema({value, []})
 
-  defp schema({:ref, pointer}) do
-    # IO.inspect opts, label: :schema_ref_opts
-    Ref.new(pointer)
-  end
+  defp schema({:ref, pointer}), do: Ref.new(pointer)
 
   defp schema({list, opts}) when is_list(list), do:
     opts
@@ -244,9 +239,6 @@ defmodule Xema do
     def new(unquote(type), opts),
       do: {unquote(type), opts} |> schema() |> create()
 
-    # defp schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
-
-    # defp schema({unquote(type), opts}), do: schema(unquote(type), opts)
     defp schema({unquote(type), opts}) when is_list(opts) do
       opts = Keyword.put(opts, :type, unquote(type))
 
@@ -255,16 +247,6 @@ defmodule Xema do
         {:error, msg} -> raise SchemaError, message: msg
       end
     end
-
-    #defp schema(unquote(type), opts) when is_list(opts) do
-    #  raise RuntimeError, message: "deprecated"
-    #  opts = Keyword.put(opts, :type, unquote(type))
-    #
-    #  case SchemaValidator.validate(unquote(type), opts) do
-    #    :ok -> opts |> update() |> Schema.new()
-    #    {:error, msg} -> raise SchemaError, message: msg
-    #  end
-    #end
 
     defp schema({unquote(type), _opts}) do
       raise SchemaError,
