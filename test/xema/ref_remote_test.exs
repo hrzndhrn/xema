@@ -195,5 +195,4 @@ defmodule Xema.RefRemoteTest do
                {:error, %{properties: %{name: :any_of}}}
     end
   end
-
 end
