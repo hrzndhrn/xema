@@ -12,7 +12,6 @@ defmodule Xema.ListTest do
       assert schema.content.as == :list
     end
 
-    @tag :only
     test "validate/2 with an empty list", %{schema: schema} do
       assert validate(schema, []) == :ok
     end

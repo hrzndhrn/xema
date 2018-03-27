@@ -5,6 +5,7 @@ defmodule Xema do
 
   use Xema.Base
 
+  alias Xema.Ref
   alias Xema.Schema
   alias Xema.Schema.Validator, as: SchemaValidator
   alias Xema.SchemaError
@@ -44,6 +45,7 @@ defmodule Xema do
           | :additional_properties
           | :all_of
           | :any_of
+          | :definitions
           | :dependencies
           | :enum
           | :exclusive_maximum
@@ -74,6 +76,7 @@ defmodule Xema do
     :additional_properties,
     :all_of,
     :any_of,
+    :definitions,
     :dependencies,
     :enum,
     :exclusive_maximum,
@@ -160,10 +163,55 @@ defmodule Xema do
 
   def new({type, keywords}, []), do: new(type, keywords)
 
-  def new(list, keywords) when is_list(list) do
+  def new(list, []) when is_list(list) do
+    case Keyword.keyword?(list) do
+      true -> new(:any, list)
+      false -> new_multi_type(list, [])
+    end
+  end
+
+  def new(list, keywords) when is_list(list), do: new_multi_type(list, keywords)
+
+  def new(tuple, keywords) when is_tuple(tuple),
+    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
+
+  def new(bool, [])
+      when is_boolean(bool),
+      do: [type: bool] |> Schema.new() |> create()
+
+  def new(:ref, remote) when is_binary(remote) do
+    uri = del_fragment(remote)
+
+    case remote_schema(uri) do
+      {:ok, schema} ->
+        [pointer: remote, schema: schema]
+        |> Ref.new()
+        |> create()
+
+      {:error, %SyntaxError{description: desc, line: line}} ->
+        raise SyntaxError, description: desc, line: line, file: uri
+
+      {:error, %CompileError{description: desc, line: line}} ->
+        raise CompileError, description: desc, line: line, file: uri
+
+      {:error, _error} ->
+        raise SchemaError, message: "Remote schema '#{remote}' not found."
+    end
+  end
+
+  for type <- @schema_types do
+    def new(unquote(type), opts),
+      do: {unquote(type), opts} |> schema([]) |> create()
+  end
+
+  for keyword <- @schema_keywords do
+    def new(unquote(keyword), opts), do: new(:any, [{unquote(keyword), opts}])
+  end
+
+  defp new_multi_type(list, keywords) when is_list(list) do
     case Enum.all?(list, fn type -> type in @schema_types end) do
       true ->
-        list |> schema(keywords) |> create
+        {list, keywords} |> schema([]) |> create()
 
       false ->
         raise(
@@ -173,106 +221,174 @@ defmodule Xema do
     end
   end
 
-  def new(tuple, keywords) when is_tuple(tuple),
-    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
-
-  def new(bool, [])
-      when is_boolean(bool),
-      do: bool |> schema([]) |> create()
-
-  @spec schema(schema_types | schema_keywords | [schema_types], keyword) ::
-          Xema.Schema.t()
-  defp schema(type, keywords \\ [])
+  #
+  # function: schema
+  #
+  @spec schema(any, keyword) :: Xema.Schema.t()
 
   defp schema(list, opts) when is_list(list) do
-    opts
-    |> Keyword.put(:type, list)
-    |> update()
-    |> Schema.new()
+    case Keyword.keyword?(list) do
+      true ->
+        schema({:any, list}, opts)
+
+      false ->
+        schema({list, []}, opts)
+    end
   end
 
+  defp schema(value, opts)
+       when not is_tuple(value),
+       do: schema({value, []}, opts)
+
+  defp schema({:ref, "#" <> _ = pointer}, _opts), do: Ref.new(pointer)
+
+  defp schema({:ref, pointer}, opts) do
+    uri = opts[:id] |> URI.parse() |> update_path(pointer)
+
+    case String.ends_with?(uri.path, ".exon") do
+      true ->
+        case remote_schema(uri) do
+          {:ok, schema} ->
+            Ref.new(uri, schema)
+
+          {:error, :not_found} ->
+            raise SchemaError, message: "Schema '#{pointer}' not found."
+        end
+
+      false ->
+        Ref.new(pointer)
+    end
+  end
+
+  defp schema({list, keywords}, opts) when is_list(list),
+    do:
+      keywords
+      |> Keyword.put(:type, list)
+      |> update(opts)
+      |> Schema.new()
+
   for type <- @schema_types do
-    def new(unquote(type), opts), do: unquote(type) |> schema(opts) |> create()
+    defp schema({unquote(type), keywords}, opts) when is_list(keywords) do
+      keywords = Keyword.put(keywords, :type, unquote(type))
+      {keywords, opts} = update_id(keywords, opts)
 
-    defp schema({unquote(type), opts}, []), do: schema(unquote(type), opts)
-
-    defp schema(unquote(type), opts) do
-      opts = Keyword.put(opts, :type, unquote(type))
-
-      case SchemaValidator.validate(unquote(type), opts) do
-        :ok -> opts |> update() |> Schema.new()
+      case SchemaValidator.validate(unquote(type), keywords) do
+        :ok -> keywords |> update(opts) |> Schema.new()
         {:error, msg} -> raise SchemaError, message: msg
       end
+    end
+
+    defp schema({unquote(type), _keywords}, _opts) do
+      raise SchemaError,
+        message: "Wrong argument for #{inspect(unquote(type))}."
     end
   end
 
   for keyword <- @schema_keywords do
-    def new(unquote(keyword), opts), do: new(:any, [{unquote(keyword), opts}])
-
-    defp schema({unquote(keyword), opts}, []),
-      do: schema(:any, [{unquote(keyword), opts}])
-
-    defp schema(%{unquote(keyword) => opts}, []),
-      do: schema(:any, [{unquote(keyword), opts}])
+    defp schema({unquote(keyword), keywords}, opts),
+      do: schema({:any, [{unquote(keyword), keywords}]}, opts)
   end
 
-  defp schema(bool, [])
+  defp schema({bool, _}, _opts)
        when is_boolean(bool),
        do: Schema.new(type: bool)
 
-  defp schema(type, _) do
+  defp schema({type, _}, _opts) do
     raise SchemaError,
       message: "#{inspect(type)} is not a valid type or keyword."
   end
 
-  @spec update(keyword) :: keyword
-  defp update(opts) do
-    opts
-    |> Keyword.put_new(:as, opts[:type])
-    |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
-    |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
-    |> Keyword.update(:all_of, nil, &schemas/1)
-    |> Keyword.update(:any_of, nil, &schemas/1)
-    |> Keyword.update(:dependencies, nil, &dependencies/1)
-    |> Keyword.update(:items, nil, &items/1)
-    |> Keyword.update(:not, nil, fn schema -> schema(schema) end)
-    |> Keyword.update(:one_of, nil, &schemas/1)
-    |> Keyword.update(:pattern_properties, nil, &properties/1)
-    |> Keyword.update(:properties, nil, &properties/1)
+  defp update_path(uri, pointer) do
+    path =
+      case uri.path do
+        nil ->
+          Path.join("/", pointer)
+
+        path ->
+          if String.ends_with?(path, "/"),
+            do: Path.join(path, pointer),
+            else: Path.join("/", pointer)
+      end
+
+    Map.put(uri, :path, path) |> URI.to_string() |> URI.parse()
+  end
+
+  @spec update_id(keyword, keyword) :: {keyword, keyword}
+  defp update_id(keywords, opts) do
+    {kid, oid} = do_update_id(keywords[:id], opts[:id])
+
+    {Keyword.put(keywords, :id, kid), Keyword.put(opts, :id, oid)}
+  end
+
+  defp do_update_id(nil, oid) do
+    {nil, oid}
+  end
+
+  defp do_update_id("http" <> _ = kid, nil) do
+    {kid, kid}
+  end
+
+  defp do_update_id(kid, "http" <> _ = oid) do
+    id = oid |> URI.merge(kid) |> URI.to_string()
+    {id, id}
+  end
+
+  defp do_update_id(kid, oid) do
+    {kid, oid}
+  end
+
+  # function: update/1
+  #
+  @spec update(keyword, keyword) :: keyword
+  defp update(keywords, opts) do
+    keywords
+    |> Keyword.put_new(:as, keywords[:type])
+    |> Keyword.update(:additional_items, nil, &bool_or_schema(&1, opts))
+    |> Keyword.update(:additional_properties, nil, &bool_or_schema(&1, opts))
+    |> Keyword.update(:all_of, nil, &schemas(&1, opts))
+    |> Keyword.update(:any_of, nil, &schemas(&1, opts))
+    |> Keyword.update(:dependencies, nil, &dependencies(&1, opts))
+    |> Keyword.update(:items, nil, &items(&1, opts))
+    |> Keyword.update(:not, nil, &schema(&1, opts))
+    |> Keyword.update(:one_of, nil, &schemas(&1, opts))
+    |> Keyword.update(:pattern_properties, nil, &properties(&1, opts))
+    |> Keyword.update(:properties, nil, &properties(&1, opts))
+    |> Keyword.update(:definitions, nil, &properties(&1, opts))
     |> Keyword.update(:required, nil, &MapSet.new/1)
     |> update_allow()
   end
 
-  @spec schemas(list) :: list
-  defp schemas(list), do: Enum.map(list, fn schema -> schema(schema) end)
+  @spec schemas(list, keyword) :: list
+  defp schemas(list, opts),
+    do: Enum.map(list, fn schema -> schema(schema, opts) end)
 
-  @spec properties(map) :: map
-  defp properties(map),
-    do: Enum.into(map, %{}, fn {key, prop} -> {key, schema(prop)} end)
+  @spec properties(map, keyword) :: map
+  defp properties(map, opts),
+    do: Enum.into(map, %{}, fn {key, prop} -> {key, schema(prop, opts)} end)
 
-  @spec dependencies(map) :: map
-  defp dependencies(map),
+  @spec dependencies(map, keyword) :: map
+  defp dependencies(map, opts),
     do:
       Enum.into(map, %{}, fn
         {key, dep} when is_list(dep) -> {key, dep}
-        {key, dep} when is_boolean(dep) -> {key, schema(dep)}
+        {key, dep} when is_boolean(dep) -> {key, schema(dep, opts)}
         {key, dep} when is_atom(dep) -> {key, [dep]}
         {key, dep} when is_binary(dep) -> {key, [dep]}
-        {key, dep} -> {key, schema(dep)}
+        {key, dep} -> {key, schema(dep, opts)}
       end)
 
-  @spec bool_or_schema(boolean | atom) :: boolean | Xema.Schema.t()
-  defp bool_or_schema(bool) when is_boolean(bool), do: bool
+  @spec bool_or_schema(boolean | atom, keyword) :: boolean | Xema.Schema.t()
+  defp bool_or_schema(bool, _opts) when is_boolean(bool), do: bool
 
-  defp bool_or_schema(schema), do: schema(schema)
+  defp bool_or_schema(schema, opts), do: schema(schema, opts)
 
-  @spec items(any) :: list
-  defp items(schema) when is_atom(schema) or is_tuple(schema),
-    do: schema(schema)
+  @spec items(any, keyword) :: list
+  defp items(schema, opts) when is_atom(schema) or is_tuple(schema),
+    do: schema(schema, opts)
 
-  defp items(schemas) when is_list(schemas), do: schemas(schemas)
+  defp items(schemas, opts) when is_list(schemas), do: schemas(schemas, opts)
 
-  defp items(items), do: items
+  defp items(items, _opts), do: items
 
   defp update_allow(opts) do
     case Keyword.get(opts, :allow, :undefined) do
@@ -285,6 +401,49 @@ defmodule Xema do
           type -> [type, value]
         end)
     end
+  end
+
+  defp remote_schema(%URI{} = uri), do: remote_schema(URI.to_string(uri))
+
+  defp remote_schema(uri) do
+    with {:ok, str} <- get_remote(uri),
+         {:ok, data} <- eval(str) do
+      data =
+        case data do
+          type when is_atom(type) -> {type, id: uri}
+          {type, keywords} -> {type, Keyword.put(keywords, :id, uri)}
+          keywords -> Keyword.put(keywords, :id, uri)
+        end
+
+      {:ok, Xema.new(data)}
+    else
+      {:error, %SyntaxError{description: desc, line: line}} ->
+        raise SyntaxError, description: desc, line: line, file: uri
+
+      {:error, %CompileError{description: desc, line: line}} ->
+        raise CompileError, description: desc, line: line, file: uri
+
+      {:error, :not_found} ->
+        raise SchemaError, message: "Remote schema '#{uri}' not found."
+    end
+  end
+
+  defp get_remote(uri) do
+    case HTTPoison.get(uri) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
+      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
+      error -> {:error, error}
+    end
+  end
+
+  defp del_fragment(uri),
+    do: uri |> URI.parse() |> Map.put(:fragment, nil) |> URI.to_string()
+
+  defp eval(str) do
+    {data, _} = Code.eval_string(str)
+    {:ok, data}
+  rescue
+    error -> {:error, error}
   end
 
   #
@@ -346,6 +505,10 @@ defmodule Xema do
   defp value_to_string(%{__struct__: Regex} = regex),
     do: ~s("#{Regex.source(regex)}")
 
+  defp value_to_string(%{__struct__: Xema.Ref} = ref) do
+    "#{ref}"
+  end
+
   defp value_to_string(list) when is_list(list),
     do:
       list
@@ -363,6 +526,9 @@ defmodule Xema do
   defp value_to_string(value), do: inspect(value)
 
   @spec key_value_to_string({atom | String.t(), any}) :: String.t()
+  defp key_value_to_string({:ref, %{__struct__: Xema.Ref} = ref}),
+    do: "ref: #{inspect(ref.pointer)}"
+
   defp key_value_to_string({key, value}) when is_atom(key),
     do: "#{key}: #{value_to_string(value)}"
 

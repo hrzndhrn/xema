@@ -14,6 +14,7 @@ defmodule Xema.Schema.Validator do
                   :allow,
                   :any_of,
                   :as,
+                  :definitions,
                   :description,
                   :enum,
                   :id,
@@ -74,6 +75,11 @@ defmodule Xema.Schema.Validator do
             |> MapSet.union(@string_keys)
             |> MapSet.union(@list_keys)
             |> MapSet.union(@map_keys)
+            |> MapSet.union(
+              MapSet.new([
+                :ref
+              ])
+            )
 
   @keys [
     any: @any_keys,
@@ -89,13 +95,18 @@ defmodule Xema.Schema.Validator do
   @spec validate(atom, keyword) :: :ok | {:error, String.t()}
   def validate(_, []), do: :ok
 
-  def validate(nil, type: nil), do: :ok
+  def validate(nil, keywords) do
+    case Keyword.has_key?(keywords, :type) && keywords[:type] == nil do
+      true -> :ok
+    end
+  end
 
   def validate(:any, opts) do
     with :ok <- validate_keywords(:any, opts),
          :ok <- enum(:any, opts[:enum]),
          :ok <- schemas(opts, :all_of),
          :ok <- schemas(opts, :any_of),
+         :ok <- string(opts, :ref),
          do: :ok
   end
 
@@ -164,6 +175,16 @@ defmodule Xema.Schema.Validator do
          :ok <- non_negative_integer(:min_length, opts[:min_length]),
          :ok <- regex(:pattern, opts[:pattern]) do
       :ok
+    end
+  end
+
+  # Check if keyword value a string
+
+  defp string(opts, key) do
+    case opts[key] do
+      nil -> :ok
+      value when is_binary(value) -> :ok
+      _ -> {:error, "The value for '#{key}' must be a string."}
     end
   end
 

@@ -1,0 +1,4 @@
+[definitions: %{
+  int: :integer,
+  refToInt: {:ref, "#/definitions/int"}
+}]

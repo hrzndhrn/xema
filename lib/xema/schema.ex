@@ -12,6 +12,7 @@ defmodule Xema.Schema do
       true
   """
 
+  alias Xema.Ref
   alias Xema.Schema
 
   @typedoc """
@@ -22,6 +23,7 @@ defmodule Xema.Schema do
   * `additional_properties` disallow additional properties, if set to true.
   * `as` is used in an error report.
   * `as` is used in an error report. Default of `as` is `:list`.
+  # `definitions` contains schemas for reuse.
   * `dependencies` allows the schema of the map to change based on the presence
     of certain special properties
   * `description` of the schema.
@@ -49,6 +51,7 @@ defmodule Xema.Schema do
   * `pattern_properties` specifies schemas for properties by patterns
   * `pattern` restrict a string to a particular regular expression.
   * `properties` specifies schemas for properties.
+  * `ref` a reference to a schema.
   * `required` contains a set of required properties.
   * `schema` declares the used schema.
   * `title` of the schema.
@@ -59,6 +62,7 @@ defmodule Xema.Schema do
           additional_items: Xema.t() | Xema.Schema.t() | boolean | nil,
           additional_properties: map | boolean | nil,
           as: atom,
+          definitions: map,
           dependencies: list | map | nil,
           description: String.t() | nil,
           enum: list | nil,
@@ -80,6 +84,7 @@ defmodule Xema.Schema do
           pattern: Regex.t() | nil,
           pattern_properties: map | nil,
           properties: map | nil,
+          ref: Ref.t() | nil,
           required: MapSet.t() | nil,
           schema: String.t() | nil,
           title: String.t() | nil,
@@ -93,6 +98,7 @@ defmodule Xema.Schema do
     :all_of,
     :any_of,
     :as,
+    :definitions,
     :dependencies,
     :description,
     :enum,
@@ -116,6 +122,7 @@ defmodule Xema.Schema do
     :pattern,
     :pattern_properties,
     :properties,
+    :ref,
     :required,
     :schema,
     :title,
@@ -141,6 +148,7 @@ defmodule Xema.Schema do
       |> Keyword.put_new(:as, opts[:type])
       |> Keyword.update(:pattern, nil, &pattern/1)
       |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
+      |> Keyword.update(:ref, nil, &ref/1)
 
   @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
   defp pattern(string) when is_binary(string), do: Regex.compile!(string)
@@ -174,4 +182,7 @@ defmodule Xema.Schema do
   @spec delete_nils(map) :: map
   defp delete_nils(schema),
     do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
+
+  @spec ref(String.t()) :: Ref.t()
+  defp ref(pointer), do: Ref.new(pointer)
 end
