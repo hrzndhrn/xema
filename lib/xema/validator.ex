@@ -77,10 +77,10 @@ defmodule Xema.Validator do
 
   defp do_validate(:default, schema, value, opts) do
     with :ok <- enum(schema, value),
-         :ok <- do_not(schema, value, opts),
-         :ok <- all_of(schema, value, opts),
-         :ok <- any_of(schema, value, opts),
-         :ok <- one_of(schema, value, opts),
+         :ok <- validate_not(schema, value, opts),
+         :ok <- validate_all_of(schema, value, opts),
+         :ok <- validate_any_of(schema, value, opts),
+         :ok <- validate_one_of(schema, value, opts),
          do: :ok
   end
 
@@ -195,62 +195,62 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_not(Xema.Schema.t(), any, keyword) :: result
-  defp do_not(%{not: nil}, _value, _opts), do: :ok
+  @spec validate_not(Xema.Schema.t(), any, keyword) :: result
+  defp validate_not(%{not: nil}, _value, _opts), do: :ok
 
-  defp do_not(%{not: schema}, value, opts) do
+  defp validate_not(%{not: schema}, value, opts) do
     case do_validate(schema, value, opts) do
       :ok -> {:error, :not}
       _ -> :ok
     end
   end
 
-  @spec all_of(Xema.Schema.t(), any, keyword) :: result
-  defp all_of(%{all_of: nil}, _value, _opts), do: :ok
+  @spec validate_all_of(Xema.Schema.t(), any, keyword) :: result
+  defp validate_all_of(%{all_of: nil}, _value, _opts), do: :ok
 
-  defp all_of(%{all_of: schemas}, value, opts) do
-    case do_all_of(schemas, value, opts) do
+  defp validate_all_of(%{all_of: schemas}, value, opts) do
+    case do_validate_all_of(schemas, value, opts) do
       true -> :ok
       false -> {:error, :all_of}
     end
   end
 
-  @spec do_all_of(list, any, keyword) :: boolean
-  defp do_all_of(schemas, value, opts),
+  @spec do_validate_all_of(list, any, keyword) :: boolean
+  defp do_validate_all_of(schemas, value, opts),
     do:
       Enum.all?(schemas, fn schema ->
         do_validate(schema, value, opts) == :ok
       end)
 
-  @spec any_of(Xema.Schema.t(), any, keyword) :: result
-  defp any_of(%{any_of: nil}, _value, _opts), do: :ok
+  @spec validate_any_of(Xema.Schema.t(), any, keyword) :: result
+  defp validate_any_of(%{any_of: nil}, _value, _opts), do: :ok
 
-  defp any_of(%{any_of: schemas}, value, opts) do
-    case do_any_of(schemas, value, opts) do
+  defp validate_any_of(%{any_of: schemas}, value, opts) do
+    case do_validate_any_of(schemas, value, opts) do
       true -> :ok
       false -> {:error, :any_of}
     end
   end
 
-  @spec do_any_of(list, any, keyword) :: boolean
-  defp do_any_of(schemas, value, opts),
+  @spec do_validate_any_of(list, any, keyword) :: boolean
+  defp do_validate_any_of(schemas, value, opts),
     do:
       Enum.any?(schemas, fn schema ->
         do_validate(schema, value, opts) == :ok
       end)
 
-  @spec one_of(Xema.Schema.t(), any, keyword) :: result
-  defp one_of(%{one_of: nil}, _value, _opts), do: :ok
+  @spec validate_one_of(Xema.Schema.t(), any, keyword) :: result
+  defp validate_one_of(%{one_of: nil}, _value, _opts), do: :ok
 
-  defp one_of(%{one_of: schemas}, value, opts) do
-    case do_one_of(schemas, value, opts) == 1 do
+  defp validate_one_of(%{one_of: schemas}, value, opts) do
+    case do_validate_one_of(schemas, value, opts) == 1 do
       true -> :ok
       false -> {:error, :one_of}
     end
   end
 
-  @spec do_one_of(list, any, keyword) :: integer
-  defp do_one_of(schemas, value, opts) do
+  @spec do_validate_one_of(list, any, keyword) :: integer
+  defp do_validate_one_of(schemas, value, opts) do
     schemas
     |> Enum.filter(fn schema ->
       case do_validate(schema, value, opts) do
