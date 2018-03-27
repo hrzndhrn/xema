@@ -102,7 +102,6 @@ defmodule Xema.RefRemoteTest do
 
     @tag :remote
     test "validate/2 with a valid value", %{schema: schema} do
-      IO.inspect schema
       assert Xema.validate(schema, 1) == :ok
     end
 
@@ -163,7 +162,6 @@ defmodule Xema.RefRemoteTest do
       assert Xema.validate(schema, %{name: nil}) == :ok
     end
 
-    @tag :only
     @tag :remote
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, %{name: 1}) ==

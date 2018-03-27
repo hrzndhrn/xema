@@ -54,9 +54,6 @@ defmodule Xema.Ref do
 
 
   def validate(ref, value, opts) do
-    #IO.inspect opts
-    #IO.inspect ref
-    # raise "Ups"
     case get(ref, opts[:root], opts[:id]) do
       {:ok, %Schema{} = schema} -> Xema.validate(schema, value, opts)
       {:ok, %Ref{} = ref} -> validate(ref, value, opts)
@@ -80,8 +77,6 @@ defmodule Xema.Ref do
   def get(%Ref{pointer: "#"}, xema, _), do: {:ok, get_schema(xema)}
 
   def get(%Ref{pointer: "#/" <> pointer, schema: nil}, xema, _id) do
-    #IO.puts("=========")
-    #IO.inspect xema
     do_get(pointer, xema)
   end
 
