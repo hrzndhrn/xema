@@ -5,6 +5,7 @@ defmodule Xema.RefRemoteTest do
 
   require Logger
 
+  @tag :remote
   test "http server" do
     assert %{body: body} =
              HTTPoison.get!("http://localhost:1234/folder/folderInteger.exon")
@@ -13,6 +14,7 @@ defmodule Xema.RefRemoteTest do
   end
 
   describe "invalid exon" do
+    @tag :remote
     test "compile error" do
       expected =
         "http://localhost:1234/compile-error.exon:3: " <>
@@ -23,6 +25,7 @@ defmodule Xema.RefRemoteTest do
       end
     end
 
+    @tag :remote
     test "syntax error" do
       expected =
         "http://localhost:1234/syntax-error.exon:2: " <>
@@ -35,6 +38,7 @@ defmodule Xema.RefRemoteTest do
   end
 
   describe "invalid remote ref" do
+    @tag :remote
     test "404" do
       expected =
         "Remote schema 'http://localhost:1234/not-found.exon' not found."
@@ -50,10 +54,12 @@ defmodule Xema.RefRemoteTest do
       %{schema: Xema.new(:ref, "http://localhost:1234/integer.exon")}
     end
 
+    @tag :remote
     test "validate/2 with a valid value", %{schema: schema} do
       assert Xema.validate(schema, 1) == :ok
     end
 
+    @tag :remote
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, "1") ==
                {:error, %{type: :integer, value: "1"}}
@@ -71,10 +77,12 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
+    @tag :remote
     test "validate/2 with a valid value", %{schema: schema} do
       assert Xema.validate(schema, 1) == :ok
     end
 
+    @tag :remote
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, "1") ==
                {:error, %{type: :integer, value: "1"}}
@@ -92,10 +100,12 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
+    @tag :remote
     test "validate/2 with a valid value", %{schema: schema} do
       assert Xema.validate(schema, 1) == :ok
     end
 
+    @tag :remote
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, "1") ==
                {:error, %{type: :integer, value: "1"}}
@@ -119,10 +129,12 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
+    @tag :remote
     test "validate/2 with a valid value", %{schema: schema} do
       assert Xema.validate(schema, %{list: [1]}) == :ok
     end
 
+    @tag :remote
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, %{list: ["1"]}) ==
                {:error,
@@ -144,15 +156,44 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
-    @tag :only
+    @tag :remote
     test "validate/2 with a valid value", %{schema: schema} do
       assert Xema.validate(schema, %{name: "foo"}) == :ok
       assert Xema.validate(schema, %{name: nil}) == :ok
     end
 
+    @tag :remote
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, %{name: 1}) ==
                {:error, %{properties: %{name: :any_of}}}
     end
   end
+
+  describe "root ref in remote ref (id without path)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            id: "http://localhost:1234",
+            properties: %{
+              name: {:ref, "name.exon#/definitions/or_nil"}
+            }
+          )
+      }
+    end
+
+    @tag :remote
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert Xema.validate(schema, %{name: "foo"}) == :ok
+      assert Xema.validate(schema, %{name: nil}) == :ok
+    end
+
+    @tag :remote
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert Xema.validate(schema, %{name: 1}) ==
+               {:error, %{properties: %{name: :any_of}}}
+    end
+  end
+
 end

@@ -7,9 +7,8 @@ defmodule Xema do
 
   alias Xema.Ref
   alias Xema.Schema
-  alias Xema.Schema.Validator, as: SchemaValidator
+  alias Xema.Schema.Validator, as: Validator
   alias Xema.SchemaError
-  alias Xema.Validator
 
   @typedoc """
   The available type notations.
@@ -68,6 +67,7 @@ defmodule Xema do
           | :pattern
           | :pattern_properties
           | :properties
+          | :ref
           | :required
           | :unique_items
 
@@ -99,15 +99,10 @@ defmodule Xema do
     :pattern,
     :pattern_properties,
     :properties,
+    :ref,
     :required,
     :unique_items
   ]
-
-  @spec is_valid?(Xema.t(), any) :: boolean
-  def is_valid?(schema, value), do: validate(schema, value) == :ok
-
-  @spec validate(Xema.t() | Schema.t(), any) :: Validator.result()
-  def validate(schema, value), do: Validator.validate(schema, value)
 
   @doc """
   This function defines the schemas.
@@ -156,62 +151,60 @@ defmodule Xema do
 
   """
 
-  @spec new(schema_types | schema_keywords | tuple, keyword) :: Xema.t()
-  def new(type, keywords \\ [])
+  # @spec new(schema_types | schema_keywords | tuple, keyword) :: Xema.t()
+  # def x_new(type, keywords \\ [])
 
-  def new({type}, []), do: new(type, [])
+  def init({type}, []), do: init(type, [])
 
-  def new({type, keywords}, []), do: new(type, keywords)
-
-  def new(list, []) when is_list(list) do
+  def init(list, []) when is_list(list) do
     case Keyword.keyword?(list) do
-      true -> new(:any, list)
-      false -> new_multi_type(list, [])
+      true -> init(:any, list)
+      false -> multi_type(list, [])
     end
   end
 
-  def new(list, keywords) when is_list(list), do: new_multi_type(list, keywords)
+  def init(list, keywords) when is_list(list), do: multi_type(list, keywords)
 
-  def new(tuple, keywords) when is_tuple(tuple),
+  def init({type, keywords}, []), do: init(type, keywords)
+
+  def init(tuple, keywords) when is_tuple(tuple),
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
 
-  def new(bool, [])
+  def init(bool, [])
       when is_boolean(bool),
-      do: [type: bool] |> Schema.new() |> create()
+      do: Schema.new(type: bool)
 
-  def new(:ref, remote) when is_binary(remote) do
-    uri = del_fragment(remote)
-
-    case remote_schema(uri) do
-      {:ok, schema} ->
-        [pointer: remote, schema: schema]
-        |> Ref.new()
-        |> create()
-
-      {:error, %SyntaxError{description: desc, line: line}} ->
-        raise SyntaxError, description: desc, line: line, file: uri
-
-      {:error, %CompileError{description: desc, line: line}} ->
-        raise CompileError, description: desc, line: line, file: uri
-
-      {:error, _error} ->
-        raise SchemaError, message: "Remote schema '#{remote}' not found."
-    end
-  end
+  #  def init(:ref, remote) when is_binary(remote) do
+  #    uri = del_fragment(remote)
+  #
+  #    case remote_schema(uri) do
+  #      {:ok, schema} ->
+  #        [pointer: remote, schema: schema]
+  #        |> Ref.new()
+  #
+  #      {:error, %SyntaxError{description: desc, line: line}} ->
+  #        raise SyntaxError, description: desc, line: line, file: uri
+  #
+  #      {:error, %CompileError{description: desc, line: line}} ->
+  #        raise CompileError, description: desc, line: line, file: uri
+  #
+  #      {:error, _error} ->
+  #        raise SchemaError, message: "Remote schema '#{remote}' not found."
+  #    end
+  #  end
 
   for type <- @schema_types do
-    def new(unquote(type), opts),
-      do: {unquote(type), opts} |> schema([]) |> create()
+    def init(unquote(type), opts), do: schema({unquote(type), opts}, [])
   end
 
   for keyword <- @schema_keywords do
-    def new(unquote(keyword), opts), do: new(:any, [{unquote(keyword), opts}])
+    def init(unquote(keyword), opts), do: init(:any, [{unquote(keyword), opts}])
   end
 
-  defp new_multi_type(list, keywords) when is_list(list) do
+  defp multi_type(list, keywords) when is_list(list) do
     case Enum.all?(list, fn type -> type in @schema_types end) do
       true ->
-        {list, keywords} |> schema([]) |> create()
+        schema({list, keywords}, [])
 
       false ->
         raise(
@@ -246,17 +239,8 @@ defmodule Xema do
     uri = opts[:id] |> URI.parse() |> update_path(pointer)
 
     case String.ends_with?(uri.path, ".exon") do
-      true ->
-        case remote_schema(uri) do
-          {:ok, schema} ->
-            Ref.new(uri, schema)
-
-          {:error, :not_found} ->
-            raise SchemaError, message: "Schema '#{pointer}' not found."
-        end
-
-      false ->
-        Ref.new(pointer)
+      true -> Ref.new(uri)
+      false -> Ref.new(pointer)
     end
   end
 
@@ -272,7 +256,7 @@ defmodule Xema do
       keywords = Keyword.put(keywords, :type, unquote(type))
       {keywords, opts} = update_id(keywords, opts)
 
-      case SchemaValidator.validate(unquote(type), keywords) do
+      case Validator.validate(unquote(type), keywords) do
         :ok -> keywords |> update(opts) |> Schema.new()
         {:error, msg} -> raise SchemaError, message: msg
       end
@@ -310,7 +294,7 @@ defmodule Xema do
             else: Path.join("/", pointer)
       end
 
-    Map.put(uri, :path, path) |> URI.to_string() |> URI.parse()
+      uri |> Map.put(:path, path) |> URI.to_string() |> URI.parse()
   end
 
   @spec update_id(keyword, keyword) :: {keyword, keyword}
@@ -403,48 +387,6 @@ defmodule Xema do
     end
   end
 
-  defp remote_schema(%URI{} = uri), do: remote_schema(URI.to_string(uri))
-
-  defp remote_schema(uri) do
-    with {:ok, str} <- get_remote(uri),
-         {:ok, data} <- eval(str) do
-      data =
-        case data do
-          type when is_atom(type) -> {type, id: uri}
-          {type, keywords} -> {type, Keyword.put(keywords, :id, uri)}
-          keywords -> Keyword.put(keywords, :id, uri)
-        end
-
-      {:ok, Xema.new(data)}
-    else
-      {:error, %SyntaxError{description: desc, line: line}} ->
-        raise SyntaxError, description: desc, line: line, file: uri
-
-      {:error, %CompileError{description: desc, line: line}} ->
-        raise CompileError, description: desc, line: line, file: uri
-
-      {:error, :not_found} ->
-        raise SchemaError, message: "Remote schema '#{uri}' not found."
-    end
-  end
-
-  defp get_remote(uri) do
-    case HTTPoison.get(uri) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
-      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
-      error -> {:error, error}
-    end
-  end
-
-  defp del_fragment(uri),
-    do: uri |> URI.parse() |> Map.put(:fragment, nil) |> URI.to_string()
-
-  defp eval(str) do
-    {data, _} = Code.eval_string(str)
-    {:ok, data}
-  rescue
-    error -> {:error, error}
-  end
 
   #
   # to_string

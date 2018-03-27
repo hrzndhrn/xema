@@ -13,30 +13,20 @@ defmodule Xema.Validator do
   @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
 
   @spec validate(Xema.t(), any, keyword) :: result
-
-  def validate(%Xema{content: schema} = xema, value, opts \\ []) do
+  def validate(%Xema{content: schema} = xema, value, opts) do
     opts = Keyword.put_new(opts, :root, xema)
     do_validate(schema, value, opts)
   end
 
+  def validate(%Schema{} = schema, value, opts),
+    do: do_validate(schema, value, opts)
+
   @spec do_validate(Xema.t() | Xema.Schema.t(), any, keyword) :: result
-  defp do_validate(%Xema{content: schema}, value, opts) do
-    do_validate(schema, value, opts)
-  end
+  defp do_validate(%Xema{content: schema}, value, opts),
+    do: do_validate(schema, value, opts)
 
-  defp do_validate(%Ref{schema: nil} = ref, value, opts) do
-    case Ref.get(ref, opts[:root], opts[:id]) do
-      {:ok, schema} -> do_validate(schema, value, opts)
-      {:error, :not_found} -> {:error, :ref_not_found}
-    end
-  end
-
-  defp do_validate(%Ref{schema: root} = ref, value, opts) do
-    case Ref.get(ref, nil, opts[:id]) do
-      {:ok, schema} -> do_validate(schema, value, root: root)
-      {:error, :not_found} -> {:error, :ref_not_found}
-    end
-  end
+  defp do_validate(%Ref{} = ref, value, opts),
+    do: Ref.validate(ref, value, opts)
 
   defp do_validate(%Schema{type: true}, _value, _opts), do: :ok
 
@@ -62,8 +52,7 @@ defmodule Xema.Validator do
              do: :ok
 
       %{type: :any, ref: ref} ->
-        with {:ok, schema} <- Ref.get(ref, opts[:root], opts[:id]),
-             do: do_validate(schema, value, opts)
+        Ref.validate(ref, value, opts)
 
       %{type: :string} ->
         with :ok <- type(schema, value),
