@@ -13,9 +13,14 @@ defmodule Xema.Validator do
   @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
 
   @spec validate(Xema.t(), any, keyword) :: result
+  def validate(xema, value, opts \\ [])
 
-  def validate(%Xema{content: schema} = xema, value, opts \\ []) do
+  def validate(%Xema{content: schema} = xema, value, opts) do
     opts = Keyword.put_new(opts, :root, xema)
+    do_validate(schema, value, opts)
+  end
+
+  def validate(%Schema{} = schema, value, opts) do
     do_validate(schema, value, opts)
   end
 
@@ -25,18 +30,19 @@ defmodule Xema.Validator do
   end
 
   defp do_validate(%Ref{schema: nil} = ref, value, opts) do
-    case Ref.get(ref, opts[:root], opts[:id]) do
-      {:ok, schema} -> do_validate(schema, value, opts)
-      {:error, :not_found} -> {:error, :ref_not_found}
-    end
+    Ref.validate(ref, value, opts)
+    #case Ref.get(ref, opts[:root], opts[:id]) do
+    #  {:ok, schema} -> do_validate(schema, value, root: schema, id: opts[:id])
+    #  {:error, :not_found} -> {:error, ref}
+    #end
   end
 
-  defp do_validate(%Ref{schema: root} = ref, value, opts) do
-    case Ref.get(ref, nil, opts[:id]) do
-      {:ok, schema} -> do_validate(schema, value, root: root)
-      {:error, :not_found} -> {:error, :ref_not_found}
-    end
-  end
+#  defp do_validate(%Ref{schema: root} = ref, value, opts) do
+#    case Ref.get(ref, opts[:root], opts[:id]) do
+#      {:ok, schema} -> do_validate(schema, value, root: root)
+#      {:error, :not_found} -> {:error, :ref_not_found}
+#    end
+#  end
 
   defp do_validate(%Schema{type: true}, _value, _opts), do: :ok
 
@@ -62,8 +68,9 @@ defmodule Xema.Validator do
              do: :ok
 
       %{type: :any, ref: ref} ->
-        with {:ok, schema} <- Ref.get(ref, opts[:root], opts[:id]),
-             do: do_validate(schema, value, opts)
+        Ref.validate(ref, value, opts)
+        #with {:ok, schema} <- Ref.get(ref, opts[:root], opts[:id]),
+               #do: do_validate(schema, value, root: schema)
 
       %{type: :string} ->
         with :ok <- type(schema, value),
