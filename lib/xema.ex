@@ -174,24 +174,24 @@ defmodule Xema do
       when is_boolean(bool),
       do: Schema.new(type: bool)
 
-#  def init(:ref, remote) when is_binary(remote) do
-#    uri = del_fragment(remote)
-#
-#    case remote_schema(uri) do
-#      {:ok, schema} ->
-#        [pointer: remote, schema: schema]
-#        |> Ref.new()
-#
-#      {:error, %SyntaxError{description: desc, line: line}} ->
-#        raise SyntaxError, description: desc, line: line, file: uri
-#
-#      {:error, %CompileError{description: desc, line: line}} ->
-#        raise CompileError, description: desc, line: line, file: uri
-#
-#      {:error, _error} ->
-#        raise SchemaError, message: "Remote schema '#{remote}' not found."
-#    end
-#  end
+  #  def init(:ref, remote) when is_binary(remote) do
+  #    uri = del_fragment(remote)
+  #
+  #    case remote_schema(uri) do
+  #      {:ok, schema} ->
+  #        [pointer: remote, schema: schema]
+  #        |> Ref.new()
+  #
+  #      {:error, %SyntaxError{description: desc, line: line}} ->
+  #        raise SyntaxError, description: desc, line: line, file: uri
+  #
+  #      {:error, %CompileError{description: desc, line: line}} ->
+  #        raise CompileError, description: desc, line: line, file: uri
+  #
+  #      {:error, _error} ->
+  #        raise SchemaError, message: "Remote schema '#{remote}' not found."
+  #    end
+  #  end
 
   for type <- @schema_types do
     def init(unquote(type), opts), do: schema({unquote(type), opts}, [])
@@ -239,17 +239,8 @@ defmodule Xema do
     uri = opts[:id] |> URI.parse() |> update_path(pointer)
 
     case String.ends_with?(uri.path, ".exon") do
-      true ->
-        case remote_schema(uri) do
-          {:ok, schema} ->
-            Ref.new(uri, schema)
-
-          {:error, :not_found} ->
-            raise SchemaError, message: "Schema '#{pointer}' not found."
-        end
-
-      false ->
-        Ref.new(pointer)
+      true -> Ref.new(uri)
+      false -> Ref.new(pointer)
     end
   end
 

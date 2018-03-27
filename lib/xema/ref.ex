@@ -8,66 +8,50 @@ defmodule Xema.Ref do
   alias Xema.Ref
   alias Xema.Schema
 
-  @type t :: %Xema.Ref{pointer: String.t(), schema: Xema.t() | nil}
+  @type t :: %Xema.Ref{pointer: String.t()}
 
-  defstruct pointer: "", schema: nil
+  defstruct pointer: ""
 
   @spec new(keyword | String.t()) :: Ref.t()
-
   def new(pointer) when is_binary(pointer), do: %Ref{pointer: pointer}
 
-  def new(opts), do: struct(Ref, opts)
+  def new(%URI{} = uri), do: %Ref{pointer: URI.to_string(uri)}
 
-  def new(%URI{} = uri, schema),
-    do: %Ref{pointer: URI.to_string(uri), schema: nil}
-
-  def new(pointer, schema), do: %Ref{pointer: pointer, schema: nil}
-
-
-  def validate(%Ref{pointer: "#"}, value, opts) do
-    Xema.validate(opts[:root].content, value, opts)
-  end
-
-  def validate(%Ref{pointer: "#/" <> pointer}, value, opts) do
-    case do_get(pointer, opts[:root]) do
-      {:ok, %Schema{} = schema} -> Xema.validate(schema, value, opts)
-      {:ok, %Ref{} = ref} -> validate(ref, value, opts)
-      _error -> {:error, :ref_not_found}
-      #_error -> {:error, ref}
-    end
-  end
+  def new(opts) when is_list(opts), do: struct(Ref, opts)
 
   def validate(%Ref{pointer: "http" <> _ = pointer}, value, opts) do
     xema = Map.get(opts[:root].refs, del_fragment(pointer))
     pointer = get_fragment(pointer)
-    # schema = pointer |> get_fragment() |> do_get(xema)
 
     case do_get(pointer, xema) do
-      {:ok, %Schema{} = schema} -> Xema.validate(schema, value, root: xema)
-      {:ok, %Ref{} = ref} -> validate(ref, value, root: xema)
-      _error -> {:error, :ref_not_found}
-      #_error -> {:error, ref}
+      {:ok, %Schema{} = schema} ->
+        Xema.validate(schema, value, root: xema)
+
+      {:ok, %Ref{} = ref} ->
+        validate(ref, value, root: xema)
+
+      _error ->
+        {:error, :ref_not_found}
+        # _error -> {:error, ref}
     end
-    #Xema.validate(schema, value, root: xema)
   end
-
-
 
   def validate(ref, value, opts) do
     case get(ref, opts[:root], opts[:id]) do
-      {:ok, %Schema{} = schema} -> Xema.validate(schema, value, opts)
-      {:ok, %Ref{} = ref} -> validate(ref, value, opts)
-      _error -> {:error, :ref_not_found}
-      #_error -> {:error, ref}
+      {:ok, %Schema{} = schema} ->
+        Xema.validate(schema, value, opts)
+
+      {:ok, %Ref{} = ref} ->
+        validate(ref, value, opts)
+
+      _error ->
+        {:error, :ref_not_found}
+        # _error -> {:error, ref}
     end
   end
 
-
-
   @spec get(Ref.t(), Xema.t() | Schema.t() | String.t() | nil) ::
           {:ok, Schema.t()} | {:error, atom}
-  def get(ref, id) when is_binary(id), do: get(ref, ref.schema, id)
-
   def get(ref, schema), do: get(ref, schema, nil)
 
   @spec get(Ref.t(), Xema.t() | Schema.t(), String.t()) ::
@@ -76,20 +60,8 @@ defmodule Xema.Ref do
 
   def get(%Ref{pointer: "#"}, xema, _), do: {:ok, get_schema(xema)}
 
-  def get(%Ref{pointer: "#/" <> pointer, schema: nil}, xema, _id) do
+  def get(%Ref{pointer: "#/" <> pointer}, xema, _id) do
     do_get(pointer, xema)
-  end
-
-  def get(%Ref{pointer: "#/" <> pointer, schema: xema}, _xema, _id) do
-    do_get(pointer, xema)
-  end
-
-  def get(%Ref{pointer: "http" <> _ = pointer, schema: _x}, xema, _) do
-    xema = Map.get(xema.refs, del_fragment(pointer))
-
-    pointer
-    |> get_fragment()
-    |> do_get(xema)
   end
 
   def get(ref, xema, id) when not is_nil(id) do
@@ -113,11 +85,7 @@ defmodule Xema.Ref do
 
   defp do_get("#", xema), do: {:ok, get_schema(xema)}
 
-  defp do_get("#" <> pointer, xema), do: do_get(pointer, xema)
-
-  defp do_get(pointer, %Xema{} = xema)
-       when is_binary(pointer),
-       do: do_get(pointer, xema.content)
+  defp do_get(pointer, %Xema{} = xema), do: do_get(pointer, xema.content)
 
   defp do_get(pointer, schema)
        when is_binary(pointer),
@@ -159,7 +127,6 @@ defmodule Xema.Ref do
     case schema do
       %Xema{content: schema} -> schema
       %Schema{} = schema -> schema
-      %Ref{schema: schema} -> schema
     end
   end
 
