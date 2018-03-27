@@ -13,21 +13,17 @@ defmodule Xema.Validator do
   @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
 
   @spec validate(Xema.t(), any, keyword) :: result
-  def validate(xema, value, opts \\ [])
-
   def validate(%Xema{content: schema} = xema, value, opts) do
     opts = Keyword.put_new(opts, :root, xema)
     do_validate(schema, value, opts)
   end
 
-  def validate(%Schema{} = schema, value, opts) do
-    do_validate(schema, value, opts)
-  end
+  def validate(%Schema{} = schema, value, opts),
+    do: do_validate(schema, value, opts)
 
   @spec do_validate(Xema.t() | Xema.Schema.t(), any, keyword) :: result
-  defp do_validate(%Xema{content: schema}, value, opts) do
-    do_validate(schema, value, opts)
-  end
+  defp do_validate(%Xema{content: schema}, value, opts),
+    do: do_validate(schema, value, opts)
 
   defp do_validate(%Ref{} = ref, value, opts),
     do: Ref.validate(ref, value, opts)

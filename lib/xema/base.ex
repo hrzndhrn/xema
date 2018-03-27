@@ -24,17 +24,6 @@ defmodule Xema.Base do
         :refs
       ]
 
-      @spec create(Xema.Schema.t()) :: __MODULE__.t()
-      def create(schema) do
-        raise "deprected"
-
-        struct(
-          __MODULE__,
-          content: schema,
-          ids: Base.get_ids(schema)
-        )
-      end
-
       @spec new(any, keyword) :: Xema.t()
       def new(data, opts \\ []), do: Base.__new__(__MODULE__, data, opts)
 
@@ -50,17 +39,7 @@ defmodule Xema.Base do
   @callback init(any, keyword) :: Xema.t()
 
   def __new__(module, data, opts) do
-    content =
-      case module.init(data, opts) do
-        %Schema{} = schema ->
-          schema
-
-        %Ref{} = ref ->
-          ref
-
-        _ ->
-          raise Xema.Error, message: "Function 'init' must return a schema."
-      end
+    content = module.init(data, opts)
 
     struct(
       module,
@@ -99,15 +78,7 @@ defmodule Xema.Base do
 
   defp put_ref(map, %Ref{pointer: "http" <> _ = pointer}) do
     uri = String.replace(pointer, ~r/#.*/, "")
-
-    unless Regex.match?(~r/\..+/, uri) do
-      map
-    else
-      case(get_schema(uri)) do
-        nil -> map
-        schema -> Map.put(map, uri, schema)
-      end
-    end
+    Map.put(map, uri, get_schema(uri))
   end
 
   defp put_ref(map, _), do: map

@@ -387,48 +387,6 @@ defmodule Xema do
     end
   end
 
-  defp remote_schema(%URI{} = uri), do: remote_schema(URI.to_string(uri))
-
-  defp remote_schema(uri) do
-    with {:ok, str} <- get_remote(uri),
-         {:ok, data} <- eval(str) do
-      data =
-        case data do
-          type when is_atom(type) -> {type, id: uri}
-          {type, keywords} -> {type, Keyword.put(keywords, :id, uri)}
-          keywords -> Keyword.put(keywords, :id, uri)
-        end
-
-      {:ok, Xema.new(data)}
-    else
-      {:error, %SyntaxError{description: desc, line: line}} ->
-        raise SyntaxError, description: desc, line: line, file: uri
-
-      {:error, %CompileError{description: desc, line: line}} ->
-        raise CompileError, description: desc, line: line, file: uri
-
-      {:error, :not_found} ->
-        raise SchemaError, message: "Remote schema '#{uri}' not found."
-    end
-  end
-
-  defp get_remote(uri) do
-    case HTTPoison.get(uri) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
-      {:ok, %HTTPoison.Response{status_code: 404}} -> {:error, :not_found}
-      error -> {:error, error}
-    end
-  end
-
-  defp del_fragment(uri),
-    do: uri |> URI.parse() |> Map.put(:fragment, nil) |> URI.to_string()
-
-  defp eval(str) do
-    {data, _} = Code.eval_string(str)
-    {:ok, data}
-  rescue
-    error -> {:error, error}
-  end
 
   #
   # to_string
