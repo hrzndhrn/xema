@@ -1,4 +1,6 @@
 defmodule Xema.Utils do
+  @moduledoc false
+
   @spec get_value(map, String.t() | atom) :: any
   def get_value(map, key) when is_atom(key) do
     do_get_value(map, to_string(key), key)

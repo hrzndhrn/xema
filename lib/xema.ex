@@ -294,7 +294,7 @@ defmodule Xema do
             else: Path.join("/", pointer)
       end
 
-    Map.put(uri, :path, path) |> URI.to_string() |> URI.parse()
+      uri |> Map.put(:path, path) |> URI.to_string() |> URI.parse()
   end
 
   @spec update_id(keyword, keyword) :: {keyword, keyword}

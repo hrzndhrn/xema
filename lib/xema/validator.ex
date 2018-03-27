@@ -54,9 +54,6 @@ defmodule Xema.Validator do
       %{type: :any, ref: ref} ->
         Ref.validate(ref, value, opts)
 
-      # with {:ok, schema} <- Ref.get(ref, opts[:root], opts[:id]),
-      # do: do_validate(schema, value, root: schema)
-
       %{type: :string} ->
         with :ok <- type(schema, value),
              :ok <- do_validate(:default, schema, value, opts),
