@@ -37,18 +37,16 @@ defmodule Xema.Base do
             :ok
 
           {:error, error} ->
-            case function_exported?(__MODULE__, :on_error, 1) do
-              true -> {:error, __MODULE__.on_error(error)}
-              false -> {:error, error}
-            end
+            {:error, __MODULE__.on_error(error)}
         end
       end
+
+      def on_error(error), do: error
+      defoverridable on_error: 1
     end
   end
 
   @callback init(any, keyword) :: Xema.t()
-  @callback on_error(any) :: any
-  @optional_callbacks on_error: 1
 
   def __new__(module, data, opts) do
     content = module.init(data, opts)
