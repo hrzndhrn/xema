@@ -13,7 +13,6 @@ defmodule Xema.Ref do
   @type t :: %Xema.Ref{pointer: String.t()}
 
   defstruct pointer: nil,
-            ptr: nil,
             path: nil,
             remote: false,
             url: nil
@@ -22,7 +21,7 @@ defmodule Xema.Ref do
   def new(pointer) when is_binary(pointer) do
     uri = URI.parse(pointer)
     path = uri |> Map.get(:path)
-    ptr = uri |> Map.get(:fragment)
+    pointer = uri |> Map.get(:fragment)
     remote = !is_nil(path) && Regex.match?(~r/(?:\..+#)|(?:\..+$)/, path)
 
     url =
@@ -37,8 +36,6 @@ defmodule Xema.Ref do
 
     %Ref{
       pointer: pointer,
-      # unless(is_nil(ptr), do: "##{ptr}"),
-      ptr: ptr,
       path: path,
       remote: remote,
       url: url
@@ -69,11 +66,11 @@ defmodule Xema.Ref do
     end
   end
 
-  defp get_x(%Ref{remote: false, path: nil, ptr: pointer}, opts) do
+  defp get_x(%Ref{remote: false, path: nil, pointer: pointer}, opts) do
     with {:ok, schema} <- do_get(pointer, opts[:root]), do: {:ok, schema, opts}
   end
 
-  defp get_x(%Ref{remote: false, path: path, ptr: nil}, opts) do
+  defp get_x(%Ref{remote: false, path: path, pointer: nil}, opts) do
     id =
       opts[:id]
       |> URI.parse()
@@ -85,7 +82,7 @@ defmodule Xema.Ref do
     {:ok, ref, opts}
   end
 
-  defp get_x(%Ref{remote: true, url: nil, path: path, ptr: pointer}, opts) do
+  defp get_x(%Ref{remote: true, url: nil, path: path, pointer: pointer}, opts) do
     uri = URI.parse(opts[:id])
 
     uri =
@@ -99,7 +96,7 @@ defmodule Xema.Ref do
     with {:ok, schema} <- do_get(pointer, xema), do: {:ok, schema, root: xema}
   end
 
-  defp get_x(%Ref{remote: true, url: url, path: path, ptr: pointer}, opts) do
+  defp get_x(%Ref{remote: true, url: url, path: path, pointer: pointer}, opts) do
     uri = Path.join(url, path)
 
     xema = Map.get(opts[:root].refs, uri)
