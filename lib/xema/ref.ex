@@ -42,16 +42,6 @@ defmodule Xema.Ref do
     }
   end
 
-  def new(%URI{} = uri) do
-    raise "deprecated"
-    %Ref{pointer: URI.to_string(uri)}
-  end
-
-  def new(opts) when is_list(opts) do
-    raise "deprecated"
-    struct(Ref, opts)
-  end
-
   def validate(ref, value, opts) do
     case get(ref, opts) do
       {:ok, %Schema{} = schema, opts} ->
@@ -108,11 +98,8 @@ defmodule Xema.Ref do
 
   defp do_get(_, nil), do: {:error, :not_found}
 
-  defp do_get(nil, %Xema{} = xema), do: {:ok, xema.content}
-
-  defp do_get("#", xema), do: {:ok, get_schema(xema)}
-
-  defp do_get("", xema), do: {:ok, get_schema(xema)}
+  defp do_get(pointer, %Xema{} = xema)
+    when pointer in [nil, "", "#"],do: {:ok, xema.content}
 
   defp do_get(pointer, %Xema{} = xema), do: do_get(pointer, xema.content)
 
@@ -142,13 +129,6 @@ defmodule Xema.Ref do
         nil -> {:error, :not_found}
         value -> do_get(steps, value)
       end
-    end
-  end
-
-  defp get_schema(schema) do
-    case schema do
-      %Xema{content: schema} -> schema
-      %Schema{} = schema -> schema
     end
   end
 
