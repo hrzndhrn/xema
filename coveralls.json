@@ -3,7 +3,9 @@
     "test"
   ],
   "custom_stop_words": [
-    "defguard"
+    "defguard",
+    "raise Error, message: \"Xema is not configured for remote schemas.\""
+
   ],
   "coverage_options": {
     "treat_no_relevant_lines_as_covered": true,

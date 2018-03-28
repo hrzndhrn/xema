@@ -1,10 +1,13 @@
 defmodule Xema.Base do
   @moduledoc false
 
+  alias Xema.Error
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaError
   alias Xema.Validator
+
+  @remote Application.get_env(:xema, :remote, false)
 
   defmacro __using__(_opts) do
     quote do
@@ -131,6 +134,10 @@ defmodule Xema.Base do
   end
 
   defp get_response(uri) do
+    unless @remote do
+      raise Error, message: "Xema is not configured for remote schemas."
+    end
+
     case HTTPoison.get(uri) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, body}
