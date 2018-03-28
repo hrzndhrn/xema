@@ -6,6 +6,8 @@ defmodule Xema.Base do
   alias Xema.SchemaError
   alias Xema.Validator
 
+  require Logger
+
   defmacro __using__(_opts) do
     quote do
       @behaviour Xema.Base
@@ -27,16 +29,28 @@ defmodule Xema.Base do
       @spec new(any, keyword) :: Xema.t()
       def new(data, opts \\ []), do: Base.__new__(__MODULE__, data, opts)
 
-      @spec is_valid?(Xema.t(), any) :: boolean
+      @spec is_valid?(__MODULE__.t(), any) :: boolean
       def is_valid?(schema, value), do: validate(schema, value) == :ok
 
-      @spec validate(Xema.t() | Schema.t(), any) :: Validator.result()
-      def validate(schema, value, opts \\ []),
-        do: Validator.validate(schema, value, opts)
+      @spec validate(__MODULE__.t() | Schema.t(), any) :: Validator.result()
+      def validate(schema, value, opts \\ []) do
+        case Validator.validate(schema, value, opts) do
+          :ok ->
+            :ok
+
+          {:error, error} ->
+            case function_exported?(__MODULE__, :on_error, 1) do
+              true -> {:error, __MODULE__.on_error(error)}
+              false -> {:error, error}
+            end
+        end
+      end
     end
   end
 
   @callback init(any, keyword) :: Xema.t()
+  @callback on_error(any) :: any
+  @optional_callbacks on_error: 1
 
   def __new__(module, data, opts) do
     content = module.init(data, opts)
@@ -66,22 +80,82 @@ defmodule Xema.Base do
 
   defp get_refs(%Schema{} = schema) do
     refs =
-      reduce(schema, %{}, fn
-        %Ref{} = ref, acc, _path -> put_ref(acc, ref)
-        _, acc, _ -> acc
+      reduce(schema, %{id: nil}, fn
+        %Ref{} = ref, acc, _path ->
+          Logger.debug("ref:  acc id: #{inspect(Map.get(acc, :id))}")
+          Logger.debug("ref: pointer: #{inspect(ref.pointer)}")
+          put_ref(acc, ref)
+
+        %Schema{id: id}, acc, _path when not is_nil(id) ->
+          Logger.debug("id: #{id}")
+          Logger.debug("acc id: #{inspect(Map.get(acc, :id))}")
+          update_id_y(acc, id)
+
+        _, acc, _ ->
+          acc
       end)
+
+    refs = Map.delete(refs, :id)
 
     if refs == %{}, do: nil, else: refs
   end
 
   defp get_refs(_), do: nil
 
-  defp put_ref(map, %Ref{pointer: "http" <> _ = pointer}) do
-    uri = String.replace(pointer, ~r/#.*/, "")
-    Map.put(map, uri, get_schema(uri))
+  #  defp put_ref(map, %Ref{pointer: "http" <> _ = pointer} = ref) do
+  #    IO.inspect ref, label: :ref
+  #    IO.inspect map[:id], label: :id
+  #    raise "deprecated"
+  #    Logger.warn("load: #{pointer}")
+  #    uri = String.replace(pointer, ~r/#.*/, "")
+  #    Map.put(map, uri, get_schema(uri))
+  #  end
+
+  defp put_ref(%{id: id} = acc, %Ref{remote: true, url: nil} = ref) do
+    uri = update_id_y(id, ref.path)
+    Map.put(acc, uri, get_schema(uri))
+  end
+
+  defp put_ref(acc, %Ref{remote: true, url: url, path: path}) do
+    uri = Path.join(url, path)
+    Map.put(acc, uri, get_schema(uri))
   end
 
   defp put_ref(map, _), do: map
+
+  # defp update_id_x(map, nil), do: map
+
+  defp update_id_x(%{id: id} = map, sid) when is_nil(id) do
+    Map.put(map, :id, sid)
+  end
+
+  defp update_id_x(%{id: id} = map, sid) do
+    id = id |> URI.merge(sid) |> URI.to_string()
+    Map.put(map, :id, id)
+  end
+
+  defp update_id_y(%{id: a} = map, b) do
+    Map.put(map, :id, update_id_y(a, b))
+  end
+
+  defp update_id_y(a, b) when is_nil(a), do: b
+
+  defp update_id_y(a, b), do: a |> URI.merge(b) |> URI.to_string()
+
+  defp update_path_x(uri, pointer) do
+    path =
+      case uri.path do
+        nil ->
+          Path.join("/", pointer)
+
+        path ->
+          if String.ends_with?(path, "/"),
+            do: Path.join(path, pointer),
+            else: Path.join("/", pointer)
+      end
+
+    uri |> Map.put(:path, path) |> URI.to_string() |> URI.parse()
+  end
 
   defp get_schema(uri) do
     with {:ok, src} <- get_response(uri),

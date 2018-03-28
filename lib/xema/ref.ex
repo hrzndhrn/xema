@@ -8,40 +8,59 @@ defmodule Xema.Ref do
   alias Xema.Ref
   alias Xema.Schema
 
+  require Logger
+
   @type t :: %Xema.Ref{pointer: String.t()}
 
-  defstruct pointer: ""
+  defstruct pointer: nil,
+            ptr: nil,
+            path: nil,
+            remote: false,
+            url: nil
 
   @spec new(keyword | String.t()) :: Ref.t()
-  def new(pointer) when is_binary(pointer), do: %Ref{pointer: pointer}
+  def new(pointer) when is_binary(pointer) do
+    uri = URI.parse(pointer)
+    path = uri |> Map.get(:path)
+    ptr = uri |> Map.get(:fragment)
+    remote = !is_nil(path) && Regex.match?(~r/(?:\..+#)|(?:\..+$)/, path)
 
-  def new(%URI{} = uri), do: %Ref{pointer: URI.to_string(uri)}
+    url =
+      unless is_nil(uri.scheme) do
+        port =
+          if is_nil(uri.port),
+            do: "",
+            else: ":#{Integer.to_string(uri.port)}"
 
-  def new(opts) when is_list(opts), do: struct(Ref, opts)
+        "#{uri.scheme}://#{uri.host}#{port}"
+      end
 
-  def validate(%Ref{pointer: "http" <> _ = pointer}, value, opts) do
-    xema = Map.get(opts[:root].refs, del_fragment(pointer))
-    pointer = get_fragment(pointer)
+    %Ref{
+      pointer: pointer,
+      # unless(is_nil(ptr), do: "##{ptr}"),
+      ptr: ptr,
+      path: path,
+      remote: remote,
+      url: url
+    }
+  end
 
-    case do_get(pointer, xema) do
-      {:ok, %Schema{} = schema} ->
-        Xema.validate(schema, value, root: xema)
+  def new(%URI{} = uri) do
+    raise "deprecated"
+    %Ref{pointer: URI.to_string(uri)}
+  end
 
-      {:ok, %Ref{} = ref} ->
-        validate(ref, value, root: xema)
-
-      _error ->
-        {:error, :ref_not_found}
-        # _error -> {:error, ref}
-    end
+  def new(opts) when is_list(opts) do
+    raise "deprecated"
+    struct(Ref, opts)
   end
 
   def validate(ref, value, opts) do
-    case get(ref, opts[:root], opts[:id]) do
-      {:ok, %Schema{} = schema} ->
+    case get_x(ref, opts) do
+      {:ok, %Schema{} = schema, opts} ->
         Xema.validate(schema, value, opts)
 
-      {:ok, %Ref{} = ref} ->
+      {:ok, %Ref{} = ref, opts} ->
         validate(ref, value, opts)
 
       _error ->
@@ -50,40 +69,53 @@ defmodule Xema.Ref do
     end
   end
 
-  @spec get(Ref.t(), Xema.t() | Schema.t() | String.t() | nil) ::
-          {:ok, Schema.t()} | {:error, atom}
-  def get(ref, schema), do: get(ref, schema, nil)
-
-  @spec get(Ref.t(), Xema.t() | Schema.t(), String.t()) ::
-          {:ok, Schema.t()} | {:error, atom}
-  def get(ref, schema, id)
-
-  def get(%Ref{pointer: "#"}, xema, _), do: {:ok, get_schema(xema)}
-
-  def get(%Ref{pointer: "#/" <> pointer}, xema, _id) do
-    do_get(pointer, xema)
+  defp get_x(%Ref{remote: false, path: nil, ptr: pointer}, opts) do
+    with {:ok, schema} <- do_get(pointer, opts[:root]), do: {:ok, schema, opts}
   end
 
-  def get(ref, xema, id) when not is_nil(id) do
+  defp get_x(%Ref{remote: false, path: path, ptr: nil}, opts) do
     id =
-      id
-      |> URI.merge(ref.pointer)
+      opts[:id]
+      |> URI.parse()
+      |> Map.put(:path, Path.join("/", path))
       |> URI.to_string()
 
-    case Map.get(xema.ids, id) do
-      nil ->
-        {:error, :not_found}
+    ref = Map.get(opts[:root].ids, id)
 
-      id_ref ->
-        get(id_ref, xema.content, nil)
-    end
+    {:ok, ref, opts}
   end
 
-  def get(_, _, _), do: {:error, :invalid_ref}
+  defp get_x(%Ref{remote: true, url: nil, path: path, ptr: pointer}, opts) do
+    uri = URI.parse(opts[:id])
+
+    uri =
+      case is_nil(uri.path) || !String.ends_with?(uri.path, "/") do
+        true -> Map.put(uri, :path, Path.join("/", path))
+        false -> Map.put(uri, :path, Path.join(uri.path, path))
+      end
+
+    xema = Map.get(opts[:root].refs, URI.to_string(uri))
+
+    with {:ok, schema} <- do_get(pointer, xema), do: {:ok, schema, root: xema}
+  end
+
+  defp get_x(%Ref{remote: true, url: url, path: path, ptr: pointer}, opts) do
+    uri = Path.join(url, path)
+
+    xema = Map.get(opts[:root].refs, uri)
+
+    with {:ok, schema} <- do_get(pointer, xema), do: {:ok, schema, root: xema}
+  end
+
+  defp get_x(_ref, _opts), do: {:error, :not_found}
 
   defp do_get(_, nil), do: {:error, :not_found}
 
+  defp do_get(nil, %Xema{} = xema), do: {:ok, xema.content}
+
   defp do_get("#", xema), do: {:ok, get_schema(xema)}
+
+  defp do_get("", xema), do: {:ok, get_schema(xema)}
 
   defp do_get(pointer, %Xema{} = xema), do: do_get(pointer, xema.content)
 
@@ -99,8 +131,11 @@ defmodule Xema.Ref do
 
   defp do_get([step | steps], schema) when is_map(schema) do
     case get_value(schema, decode(step)) do
-      {:ok, value} -> do_get(steps, value)
-      {:error, _} -> {:error, :not_found}
+      {:ok, value} ->
+        do_get(steps, value)
+
+      {:error, _} ->
+        {:error, :not_found}
     end
   end
 
@@ -112,16 +147,6 @@ defmodule Xema.Ref do
       end
     end
   end
-
-  defp get_fragment(str) do
-    case URI.parse(str) do
-      %URI{fragment: nil} -> "#"
-      %URI{fragment: fragment} -> fragment
-    end
-  end
-
-  defp del_fragment(str),
-    do: str |> URI.parse() |> Map.put(:fragment, nil) |> URI.to_string()
 
   defp get_schema(schema) do
     case schema do

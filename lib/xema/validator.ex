@@ -13,7 +13,7 @@ defmodule Xema.Validator do
   @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
 
   @spec validate(Xema.t(), any, keyword) :: result
-  def validate(%Xema{content: schema} = xema, value, opts) do
+  def validate(%{content: schema} = xema, value, opts) do
     opts = Keyword.put_new(opts, :root, xema)
     do_validate(schema, value, opts)
   end

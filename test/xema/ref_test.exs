@@ -5,37 +5,6 @@ defmodule Xema.RefTest do
 
   import Xema, only: [validate: 2]
 
-  describe "schema without keyword ref" do
-    setup do
-      %{
-        schema:
-          Xema.new(:properties, %{
-            foo: :integer
-          })
-      }
-    end
-
-    @tag :ref
-    test "get/2 returns the pointed schema", %{schema: schema} do
-      ref = Ref.new(pointer: "#/properties/foo")
-      assert Ref.get(ref, schema) == {:ok, Xema.new(:integer).content}
-    end
-
-    @tag :ref
-    test "get/2 returns an error tuple for an invalid pointer", %{
-      schema: schema
-    } do
-      ref = Ref.new(pointer: "#/properties/bar")
-      assert Ref.get(ref, schema) == {:error, :not_found}
-    end
-
-    @tag :ref
-    test "get/2 returns the root schema for #", %{schema: schema} do
-      ref = Ref.new(pointer: "#")
-      assert Ref.get(ref, schema) == {:ok, schema.content}
-    end
-  end
-
   describe "schema with ref root pointer" do
     setup do
       %{
@@ -227,7 +196,6 @@ defmodule Xema.RefTest do
       assert Xema.validate(schema, 42) == :ok
     end
 
-    @tag :only
     @tag :ref
     test "validate/2 with invalid value", %{schema: schema} do
       assert Xema.validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
@@ -426,6 +394,7 @@ defmodule Xema.RefTest do
       assert Xema.validate(schema, tree) == :ok
     end
 
+    @tag :only
     @tag :ref
     test "ids", %{schema: schema} do
       assert schema.ids == %{

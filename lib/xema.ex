@@ -10,6 +10,8 @@ defmodule Xema do
   alias Xema.Schema.Validator, as: Validator
   alias Xema.SchemaError
 
+  require Logger
+
   @typedoc """
   The available type notations.
   """
@@ -174,25 +176,6 @@ defmodule Xema do
       when is_boolean(bool),
       do: Schema.new(type: bool)
 
-  #  def init(:ref, remote) when is_binary(remote) do
-  #    uri = del_fragment(remote)
-  #
-  #    case remote_schema(uri) do
-  #      {:ok, schema} ->
-  #        [pointer: remote, schema: schema]
-  #        |> Ref.new()
-  #
-  #      {:error, %SyntaxError{description: desc, line: line}} ->
-  #        raise SyntaxError, description: desc, line: line, file: uri
-  #
-  #      {:error, %CompileError{description: desc, line: line}} ->
-  #        raise CompileError, description: desc, line: line, file: uri
-  #
-  #      {:error, _error} ->
-  #        raise SchemaError, message: "Remote schema '#{remote}' not found."
-  #    end
-  #  end
-
   for type <- @schema_types do
     def init(unquote(type), opts), do: schema({unquote(type), opts}, [])
   end
@@ -233,16 +216,20 @@ defmodule Xema do
        when not is_tuple(value),
        do: schema({value, []}, opts)
 
-  defp schema({:ref, "#" <> _ = pointer}, _opts), do: Ref.new(pointer)
-
-  defp schema({:ref, pointer}, opts) do
-    uri = opts[:id] |> URI.parse() |> update_path(pointer)
-
-    case String.ends_with?(uri.path, ".exon") do
-      true -> Ref.new(uri)
-      false -> Ref.new(pointer)
-    end
-  end
+  defp schema({:ref, pointer}, _opts), do: Ref.new(pointer)
+  #  defp schema({:ref, "#" <> _ = pointer}, _opts), do: Ref.new(pointer)
+  #
+  #  defp schema({:ref, pointer}, opts) do
+  #    uri = opts[:id] |> URI.parse() |> update_path(pointer)
+  #
+  #    case String.ends_with?(uri.path, ".exon") do
+  #      true ->
+  #        Logger.warn("#{pointer} - #{uri}")
+  #        #Ref.new(uri)
+  #        Ref.new(pointer)
+  #      false -> Ref.new(pointer)
+  #    end
+  #  end
 
   defp schema({list, keywords}, opts) when is_list(list),
     do:
