@@ -53,7 +53,7 @@ defmodule Xema.Ref do
   end
 
   def validate(ref, value, opts) do
-    case get_x(ref, opts) do
+    case get(ref, opts) do
       {:ok, %Schema{} = schema, opts} ->
         Xema.validate(schema, value, opts)
 
@@ -66,11 +66,11 @@ defmodule Xema.Ref do
     end
   end
 
-  defp get_x(%Ref{remote: false, path: nil, pointer: pointer}, opts) do
+  defp get(%Ref{remote: false, path: nil, pointer: pointer}, opts) do
     with {:ok, schema} <- do_get(pointer, opts[:root]), do: {:ok, schema, opts}
   end
 
-  defp get_x(%Ref{remote: false, path: path, pointer: nil}, opts) do
+  defp get(%Ref{remote: false, path: path, pointer: nil}, opts) do
     id =
       opts[:id]
       |> URI.parse()
@@ -82,7 +82,7 @@ defmodule Xema.Ref do
     {:ok, ref, opts}
   end
 
-  defp get_x(%Ref{remote: true, url: nil, path: path, pointer: pointer}, opts) do
+  defp get(%Ref{remote: true, url: nil, path: path, pointer: pointer}, opts) do
     uri = URI.parse(opts[:id])
 
     uri =
@@ -96,7 +96,7 @@ defmodule Xema.Ref do
     with {:ok, schema} <- do_get(pointer, xema), do: {:ok, schema, root: xema}
   end
 
-  defp get_x(%Ref{remote: true, url: url, path: path, pointer: pointer}, opts) do
+  defp get(%Ref{remote: true, url: url, path: path, pointer: pointer}, opts) do
     uri = Path.join(url, path)
 
     xema = Map.get(opts[:root].refs, uri)
@@ -104,7 +104,7 @@ defmodule Xema.Ref do
     with {:ok, schema} <- do_get(pointer, xema), do: {:ok, schema, root: xema}
   end
 
-  defp get_x(_ref, _opts), do: {:error, :not_found}
+  defp get(_ref, _opts), do: {:error, :not_found}
 
   defp do_get(_, nil), do: {:error, :not_found}
 
