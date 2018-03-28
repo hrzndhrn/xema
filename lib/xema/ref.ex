@@ -3,7 +3,7 @@ defmodule Xema.Ref do
   TODO: doc
   """
 
-  import Xema.Utils, only: [get_value: 2]
+  import Xema.Utils, only: [get_value: 2, update_nil: 2]
 
   alias Xema.Ref
   alias Xema.Schema
@@ -168,9 +168,16 @@ defmodule Xema.Ref do
     end
   end
 
-  def to_string(ref) do
-    "{:ref, #{inspect(ref.pointer)}}"
+  def get_pointer(ref) do
+    ref.url
+    |> update_nil("")
+    |> URI.parse()
+    |> Map.put(:path, ref.path)
+    |> Map.put(:fragment, ref.pointer)
+    |> URI.to_string()
   end
+
+  def to_string(ref), do: "{:ref, #{inspect(get_pointer(ref))}}"
 end
 
 defimpl String.Chars, for: Xema.Ref do

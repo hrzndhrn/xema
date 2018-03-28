@@ -394,15 +394,20 @@ defmodule Xema.RefTest do
       assert Xema.validate(schema, tree) == :ok
     end
 
-    @tag :only
     @tag :ref
     test "ids", %{schema: schema} do
       assert schema.ids == %{
-               "http://localhost:1234/node" => %Xema.Ref{
-                 pointer: "#/definitions/node"
+               "http://localhost:1234/node" => %Ref{
+                 path: nil,
+                 remote: false,
+                 url: nil,
+                 pointer: "/definitions/node"
                },
-               "http://localhost:1234/tree" => %Xema.Ref{
-                 pointer: "#"
+               "http://localhost:1234/tree" => %Ref{
+                 path: nil,
+                 remote: false,
+                 url: nil,
+                 pointer: ""
                }
              }
     end

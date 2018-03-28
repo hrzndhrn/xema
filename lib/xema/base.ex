@@ -6,8 +6,6 @@ defmodule Xema.Base do
   alias Xema.SchemaError
   alias Xema.Validator
 
-  require Logger
-
   defmacro __using__(_opts) do
     quote do
       @behaviour Xema.Base
@@ -82,14 +80,10 @@ defmodule Xema.Base do
     refs =
       reduce(schema, %{id: nil}, fn
         %Ref{} = ref, acc, _path ->
-          Logger.debug("ref:  acc id: #{inspect(Map.get(acc, :id))}")
-          Logger.debug("ref: pointer: #{inspect(ref.pointer)}")
           put_ref(acc, ref)
 
         %Schema{id: id}, acc, _path when not is_nil(id) ->
-          Logger.debug("id: #{id}")
-          Logger.debug("acc id: #{inspect(Map.get(acc, :id))}")
-          update_id_y(acc, id)
+          update_id(acc, id)
 
         _, acc, _ ->
           acc
@@ -102,17 +96,8 @@ defmodule Xema.Base do
 
   defp get_refs(_), do: nil
 
-  #  defp put_ref(map, %Ref{pointer: "http" <> _ = pointer} = ref) do
-  #    IO.inspect ref, label: :ref
-  #    IO.inspect map[:id], label: :id
-  #    raise "deprecated"
-  #    Logger.warn("load: #{pointer}")
-  #    uri = String.replace(pointer, ~r/#.*/, "")
-  #    Map.put(map, uri, get_schema(uri))
-  #  end
-
   defp put_ref(%{id: id} = acc, %Ref{remote: true, url: nil} = ref) do
-    uri = update_id_y(id, ref.path)
+    uri = update_id(id, ref.path)
     Map.put(acc, uri, get_schema(uri))
   end
 
@@ -123,39 +108,13 @@ defmodule Xema.Base do
 
   defp put_ref(map, _), do: map
 
-  # defp update_id_x(map, nil), do: map
-
-  defp update_id_x(%{id: id} = map, sid) when is_nil(id) do
-    Map.put(map, :id, sid)
+  defp update_id(%{id: a} = map, b) do
+    Map.put(map, :id, update_id(a, b))
   end
 
-  defp update_id_x(%{id: id} = map, sid) do
-    id = id |> URI.merge(sid) |> URI.to_string()
-    Map.put(map, :id, id)
-  end
+  defp update_id(a, b) when is_nil(a), do: b
 
-  defp update_id_y(%{id: a} = map, b) do
-    Map.put(map, :id, update_id_y(a, b))
-  end
-
-  defp update_id_y(a, b) when is_nil(a), do: b
-
-  defp update_id_y(a, b), do: a |> URI.merge(b) |> URI.to_string()
-
-  defp update_path_x(uri, pointer) do
-    path =
-      case uri.path do
-        nil ->
-          Path.join("/", pointer)
-
-        path ->
-          if String.ends_with?(path, "/"),
-            do: Path.join(path, pointer),
-            else: Path.join("/", pointer)
-      end
-
-    uri |> Map.put(:path, path) |> URI.to_string() |> URI.parse()
-  end
+  defp update_id(a, b), do: a |> URI.merge(b) |> URI.to_string()
 
   defp get_schema(uri) do
     with {:ok, src} <- get_response(uri),

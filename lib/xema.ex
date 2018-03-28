@@ -10,8 +10,6 @@ defmodule Xema do
   alias Xema.Schema.Validator, as: Validator
   alias Xema.SchemaError
 
-  require Logger
-
   @typedoc """
   The available type notations.
   """
@@ -217,19 +215,6 @@ defmodule Xema do
        do: schema({value, []}, opts)
 
   defp schema({:ref, pointer}, _opts), do: Ref.new(pointer)
-  #  defp schema({:ref, "#" <> _ = pointer}, _opts), do: Ref.new(pointer)
-  #
-  #  defp schema({:ref, pointer}, opts) do
-  #    uri = opts[:id] |> URI.parse() |> update_path(pointer)
-  #
-  #    case String.ends_with?(uri.path, ".exon") do
-  #      true ->
-  #        Logger.warn("#{pointer} - #{uri}")
-  #        #Ref.new(uri)
-  #        Ref.new(pointer)
-  #      false -> Ref.new(pointer)
-  #    end
-  #  end
 
   defp schema({list, keywords}, opts) when is_list(list),
     do:
@@ -267,21 +252,6 @@ defmodule Xema do
   defp schema({type, _}, _opts) do
     raise SchemaError,
       message: "#{inspect(type)} is not a valid type or keyword."
-  end
-
-  defp update_path(uri, pointer) do
-    path =
-      case uri.path do
-        nil ->
-          Path.join("/", pointer)
-
-        path ->
-          if String.ends_with?(path, "/"),
-            do: Path.join(path, pointer),
-            else: Path.join("/", pointer)
-      end
-
-    uri |> Map.put(:path, path) |> URI.to_string() |> URI.parse()
   end
 
   @spec update_id(keyword, keyword) :: {keyword, keyword}
@@ -455,7 +425,7 @@ defmodule Xema do
 
   @spec key_value_to_string({atom | String.t(), any}) :: String.t()
   defp key_value_to_string({:ref, %{__struct__: Xema.Ref} = ref}),
-    do: "ref: #{inspect(ref.pointer)}"
+    do: "ref: #{inspect(Ref.get_pointer(ref))}"
 
   defp key_value_to_string({key, value}) when is_atom(key),
     do: "#{key}: #{value_to_string(value)}"
