@@ -111,7 +111,6 @@ defmodule Xema.Base do
 
   defp put_ref(map, _), do: map
 
-
   defp get_schema(uri) do
     with {:ok, src} <- get_response(uri),
          {:ok, data} <- evil(src) do

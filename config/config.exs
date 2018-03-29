@@ -1,4 +1,3 @@
 use Mix.Config
 
-config :xema,
-  :remote, true
+config :xema, :remote, true

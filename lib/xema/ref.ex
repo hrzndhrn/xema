@@ -99,7 +99,8 @@ defmodule Xema.Ref do
   defp do_get(_, nil), do: {:error, :not_found}
 
   defp do_get(pointer, %Xema{} = xema)
-    when pointer in [nil, "", "#"],do: {:ok, xema.content}
+       when pointer in [nil, "", "#"],
+       do: {:ok, xema.content}
 
   defp do_get(pointer, %Xema{} = xema), do: do_get(pointer, xema.content)
 
