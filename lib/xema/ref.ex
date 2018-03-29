@@ -7,6 +7,7 @@ defmodule Xema.Ref do
 
   alias Xema.Ref
   alias Xema.Schema
+  alias Xema.SchemaError
 
   require Logger
 
@@ -50,9 +51,9 @@ defmodule Xema.Ref do
       {:ok, %Ref{} = ref, opts} ->
         validate(ref, value, opts)
 
-      _error ->
-        {:error, :ref_not_found}
-        # _error -> {:error, ref}
+      {:error, :not_found} ->
+        raise SchemaError,
+          message: "Reference '#{Ref.get_pointer(ref)}' not found."
     end
   end
 
@@ -67,9 +68,7 @@ defmodule Xema.Ref do
       |> Map.put(:path, Path.join("/", path))
       |> URI.to_string()
 
-    ref = Map.get(opts[:root].ids, id)
-
-    {:ok, ref, opts}
+    with {:ok, ref} <- get_ref(opts[:root], id), do: {:ok, ref, opts}
   end
 
   defp get(%Ref{remote: true, url: nil, path: path, pointer: pointer}, opts) do
@@ -81,17 +80,21 @@ defmodule Xema.Ref do
         false -> Map.put(uri, :path, Path.join(uri.path, path))
       end
 
-    xema = Map.get(opts[:root].refs, URI.to_string(uri))
+    # xema = Map.get(opts[:root].refs, URI.to_string(uri))
 
-    with {:ok, schema} <- do_get(pointer, xema), do: {:ok, schema, root: xema}
+    with {:ok, xema} <- get_xema(opts[:root], URI.to_string(uri)),
+         {:ok, schema} <- do_get(pointer, xema),
+         do: {:ok, schema, root: xema}
   end
 
   defp get(%Ref{remote: true, url: url, path: path, pointer: pointer}, opts) do
     uri = Path.join(url, path)
 
-    xema = Map.get(opts[:root].refs, uri)
+    # xema = Map.get(opts[:root].refs, uri)
 
-    with {:ok, schema} <- do_get(pointer, xema), do: {:ok, schema, root: xema}
+    with {:ok, xema} <- get_xema(opts[:root], uri),
+         {:ok, schema} <- do_get(pointer, xema),
+         do: {:ok, schema, root: xema}
   end
 
   defp get(_ref, _opts), do: {:error, :not_found}
@@ -132,6 +135,24 @@ defmodule Xema.Ref do
       end
     end
   end
+
+  defp get_ref(%{ids: refs}, id) do
+    case Map.get(refs, id) do
+      nil -> {:error, :not_found}
+      ref -> {:ok, ref}
+    end
+  end
+
+  defp get_ref(_, _), do: {:error, :not_found}
+
+  defp get_xema(%{refs: xemas}, pointer) do
+    case Map.get(xemas, pointer) do
+      nil -> {:error, :not_found}
+      xema -> {:ok, xema}
+    end
+  end
+
+  defp get_xema(_, _), do: {:error, :not_found}
 
   defp decode(str) do
     str

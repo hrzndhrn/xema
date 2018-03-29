@@ -66,6 +66,26 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
+  describe "schema with invalid ref" do
+    setup do
+      schema =
+        :ref
+        |> Xema.new("http://localhost:1234/integer.exon")
+        |> Map.delete(:refs)
+
+      %{schema: schema}
+    end
+
+    @tag :remote
+    test "validate/2 with a valid value", %{schema: schema} do
+      expected = "Reference 'http://localhost:1234/integer.exon' not found."
+
+      assert_raise SchemaError, expected, fn ->
+        Xema.validate(schema, 1)
+      end
+    end
+  end
+
   describe "fragment within remote ref" do
     setup do
       %{

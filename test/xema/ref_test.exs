@@ -2,6 +2,7 @@ defmodule Xema.RefTest do
   use ExUnit.Case, async: true
 
   alias Xema.Ref
+  alias Xema.SchemaError
 
   import Xema, only: [validate: 2]
 
@@ -234,8 +235,12 @@ defmodule Xema.RefTest do
 
     @tag :ref
     test "validate/2 an invalid ref", %{schema: schema} do
-      assert Xema.validate(schema, [1, 2, 3, 4]) ==
-               {:error, [{3, :ref_not_found}]}
+      expected = "Reference '#/items/11' not found."
+
+      assert_raise SchemaError, expected, fn ->
+        Xema.validate(schema, [1, 2, 3, 4]) ==
+          {:error, [{3, {:ref, "#/items/11"}}]}
+      end
     end
   end
 
@@ -353,6 +358,47 @@ defmodule Xema.RefTest do
                     tilda_3: %{type: :integer, value: "1"}
                   }
                 }}
+    end
+  end
+
+  describe "schema with invalid ref" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            id: "http://localhost",
+            definitions: %{
+              int: {:integer, id: "http://localhost/int"},
+              foobar: {:integer, id: "foobar"}
+            },
+            properties: %{
+              num: {:ref, "int"},
+              invalid: {:ref, "invalid"},
+              baz: {:ref, "foobar"}
+            }
+          )
+      }
+    end
+
+    test "validate/2 with valid ref", %{schema: schema} do
+      assert Xema.validate(schema, %{num: 1}) == :ok
+    end
+
+    test "validate/2 with invalid ref", %{schema: schema} do
+      expected = "Reference 'invalid' not found."
+
+      assert_raise SchemaError, expected, fn ->
+        Xema.validate(schema, %{invalid: 1})
+      end
+    end
+
+    test "validate/2 with invalid id", %{schema: schema} do
+      expected = "Reference 'foobar' not found."
+
+      assert_raise SchemaError, expected, fn ->
+        Xema.validate(schema, %{baz: 1})
+      end
     end
   end
 
