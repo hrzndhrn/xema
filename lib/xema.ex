@@ -226,7 +226,6 @@ defmodule Xema do
   for type <- @schema_types do
     defp schema({unquote(type), keywords}, opts) when is_list(keywords) do
       keywords = Keyword.put(keywords, :type, unquote(type))
-      {keywords, opts} = update_id(keywords, opts)
 
       case Validator.validate(unquote(type), keywords) do
         :ok -> keywords |> update(opts) |> Schema.new()
@@ -252,30 +251,6 @@ defmodule Xema do
   defp schema({type, _}, _opts) do
     raise SchemaError,
       message: "#{inspect(type)} is not a valid type or keyword."
-  end
-
-  @spec update_id(keyword, keyword) :: {keyword, keyword}
-  defp update_id(keywords, opts) do
-    {kid, oid} = do_update_id(keywords[:id], opts[:id])
-
-    {Keyword.put(keywords, :id, kid), Keyword.put(opts, :id, oid)}
-  end
-
-  defp do_update_id(nil, oid) do
-    {nil, oid}
-  end
-
-  defp do_update_id("http" <> _ = kid, nil) do
-    {kid, kid}
-  end
-
-  defp do_update_id(kid, "http" <> _ = oid) do
-    id = oid |> URI.merge(kid) |> URI.to_string()
-    {id, id}
-  end
-
-  defp do_update_id(kid, oid) do
-    {kid, oid}
   end
 
   # function: update/1

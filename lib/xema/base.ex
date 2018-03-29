@@ -1,6 +1,8 @@
 defmodule Xema.Base do
   @moduledoc false
 
+  import Xema.Utils, only: [update_id: 2]
+
   alias Xema.Error
   alias Xema.Ref
   alias Xema.Schema
@@ -109,13 +111,6 @@ defmodule Xema.Base do
 
   defp put_ref(map, _), do: map
 
-  defp update_id(%{id: a} = map, b) do
-    Map.put(map, :id, update_id(a, b))
-  end
-
-  defp update_id(a, b) when is_nil(a), do: b
-
-  defp update_id(a, b), do: a |> URI.merge(b) |> URI.to_string()
 
   defp get_schema(uri) do
     with {:ok, src} <- get_response(uri),

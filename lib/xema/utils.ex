@@ -68,4 +68,16 @@ defmodule Xema.Utils do
         into: %{},
         do: {key, Map.get(b, key)}
       )
+
+  def update_id(kw, b) when is_list(kw) do
+    Keyword.put(kw, :id, update_id(Keyword.get(kw, :id), b))
+  end
+
+  def update_id(%{id: a} = map, b) do
+    Map.put(map, :id, update_id(a, b))
+  end
+
+  def update_id(a, b) when is_nil(a), do: b
+
+  def update_id(a, b), do: a |> URI.merge(b) |> URI.to_string()
 end

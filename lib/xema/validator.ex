@@ -36,7 +36,7 @@ defmodule Xema.Validator do
     opts =
       case schema.id do
         nil -> opts
-        id -> Keyword.put(opts, :id, id)
+        id -> update_id(opts, id)
       end
 
     case schema do
