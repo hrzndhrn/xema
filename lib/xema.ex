@@ -5,10 +5,13 @@ defmodule Xema do
 
   use Xema.Base
 
+  alias Xema.Error
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.Schema.Validator, as: Validator
   alias Xema.SchemaError
+
+  @remote Application.get_env(:xema, :remote, false)
 
   @typedoc """
   The available type notations.
@@ -150,36 +153,38 @@ defmodule Xema do
       {:error, [{2, %{value: 1, minimum: 2}}]}
 
   """
+  @spec new(schema_types | schema_keywords | tuple, keyword) :: Xema.t()
+  def new(type, keywords)
 
-  # @spec new(schema_types | schema_keywords | tuple, keyword) :: Xema.t()
-  # def x_new(type, keywords \\ [])
+  defp init(typ, keywords \\ [])
 
-  def init({type}, []), do: init(type, [])
+  defp init({type}, []), do: init(type, [])
 
-  def init(list, []) when is_list(list) do
+  defp init(list, []) when is_list(list) do
     case Keyword.keyword?(list) do
       true -> init(:any, list)
       false -> multi_type(list, [])
     end
   end
 
-  def init(list, keywords) when is_list(list), do: multi_type(list, keywords)
+  defp init(list, keywords) when is_list(list), do: multi_type(list, keywords)
 
-  def init({type, keywords}, []), do: init(type, keywords)
+  defp init({type, keywords}, []), do: init(type, keywords)
 
-  def init(tuple, keywords) when is_tuple(tuple),
+  defp init(tuple, keywords) when is_tuple(tuple),
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
 
-  def init(bool, [])
-      when is_boolean(bool),
-      do: Schema.new(type: bool)
+  defp init(bool, [])
+       when is_boolean(bool),
+       do: Schema.new(type: bool)
 
   for type <- @schema_types do
-    def init(unquote(type), keywords), do: schema({unquote(type), keywords}, [])
+    defp init(unquote(type), keywords),
+      do: schema({unquote(type), keywords}, [])
   end
 
   for keyword <- @schema_keywords do
-    def init(unquote(keyword), keywords),
+    defp init(unquote(keyword), keywords),
       do: init(:any, [{unquote(keyword), keywords}])
   end
 
@@ -194,6 +199,21 @@ defmodule Xema do
           message: "Invalid type in argument list #{inspect(list)}."
         )
     end
+  end
+
+  defp remote(str) do
+    unless @remote do
+      raise Error, message: "Xema is not configured for remote schemas."
+    end
+
+    do_remote(str)
+  end
+
+  defp do_remote(str) do
+    {data, _} = Code.eval_string(str)
+    {:ok, data}
+  rescue
+    error -> {:error, error}
   end
 
   #
