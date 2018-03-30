@@ -10,7 +10,7 @@ defmodule Xema.Base do
 
   defmacro __using__(_opts) do
     quote do
-      alias Xema.Base
+      import Xema.Base
 
       @enforce_keys [:content]
 
@@ -52,21 +52,6 @@ defmodule Xema.Base do
 
       defp on_error(error), do: error
       defoverridable on_error: 1
-
-      defp get_ids(%Schema{} = schema) do
-        ids =
-          reduce(schema, %{}, fn
-            %Schema{id: id}, acc, path when not is_nil(id) ->
-              Map.put(acc, id, Ref.new(path))
-
-            _, acc, _ ->
-              acc
-          end)
-
-        if ids == %{}, do: nil, else: ids
-      end
-
-      defp get_ids(_), do: nil
 
       defp get_refs(%Schema{} = schema) do
         refs =
@@ -115,53 +100,70 @@ defmodule Xema.Base do
             raise SchemaError, message: "Remote schema '#{uri}' not found."
         end
       end
-
-      defp get_response(uri) do
-        case HTTPoison.get(uri) do
-          {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-            {:ok, body}
-
-          {:ok, %HTTPoison.Response{status_code: 404}} ->
-            {:error, :not_found}
-
-          error ->
-            {:error, error}
-        end
-      end
-
-      defp evil(str) do
-        {data, _} = Code.eval_string(str)
-        {:ok, data}
-      rescue
-        error -> {:error, error}
-      end
-
-      defp reduce(schema, acc, fun) do
-        reduce(schema, acc, "#", fun)
-      end
-
-      defp reduce(%Schema{} = schema, acc, path, fun) do
-        schema
-        |> Map.from_struct()
-        |> Enum.reduce(fun.(schema, acc, path), fn {key, value}, x ->
-          reduce(value, x, Path.join(path, to_string(key)), fun)
-        end)
-      end
-
-      defp reduce(%{__struct__: _} = struct, acc, path, fun),
-        do: fun.(struct, acc, path)
-
-      defp reduce(map, acc, path, fun) when is_map(map) do
-        Enum.reduce(map, fun.(map, acc, path), fn
-          {%{__struct__: _}, _}, acc ->
-            acc
-
-          {key, value}, acc ->
-            reduce(value, acc, Path.join(path, to_string(key)), fun)
-        end)
-      end
-
-      defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
     end
   end
+
+  def get_ids(%Schema{} = schema) do
+    ids =
+      reduce(schema, %{}, fn
+        %Schema{id: id}, acc, path when not is_nil(id) ->
+          Map.put(acc, id, Ref.new(path))
+
+        _, acc, _ ->
+          acc
+      end)
+
+    if ids == %{}, do: nil, else: ids
+  end
+
+  def get_ids(_), do: nil
+
+  def get_response(uri) do
+    case HTTPoison.get(uri) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        {:error, :not_found}
+
+      error ->
+        {:error, error}
+    end
+  end
+
+  #  defp evil(str) do
+  #    {data, _} = Code.eval_string(str)
+  #    {:ok, data}
+  #  rescue
+  #    error -> {:error, error}
+  #  end
+
+  def reduce(schema, acc, fun) do
+    reduce(schema, acc, "#", fun)
+  end
+
+  def reduce(%Schema{} = schema, acc, path, fun) do
+    schema
+    |> Map.from_struct()
+    |> Enum.reduce(fun.(schema, acc, path), fn {key, value}, x ->
+      reduce(value, x, Path.join(path, to_string(key)), fun)
+    end)
+  end
+
+  def reduce(%{__struct__: _} = struct, acc, path, fun),
+    do: fun.(struct, acc, path)
+
+  def reduce(map, acc, path, fun) when is_map(map) do
+    Enum.reduce(map, fun.(map, acc, path), fn
+      {%{__struct__: _}, _}, acc ->
+        acc
+
+      {key, value}, acc ->
+        reduce(value, acc, Path.join(path, to_string(key)), fun)
+    end)
+  end
+
+  def reduce(value, acc, path, fun), do: fun.(value, acc, path)
+  #  end
+  # end
 end
