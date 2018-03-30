@@ -4,6 +4,7 @@ defmodule Xema.Format do
   """
 
   @formats [:date_time, :email, :hostname, :ipv4, :ipv6, :uri]
+  @type format :: :date_time | :email | :hostname | :ipv4 | :ipv6 | :uri
 
   defmacro __using__(_opts) do
     quote do
