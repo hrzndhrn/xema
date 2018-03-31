@@ -13,24 +13,25 @@ defmodule Xema.Format do
     end
   end
 
-  defguard supports(fmt) when fmt in @formats
+  @spec supports(format) :: boolean
+  defguard supports(format) when format in @formats
 
-  @spec is?(atom, any) :: boolean
+  @spec is?(format, any) :: boolean
   for fmt <- @formats do
-    def is?(unquote(fmt), str) do
-      unquote(:"is_#{Atom.to_string(fmt)}?")(str)
+    def is?(unquote(fmt), string) do
+      unquote(:"is_#{Atom.to_string(fmt)}?")(string)
     end
   end
 
   @spec is_date_time?(any) :: boolean
-  def is_date_time?(str) when is_binary(str) do
+  def is_date_time?(string) when is_binary(string) do
     regex = ~r/^
       (\d{4})-([01]\d)-([0-3]\d)T
       ([0-2]\d):([0-5]\d):([0-6]\d)(?:\.(\d+))?
       (?:Z|[-+](?:[01]\d|2[0-3]):(?:[0-5]\d|60))
     $/xi
 
-    case Regex.run(regex, str) do
+    case Regex.run(regex, string) do
       nil ->
         false
 
@@ -55,7 +56,7 @@ defmodule Xema.Format do
   end
 
   @spec is_hostname?(any) :: boolean
-  def is_hostname?(str) when is_binary(str) do
+  def is_hostname?(string) when is_binary(string) do
     regex = ~r/
       (?(DEFINE)
         (?<sub_domain> (?:[a-z][-a-z\d]{0,62}) )
@@ -63,13 +64,13 @@ defmodule Xema.Format do
       ^(?&sub_domain)(?:\.(?&sub_domain))*$
     /xi
 
-    Regex.match?(regex, str)
+    Regex.match?(regex, string)
   end
 
   def is_hostname?(_), do: false
 
   @spec is_ipv4?(any) :: boolean
-  def is_ipv4?(str) when is_binary(str) do
+  def is_ipv4?(string) when is_binary(string) do
     regex = ~r/
       (?(DEFINE)
         (?<dec_octet> (?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2}) )
@@ -78,13 +79,13 @@ defmodule Xema.Format do
       ^(?&ipv4)$
     /x
 
-    Regex.match?(regex, str)
+    Regex.match?(regex, string)
   end
 
   def is_ipv4?(_), do: true
 
   @spec is_ipv6?(any) :: boolean
-  def is_ipv6?(str) when is_binary(str) do
+  def is_ipv6?(string) when is_binary(string) do
     regex = ~r/
       (?(DEFINE)
         (?<h16>(?:[[:xdigit:]]{1,4}) )
@@ -105,13 +106,13 @@ defmodule Xema.Format do
       )$
     /x
 
-    Regex.match?(regex, str)
+    Regex.match?(regex, string)
   end
 
   def is_ipv6?(_), do: true
 
   @spec is_email?(any) :: boolean
-  def is_email?(str) when is_binary(str) do
+  def is_email?(string) when is_binary(string) do
     # The BNF rules from RFC 5322 transformed to PCRE by Nikita Popov and
     # described in the post
     # http://nikic.github.io/2012/06/15/The-true-power-of-regular-expressions.html.
@@ -153,11 +154,11 @@ defmodule Xema.Format do
       ^(?&addr_spec)$
     /x
 
-    Regex.match?(regex, str)
+    Regex.match?(regex, string)
   end
 
   @spec is_uri?(any) :: boolean
-  def is_uri?(str) when is_binary(str), do: is_uri?(URI.parse(str))
+  def is_uri?(string) when is_binary(string), do: is_uri?(URI.parse(string))
 
   def is_uri?(%URI{scheme: nil}), do: false
 
@@ -173,14 +174,14 @@ defmodule Xema.Format do
   end
 
   @spec is_host?(any) :: boolean
-  def is_host?(str) when is_binary(str) do
-    is_ipv4?(str) || is_ipv6?(str) || is_hostname?(str)
+  def is_host?(string) when is_binary(string) do
+    is_ipv4?(string) || is_ipv6?(string) || is_hostname?(string)
   end
 
   def is_host?(_), do: false
 
   @spec is_uri_userinfo?(any) :: boolean
-  def is_uri_userinfo?(str) when is_binary(str) do
+  def is_uri_userinfo?(string) when is_binary(string) do
     regex = ~r/
       (?(DEFINE)
         (?<pct_encoded> %[[:xdigit:]][[:xdigit:]] )
@@ -189,13 +190,13 @@ defmodule Xema.Format do
       ^(?:(?&chars)|(?&pct_encoded))*$
     /x
 
-    Regex.match?(regex, str)
+    Regex.match?(regex, string)
   end
 
   def is_uri_userinfo?(_), do: false
 
   @spec is_uri_path?(any) :: boolean
-  def is_uri_path?(str) when is_binary(str) do
+  def is_uri_path?(string) when is_binary(string) do
     regex = ~r/
       (?(DEFINE)
         (?<unreserved>  [-._~[:alnum:]] )
@@ -213,13 +214,13 @@ defmodule Xema.Format do
       ^(?:(?&rootless)|(?&noscheme)|(?&absolute)|(?&abempty))$
     /x
 
-    Regex.match?(regex, str)
+    Regex.match?(regex, string)
   end
 
   def is_uri_path?(_), do: false
 
   @spec is_uri_query?(any) :: boolean
-  def is_uri_query?(str) when is_binary(str) do
+  def is_uri_query?(string) when is_binary(string) do
     regex = ~r/
       (?(DEFINE)
         (?<pct_encoded> %[[:xdigit:]][[:xdigit:]] )
@@ -229,13 +230,13 @@ defmodule Xema.Format do
       ^(?:(?&pchar)|[\/?])*$
     /x
 
-    Regex.match?(regex, str)
+    Regex.match?(regex, string)
   end
 
   def is_uri_query?(_), do: false
 
   @spec is_uri_fragment?(any) :: boolean
-  def is_uri_fragment?(str) when is_binary(str), do: is_uri_query?(str)
+  def is_uri_fragment?(string) when is_binary(string), do: is_uri_query?(string)
 
   def is_uri_fragment?(_), do: false
 end
