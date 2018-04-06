@@ -54,7 +54,7 @@ Xema supported the following types to validate data structures.
   * [Size](#map_size)
 * [Enumerations](#enum)
 * [Negate Schema](#not)
-+ [Combine Schemas](#combine)
+* [Combine Schemas](#combine)
 
 ### <a name="any"></a> Type any
 
