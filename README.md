@@ -53,6 +53,8 @@ Xema supported the following types to validate data structures.
   * [Pattern Properties](#pattern_properties)
   * [Size](#map_size)
 * [Enumerations](#enum)
+* [Negate Schema](#not)
++ [Combine Schemas](#combine)
 
 ### <a name="any"></a> Type any
 
@@ -680,6 +682,82 @@ iex> Xema.is_valid? schema, :bar
 true
 iex> Xema.is_valid? schema, 42
 false
+```
+
+### <a name="not"></a> Negate Schema
+
+The keyword `not` negates a schema.
+
+```Elixir
+iex> schema = Xema.new :not, {:integer, minimum: 0}
+%Xema{
+  content: %Xema.Schema{
+    type: :any,
+    as: :any,
+    not: %Xema.Schema{type: :integer, as: :integer, minimum: 0}
+  }
+}
+iex> Xema.is_valid? schema, 10
+false
+iex> Xema.is_valid? schema, -10
+true
+```
+
+### <a name="combine"></a> Combine Schemas
+
+The keywords `all_of`, `any_of`, and `one_of` combines schemas.
+
+With `all_of` all schemas have to match.
+```Elixir
+iex> all = Xema.new :all_of, [
+...>   {:integer, multiple_of: 2},
+...>   {:integer, multiple_of: 3}
+...> ]
+%Xema{content: %Xema.Schema{
+  type: :any, as: :any, all_of: [
+    %Xema.Schema{type: :integer, as: :integer, multiple_of: 2},
+    %Xema.Schema{type: :integer, as: :integer, multiple_of: 3}
+  ]
+}}
+iex> 0..9 |> Enum.map(&Xema.is_valid?(all, &1)) |> Enum.with_index()
+[true: 0, false: 1, false: 2, false: 3, false: 4,
+ false: 5, true: 6, false: 7, false: 8, false: 9]
+```
+
+With `any_of` any schema have to match.
+
+```Elixir
+iex> any = Xema.new :any_of, [
+...>   {:integer, multiple_of: 2},
+...>   {:integer, multiple_of: 3}
+...> ]
+%Xema{content: %Xema.Schema{
+  type: :any, as: :any, any_of: [
+    %Xema.Schema{type: :integer, as: :integer, multiple_of: 2},
+    %Xema.Schema{type: :integer, as: :integer, multiple_of: 3}
+  ]
+}}
+iex> 0..9 |> Enum.map(&Xema.is_valid?(any, &1)) |> Enum.with_index()
+[true: 0, false: 1, true: 2, true: 3, true: 4,
+ false: 5, true: 6, false: 7, true: 8, true: 9]
+```
+
+With `one_of` exactly on schema have to match.
+
+```Elixir
+iex> one = Xema.new :one_of, [
+...>   {:integer, multiple_of: 2},
+...>   {:integer, multiple_of: 3}
+...> ]
+%Xema{content: %Xema.Schema{
+  type: :any, as: :any, one_of: [
+    %Xema.Schema{type: :integer, as: :integer, multiple_of: 2},
+    %Xema.Schema{type: :integer, as: :integer, multiple_of: 3}
+  ]
+}}
+iex> 0..9 |> Enum.map(&Xema.is_valid?(one, &1)) |> Enum.with_index()
+[false: 0, false: 1, true: 2, true: 3, true: 4,
+ false: 5, false: 6, false: 7, true: 8, true: 9]
 ```
 
 ## References
