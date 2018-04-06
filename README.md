@@ -36,6 +36,7 @@ Xema supported the following types to validate data structures.
 * [Type string](#string)
   * [Length](#length)
   * [Regular Expression](#regex)
+  * [Format](#fmt)
 * [Types number, integer and float](#number)
   * [Multiples](#multi)
   * [Range](#range)
@@ -147,6 +148,37 @@ iex> Xema.validate schema, "1-AB"
 iex> Xema.validate schema, "foo"
 {:error, %{value: "foo", pattern: ~r/[0-9]-[A-B]+/}}
 ```
+
+### <a name="fmt"></a> Format
+Basic semantic validation of strings.
+
+* `:date_time` validation as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
+```Elixir
+iex> schema = Xema.new :string, format: :date_time
+%Xema{content: %Xema.Schema{type: :string, as: :string, format: :date_time}}
+iex> Xema.is_valid? schema, "today"
+false
+iex> Xema.is_valid? schema, "1963-06-19T08:30:06.283185Z"
+true
+```
+
+* `:email` validation as defined by [RFC 5322](https://tools.ietf.org/html/rfc5322)
+```Elixir
+iex> :string
+...> |> Xema.new(format: :email)
+...> |> Xema.is_valid?("marion.mustermann@otto.net")
+true
+```
+
+* `:host` checks if the `string` is an valid IPv4, IPv6, or hostname.
+* `:hostname` validation as defined by [RFC 1034](https://tools.ietf.org/html/rfc1034)
+* `:ipv4` validation as defined by [RFC 2673](https://tools.ietf.org/html/rfc2673)
+* `:ipv6` validation as defined by [RFC 2373](https://tools.ietf.org/html/rfc2373)
+* `:uri` validation as defindex by [RFC 3986](https://tools.ietf.org/html/rfc3986)
+  * `:uri_fragment`
+  * `:uri_path`
+  * `:uri_query`
+  * `:uri_userinfo`
 
 ### <a name="number"></a> Types number, integer and float
 There are three numeric types in Xema: `number`, `integer` and `float`. They
