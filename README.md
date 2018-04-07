@@ -102,6 +102,8 @@ false
 
 ### <a name="string"></a> Type string
 
+`JSON Schema Draft: 4/6/7`
+
 The string type is used for strings.
 
 ```elixir
@@ -219,6 +221,9 @@ iex> Xema.validate schema, 21.5
 ```
 
 #### <a name="multi"></a> Multiples
+
+`JSON Schema Draft: 4/6/7`
+
 Numbers can be restricted to a multiple of a given number, using the
 `multiple_of` keyword. It may be set to any positive number.
 
@@ -234,6 +239,9 @@ true
 ```
 
 #### <a name="range"></a> Range
+
+`JSON Schema Draft: 4`
+
 Ranges of numbers are specified using a combination of the `minimum`, `maximum`,
 `exclusive_minimum` and `exclusive_maximum` keywords.
 * `minimum` specifies a minimum numeric value.
@@ -247,7 +255,8 @@ Ranges of numbers are specified using a combination of the `minimum`, `maximum`,
    maxx ≤ max.
 
 ```Elixir
-iex> schema = Xema.new :float, minimum: 1.2, maximum: 1.4, exclusive_maximum: true
+iex> schema = Xema.new :float,
+...> minimum: 1.2, maximum: 1.4, exclusive_maximum: true
 %Xema{content: %Xema.Schema{
   type: :float,
   as: :float,
@@ -267,7 +276,35 @@ iex> Xema.validate schema, 1.5
 {:error, %{value: 1.5, maximum: 1.4, exclusive_maximum: true}}
 ```
 
+`JSON Schema Draft: 6/7`
+
+The keywords `exclusive_maximum` and `exclusive_minimum` changed from a boolean
+to a number. Wherever one of these would be `true` before, they have now the
+value of the corresponding keyword `maximum` or `minimum`. The keyword
+`maximum`/`minimum` can be removed.
+
+```Elixir
+iex> schema = Xema.new :float, minimum: 1.2, exclusive_maximum: 1.4
+%Xema{content: %Xema.Schema{
+  type: :float,
+  as: :float,
+  minimum: 1.2,
+  exclusive_maximum: 1.4
+}}
+iex> Xema.validate schema, 1.1
+{:error, %{value: 1.1, minimum: 1.2}}
+iex> Xema.validate schema, 1.2
+:ok
+iex> Xema.is_valid? schema, 1.3
+true
+iex> Xema.validate schema, 1.4
+{:error, %{value: 1.4, exclusive_maximum: 1.4}}
+iex> Xema.validate schema, 1.5
+{:error, %{value: 1.5, exclusive_maximum: 1.4}}
+```
+
 ### <a name="list"></a> Type list
+
 List are used for ordered elements, each element may be of a different type.
 
 ```Elixir

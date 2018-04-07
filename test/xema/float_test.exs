@@ -61,7 +61,7 @@ defmodule Xema.FloatTest do
     end
   end
 
-  describe "'float' schema with exclusive range" do
+  describe "'float' schema with exclusive range (draft 04)" do
     setup do
       %{
         schema:
@@ -101,6 +101,33 @@ defmodule Xema.FloatTest do
       expected = {:error, %{value: 5.0, maximum: 4, exclusive_maximum: true}}
 
       assert validate(schema, 5.0) == expected
+    end
+  end
+
+  describe "'float' schema with exclusive range" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :float,
+            exclusive_minimum: 1.2,
+            exclusive_maximum: 1.4
+          )
+      }
+    end
+
+    test "validate/2 with a float in range", %{schema: schema} do
+      assert validate(schema, 1.3) == :ok
+    end
+
+    test "validate/2 with a float equal to exclusive minimum", %{schema: schema} do
+      assert validate(schema, 1.2) ==
+               {:error, %{exclusive_minimum: 1.2, value: 1.2}}
+    end
+
+    test "validate/2 with a float equal to exclusive maximum", %{schema: schema} do
+      assert validate(schema, 1.4) ==
+               {:error, %{exclusive_maximum: 1.4, value: 1.4}}
     end
   end
 
