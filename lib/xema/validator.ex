@@ -598,25 +598,6 @@ defmodule Xema.Validator do
     end
   end
 
-  # TODO: function for strict mode
-  # defp required(%{required: required}, map) do
-  #   props = map |> Map.keys() |> MapSet.new()
-  #
-  #   case MapSet.subset?(required, props) do
-  #     true ->
-  #       :ok
-  #
-  #     false ->
-  #       {
-  #         :error,
-  #         required
-  #         |> MapSet.difference(props)
-  #         |> MapSet.to_list()
-  #         |> Enum.into(%{}, fn x -> {x, :required} end)
-  #       }
-  #   end
-  # end
-
   @spec size(Xema.Schema.t(), map) :: result
   defp size(%{min_properties: nil, max_properties: nil}, _map), do: :ok
 
