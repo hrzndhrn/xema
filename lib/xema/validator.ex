@@ -594,7 +594,6 @@ defmodule Xema.Validator do
         {
           :error,
           %{required: missing}
-          # Enum.into(missing, %{}, fn key -> {:required, key} end)
         }
     end
   end
@@ -745,7 +744,8 @@ defmodule Xema.Validator do
     end
   end
 
-  # TODO: spec and doc
+  # Semantic validation of strings.
+  @spec format(Xema.Schema.t(), any) :: result
   defp format(%{format: nil}, _str), do: :ok
 
   defp format(%{format: fmt}, str) when Format.supports(fmt) do
