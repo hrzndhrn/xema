@@ -1,6 +1,6 @@
 defmodule Xema.Ref do
   @moduledoc """
-  TODO: doc
+  This module contains a struct and function to represent and handle references.
   """
 
   import Xema.Utils, only: [get_value: 2, update_nil: 2]
@@ -11,14 +11,33 @@ defmodule Xema.Ref do
 
   require Logger
 
-  @type t :: %Xema.Ref{pointer: String.t()}
+  @type t :: %Xema.Ref{
+          path: String.t() | nil,
+          pointer: String.t(),
+          remote: boolean(),
+          url: String.t() | nil
+        }
 
   defstruct pointer: nil,
             path: nil,
             remote: false,
             url: nil
 
-  @spec new(keyword | String.t()) :: Ref.t()
+  @doc """
+  Creates a new reference from the given `pointer`.
+
+  ## Examples
+
+      iex> Xema.Ref.new("http://foo.com/bar/baz.exon#/definitions/abc")
+      %Xema.Ref{
+        path: "/bar/baz.exon",
+        pointer: "/definitions/abc",
+        remote: true,
+        url: "http://foo.com:80"
+      }
+
+  """
+  @spec new(String.t()) :: Ref.t()
   def new(pointer) when is_binary(pointer) do
     uri = URI.parse(pointer)
     path = uri |> Map.get(:path)
@@ -43,6 +62,10 @@ defmodule Xema.Ref do
     }
   end
 
+  @doc """
+  Validates the given value with the referenced schema.
+  """
+  @spec validate(Ref.t(), any, keyword) :: :ok | {:error, map}
   def validate(ref, value, opts) do
     case get(ref, opts) do
       {:ok, %Schema{} = schema, opts} ->
@@ -170,6 +193,10 @@ defmodule Xema.Ref do
     end
   end
 
+  @doc """
+  Returns the `pointer` of the given reference.
+  """
+  @spec get_pointer(Ref.t()) :: String.t()
   def get_pointer(ref) do
     ref.url
     |> update_nil("")
@@ -179,6 +206,18 @@ defmodule Xema.Ref do
     |> URI.to_string()
   end
 
+  @doc """
+  Returns the binary representation of a reference.
+
+  ## Examples
+
+      iex> "http://foo.com/bar/baz.exon#/definitions/abc"
+      ...> |> Xema.Ref.new()
+      ...> |> Xema.Ref.to_string()
+      "{:ref, \\"http://foo.com/bar/baz.exon#/definitions/abc\\"}"
+
+  """
+  @spec to_string(Ref.t()) :: String.t()
   def to_string(ref), do: "{:ref, #{inspect(get_pointer(ref))}}"
 end
 

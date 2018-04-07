@@ -1,6 +1,8 @@
 defmodule Xema.RefTest do
   use ExUnit.Case, async: true
 
+  doctest Xema.Ref
+
   alias Xema.Ref
   alias Xema.SchemaError
 
