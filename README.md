@@ -707,6 +707,25 @@ iex> Xema.is_valid? schema, %{b: 1, c: 7}
 true
 ```
 
+### <a name="multi"></a> Multiples Types
+
+`JSON Schema Draft: 4/6/7`
+
+It is also possible to check if a value matches one of the multiple types.
+
+```Elixir
+iex> schema = Xema.new [:string, nil], min_length: 1
+%Xema{content: %Xema.Schema{
+  type: [:string, nil], as: [:string, nil], min_length: 1
+}}
+iex> Xema.is_valid? schema, "foo"
+true
+iex> Xema.is_valid? schema, nil
+true
+iex> Xema.is_valid? schema, ""
+false
+```
+
 ### <a name="enum"></a> Enumerations
 
 The `enum` keyword is used to restrict a value to a fixed set of values. It must
