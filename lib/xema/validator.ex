@@ -173,7 +173,7 @@ defmodule Xema.Validator do
   defp is_type?(nil, nil), do: true
   defp is_type?(_, _), do: false
 
-  @spec types([atom], any) :: {:ok, atom} | {:error, map}
+  @spec types(Schema.t(), any) :: {:ok, atom} | {:error, map}
   defp types(%{type: list} = schema, value) do
     case Enum.find(list, :not_found, fn type -> is_type?(type, value) end) do
       :not_found -> {:error, %{type: schema.as, value: value}}

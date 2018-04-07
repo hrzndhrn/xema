@@ -39,7 +39,6 @@ defmodule Xema.Format do
   This function returns `true` for a valid format type, `false` otherwise.
   This function can be used in guards.
   """
-  @spec supports(format) :: boolean
   defguard supports(format) when format in @formats
 
   @doc """

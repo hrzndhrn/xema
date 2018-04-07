@@ -390,14 +390,14 @@ defmodule Xema do
   defp do_schema_to_string(type, schema, false),
     do: "{#{do_schema_to_string(type, schema, true)}}"
 
-  @spec value_to_string(any) :: String.t()
+  @spec value_to_string(term) :: String.t()
   defp value_to_string(%Schema{} = schema), do: schema_to_string(schema)
-
-  defp value_to_string(%{__struct__: MapSet} = map_set),
-    do: value_to_string(MapSet.to_list(map_set))
 
   defp value_to_string(%{__struct__: Regex} = regex),
     do: ~s("#{Regex.source(regex)}")
+
+  defp value_to_string(%{__struct__: MapSet} = map_set),
+    do: value_to_string(map_set |> MapSet.new() |> MapSet.to_list())
 
   defp value_to_string(%{__struct__: Xema.Ref} = ref) do
     "#{ref}"

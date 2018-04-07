@@ -15,7 +15,9 @@ defmodule Xema.Base do
       @enforce_keys [:content]
 
       @type t :: %__MODULE__{
-              content: __MODULE__.t()
+              content: Schema.t(),
+              ids: nil | map,
+              refs: nil | map
             }
 
       defstruct [
@@ -24,7 +26,6 @@ defmodule Xema.Base do
         :refs
       ]
 
-      @spec new(any, keyword) :: Xema.t()
       def new(data, opts \\ []) do
         content = init(data, opts)
 
@@ -62,7 +63,7 @@ defmodule Xema.Base do
             %Schema{id: id}, acc, _path when not is_nil(id) ->
               update_id(acc, id)
 
-            _, acc, _ ->
+            _xema, acc, _path ->
               acc
           end)
 
@@ -70,8 +71,6 @@ defmodule Xema.Base do
 
         if refs == %{}, do: nil, else: refs
       end
-
-      defp get_refs(_), do: nil
 
       defp put_ref(%{id: id} = acc, %Ref{remote: true, url: nil} = ref) do
         uri = update_id(id, ref.path)
@@ -83,21 +82,21 @@ defmodule Xema.Base do
         Map.put(acc, uri, get_schema(uri))
       end
 
-      defp put_ref(map, _), do: map
+      defp put_ref(map, _ref), do: map
 
       defp get_schema(uri) do
         with {:ok, src} <- get_response(uri),
              {:ok, data} <- remote(src) do
           Xema.new(data)
         else
+          {:error, :not_found} ->
+            raise SchemaError, message: "Remote schema '#{uri}' not found."
+
           {:error, %SyntaxError{description: desc, line: line}} ->
             raise SyntaxError, description: desc, line: line, file: uri
 
           {:error, %CompileError{description: desc, line: line}} ->
             raise CompileError, description: desc, line: line, file: uri
-
-          {:error, _error} ->
-            raise SchemaError, message: "Remote schema '#{uri}' not found."
         end
       end
     end
@@ -109,14 +108,12 @@ defmodule Xema.Base do
         %Schema{id: id}, acc, path when not is_nil(id) ->
           Map.put(acc, id, Ref.new(path))
 
-        _, acc, _ ->
+        _xema, acc, _path ->
           acc
       end)
 
     if ids == %{}, do: nil, else: ids
   end
-
-  def get_ids(_), do: nil
 
   def get_response(uri) do
     case HTTPoison.get(uri) do
@@ -125,24 +122,15 @@ defmodule Xema.Base do
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         {:error, :not_found}
-
-      error ->
-        {:error, error}
     end
   end
 
-  #  defp evil(str) do
-  #    {data, _} = Code.eval_string(str)
-  #    {:ok, data}
-  #  rescue
-  #    error -> {:error, error}
-  #  end
-
+  @spec reduce(Schema.t, any, function) :: any
   def reduce(schema, acc, fun) do
     reduce(schema, acc, "#", fun)
   end
 
-  def reduce(%Schema{} = schema, acc, path, fun) do
+  defp reduce(%Schema{} = schema, acc, path, fun) do
     schema
     |> Map.from_struct()
     |> Enum.reduce(fun.(schema, acc, path), fn {key, value}, x ->
@@ -150,12 +138,12 @@ defmodule Xema.Base do
     end)
   end
 
-  def reduce(%{__struct__: _} = struct, acc, path, fun),
+  defp reduce(%{__struct__: _struct} = struct, acc, path, fun),
     do: fun.(struct, acc, path)
 
-  def reduce(map, acc, path, fun) when is_map(map) do
+  defp reduce(map, acc, path, fun) when is_map(map) do
     Enum.reduce(map, fun.(map, acc, path), fn
-      {%{__struct__: _}, _}, acc ->
+      {%{__struct__: _}, _value}, acc ->
         acc
 
       {key, value}, acc ->
@@ -163,7 +151,5 @@ defmodule Xema.Base do
     end)
   end
 
-  def reduce(value, acc, path, fun), do: fun.(value, acc, path)
-  #  end
-  # end
+  defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 end

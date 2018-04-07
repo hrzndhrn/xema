@@ -39,7 +39,7 @@ defmodule Xema.Utils do
     if Map.has_key?(map, key), do: key, else: String.to_existing_atom(key)
   end
 
-  @spec has_key?(map, String.t() | atom) :: boolean
+  @spec has_key?(map | [{term(), term()}], String.t() | atom) :: boolean
   def has_key?(map, key) when is_map(map),
     do: Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
 
