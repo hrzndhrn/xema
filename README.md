@@ -52,6 +52,8 @@ Xema supported the following types to validate data structures.
   * [Additional Properties](#additional_properties)
   * [Pattern Properties](#pattern_properties)
   * [Size](#map_size)
+* [Multiples Types](#multi)
+* [Allow Additional Types](#allow)
 * [Enumerations](#enum)
 * [Negate Schema](#not)
 * [Combine Schemas](#combine)
@@ -717,6 +719,25 @@ It is also possible to check if a value matches one of the multiple types.
 iex> schema = Xema.new [:string, nil], min_length: 1
 %Xema{content: %Xema.Schema{
   type: [:string, nil], as: [:string, nil], min_length: 1
+}}
+iex> Xema.is_valid? schema, "foo"
+true
+iex> Xema.is_valid? schema, nil
+true
+iex> Xema.is_valid? schema, ""
+false
+```
+
+### <a name="allow"></a> Allow Additional Types
+
+`JSON Schema Draft: -`
+
+The keyword `allow` adds an extra type to the schema validation.
+
+```Elixir
+iex> schema = Xema.new :string, min_length: 1, allow: nil
+%Xema{content: %Xema.Schema{
+  type: [:string, nil], as: :string, min_length: 1
 }}
 iex> Xema.is_valid? schema, "foo"
 true
