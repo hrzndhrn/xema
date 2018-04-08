@@ -1,3 +1,3 @@
 use Mix.Config
 
-config :xema, remote: true
+import_config "#{Mix.env}.exs"
