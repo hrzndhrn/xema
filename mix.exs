@@ -23,7 +23,8 @@ defmodule Xema.Mixfile do
       docs: [
         extras: ["README.md"],
         main: "readme"
-      ]
+      ],
+      dialyzer: [ignore_warnings: "dialyzer.ignore-warnings"]
     ]
   end
 
