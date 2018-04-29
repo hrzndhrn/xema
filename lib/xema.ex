@@ -178,15 +178,13 @@ defmodule Xema do
        when is_boolean(bool),
        do: Schema.new(type: bool)
 
-  for type <- @schema_types do
-    defp init(unquote(type), keywords),
-      do: schema({unquote(type), keywords}, [])
-  end
+  defp init(type, keywords)
+       when type in @schema_types,
+       do: schema({type, keywords}, [])
 
-  for keyword <- @schema_keywords do
-    defp init(unquote(keyword), keywords),
-      do: init(:any, [{unquote(keyword), keywords}])
-  end
+  defp init(keyword, keywords)
+       when keyword in @schema_keywords,
+       do: init(:any, [{keyword, keywords}])
 
   defp multi_type(list, keywords) when is_list(list) do
     case Enum.all?(list, fn type -> type in @schema_types end) do
@@ -245,35 +243,32 @@ defmodule Xema do
       |> update()
       |> Schema.new()
 
-  for type <- @schema_types do
-    defp schema({unquote(type), keywords}, _) when is_list(keywords) do
-      keywords = Keyword.put(keywords, :type, unquote(type))
+  defp schema({type, keywords}, _)
+       when type in @schema_types and is_list(keywords) do
+    keywords = Keyword.put(keywords, :type, type)
 
-      case Validator.validate(unquote(type), keywords) do
-        :ok -> keywords |> update() |> Schema.new()
-        {:error, msg} -> raise SchemaError, message: msg
-      end
-    end
-
-    defp schema({unquote(type), _keywords}, _) do
-      raise SchemaError,
-        message: "Wrong argument for #{inspect(unquote(type))}."
+    case Validator.validate(type, keywords) do
+      :ok -> keywords |> update() |> Schema.new()
+      {:error, msg} -> raise SchemaError, message: msg
     end
   end
 
-  for keyword <- @schema_keywords do
-    defp schema({unquote(keyword), keywords}, _),
-      do: schema({:any, [{unquote(keyword), keywords}]})
-  end
+  defp schema({type, _keywords}, _) when type in @schema_types,
+    do: raise(SchemaError, message: "Wrong argument for #{inspect(type)}.")
+
+  defp schema({keyword, keywords}, _) when keyword in @schema_keywords,
+    do: schema({:any, [{keyword, keywords}]})
 
   defp schema({bool, _}, _)
        when is_boolean(bool),
        do: Schema.new(type: bool)
 
-  defp schema({type, _}, _) do
-    raise SchemaError,
-      message: "#{inspect(type)} is not a valid type or keyword."
-  end
+  defp schema({type, _}, _),
+    do:
+      raise(
+        SchemaError,
+        message: "#{inspect(type)} is not a valid type or keyword."
+      )
 
   # function: update/1
   #

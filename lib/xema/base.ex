@@ -125,7 +125,7 @@ defmodule Xema.Base do
     end
   end
 
-  @spec reduce(Schema.t, any, function) :: any
+  @spec reduce(Schema.t(), any, function) :: any
   def reduce(schema, acc, fun) do
     reduce(schema, acc, "#", fun)
   end
