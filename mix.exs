@@ -11,6 +11,7 @@ defmodule Xema.Mixfile do
       deps: deps(),
       description: description(),
       package: package(),
+      aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
       test_coverage: [tool: ExCoveralls],
       source_url: "https://github.com/hrzndhrn/xema",
@@ -38,12 +39,12 @@ defmodule Xema.Mixfile do
 
   defp deps do
     [
-      {:cowboy, "~> 2.2", only: [:dev, :test]},
+      {:cowboy, "~> 2.2", only: :test},
       {:credo, "~> 0.9", only: [:dev, :test]},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+      {:dialyxir, "~> 0.5", only: :test, runtime: false},
       {:ex_doc, "~> 0.18", only: :dev, runtime: false},
       {:excoveralls, "~> 0.8", only: :test},
-      {:httpoison, "~> 1.0"}
+      {:httpoison, "~> 1.0", only: :test}
     ]
   end
 
@@ -57,4 +58,18 @@ defmodule Xema.Mixfile do
       links: %{"GitHub" => "https://github.com/hrzndhrn/xema"}
     ]
   end
+
+  defp aliases do
+    [
+      credo: ["credo --strict"],
+      spec: &spec/1,
+      check: &check/1,
+      check_test: ["test", "credo", "spec"]
+    ]
+  end
+
+  defp spec(_), do: Mix.shell().cmd("mix dialyzer", env: [{"MIX_ENV", "test"}])
+
+  defp check(_),
+    do: Mix.shell().cmd("mix check_test", env: [{"MIX_ENV", "test"}])
 end

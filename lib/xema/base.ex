@@ -3,10 +3,13 @@ defmodule Xema.Base do
 
   import Xema.Utils, only: [update_id: 2]
 
+  alias Xema.NoResolver
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaError
   alias Xema.Validator
+
+  @resolver Application.get_env(:xema, :resolver, NoResolver)
 
   defmacro __using__(_opts) do
     quote do
@@ -85,22 +88,22 @@ defmodule Xema.Base do
       defp put_ref(map, _ref), do: map
 
       defp get_schema(uri) do
-        with {:ok, src} <- get_response(uri),
-             {:ok, data} <- remote(src) do
-          Xema.new(data)
-        else
-          {:error, :not_found} ->
-            raise SchemaError, message: "Remote schema '#{uri}' not found."
+        case resolver_get(uri) do
+          {:ok, data} ->
+            Xema.new(data)
 
-          {:error, %SyntaxError{description: desc, line: line}} ->
-            raise SyntaxError, description: desc, line: line, file: uri
+          {:error, reason} when is_binary(reason) ->
+            raise SchemaError, message: reason
 
-          {:error, %CompileError{description: desc, line: line}} ->
-            raise CompileError, description: desc, line: line, file: uri
+          {:error, reason} ->
+            raise reason
         end
       end
     end
   end
+
+  @spec resolver_get(String.t()) :: {:ok, any} | {:error, any}
+  def resolver_get(uri), do: @resolver.get(uri)
 
   def get_ids(%Schema{} = schema) do
     ids =
@@ -113,16 +116,6 @@ defmodule Xema.Base do
       end)
 
     if ids == %{}, do: nil, else: ids
-  end
-
-  def get_response(uri) do
-    case HTTPoison.get(uri) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        {:ok, body}
-
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        {:error, :not_found}
-    end
   end
 
   @spec reduce(Schema.t(), any, function) :: any

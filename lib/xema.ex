@@ -5,13 +5,10 @@ defmodule Xema do
 
   use Xema.Base
 
-  alias Xema.Error
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.Schema.Validator, as: Validator
   alias Xema.SchemaError
-
-  @remote Application.get_env(:xema, :remote, false)
 
   @typedoc """
   The available type notations.
@@ -156,8 +153,6 @@ defmodule Xema do
   @spec new(schema_types | schema_keywords | tuple, keyword) :: Xema.t()
   def new(type, keywords)
 
-  defp init(typ, keywords \\ [])
-
   defp init({type}, []), do: init(type, [])
 
   defp init(list, []) when is_list(list) do
@@ -197,21 +192,6 @@ defmodule Xema do
           message: "Invalid type in argument list #{inspect(list)}."
         )
     end
-  end
-
-  defp remote(str) do
-    unless @remote do
-      raise Error, message: "Xema is not configured for remote schemas."
-    end
-
-    do_remote(str)
-  end
-
-  defp do_remote(str) do
-    {data, _} = Code.eval_string(str)
-    {:ok, data}
-  rescue
-    error -> {:error, error}
   end
 
   #
