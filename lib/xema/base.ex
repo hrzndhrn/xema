@@ -102,6 +102,7 @@ defmodule Xema.Base do
     end
   end
 
+  @spec resolver_get(String.t()) :: {:ok, any} | {:error, any}
   def resolver_get(uri), do: @resolver.get(uri)
 
   def get_ids(%Schema{} = schema) do
