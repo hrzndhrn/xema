@@ -149,10 +149,8 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
-    @tag :only
     @tag :remote
     test "validate/2 with a valid value", %{schema: schema} do
-      # IO.inspect schema, limit: :infinity
       assert Xema.validate(schema, %{list: [1]}) == :ok
     end
 
