@@ -625,7 +625,7 @@ iex> Xema.validate schema, %{foo: "foo", add: "one"}
 The keyword `pattern_properties` defined additional properties by regular
 expressions.
 
-```Eixir
+```Elixir
 iex> schema = Xema.new :map,
 ...> additional_properties: false,
 ...> pattern_properties: %{
