@@ -55,7 +55,7 @@ defmodule Xema.Utils do
   @spec to_existing_atom(String.t()) :: atom | nil
   def to_existing_atom(str) do
     String.to_existing_atom(str)
-  catch
+  rescue
     _ -> nil
   end
 

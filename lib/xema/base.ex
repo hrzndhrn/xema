@@ -29,9 +29,9 @@ defmodule Xema.Base do
         :refs
       ]
 
-      def new(data, opts \\ []) do
-        content = init(data, opts)
+      def new(data, opts \\ [])
 
+      def new(%Schema{} = content, opts) do
         struct(
           __MODULE__,
           content: content,
@@ -39,6 +39,12 @@ defmodule Xema.Base do
           refs: get_refs(content)
         )
       end
+
+      def new(data, opts),
+        do:
+          data
+          |> init(opts)
+          |> new()
 
       @spec is_valid?(__MODULE__.t(), any) :: boolean
       def is_valid?(schema, value), do: validate(schema, value) == :ok

@@ -578,7 +578,7 @@ defmodule Xema.Validator do
   defp delete_property(map, prop) when is_map(map) and is_binary(prop) do
     case Map.has_key?(map, prop) do
       true -> Map.delete(map, prop)
-      false -> Map.delete(map, String.to_existing_atom(prop))
+      false -> Map.delete(map, to_existing_atom(prop))
     end
   end
 
