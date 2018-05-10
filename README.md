@@ -57,8 +57,9 @@ Xema supported the following types to validate data structures.
 * [Enumerations](#enum)
 * [Negate Schema](#not)
 * [Combine Schemas](#combine)
+* [Structuring a schema](#structuring)
 
-### <a name="any"></a> Type any
+### <a id="any"></a> Type any
 
 The schema any will accept any data.
 
@@ -73,7 +74,7 @@ iex> Xema.validate schema, nil
 :ok
 ```
 
-### <a name="nil"></a> Type nil
+### <a id="nil"></a> Type nil
 
 The nil type matches only `nil`.
 
@@ -86,7 +87,7 @@ iex> Xema.validate schema, 0
 {:error, %{type: :nil, value: 0}}
 ```
 
-### <a name="boolean"></a> Type boolean
+### <a id="boolean"></a> Type boolean
 
 The boolean type matches only `true` and `false`.
 ```Elixir
@@ -102,7 +103,7 @@ iex> Xema.is_valid? schema, nil
 false
 ```
 
-### <a name="string"></a> Type string
+### <a id="string"></a> Type string
 
 `JSON Schema Draft: 4/6/7`
 
@@ -121,7 +122,7 @@ iex> Xema.is_valid? schema, 42
 false
 ```
 
-#### <a name="length"></a> Length
+#### <a id="length"></a> Length
 
 The length of a string can be constrained using the `min_length` and `max_length`
 keywords. For both keywords, the value must be a non-negative number.
@@ -141,7 +142,7 @@ iex> Xema.validate schema, "abcd"
 {:error, %{value: "abcd", max_length: 3}}
 ```
 
-#### <a name="regex"></a> Regular Expression
+#### <a id="regex"></a> Regular Expression
 
 The `pattern` keyword is used to restrict a string to a particular regular
 expression.
@@ -155,7 +156,7 @@ iex> Xema.validate schema, "foo"
 {:error, %{value: "foo", pattern: ~r/[0-9]-[A-B]+/}}
 ```
 
-### <a name="fmt"></a> Format
+### <a id="fmt"></a> Format
 Basic semantic validation of strings.
 
 * `:date_time` validation as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
@@ -186,7 +187,7 @@ true
   * `:uri_query`
   * `:uri_userinfo`
 
-### <a name="number"></a> Types number, integer and float
+### <a id="number"></a> Types number, integer and float
 There are three numeric types in Xema: `number`, `integer` and `float`. They
 share the same validation keywords.
 
@@ -222,7 +223,7 @@ iex> Xema.validate schema, 21.5
 :ok
 ```
 
-#### <a name="multi"></a> Multiples
+#### <a id="multi"></a> Multiples
 
 `JSON Schema Draft: 4/6/7`
 
@@ -240,7 +241,7 @@ iex> Xema.is_valid? schema, 8.0
 true
 ```
 
-#### <a name="range"></a> Range
+#### <a id="range"></a> Range
 
 `JSON Schema Draft: 4`
 
@@ -305,7 +306,7 @@ iex> Xema.validate schema, 1.5
 {:error, %{value: 1.5, exclusive_maximum: 1.4}}
 ```
 
-### <a name="list"></a> Type list
+### <a id="list"></a> Type list
 
 List are used for ordered elements, each element may be of a different type.
 
@@ -318,7 +319,7 @@ iex> Xema.validate schema, 9
 {:error, %{type: :list, value: 9}}
 ```
 
-#### <a name="items"></a> Items
+#### <a id="items"></a> Items
 The `items` keyword will be used to validate all items of a list to a single
 schema.
 
@@ -378,7 +379,7 @@ iex> Xema.validate schema, [1, "hello", "foo"]
 :ok
 ```
 
-#### <a name="additional_items"></a> Additional Items
+#### <a id="additional_items"></a> Additional Items
 
 The `additional_items` keyword controls whether it is valid to have additional
 items in the array beyond what is defined in the schema.
@@ -429,7 +430,7 @@ iex> Xema.validate schema, [1, "two", 3, "four"]
 {:error, [{3, %{type: :integer, value: "four"}}]}
 ```
 
-#### <a name="list_length"></a> Length
+#### <a id="list_length"></a> Length
 
 The length of the array can be specified using the `min_items` and `max_items`
 keywords. The value of each keyword must be a non-negative number.
@@ -447,7 +448,7 @@ iex> Xema.validate schema, [1, 2, 3, 4]
 {:error, %{value: [1, 2, 3, 4], max_items: 3}}
 ```
 
-#### <a name="unique"></a> Uniqueness
+#### <a id="unique"></a> Uniqueness
 
 A schema can ensure that each of the items in an array is unique.
 
@@ -460,7 +461,7 @@ iex> Xema.validate schema, [1, 2, 3, 2, 1]
 {:error, %{value: [1, 2, 3, 2, 1], unique_items: true}}
 ```
 
-### <a name="map"></a> Type map
+### <a id="map"></a> Type map
 
 Whenever you need a key-value store, maps are the “go to” data structure in
 Elixir. Each of these pairs is conventionally referred to as a “property”.
@@ -479,7 +480,7 @@ iex> Xema.is_valid? schema, %{1 => "bar"}
 true
 ```
 
-#### <a name="keys"></a> Keys
+#### <a id="keys"></a> Keys
 
 The keyword `keys` can restrict the keys to atoms or strings.
 
@@ -507,7 +508,7 @@ iex> Xema.is_valid? schema, %{1 => "bar"}
 false
 ```
 
-#### <a name="properties"></a> Properties
+#### <a id="properties"></a> Properties
 
 The properties on a map are defined using the `properties` keyword. The value
 of properties is a map, where each key is the name of a property and each
@@ -541,7 +542,7 @@ iex> Xema.is_valid? schema, %{a: 5, b: "hello", add: :prop}
 true
 ```
 
-#### <a name="required_properties"></a> Required Properties
+#### <a id="required_properties"></a> Required Properties
 
 By default, the properties defined by the properties keyword are not required.
 However, one can provide a list of `required` properties using the required
@@ -565,7 +566,7 @@ iex> Xema.validate schema, %{bar: "foo"}
 {:error, %{required: [:foo]}}
 ```
 
-#### <a name="additional_properties"></a> Additional Properties
+#### <a id="additional_properties"></a> Additional Properties
 
 The `additional_properties` keyword is used to control the handling of extra
 stuff, that is, properties whose names are not listed in the properties keyword.
@@ -620,7 +621,7 @@ iex> Xema.validate schema, %{foo: "foo", add: "one"}
 }}
 ```
 
-#### <a name="pattern_properties"></a> Pattern Properties
+#### <a id="pattern_properties"></a> Pattern Properties
 
 The keyword `pattern_properties` defined additional properties by regular
 expressions.
@@ -651,7 +652,7 @@ iex> Xema.validate schema, %{s_0: "foo", f_1: 6.6}
 }}}
 ```
 
-#### <a name="map_size"></a> Size
+#### <a id="map_size"></a> Size
 
 The number of properties on an object can be restricted using the
 `min_properties` and `max_properties` keywords.
@@ -674,7 +675,7 @@ iex> Xema.validate schema, %{a: 1, b: 2, c: 3, d: 4}
 {:error, %{max_properties: 3}}
 ```
 
-#### <a name="dependencies"></a> Dependencies
+#### <a id="dependencies"></a> Dependencies
 
 The `dependencies` keyword allows the schema of the object to change based on
 the presence of certain special properties.
@@ -709,7 +710,7 @@ iex> Xema.is_valid? schema, %{b: 1, c: 7}
 true
 ```
 
-### <a name="multi"></a> Multiples Types
+### <a id="multi"></a> Multiples Types
 
 `JSON Schema Draft: 4/6/7`
 
@@ -728,7 +729,7 @@ iex> Xema.is_valid? schema, ""
 false
 ```
 
-### <a name="allow"></a> Allow Additional Types
+### <a id="allow"></a> Allow Additional Types
 
 `JSON Schema Draft: -`
 
@@ -747,7 +748,7 @@ iex> Xema.is_valid? schema, ""
 false
 ```
 
-### <a name="enum"></a> Enumerations
+### <a id="enum"></a> Enumerations
 
 The `enum` keyword is used to restrict a value to a fixed set of values. It must
 be an array with at least one element, where each element is unique.
@@ -761,7 +762,7 @@ iex> Xema.is_valid? schema, 42
 false
 ```
 
-### <a name="not"></a> Negate Schema
+### <a id="not"></a> Negate Schema
 
 The keyword `not` negates a schema.
 
@@ -780,7 +781,7 @@ iex> Xema.is_valid? schema, -10
 true
 ```
 
-### <a name="combine"></a> Combine Schemas
+### <a id="combine"></a> Combine Schemas
 
 The keywords `all_of`, `any_of`, and `one_of` combines schemas.
 
