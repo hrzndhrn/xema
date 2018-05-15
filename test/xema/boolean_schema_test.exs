@@ -9,7 +9,7 @@ defmodule Xema.BooleanSchemaTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.content.as == true
+      assert schema.content.type == true
     end
 
     test "is_valid?/2 returns always true", %{schema: schema} do
@@ -35,7 +35,7 @@ defmodule Xema.BooleanSchemaTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.content.as == false
+      assert schema.content.type == false
     end
 
     test "is_valid?/2 returns always false", %{schema: schema} do

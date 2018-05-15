@@ -66,7 +66,8 @@ defmodule Xema.MultiTypeTest do
     end
 
     test "with a number", %{schema: schema} do
-      assert validate(schema, 42) == {:error, %{type: :string, value: 42}}
+      assert validate(schema, 42) ==
+               {:error, %{type: [:string, nil], value: 42}}
     end
   end
 end

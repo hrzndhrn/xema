@@ -8,10 +8,6 @@ defmodule Xema.AnyTest do
       %{schema: Xema.new(:any)}
     end
 
-    test "type", %{schema: schema} do
-      assert schema.content.as == :any
-    end
-
     test "is_valid?/2 with a string", %{schema: schema} do
       assert is_valid?(schema, "foo")
     end
@@ -92,7 +88,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.content.as == :any
+      assert schema.content.type == :any
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -107,10 +103,6 @@ defmodule Xema.AnyTest do
   describe "keyword not (shortcut):" do
     setup do
       %{schema: Xema.new(:not, :integer)}
-    end
-
-    test "type", %{schema: schema} do
-      assert schema.content.as == :any
     end
 
     test "equal long version", %{schema: schema} do
@@ -176,10 +168,6 @@ defmodule Xema.AnyTest do
       }
     end
 
-    test "type", %{schema: schema} do
-      assert schema.content.as == :any
-    end
-
     test "validate/2 with a valid value", %{schema: schema} do
       assert validate(schema, 1) == :ok
     end
@@ -217,7 +205,7 @@ defmodule Xema.AnyTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.content.as == :any
+      assert schema.content.type == :any
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -257,10 +245,6 @@ defmodule Xema.AnyTest do
       }
     end
 
-    test "type", %{schema: schema} do
-      assert schema.content.as == :any
-    end
-
     test "validate/2 with a valid value", %{schema: schema} do
       assert validate(schema, 9) == :ok
       assert validate(schema, 10) == :ok
@@ -297,10 +281,6 @@ defmodule Xema.AnyTest do
         )
 
       assert schema == alternative
-    end
-
-    test "type", %{schema: schema} do
-      assert schema.content.as == :integer
     end
 
     test "validate/2 with a valid value", %{schema: schema} do

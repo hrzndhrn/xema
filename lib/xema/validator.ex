@@ -97,7 +97,7 @@ defmodule Xema.Validator do
   defp do_validate(nil, _schema, nil, _opts), do: :ok
 
   defp do_validate(nil, schema, value, _opts),
-    do: {:error, %{value: value, type: schema.as}}
+    do: {:error, %{value: value, type: schema.type}}
 
   defp do_validate(:list, schema, value, opts) do
     with :ok <- min_items(schema, value),
@@ -122,7 +122,7 @@ defmodule Xema.Validator do
   defp do_validate(:boolean, schema, value, _opts) do
     case is_boolean(value) do
       true -> :ok
-      false -> {:error, %{value: value, type: schema.as}}
+      false -> {:error, %{value: value, type: schema.type}}
     end
   end
 
@@ -156,7 +156,7 @@ defmodule Xema.Validator do
   defp type(%{type: type} = schema, value) do
     case is_type?(type, value) do
       true -> :ok
-      false -> {:error, %{type: schema.as, value: value}}
+      false -> {:error, %{type: schema.type, value: value}}
     end
   end
 
@@ -176,7 +176,7 @@ defmodule Xema.Validator do
   @spec types(Schema.t(), any) :: {:ok, atom} | {:error, map}
   defp types(%{type: list} = schema, value) do
     case Enum.find(list, :not_found, fn type -> is_type?(type, value) end) do
-      :not_found -> {:error, %{type: schema.as, value: value}}
+      :not_found -> {:error, %{type: list, value: value}}
       found -> {:ok, found}
     end
   end

@@ -7,8 +7,8 @@ defmodule Xema.Schema do
   ## Examples
 
       iex> schema = Xema.new :any
-      %Xema{content: %Xema.Schema{type: :any, as: :any}}
-      iex> schema.content == %Xema.Schema{type: :any, as: :any}
+      %Xema{content: %Xema.Schema{type: :any}}
+      iex> schema.content == %Xema.Schema{type: :any}
       true
   """
 
@@ -21,9 +21,7 @@ defmodule Xema.Schema do
   * `additional_items` disallow additional items, if set to false. The keyword
     can also contain a schema to specify the type of additional items.
   * `additional_properties` disallow additional properties, if set to true.
-  * `as` is used in an error report.
-  * `as` is used in an error report. Default of `as` is `:list`.
-  # `definitions` contains schemas for reuse.
+  * `definitions` contains schemas for reuse.
   * `dependencies` allows the schema of the map to change based on the presence
     of certain special properties
   * `description` of the schema.
@@ -61,7 +59,6 @@ defmodule Xema.Schema do
   @type t :: %Xema.Schema{
           additional_items: Xema.t() | Xema.Schema.t() | boolean | nil,
           additional_properties: map | boolean | nil,
-          as: atom,
           definitions: map,
           dependencies: list | map | nil,
           description: String.t() | nil,
@@ -97,7 +94,6 @@ defmodule Xema.Schema do
     :additional_properties,
     :all_of,
     :any_of,
-    :as,
     :definitions,
     :dependencies,
     :description,
@@ -138,14 +134,12 @@ defmodule Xema.Schema do
     do:
       schema
       |> Map.from_struct()
-      |> delete_as()
       |> delete_nils()
 
   @spec update(keyword) :: keyword
   defp update(opts),
     do:
       opts
-      |> Keyword.put_new(:as, opts[:type])
       |> Keyword.update(:pattern, nil, &pattern/1)
       |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
       |> Keyword.update(:ref, nil, &ref/1)
@@ -173,11 +167,6 @@ defmodule Xema.Schema do
   end
 
   defp pattern_property(key_value), do: key_value
-
-  @spec delete_as(map) :: map
-  defp delete_as(%{type: type, as: type} = schema), do: Map.delete(schema, :as)
-
-  defp delete_as(schema), do: schema
 
   @spec delete_nils(map) :: map
   defp delete_nils(schema),

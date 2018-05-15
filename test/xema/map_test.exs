@@ -8,10 +8,6 @@ defmodule Xema.MapTest do
       %{schema: Xema.new(:map)}
     end
 
-    test "type", %{schema: schema} do
-      assert schema.content.as == :map
-    end
-
     test "validate/2 with an empty map", %{schema: schema} do
       assert validate(schema, %{}) == :ok
     end
@@ -28,22 +24,6 @@ defmodule Xema.MapTest do
 
     test "is_valid?/2 with an invalid value", %{schema: schema} do
       refute is_valid?(schema, 55)
-    end
-  end
-
-  describe "empty 'map' schema as object" do
-    setup do
-      %{schema: Xema.new(:map, as: :object)}
-    end
-
-    test "type", %{schema: schema} do
-      assert schema.content.as == :object
-    end
-
-    test "validate/2 with a string", %{schema: schema} do
-      expected = {:error, %{type: :object, value: "foo"}}
-
-      assert validate(schema, "foo") == expected
     end
   end
 

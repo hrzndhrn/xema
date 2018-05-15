@@ -8,10 +8,6 @@ defmodule Xema.IntegerTest do
       %{schema: Xema.new(:integer)}
     end
 
-    test "type", %{schema: schema} do
-      assert schema.content.as == :integer
-    end
-
     test "validate/2 with an integer", %{schema: schema} do
       assert validate(schema, 2) == :ok
     end
