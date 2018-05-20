@@ -50,7 +50,7 @@ defmodule Xema.Base do
       def is_valid?(schema, value), do: validate(schema, value) == :ok
 
       @spec validate(__MODULE__.t() | Schema.t(), any) :: Validator.result()
-      def validate(schema, value, opts \\ []) do
+      def validate(%__MODULE__{} = schema, value, opts \\ []) do
         case Validator.validate(schema, value, opts) do
           :ok ->
             :ok
