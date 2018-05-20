@@ -8,10 +8,6 @@ defmodule Xema.StringTest do
       %{schema: Xema.new(:string)}
     end
 
-    test "type", %{schema: schema} do
-      assert schema.content.as == :string
-    end
-
     test "validate/2 with a string", %{schema: schema} do
       assert validate(schema, "foo") == :ok
     end

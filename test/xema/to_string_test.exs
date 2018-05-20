@@ -12,11 +12,11 @@ defmodule Xema.ToStringTest do
       assert to_string(xema) == "Xema.new(#{schema})"
     end
 
-    test "with a simple any-schema with an id and as :bar" do
-      schema = ~s(:any, as: :bar, id: "foo")
+    test "with a simple any-schema with an id" do
+      schema = ~s(:any, id: "foo")
       xema = xema(schema)
 
-      assert to_string(xema) == "Xema.new(#{schema})"
+      assert to_string(xema) == ~s[Xema.new(:id, "foo")]
     end
 
     test "with an enum" do

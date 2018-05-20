@@ -8,10 +8,6 @@ defmodule Xema.ListTest do
       %{schema: Xema.new(:list)}
     end
 
-    test "type", %{schema: schema} do
-      assert schema.content.as == :list
-    end
-
     test "validate/2 with an empty list", %{schema: schema} do
       assert validate(schema, []) == :ok
     end

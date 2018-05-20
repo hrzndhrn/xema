@@ -122,8 +122,7 @@ defmodule Xema do
         content: %Xema.Schema{
           max_length: 12,
           min_length: 3,
-          type: :string,
-          as: :string
+          type: :string
         }
       }
 
@@ -134,10 +133,8 @@ defmodule Xema do
       %Xema{
         content: %Xema.Schema{
           type: :list,
-          as: :list,
           items: %Xema.Schema{
             type: :number,
-            as: :number,
             minimum: 2
           }
         }
