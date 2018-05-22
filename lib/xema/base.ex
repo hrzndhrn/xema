@@ -52,7 +52,7 @@ defmodule Xema.Base do
       def validate(xema, value, opts \\ [])
 
       @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
-      def validate(%__MODULE__{} = xema, value, opts),
+      def validate(%{__struct__: _, content: _} = xema, value, opts),
         do: do_validate(xema, value, opts)
 
       @spec validate(Schema.t(), any, keyword) :: Validator.result()

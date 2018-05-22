@@ -22,7 +22,7 @@ defmodule Xema.Validator do
     do: do_validate(schema, value, opts)
 
   @spec do_validate(Xema.t() | Xema.Schema.t(), any, keyword) :: result
-  defp do_validate(%Xema{content: schema}, value, opts),
+  defp do_validate(%{content: schema}, value, opts),
     do: do_validate(schema, value, opts)
 
   defp do_validate(%Ref{} = ref, value, opts),

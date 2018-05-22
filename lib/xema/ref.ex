@@ -124,11 +124,12 @@ defmodule Xema.Ref do
 
   defp do_get(_, nil), do: {:error, :not_found}
 
-  defp do_get(pointer, %Xema{} = xema)
-       when pointer in [nil, "", "#"],
-       do: {:ok, xema.content}
-
-  defp do_get(pointer, %Xema{} = xema), do: do_get(pointer, xema.content)
+  defp do_get(pointer, %{__struct__: _, content: content}) do
+    case pointer in [nil, "", "#"] do
+      true -> {:ok, content}
+      false -> do_get(pointer, content)
+    end
+  end
 
   defp do_get(pointer, schema)
        when is_binary(pointer),
