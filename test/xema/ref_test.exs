@@ -105,11 +105,11 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with valid values", %{schema: schema} do
-      assert Xema.validate(schema, %{foo: 5, bar: -1}) == :ok
+      assert validate(schema, %{foo: 5, bar: -1}) == :ok
     end
 
     test "validate/2 with invalid values", %{schema: schema} do
-      assert Xema.validate(schema, %{foo: -1, bar: 1}) ==
+      assert validate(schema, %{foo: -1, bar: 1}) ==
                {:error,
                 %{
                   properties: %{
@@ -137,11 +137,11 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{foo: 42}) == :ok
+      assert validate(schema, %{foo: 42}) == :ok
     end
 
     test "validate/2 with invalid value", %{schema: schema} do
-      assert Xema.validate(schema, %{foo: -21}) ==
+      assert validate(schema, %{foo: -21}) ==
                {:error, %{properties: %{foo: %{minimum: 0, value: -21}}}}
     end
   end
@@ -160,11 +160,11 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, 42) == :ok
+      assert validate(schema, 42) == :ok
     end
 
     test "validate/2 with invalid value", %{schema: schema} do
-      assert Xema.validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
+      assert validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
     end
   end
 
@@ -182,12 +182,14 @@ defmodule Xema.RefTest do
       }
     end
 
+    @tag :only
     test "validate/2 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, 42) == :ok
+      IO.inspect schema, limit: :infinity
+      assert validate(schema, 42) == :ok
     end
 
     test "validate/2 with invalid value", %{schema: schema} do
-      assert Xema.validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
+      assert validate(schema, -42) == {:error, %{minimum: 0, value: -42}}
     end
   end
 
@@ -207,15 +209,15 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, [1, 2]) == :ok
-      assert Xema.validate(schema, [1, 2, 3]) == :ok
+      assert validate(schema, [1, 2]) == :ok
+      assert validate(schema, [1, 2, 3]) == :ok
     end
 
     test "validate/2 with invalid value", %{schema: schema} do
-      assert Xema.validate(schema, [1, "2"]) ==
+      assert validate(schema, [1, "2"]) ==
                {:error, [{1, %{type: :integer, value: "2"}}]}
 
-      assert Xema.validate(schema, [1, 2, "3"]) ==
+      assert validate(schema, [1, 2, "3"]) ==
                {:error, [{2, %{type: :integer, value: "3"}}]}
     end
 
@@ -223,7 +225,7 @@ defmodule Xema.RefTest do
       expected = "Reference '#/items/11' not found."
 
       assert_raise SchemaError, expected, fn ->
-        Xema.validate(schema, [1, 2, 3, 4]) ==
+        validate(schema, [1, 2, 3, 4]) ==
           {:error, [{3, {:ref, "#/items/11"}}]}
       end
     end
@@ -244,11 +246,11 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, [1, "foo"]) == :ok
+      assert validate(schema, [1, "foo"]) == :ok
     end
 
     test "validate/2 with invalid value", %{schema: schema} do
-      assert Xema.validate(schema, [1, 2]) ==
+      assert validate(schema, [1, 2]) ==
                {:error, [{1, %{type: :string, value: 2}}]}
     end
   end
@@ -277,41 +279,41 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 tilda_1 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{tilda_1: 1}) == :ok
+      assert validate(schema, %{tilda_1: 1}) == :ok
     end
 
     test "validate/2 tilda_1 with invalid value", %{schema: schema} do
-      assert Xema.validate(schema, %{tilda_1: "1"}) ==
+      assert validate(schema, %{tilda_1: "1"}) ==
                {:error,
                 %{properties: %{tilda_1: %{type: :integer, value: "1"}}}}
     end
 
     test "validate/2 tilda_2 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{tilda_2: 1}) == :ok
+      assert validate(schema, %{tilda_2: 1}) == :ok
     end
 
     test "validate/2 tilda_3 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{tilda_3: 1}) == :ok
+      assert validate(schema, %{tilda_3: 1}) == :ok
     end
 
     test "validate/2 percent_1 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{percent_1: 1}) == :ok
+      assert validate(schema, %{percent_1: 1}) == :ok
     end
 
     test "validate/2 percent_2 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{percent_2: 1}) == :ok
+      assert validate(schema, %{percent_2: 1}) == :ok
     end
 
     test "validate/2 slash_1 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{slash_1: 1}) == :ok
+      assert validate(schema, %{slash_1: 1}) == :ok
     end
 
     test "validate/2 slash_2 with valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{slash_2: 1}) == :ok
+      assert validate(schema, %{slash_2: 1}) == :ok
     end
 
     test "validate/2 with invalid values", %{schema: schema} do
-      assert Xema.validate(schema, %{
+      assert validate(schema, %{
                tilda_1: "1",
                tilda_2: "1",
                tilda_3: "1",
@@ -356,14 +358,14 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with valid ref", %{schema: schema} do
-      assert Xema.validate(schema, %{num: 1}) == :ok
+      assert validate(schema, %{num: 1}) == :ok
     end
 
     test "validate/2 with invalid ref", %{schema: schema} do
       expected = "Reference 'invalid' not found."
 
       assert_raise SchemaError, expected, fn ->
-        Xema.validate(schema, %{invalid: 1})
+        validate(schema, %{invalid: 1})
       end
     end
 
@@ -371,7 +373,7 @@ defmodule Xema.RefTest do
       expected = "Reference 'foobar' not found."
 
       assert_raise SchemaError, expected, fn ->
-        Xema.validate(schema, %{baz: 1})
+        validate(schema, %{baz: 1})
       end
     end
   end
@@ -410,7 +412,7 @@ defmodule Xema.RefTest do
         nodes: []
       }
 
-      assert Xema.validate(schema, tree) == :ok
+      assert validate(schema, tree) == :ok
     end
 
     test "ids", %{schema: schema} do
@@ -456,7 +458,7 @@ defmodule Xema.RefTest do
         ]
       }
 
-      assert Xema.validate(schema, tree) == :ok
+      assert validate(schema, tree) == :ok
     end
 
     test "validate/2 with a missing nodes property", %{schema: schema} do
@@ -484,7 +486,7 @@ defmodule Xema.RefTest do
         ]
       }
 
-      assert Xema.validate(schema, tree) ==
+      assert validate(schema, tree) ==
                {:error,
                 %{
                   properties: %{
