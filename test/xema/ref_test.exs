@@ -184,7 +184,6 @@ defmodule Xema.RefTest do
 
     @tag :only
     test "validate/2 with valid value", %{schema: schema} do
-      IO.inspect schema, limit: :infinity
       assert validate(schema, 42) == :ok
     end
 
