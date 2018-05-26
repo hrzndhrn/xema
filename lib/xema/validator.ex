@@ -174,7 +174,7 @@ defmodule Xema.Validator do
   defp is_type?(_, _), do: false
 
   @spec types(Schema.t(), any) :: {:ok, atom} | {:error, map}
-  defp types(%{type: list} = schema, value) do
+  defp types(%{type: list}, value) do
     case Enum.find(list, :not_found, fn type -> is_type?(type, value) end) do
       :not_found -> {:error, %{type: list, value: value}}
       found -> {:ok, found}
@@ -227,17 +227,31 @@ defmodule Xema.Validator do
 
   defp validate_any_of(%{any_of: schemas}, value, opts) do
     case do_validate_any_of(schemas, value, opts) do
-      true -> :ok
-      false -> {:error, :any_of}
+      :ok ->
+        :ok
+
+      {:error, errors} ->
+        {:error, %{any_of: Enum.reverse(errors), value: value}}
     end
   end
 
-  @spec do_validate_any_of(list, any, keyword) :: boolean
-  defp do_validate_any_of(schemas, value, opts),
-    do:
-      Enum.any?(schemas, fn schema ->
-        do_validate(schema, value, opts) == :ok
-      end)
+  @spec do_validate_any_of(list, any, keyword, [map]) :: boolean
+  defp do_validate_any_of(schemas, value, opts, errors \\ [])
+
+  defp do_validate_any_of([], _value, _opts, errors) do
+    {:error, errors}
+  end
+
+  defp do_validate_any_of([schema | schemas], value, opts, errors) do
+    case do_validate(schema, value, opts) do
+      :ok ->
+        :ok
+
+      {:error, error} ->
+        error = Map.delete(error, :value)
+        do_validate_any_of(schemas, value, opts, [error | errors])
+    end
+  end
 
   @spec validate_one_of(Xema.Schema.t(), any, keyword) :: result
   defp validate_one_of(%{one_of: nil}, _value, _opts), do: :ok

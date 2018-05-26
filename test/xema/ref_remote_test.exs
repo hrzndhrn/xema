@@ -168,7 +168,12 @@ defmodule Xema.RefRemoteTest do
 
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, %{name: 1}) ==
-               {:error, %{properties: %{name: :any_of}}}
+               {:error,
+                %{
+                  properties: %{
+                    name: %{any_of: [%{type: nil}, %{type: :string}], value: 1}
+                  }
+                }}
     end
   end
 
@@ -193,7 +198,12 @@ defmodule Xema.RefRemoteTest do
 
     test "validate/2 with an invalid value", %{schema: schema} do
       assert Xema.validate(schema, %{name: 1}) ==
-               {:error, %{properties: %{name: :any_of}}}
+               {:error,
+                %{
+                  properties: %{
+                    name: %{any_of: [%{type: nil}, %{type: :string}], value: 1}
+                  }
+                }}
     end
   end
 end
