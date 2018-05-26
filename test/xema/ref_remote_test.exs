@@ -3,8 +3,6 @@ defmodule Xema.RefRemoteTest do
 
   alias Xema.SchemaError
 
-  require Logger
-
   test "http server" do
     assert %{body: body} =
              HTTPoison.get!("http://localhost:1234/folder/folderInteger.exon")
