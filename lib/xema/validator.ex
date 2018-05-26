@@ -200,7 +200,7 @@ defmodule Xema.Validator do
 
   defp validate_not(%{not: schema}, value, opts) do
     case do_validate(schema, value, opts) do
-      :ok -> {:error, :not}
+      :ok -> {:error, %{not: :ok, value: value}}
       _ -> :ok
     end
   end
