@@ -20,8 +20,11 @@ defmodule Xema.OneOfTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, 15) == {:error, :one_of}
-      assert validate(schema, 4) == {:error, :one_of}
+      assert validate(schema, 15) == {:error, %{one_of: [], value: 15}}
+
+      assert validate(schema, 4) ==
+               {:error,
+                %{one_of: [%{multiple_of: 5}, %{multiple_of: 3}], value: 4}}
     end
   end
 
@@ -58,8 +61,11 @@ defmodule Xema.OneOfTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, 15) == {:error, :one_of}
-      assert validate(schema, 4) == {:error, :one_of}
+      assert validate(schema, 15) == {:error, %{one_of: [], value: 15}}
+
+      assert validate(schema, 4) ==
+               {:error,
+                %{one_of: [%{multiple_of: 5}, %{multiple_of: 3}], value: 4}}
     end
   end
 

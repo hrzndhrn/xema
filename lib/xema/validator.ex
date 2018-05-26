@@ -269,23 +269,27 @@ defmodule Xema.Validator do
   defp validate_one_of(%{one_of: nil}, _value, _opts), do: :ok
 
   defp validate_one_of(%{one_of: schemas}, value, opts) do
-    case do_validate_one_of(schemas, value, opts) == 1 do
-      true -> :ok
-      false -> {:error, :one_of}
+    errors = do_validate_one_of(schemas, value, opts)
+
+    case length(schemas) - length(errors) do
+      1 -> :ok
+      _ -> {:error, %{one_of: errors, value: value}}
     end
   end
 
-  @spec do_validate_one_of(list, any, keyword) :: integer
-  defp do_validate_one_of(schemas, value, opts) do
-    schemas
-    |> Enum.filter(fn schema ->
-      case do_validate(schema, value, opts) do
-        :ok -> true
-        {:error, _} -> false
-      end
-    end)
-    |> Enum.count()
-  end
+  @spec do_validate_one_of(list, any, keyword) :: [map]
+  defp do_validate_one_of(schemas, value, opts),
+    do:
+      Enum.reduce(schemas, [], fn schema, acc ->
+        case do_validate(schema, value, opts) do
+          :ok ->
+            acc
+
+          {:error, error} ->
+            error = Map.delete(error, :value)
+            [error | acc]
+        end
+      end)
 
   @spec exclusive_maximum(Xema.Schema.t(), any) :: result
   defp exclusive_maximum(%{exclusive_maximum: nil}, _value), do: :ok
