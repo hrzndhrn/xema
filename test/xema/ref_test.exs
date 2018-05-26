@@ -224,8 +224,7 @@ defmodule Xema.RefTest do
       expected = "Reference '#/items/11' not found."
 
       assert_raise SchemaError, expected, fn ->
-        validate(schema, [1, 2, 3, 4]) ==
-          {:error, [{3, {:ref, "#/items/11"}}]}
+        validate(schema, [1, 2, 3, 4]) == {:error, [{3, {:ref, "#/items/11"}}]}
       end
     end
   end
