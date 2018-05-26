@@ -9,8 +9,6 @@ defmodule Xema.Base do
   alias Xema.SchemaError
   alias Xema.Validator
 
-  @resolver Application.get_env(:xema, :resolver, NoResolver)
-
   defmacro __using__(_opts) do
     quote do
       import Xema.Base
@@ -105,7 +103,7 @@ defmodule Xema.Base do
       defp get_schema(uri) do
         case resolver_get(uri) do
           {:ok, data} ->
-            Xema.new(data)
+            new(data)
 
           {:error, reason} when is_binary(reason) ->
             raise SchemaError, message: reason
@@ -118,7 +116,7 @@ defmodule Xema.Base do
   end
 
   @spec resolver_get(String.t()) :: {:ok, any} | {:error, any}
-  def resolver_get(uri), do: @resolver.get(uri)
+  def resolver_get(uri), do: resolver().get(uri)
 
   def get_ids(%Schema{} = schema) do
     ids =
@@ -160,4 +158,6 @@ defmodule Xema.Base do
   end
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
+
+  defp resolver, do: Application.get_env(:xema, :resolver, NoResolver)
 end
