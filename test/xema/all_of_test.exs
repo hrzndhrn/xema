@@ -19,7 +19,8 @@ defmodule Xema.AllOfTest do
     end
 
     test "validate/2 with an imvalid value", %{schema: schema} do
-      assert validate(schema, -1) == {:error, :all_of}
+      assert validate(schema, -1) ==
+               {:error, %{all_of: [%{minimum: 0}], value: -1}}
     end
   end
 

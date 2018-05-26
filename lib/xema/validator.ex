@@ -210,17 +210,29 @@ defmodule Xema.Validator do
 
   defp validate_all_of(%{all_of: schemas}, value, opts) do
     case do_validate_all_of(schemas, value, opts) do
-      true -> :ok
-      false -> {:error, :all_of}
+      :ok -> :ok
+      {:error, errors} -> {:error, %{all_of: errors, value: value}}
     end
   end
 
-  @spec do_validate_all_of(list, any, keyword) :: boolean
-  defp do_validate_all_of(schemas, value, opts),
-    do:
-      Enum.all?(schemas, fn schema ->
-        do_validate(schema, value, opts) == :ok
-      end)
+  @spec do_validate_all_of(list, any, keyword, [map]) :: boolean
+  defp do_validate_all_of(schemas, value, opts, errors \\ [])
+
+  defp do_validate_all_of([], _value, _opts, []), do: :ok
+
+  defp do_validate_all_of([], _value, _opts, errors),
+    do: {:error, Enum.reverse(errors)}
+
+  defp do_validate_all_of([schema | schemas], value, opts, errors) do
+    case do_validate(schema, value, opts) do
+      :ok ->
+        do_validate_all_of(schemas, value, opts, errors)
+
+      {:error, error} ->
+        error = Map.delete(error, :value)
+        do_validate_all_of(schemas, value, opts, [error | errors])
+    end
+  end
 
   @spec validate_any_of(Xema.Schema.t(), any, keyword) :: result
   defp validate_any_of(%{any_of: nil}, _value, _opts), do: :ok
