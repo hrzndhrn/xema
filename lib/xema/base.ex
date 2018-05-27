@@ -93,8 +93,8 @@ defmodule Xema.Base do
         Map.put(acc, uri, get_schema(uri))
       end
 
-      defp put_ref(acc, %Ref{remote: true, url: url, path: path}) do
-        uri = Path.join(url, path)
+      defp put_ref(acc, %Ref{remote: true, url: url} = ref) do
+        uri = Path.join(url, ref.path)
         Map.put(acc, uri, get_schema(uri))
       end
 
