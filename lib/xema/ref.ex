@@ -103,8 +103,6 @@ defmodule Xema.Ref do
         false -> Map.put(uri, :path, Path.join(uri.path, path))
       end
 
-    # xema = Map.get(opts[:root].refs, URI.to_string(uri))
-
     with {:ok, xema} <- get_xema(opts[:root], URI.to_string(uri)),
          {:ok, schema} <- do_get(pointer, xema),
          do: {:ok, schema, root: xema}
@@ -171,8 +169,11 @@ defmodule Xema.Ref do
 
   defp get_xema(%{refs: xemas}, pointer) do
     case Map.get(xemas, pointer) do
-      nil -> {:error, :not_found}
-      xema -> {:ok, xema}
+      nil ->
+        {:error, :not_found}
+
+      xema ->
+        {:ok, xema}
     end
   end
 
