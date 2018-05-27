@@ -182,7 +182,6 @@ defmodule Xema.RefTest do
       }
     end
 
-    @tag :only
     test "validate/2 with valid value", %{schema: schema} do
       assert validate(schema, 42) == :ok
     end
