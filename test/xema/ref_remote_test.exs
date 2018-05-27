@@ -1,6 +1,8 @@
 defmodule Xema.RefRemoteTest do
   use ExUnit.Case, async: true
 
+  import Xema, only: [validate: 2]
+
   alias Xema.SchemaError
 
   test "http server" do
@@ -49,12 +51,11 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
-      assert Xema.validate(schema, 1) == :ok
+      assert validate(schema, 1) == :ok
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert Xema.validate(schema, "1") ==
-               {:error, %{type: :integer, value: "1"}}
+      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
     end
   end
 
@@ -72,7 +73,7 @@ defmodule Xema.RefRemoteTest do
       expected = "Reference 'http://localhost:1234/integer.exon' not found."
 
       assert_raise SchemaError, expected, fn ->
-        Xema.validate(schema, 1)
+        validate(schema, 1)
       end
     end
   end
@@ -89,12 +90,11 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
-      assert Xema.validate(schema, 1) == :ok
+      assert validate(schema, 1) == :ok
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert Xema.validate(schema, "1") ==
-               {:error, %{type: :integer, value: "1"}}
+      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
     end
   end
 
@@ -110,12 +110,11 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
-      assert Xema.validate(schema, 1) == :ok
+      assert validate(schema, 1) == :ok
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert Xema.validate(schema, "1") ==
-               {:error, %{type: :integer, value: "1"}}
+      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
     end
   end
 
@@ -137,11 +136,11 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{list: [1]}) == :ok
+      assert validate(schema, %{list: [1]}) == :ok
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert Xema.validate(schema, %{list: ["1"]}) ==
+      assert validate(schema, %{list: ["1"]}) ==
                {:error,
                 %{properties: %{list: [{0, %{type: :integer, value: "1"}}]}}}
     end
@@ -162,12 +161,12 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{name: "foo"}) == :ok
-      assert Xema.validate(schema, %{name: nil}) == :ok
+      assert validate(schema, %{name: "foo"}) == :ok
+      assert validate(schema, %{name: nil}) == :ok
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert Xema.validate(schema, %{name: 1}) ==
+      assert validate(schema, %{name: 1}) ==
                {:error,
                 %{
                   properties: %{
@@ -192,12 +191,12 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
-      assert Xema.validate(schema, %{name: "foo"}) == :ok
-      assert Xema.validate(schema, %{name: nil}) == :ok
+      assert validate(schema, %{name: "foo"}) == :ok
+      assert validate(schema, %{name: nil}) == :ok
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert Xema.validate(schema, %{name: 1}) ==
+      assert validate(schema, %{name: 1}) ==
                {:error,
                 %{
                   properties: %{
