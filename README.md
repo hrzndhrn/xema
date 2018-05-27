@@ -829,10 +829,20 @@ The home of JSON Schema: http://json-schema.org/
 
 Specification:
 
-* [JSON Schema core](http://json-schema.org/latest/json-schema-core.html)
+* Draft-04
+** [JSON Schema core](http://json-schema.org/draft-04/json-schema-core.html)
 defines the basic foundation of JSON Schema
-* [JSON Schema Validation](http://json-schema.org/latest/json-schema-validation.html)
+** [JSON Schema Validation](http://json-schema.org/draft-04/json-schema-validation.html)
 defines the validation keywords of JSON Schema
+* Draft-06
+** [JSON Schema core](http://json-schema.org/draft-06/json-schema-core.html)
+** [JSON Schema Validation](http://json-schema.org/draft-06/json-schema-validation.html)
+** [JSON Schema Release Notes](http://json-schema.org/draft-06/json-schema-release-notes.html)
+contains informations to migrate schemas.
+* Draft-07
+** [JSON Schema core](http://json-schema.org/draft-07/json-schema-core.html)
+** [JSON Schema Validation](http://json-schema.org/draft-07/json-schema-validation.html)
+** [JSON Schema Release Notes](http://json-schema.org/draft-07/json-schema-release-notes.html)
 
 
 [Understanding JSON Schema](https://spacetelescope.github.io/understanding-json-schema/index.html)
