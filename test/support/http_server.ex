@@ -1,6 +1,7 @@
 defmodule HttpServer do
   @moduledoc false
 
+  @spec start(keyword) :: {:ok, any}
   def start(opts) do
     dispatch =
       :cowboy_router.compile([

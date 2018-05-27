@@ -215,7 +215,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_validate_all_of(list, any, keyword, [map]) :: boolean
+  @spec do_validate_all_of(list, any, keyword, [map]) :: result
   defp do_validate_all_of(schemas, value, opts, errors \\ [])
 
   defp do_validate_all_of([], _value, _opts, []), do: :ok
@@ -247,7 +247,8 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_validate_any_of(list, any, keyword, [map]) :: boolean
+  @spec do_validate_any_of(list, any, keyword, [map]) ::
+          :ok | {:error, list(map)}
   defp do_validate_any_of(schemas, value, opts, errors \\ [])
 
   defp do_validate_any_of([], _value, _opts, errors) do
@@ -679,7 +680,9 @@ defmodule Xema.Validator do
             properties:
               map
               |> Map.keys()
-              |> Enum.into(%{}, fn x -> {x, %{additional_properties: false}} end)
+              |> Enum.into(%{}, fn x ->
+                {x, %{additional_properties: false}}
+              end)
           }
         }
     end

@@ -69,15 +69,19 @@ defmodule Xema.Utils do
         do: {key, Map.get(b, key)}
       )
 
+  @spec update_id(list, binary) :: keyword
   def update_id(kw, b) when is_list(kw) do
     Keyword.put(kw, :id, update_id(Keyword.get(kw, :id), b))
   end
 
+  @spec update_id(map, binary) :: map
   def update_id(%{id: a} = map, b) do
     Map.put(map, :id, update_id(a, b))
   end
 
+  @spec update_id(nil, binary) :: binary
   def update_id(a, b) when is_nil(a), do: b
 
+  @spec update_id(binary, binary) :: binary
   def update_id(a, b), do: a |> URI.merge(b) |> URI.to_string()
 end

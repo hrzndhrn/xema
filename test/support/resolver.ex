@@ -3,6 +3,7 @@ defmodule Test.Resolver do
 
   @behaviour Xema.Resolver
 
+  @spec get(binary) :: {:ok, map} | {:error, any}
   def get(uri) do
     with {:ok, response} <- get_response(uri), do: eval(response, uri)
   end

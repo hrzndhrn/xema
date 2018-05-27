@@ -6,5 +6,5 @@ defmodule Xema.Resolver do
   @type exon :: atom | tuple | list | map
   @type reason :: any
 
-  @callback get(uri :: String.t()) :: {:ok, exon} | {:error, reason}
+  @callback get(uri :: binary) :: {:ok, exon} | {:error, reason}
 end
