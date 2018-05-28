@@ -15,6 +15,7 @@ defmodule Xema.Format do
     :uri_query,
     :uri_userinfo
   ]
+
   @typedoc "The list of supported validators."
   @type format ::
           :date_time
