@@ -157,6 +157,9 @@ iex> Xema.validate schema, "foo"
 ```
 
 ### <a id="fmt"></a> Format
+
+`JSON Schema Draft: 4/6/7`
+
 Basic semantic validation of strings.
 
 * `:date_time` validation as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
@@ -186,6 +189,10 @@ true
   * `:uri_path`
   * `:uri_query`
   * `:uri_userinfo`
+
+`JSON Schema Draft: -/-/7`
+
+* `:regex`checks if the `string` is a valid regular expression.
 
 ### <a id="number"></a> Types number, integer and float
 There are three numeric types in Xema: `number`, `integer` and `float`. They
@@ -243,7 +250,7 @@ true
 
 #### <a id="range"></a> Range
 
-`JSON Schema Draft: 4`
+`JSON Schema Draft: 4/-/-`
 
 Ranges of numbers are specified using a combination of the `minimum`, `maximum`,
 `exclusive_minimum` and `exclusive_maximum` keywords.
