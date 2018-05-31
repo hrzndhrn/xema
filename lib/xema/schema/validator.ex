@@ -5,6 +5,8 @@ end
 defmodule Xema.Schema.Validator do
   @moduledoc false
 
+  use Xema.Format
+
   import Xema.Validator, only: [is_unique?: 1]
 
   @type result :: :ok | {:error, String.t()}
@@ -107,6 +109,7 @@ defmodule Xema.Schema.Validator do
          :ok <- schemas(opts, :all_of),
          :ok <- schemas(opts, :any_of),
          :ok <- string(opts, :ref),
+         :ok <- format(opts[:format]),
          do: :ok
   end
 
@@ -178,7 +181,7 @@ defmodule Xema.Schema.Validator do
     end
   end
 
-  # Check if keyword value a string
+  # Check if keyword value is a string
 
   defp string(opts, key) do
     case opts[key] do
@@ -358,10 +361,24 @@ defmodule Xema.Schema.Validator do
   defp ex_min_max(_, keyword, value, _maximum),
     do: {:error, "Expected a boolean for #{keyword}, got #{inspect(value)}"}
 
+  # Keyword: format
+  # The *format` keyword is defined to allow interoperable semantic validation
+  # for a fixed subset of values which are accurately described by authoritative
+  # resources, be they RFCs or other external specifications.
+  # Valid values are atoms specified in the module `Xema.Format` and the atom
+  # `:regex`.
+  defp format(nil), do: :ok
+
+  defp format(value) when Format.supports(value), do: :ok
+
+  defp format(:regex), do: :ok
+
+  defp format(value),
+    do: {:error, "No support for semantic validation of #{inspect(value)}."}
+
   # Keyword: items
   # The value of `items` MUST be either a valid JSON Schema or an array of
   # valid JSON Schemas.
-
   defp items(nil), do: :ok
 
   defp items(value)
