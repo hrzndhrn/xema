@@ -28,13 +28,13 @@ $ mix deps.get
 
 ## Docs
 
-Documentation can be generated with
-[ExDoc](https://github.com/elixir-lang/ex_doc) by running `mix docs`.
-
-The generate docs can be found at https://hexdocs.pm/xema .
-
 The docs contains a [Usage](https://hexdocs.pm/xema/usage.html) page with a
 short and compact description to use `Xema`.
+
+Documentation can be generated with
+[ExDoc](https://github.com/elixir-lang/ex_doc) by running `mix docs`. The
+generate docs can be found at https://hexdocs.pm/xema .
+
 
 ## Tests
 
