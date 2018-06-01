@@ -55,7 +55,16 @@ defmodule Xema.Mixfile do
     [
       maintainers: ["Marcus Kruse"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/hrzndhrn/xema"}
+      links: %{"GitHub" => "https://github.com/hrzndhrn/xema"},
+      files: [
+        "lib",
+        "mix.exs",
+        "README*",
+        "LICENSE*",
+        "XEMA_README.md",
+        "USAGE.md",
+        "UNSUPPORTED_FEATURES.md"
+      ]
     ]
   end
 
