@@ -3,6 +3,7 @@ defmodule XemaTest do
 
   doctest Xema
   doctest Usage
+  doctest UnsupportedFeatures
 
   describe "call xema/2 with tuple" do
     test "single-tuple equal simple schema-type" do

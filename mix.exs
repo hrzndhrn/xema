@@ -22,7 +22,7 @@ defmodule Xema.Mixfile do
         "coveralls.html": :test
       ],
       docs: [
-        extras: ["XEMA_README.md", "USAGE.md"],
+        extras: ["XEMA_README.md", "USAGE.md", "UNSUPPORTED_FEATURES.md"],
         main: "xema_readme"
       ],
       dialyzer: [ignore_warnings: "dialyzer.ignore-warnings"]

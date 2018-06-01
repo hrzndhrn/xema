@@ -44,12 +44,20 @@ defmodule Xema.Base do
           |> init(opts)
           |> new()
 
+      @doc """
+      Returns true if the value is a valid value against the given schema;
+      otherwise returns false.
+      """
       @spec is_valid?(__MODULE__.t(), any) :: boolean
       def is_valid?(schema, value), do: validate(schema, value) == :ok
 
+      @doc """
+      Returns `:ok` if the value is a valid value against the given schema;
+      otherwise returns an error tuple.
+      """
+      @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
       def validate(xema, value, opts \\ [])
 
-      @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
       def validate(%{__struct__: _, content: _} = xema, value, opts),
         do: do_validate(xema, value, opts)
 
