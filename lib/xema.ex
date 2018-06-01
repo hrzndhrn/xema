@@ -197,6 +197,8 @@ defmodule Xema do
   @spec schema(any, keyword) :: Xema.Schema.t()
   defp schema(type, keywords \\ [])
 
+  defp schema(%{__struct__: _, content: schema}, _), do: schema
+
   defp schema(list, keywords) when is_list(list) do
     case Keyword.keyword?(list) do
       true ->

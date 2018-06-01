@@ -2,7 +2,7 @@ defmodule XemaTest do
   use ExUnit.Case
 
   doctest Xema
-  doctest Readme
+  doctest Usage
 
   describe "call xema/2 with tuple" do
     test "single-tuple equal simple schema-type" do
