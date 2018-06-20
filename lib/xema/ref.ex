@@ -122,20 +122,21 @@ defmodule Xema.Ref do
 
   defp do_get(_, nil), do: {:error, :not_found}
 
-  defp do_get(pointer, %{__struct__: _, content: content}) do
-    case pointer in [nil, "", "#"] do
-      true -> {:ok, content}
-      false -> do_get(pointer, content)
-    end
-  end
+  defp do_get(nil, %{__struct__: _, content: schema}), do: {:ok, schema}
 
-  defp do_get(pointer, schema)
+  defp do_get("", %{__struct__: _, content: schema}), do: {:ok, schema}
+
+  defp do_get("/" <> pointer, %{__struct__: _, content: schema})
        when is_binary(pointer),
        do:
          pointer
          |> String.trim("/")
          |> String.split("/")
          |> do_get(schema)
+
+  defp do_get(pointer, xema) when is_binary(pointer) do
+    with {:ok, ref} <- get_ref(xema, "#" <> pointer), do: get(ref, root: xema)
+  end
 
   defp do_get([], schema), do: {:ok, schema}
 
