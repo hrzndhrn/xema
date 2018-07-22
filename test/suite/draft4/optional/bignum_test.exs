@@ -3,7 +3,7 @@ defmodule Draft4.Optional.BignumTest do
 
   import Xema, only: [is_valid?: 2]
 
-  describe "integer" do
+  describe "integer (1)" do
     setup do
       %{schema: Xema.new(:integer)}
     end
@@ -14,16 +14,9 @@ defmodule Draft4.Optional.BignumTest do
 
       assert is_valid?(schema, data)
     end
-
-    test "a negative bignum is an integer", %{schema: schema} do
-      data =
-        -12_345_678_910_111_213_141_516_171_819_202_122_232_425_262_728_293_031
-
-      assert is_valid?(schema, data)
-    end
   end
 
-  describe "number" do
+  describe "number (1)" do
     setup do
       %{schema: Xema.new(:number)}
     end
@@ -33,6 +26,25 @@ defmodule Draft4.Optional.BignumTest do
         98_249_283_749_234_923_498_293_171_823_948_729_348_710_298_301_928_331
 
       assert is_valid?(schema, data)
+    end
+  end
+
+  describe "integer (2)" do
+    setup do
+      %{schema: Xema.new(:integer)}
+    end
+
+    test "a negative bignum is an integer", %{schema: schema} do
+      data =
+        -12_345_678_910_111_213_141_516_171_819_202_122_232_425_262_728_293_031
+
+      assert is_valid?(schema, data)
+    end
+  end
+
+  describe "number (2)" do
+    setup do
+      %{schema: Xema.new(:number)}
     end
 
     test "a negative bignum is a number", %{schema: schema} do
@@ -56,7 +68,7 @@ defmodule Draft4.Optional.BignumTest do
     end
   end
 
-  describe "integer comparison with maximum" do
+  describe "integer comparison (1)" do
     setup do
       %{schema: Xema.new(:maximum, 18_446_744_073_709_551_615)}
     end
@@ -81,7 +93,7 @@ defmodule Draft4.Optional.BignumTest do
     end
   end
 
-  describe "integer comparison with minimum" do
+  describe "integer comparison (2)" do
     setup do
       %{schema: Xema.new(:minimum, -18_446_744_073_709_551_615)}
     end

@@ -18,18 +18,13 @@ defmodule Draft4.Optional.FormatTest do
       assert is_valid?(schema, data)
     end
 
-    test "a valid date-time string with lower case", %{schema: schema} do
-      data = "1963-06-19t08:30:06.283185z"
-      assert is_valid?(schema, data)
-    end
-
     test "a valid date-time string with plus offset", %{schema: schema} do
       data = "1937-01-01T12:00:27.87+00:20"
       assert is_valid?(schema, data)
     end
 
     test "a valid date-time string with minus offset", %{schema: schema} do
-      data = "1990-12-31T15:59:60.123-08:00"
+      data = "1990-12-31T15:59:50.123-08:00"
       assert is_valid?(schema, data)
     end
 
@@ -46,6 +41,11 @@ defmodule Draft4.Optional.FormatTest do
     test "an invalid date-time string", %{schema: schema} do
       data = "06/19/1963 08:30:06 PST"
       refute is_valid?(schema, data)
+    end
+
+    test "case-insensitive T and Z", %{schema: schema} do
+      data = "1963-06-19t08:30:06.283185z"
+      assert is_valid?(schema, data)
     end
 
     test "only RFC3339 not all of ISO 8601 are valid", %{schema: schema} do
@@ -107,11 +107,6 @@ defmodule Draft4.Optional.FormatTest do
     test "a valid mailto URI", %{schema: schema} do
       data = "mailto:John.Doe@example.com"
       assert is_valid?(schema, data)
-    end
-
-    test "an invalid mailto URI", %{schema: schema} do
-      data = "mailto:John.Doe-example.com"
-      refute is_valid?(schema, data)
     end
 
     test "a valid newsgroup URI", %{schema: schema} do

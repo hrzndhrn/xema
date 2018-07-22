@@ -21,7 +21,7 @@ defmodule Draft4.DefaultTest do
 
   describe "invalid string value for default" do
     setup do
-      %{schema: Xema.new(:properties, %{bar: {:string, min_length: 4}})}
+      %{schema: Xema.new(:properties, %{bar: {:string, [min_length: 4]}})}
     end
 
     test "valid when property is specified", %{schema: schema} do

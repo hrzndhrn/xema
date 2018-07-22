@@ -10,7 +10,7 @@ defmodule Draft4.AdditionalPropertiesTest do
           Xema.new(
             :any,
             additional_properties: false,
-            pattern_properties: %{"^v" => :any},
+            pattern_properties: %{"^v": :any},
             properties: %{bar: :any, foo: :any}
           )
       }
@@ -44,6 +44,29 @@ defmodule Draft4.AdditionalPropertiesTest do
     test "patternProperties are not additional properties", %{schema: schema} do
       data = %{foo: 1, vroom: 2}
       assert is_valid?(schema, data)
+    end
+  end
+
+  describe "non-ASCII pattern with additionalProperties" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :any,
+            additional_properties: false,
+            pattern_properties: %{"^á": :any}
+          )
+      }
+    end
+
+    test "matching the pattern is valid", %{schema: schema} do
+      data = %{ármányos: 2}
+      assert is_valid?(schema, data)
+    end
+
+    test "not matching the pattern is invalid", %{schema: schema} do
+      data = %{élmény: 2}
+      refute is_valid?(schema, data)
     end
   end
 

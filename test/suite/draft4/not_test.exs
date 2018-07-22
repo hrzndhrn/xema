@@ -42,7 +42,7 @@ defmodule Draft4.NotTest do
 
   describe "not more complex schema" do
     setup do
-      %{schema: Xema.new(:not, {:map, properties: %{foo: :string}})}
+      %{schema: Xema.new(:not, {:map, [properties: %{foo: :string}]})}
     end
 
     test "match", %{schema: schema} do
