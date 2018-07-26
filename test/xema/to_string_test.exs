@@ -101,6 +101,20 @@ defmodule Xema.ToStringTest do
       properties: %{foo: {:ref, "#/definitions/foo"}}
       """)
     end
+
+    test "dependencies with boolean subschemas and atom keys" do
+      assert_to_string("""
+      :dependencies,
+      %{bar: true, foo: false}
+      """)
+    end
+
+    test "dependencies with boolean subschemas and string keys" do
+      assert_to_string("""
+      :dependencies,
+      %{"bar" => true, "foo" => false}
+      """)
+    end
   end
 
   describe "Xema.to_string format :data" do
