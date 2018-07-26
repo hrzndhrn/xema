@@ -21,6 +21,7 @@ defmodule Xema.Schema do
   * `additional_items` disallow additional items, if set to false. The keyword
     can also contain a schema to specify the type of additional items.
   * `additional_properties` disallow additional properties, if set to true.
+  * `const` specifies a constant.
   * `definitions` contains schemas for reuse.
   * `dependencies` allows the schema of the map to change based on the presence
     of certain special properties
@@ -59,6 +60,7 @@ defmodule Xema.Schema do
   @type t :: %Xema.Schema{
           additional_items: Xema.t() | Xema.Schema.t() | boolean | nil,
           additional_properties: map | boolean | nil,
+          const: any,
           definitions: map,
           dependencies: list | map | nil,
           description: String.t() | nil,
@@ -94,6 +96,7 @@ defmodule Xema.Schema do
     :additional_properties,
     :all_of,
     :any_of,
+    :const,
     :definitions,
     :dependencies,
     :description,
