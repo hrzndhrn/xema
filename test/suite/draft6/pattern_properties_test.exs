@@ -1,4 +1,4 @@
-defmodule Draft4.PatternPropertiesTest do
+defmodule Draft6.PatternPropertiesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -29,12 +29,12 @@ defmodule Draft4.PatternPropertiesTest do
     end
 
     test "ignores arrays", %{schema: schema} do
-      data = []
+      data = ["foo"]
       assert is_valid?(schema, data)
     end
 
     test "ignores strings", %{schema: schema} do
-      data = ""
+      data = "foo"
       assert is_valid?(schema, data)
     end
 
@@ -112,6 +112,34 @@ defmodule Draft4.PatternPropertiesTest do
     test "regexes are case sensitive, 2", %{schema: schema} do
       data = %{a_X_3: 3}
       refute is_valid?(schema, data)
+    end
+  end
+
+  describe "patternProperties with boolean schemas" do
+    setup do
+      %{schema: Xema.new(:pattern_properties, %{"b.*": false, "f.*": true})}
+    end
+
+    test "object with property matching schema true is valid", %{schema: schema} do
+      data = %{foo: 1}
+      assert is_valid?(schema, data)
+    end
+
+    test "object with property matching schema false is invalid", %{
+      schema: schema
+    } do
+      data = %{bar: 2}
+      refute is_valid?(schema, data)
+    end
+
+    test "object with both properties is invalid", %{schema: schema} do
+      data = %{bar: 2, foo: 1}
+      refute is_valid?(schema, data)
+    end
+
+    test "empty object is valid", %{schema: schema} do
+      data = %{}
+      assert is_valid?(schema, data)
     end
   end
 end

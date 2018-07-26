@@ -472,6 +472,11 @@ defmodule Xema.Validator do
     do: items_list(items, list, 0, [], opts)
 
   @spec items_list(Xema.Schema.t(), list, integer, list, keyword) :: result
+
+  defp items_list(%{type: false}, [], _, _, _), do: :ok
+  defp items_list(%{type: false}, _, _, _, _), do: {:error, %{type: false}}
+  defp items_list(%{type: true}, _, _, _, _), do: :ok
+
   defp items_list(_schema, [], _at, [], _opts), do: :ok
 
   defp items_list(_schema, [], _at, errors, _opts),

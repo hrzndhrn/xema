@@ -510,4 +510,24 @@ defmodule Xema.RefTest do
                 }}
     end
   end
+
+  describe "location-independent identifier" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :any,
+            definitions: %{
+              foo: {:integer, id: "#num"}
+            },
+            ref: "#num"
+          )
+      }
+    end
+
+    @tag :only
+    test "with valid data", %{schema: schema} do
+      assert validate(schema, 1) == :ok
+    end
+  end
 end

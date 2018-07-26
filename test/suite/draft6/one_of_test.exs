@@ -1,4 +1,4 @@
-defmodule Draft4.OneOfTest do
+defmodule Draft6.OneOfTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -45,6 +45,50 @@ defmodule Draft4.OneOfTest do
     end
 
     test "both oneOf valid", %{schema: schema} do
+      data = "foo"
+      refute is_valid?(schema, data)
+    end
+  end
+
+  describe "oneOf with boolean schemas, all true" do
+    setup do
+      %{schema: Xema.new(:one_of, [true, true, true])}
+    end
+
+    test "any value is invalid", %{schema: schema} do
+      data = "foo"
+      refute is_valid?(schema, data)
+    end
+  end
+
+  describe "oneOf with boolean schemas, one true" do
+    setup do
+      %{schema: Xema.new(:one_of, [true, false, false])}
+    end
+
+    test "any value is valid", %{schema: schema} do
+      data = "foo"
+      assert is_valid?(schema, data)
+    end
+  end
+
+  describe "oneOf with boolean schemas, more than one true" do
+    setup do
+      %{schema: Xema.new(:one_of, [true, true, false])}
+    end
+
+    test "any value is invalid", %{schema: schema} do
+      data = "foo"
+      refute is_valid?(schema, data)
+    end
+  end
+
+  describe "oneOf with boolean schemas, all false" do
+    setup do
+      %{schema: Xema.new(:one_of, [false, false, false])}
+    end
+
+    test "any value is invalid", %{schema: schema} do
       data = "foo"
       refute is_valid?(schema, data)
     end

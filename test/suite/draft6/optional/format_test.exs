@@ -1,4 +1,4 @@
-defmodule Draft4.Optional.FormatTest do
+defmodule Draft6.Optional.FormatTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -35,6 +35,11 @@ defmodule Draft4.Optional.FormatTest do
 
     test "an invalid offset in date-time string", %{schema: schema} do
       data = "1990-12-31T15:59:60-24:00"
+      refute is_valid?(schema, data)
+    end
+
+    test "an invalid closing Z after time-zone offset", %{schema: schema} do
+      data = "1963-06-19T08:30:06.28123+01:00Z"
       refute is_valid?(schema, data)
     end
 

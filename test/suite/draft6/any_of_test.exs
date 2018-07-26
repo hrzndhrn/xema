@@ -1,4 +1,4 @@
-defmodule Draft4.AnyOfTest do
+defmodule Draft6.AnyOfTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -45,6 +45,39 @@ defmodule Draft4.AnyOfTest do
     end
 
     test "both anyOf invalid", %{schema: schema} do
+      data = "foo"
+      refute is_valid?(schema, data)
+    end
+  end
+
+  describe "anyOf with boolean schemas, all true" do
+    setup do
+      %{schema: Xema.new(:any_of, [true, true])}
+    end
+
+    test "any value is valid", %{schema: schema} do
+      data = "foo"
+      assert is_valid?(schema, data)
+    end
+  end
+
+  describe "anyOf with boolean schemas, some true" do
+    setup do
+      %{schema: Xema.new(:any_of, [true, false])}
+    end
+
+    test "any value is valid", %{schema: schema} do
+      data = "foo"
+      assert is_valid?(schema, data)
+    end
+  end
+
+  describe "anyOf with boolean schemas, all false" do
+    setup do
+      %{schema: Xema.new(:any_of, [false, false])}
+    end
+
+    test "any value is invalid", %{schema: schema} do
       data = "foo"
       refute is_valid?(schema, data)
     end

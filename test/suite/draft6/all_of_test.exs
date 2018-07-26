@@ -1,4 +1,4 @@
-defmodule Draft4.AllOfTest do
+defmodule Draft6.AllOfTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -90,6 +90,39 @@ defmodule Draft4.AllOfTest do
 
     test "mismatch one", %{schema: schema} do
       data = 35
+      refute is_valid?(schema, data)
+    end
+  end
+
+  describe "allOf with boolean schemas, all true" do
+    setup do
+      %{schema: Xema.new(:all_of, [true, true])}
+    end
+
+    test "any value is valid", %{schema: schema} do
+      data = "foo"
+      assert is_valid?(schema, data)
+    end
+  end
+
+  describe "allOf with boolean schemas, some false" do
+    setup do
+      %{schema: Xema.new(:all_of, [true, false])}
+    end
+
+    test "any value is invalid", %{schema: schema} do
+      data = "foo"
+      refute is_valid?(schema, data)
+    end
+  end
+
+  describe "allOf with boolean schemas, all false" do
+    setup do
+      %{schema: Xema.new(:all_of, [false, false])}
+    end
+
+    test "any value is invalid", %{schema: schema} do
+      data = "foo"
       refute is_valid?(schema, data)
     end
   end
