@@ -39,12 +39,12 @@ defmodule Xema.Mixfile do
 
   defp deps do
     [
-      {:cowboy, "~> 2.2", only: :test},
+      {:cowboy, "~> 2.4", only: :test},
       {:credo, "~> 0.9", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.18", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.8", only: :test},
-      {:httpoison, "~> 1.0", only: :test}
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.9", only: :test},
+      {:httpoison, "~> 1.2", only: :test}
     ]
   end
 
