@@ -382,8 +382,8 @@ defmodule Xema.Schema.Validator do
   # valid JSON Schemas.
   defp items(nil), do: :ok
 
-  defp items(value)
-       when is_list(value) or is_tuple(value) or is_atom(value) or is_map(value),
+  defp items(v)
+       when is_list(v) or is_tuple(v) or is_atom(v) or is_map(v),
        do: :ok
 
   defp items(value),
