@@ -1,4 +1,4 @@
-defmodule Draft4.DefaultTest do
+defmodule Draft6.DefaultTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]

@@ -1,4 +1,4 @@
-defmodule Draft4.PropertiesTest do
+defmodule Draft6.PropertiesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -89,6 +89,32 @@ defmodule Draft4.PropertiesTest do
 
     test "additionalProperty invalidates others", %{schema: schema} do
       data = %{quux: "foo"}
+      refute is_valid?(schema, data)
+    end
+  end
+
+  describe "properties with boolean schema" do
+    setup do
+      %{schema: Xema.new(:properties, %{bar: false, foo: true})}
+    end
+
+    test "no property present is valid", %{schema: schema} do
+      data = %{}
+      assert is_valid?(schema, data)
+    end
+
+    test "only 'true' property present is valid", %{schema: schema} do
+      data = %{foo: 1}
+      assert is_valid?(schema, data)
+    end
+
+    test "only 'false' property present is invalid", %{schema: schema} do
+      data = %{bar: 2}
+      refute is_valid?(schema, data)
+    end
+
+    test "both properties present is invalid", %{schema: schema} do
+      data = %{bar: 2, foo: 1}
       refute is_valid?(schema, data)
     end
   end

@@ -1,4 +1,4 @@
-defmodule Draft4.AdditionalPropertiesTest do
+defmodule Draft6.AdditionalPropertiesTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]

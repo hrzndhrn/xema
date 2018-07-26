@@ -97,6 +97,31 @@ defmodule Xema.ListTest do
     end
   end
 
+  describe "list schema with bool schema for items: " do
+    setup do
+      %{
+        true_schema: Xema.new(:list, items: true),
+        false_schema: Xema.new(:list, items: false)
+      }
+    end
+
+    test "validate/2 true schema with empty list", %{true_schema: schema} do
+      assert validate(schema, []) == :ok
+    end
+
+    test "validate/2 true schema with non empty list", %{true_schema: schema} do
+      assert validate(schema, [1, "a"]) == :ok
+    end
+
+    test "validate/2 false schema with empty list", %{false_schema: schema} do
+      assert validate(schema, []) == :ok
+    end
+
+    test "validate/2 false schema with non empty list", %{false_schema: schema} do
+      assert validate(schema, [1, "a"]) == {:error, %{type: false}}
+    end
+  end
+
   describe "'list' schema with unique items" do
     setup do
       %{schema: Xema.new(:list, unique_items: true)}

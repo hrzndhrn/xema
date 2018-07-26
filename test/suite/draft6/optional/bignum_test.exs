@@ -1,4 +1,4 @@
-defmodule Draft4.Optional.BignumTest do
+defmodule Draft6.Optional.BignumTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -81,10 +81,7 @@ defmodule Draft4.Optional.BignumTest do
 
   describe "float comparison with high precision" do
     setup do
-      %{
-        schema:
-          Xema.new(:any, exclusive_maximum: true, maximum: 9.727837981879871e26)
-      }
+      %{schema: Xema.new(:exclusive_maximum, 9.727837981879871e26)}
     end
 
     test "comparison works for high numbers", %{schema: schema} do
@@ -106,14 +103,7 @@ defmodule Draft4.Optional.BignumTest do
 
   describe "float comparison with high precision on negative numbers" do
     setup do
-      %{
-        schema:
-          Xema.new(
-            :any,
-            exclusive_minimum: true,
-            minimum: -9.727837981879871e26
-          )
-      }
+      %{schema: Xema.new(:exclusive_minimum, -9.727837981879871e26)}
     end
 
     test "comparison works for very negative numbers", %{schema: schema} do
