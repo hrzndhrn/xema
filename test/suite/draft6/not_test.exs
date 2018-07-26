@@ -1,4 +1,4 @@
-defmodule Draft4.NotTest do
+defmodule Draft6.NotTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [is_valid?: 2]
@@ -73,6 +73,28 @@ defmodule Draft4.NotTest do
 
     test "property absent", %{schema: schema} do
       data = %{bar: 1, baz: 2}
+      assert is_valid?(schema, data)
+    end
+  end
+
+  describe "not with boolean schema true" do
+    setup do
+      %{schema: Xema.new(:not, true)}
+    end
+
+    test "any value is invalid", %{schema: schema} do
+      data = "foo"
+      refute is_valid?(schema, data)
+    end
+  end
+
+  describe "not with boolean schema false" do
+    setup do
+      %{schema: Xema.new(:not, false)}
+    end
+
+    test "any value is valid", %{schema: schema} do
+      data = "foo"
       assert is_valid?(schema, data)
     end
   end
