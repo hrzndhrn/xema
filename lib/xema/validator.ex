@@ -81,6 +81,7 @@ defmodule Xema.Validator do
          :ok <- validate_all_of(schema, value, opts),
          :ok <- validate_any_of(schema, value, opts),
          :ok <- validate_one_of(schema, value, opts),
+         :ok <- validate_const(schema, value),
          do: :ok
   end
 
@@ -184,6 +185,14 @@ defmodule Xema.Validator do
   #
   # Validators
   #
+
+  @spec validate_const(Xema.Schema.t(), any) :: result
+  defp validate_const(%{const: nil}, _value), do: :ok
+
+  defp validate_const(%{const: const}, const), do: :ok
+
+  defp validate_const(%{const: const}, value),
+    do: {:error, %{const: const, value: value}}
 
   @spec enum(Xema.Schema.t(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok

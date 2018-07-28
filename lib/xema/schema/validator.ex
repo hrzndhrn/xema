@@ -16,6 +16,7 @@ defmodule Xema.Schema.Validator do
                   :allow,
                   :any_of,
                   :as,
+                  :const,
                   :definitions,
                   :description,
                   :enum,
