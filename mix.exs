@@ -5,7 +5,7 @@ defmodule Xema.Mixfile do
     [
       app: :xema,
       version: "0.4.0",
-      elixir: "~> 1.6",
+      elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -40,7 +40,7 @@ defmodule Xema.Mixfile do
   defp deps do
     [
       {:cowboy, "~> 2.4", only: :test},
-      {:credo, "~> 0.9", only: [:dev, :test]},
+      {:credo, "~> 0.10", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.9", only: :test},

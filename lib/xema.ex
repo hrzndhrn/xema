@@ -7,102 +7,7 @@ defmodule Xema do
 
   alias Xema.Ref
   alias Xema.Schema
-  alias Xema.Schema.Validator, as: Validator
   alias Xema.SchemaError
-
-  @typedoc """
-  The available type notations.
-  """
-  @type schema_types ::
-          :any
-          | :boolean
-          | :float
-          | :integer
-          | :list
-          | :map
-          | nil
-          | :number
-          | :string
-
-  @schema_types [
-    :any,
-    :boolean,
-    :float,
-    :integer,
-    :list,
-    :map,
-    nil,
-    :number,
-    :string
-  ]
-
-  @typedoc """
-  The available schema keywords.
-  """
-  @type schema_keywords ::
-          :additional_items
-          | :additional_properties
-          | :all_of
-          | :any_of
-          | :definitions
-          | :dependencies
-          | :enum
-          | :exclusive_maximum
-          | :exclusive_minimum
-          | :format
-          | :id
-          | :items
-          | :keys
-          | :max_items
-          | :max_length
-          | :max_properties
-          | :maximum
-          | :min_items
-          | :min_length
-          | :min_properties
-          | :minimum
-          | :multiple_of
-          | :not
-          | :one_of
-          | :pattern
-          | :pattern_properties
-          | :properties
-          | :ref
-          | :required
-          | :unique_items
-
-  @schema_keywords [
-    :additional_items,
-    :additional_properties,
-    :all_of,
-    :any_of,
-    :definitions,
-    :dependencies,
-    :enum,
-    :exclusive_maximum,
-    :exclusive_minimum,
-    :format,
-    :id,
-    :items,
-    :keys,
-    :max_items,
-    :max_length,
-    :max_properties,
-    :maximum,
-    :min_items,
-    :min_length,
-    :min_properties,
-    :minimum,
-    :multiple_of,
-    :not,
-    :one_of,
-    :pattern,
-    :pattern_properties,
-    :properties,
-    :ref,
-    :required,
-    :unique_items
-  ]
 
   @doc """
   This function defines the schemas.
@@ -147,7 +52,7 @@ defmodule Xema do
       {:error, [{2, %{value: 1, minimum: 2}}]}
 
   """
-  @spec new(schema_types | schema_keywords | tuple, keyword) :: Xema.t()
+  @spec new(Schema.t() | Schema.type() | tuple, keyword) :: Xema.t()
   def new(type, keywords)
 
   defp init({type}, []), do: init(type, [])
@@ -155,39 +60,26 @@ defmodule Xema do
   defp init(list, []) when is_list(list) do
     case Keyword.keyword?(list) do
       true -> init(:any, list)
-      false -> multi_type(list, [])
+      false -> schema({list, []}, [])
     end
   end
 
-  defp init(list, keywords) when is_list(list), do: multi_type(list, keywords)
+  defp init(list, keywords) when is_list(list),
+    do: schema({list, keywords}, [])
 
-  defp init({type, keywords}, []), do: init(type, keywords)
+  defp init({type, keywords}, []),
+    do: init(type, keywords)
 
   defp init(tuple, keywords) when is_tuple(tuple),
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
 
-  defp init(bool, [])
-       when is_boolean(bool),
-       do: Schema.new(type: bool)
+  defp init(bool, []) when is_boolean(bool),
+    do: Schema.new(type: bool)
 
-  defp init(type, keywords)
-       when type in @schema_types,
-       do: schema({type, keywords}, [])
-
-  defp init(keyword, keywords)
-       when keyword in @schema_keywords,
-       do: init(:any, [{keyword, keywords}])
-
-  defp multi_type(list, keywords) when is_list(list) do
-    case Enum.all?(list, fn type -> type in @schema_types end) do
-      true ->
-        schema({list, keywords}, [])
-
-      false ->
-        raise(
-          ArgumentError,
-          message: "Invalid type in argument list #{inspect(list)}."
-        )
+  defp init(value, keywords) do
+    case value in Schema.types() do
+      true -> schema({value, keywords}, [])
+      false -> init(:any, [{value, keywords}])
     end
   end
 
@@ -222,39 +114,33 @@ defmodule Xema do
       |> update()
       |> Schema.new()
 
-  defp schema({type, keywords}, _)
-       when type in @schema_types and is_list(keywords) do
-    keywords = Keyword.put(keywords, :type, type)
-
-    case Validator.validate(type, keywords) do
-      :ok -> keywords |> update() |> Schema.new()
-      {:error, msg} -> raise SchemaError, message: msg
-    end
-  end
-
-  defp schema({type, _keywords}, _) when type in @schema_types,
-    do: raise(SchemaError, message: "Wrong argument for #{inspect(type)}.")
-
-  defp schema({keyword, keywords}, _) when keyword in @schema_keywords,
-    do: schema({:any, [{keyword, keywords}]})
-
   defp schema({bool, _}, _)
        when is_boolean(bool),
        do: Schema.new(type: bool)
 
-  defp schema({type, _}, _),
-    do:
-      raise(
-        SchemaError,
-        message: "#{inspect(type)} is not a valid type or keyword."
-      )
+  defp schema({value, keywords}, _) do
+    case value in Schema.types() do
+      true ->
+        unless Keyword.keyword?(keywords) do
+          raise(SchemaError, message: "Wrong argument for #{inspect(value)}.")
+        end
 
+        keywords
+        |> Keyword.put(:type, value)
+        |> update()
+        |> Schema.new()
+
+      false ->
+        schema({:any, [{value, keywords}]})
+    end
+  end
+
+  #
   # function: update/1
   #
   @spec update(keyword) :: keyword
   defp update(keywords) do
     keywords
-    |> Keyword.put_new(:as, keywords[:type])
     |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
     |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
     |> Keyword.update(:all_of, nil, &schemas/1)
@@ -302,11 +188,11 @@ defmodule Xema do
   defp items(items), do: items
 
   defp update_allow(keywords) do
-    case Keyword.get(keywords, :allow, :undefined) do
-      :undefined ->
+    case Keyword.pop(keywords, :allow, :undefined) do
+      {:undefined, keywords} ->
         keywords
 
-      value ->
+      {value, keywords} ->
         Keyword.update!(keywords, :type, fn
           types when is_list(types) -> [value | types]
           type -> [type, value]

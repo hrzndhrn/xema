@@ -29,7 +29,7 @@ iex> Xema.new :any,
 ...>   properties: %{
 ...>     num: {:ref, "#/int"}
 ...>   }
-** (Xema.SchemaError) Keywords [:int] are not supported by :any.
+** (Xema.SchemaError) :int is not a valid keyword.
 ```
 
 The correct schema would be.
