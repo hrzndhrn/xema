@@ -180,11 +180,11 @@ defmodule Xema.Schema do
 
   @spec validate_type!(keyword) :: keyword
   defp validate_type!(opts) when is_list(opts) do
-    with {:ok, type} <- Keyword.fetch(opts, :type),
+    with {:ok, type} <- fetch_type(opts),
          :ok <- validate_type(type) do
       opts
     else
-      :error ->
+      {:error, :not_exist} ->
         raise(SchemaError, message: "Missing type.")
 
       {:error, types} when is_list(types) ->
@@ -195,8 +195,20 @@ defmodule Xema.Schema do
     end
   end
 
+  # This function exist just to make the dialyzer happy.
+  # See: https://github.com/elixir-lang/elixir/issues/7177
+  @spec fetch_type(keyword) :: {:ok, any} | {:error, :not_exist}
+  defp fetch_type(opts) do
+    case Keyword.fetch(opts, :type) do
+      :error -> {:error, :not_exist}
+      result -> result
+    end
+  end
+
+  @spec validate_type(atom) :: :ok | {:error, atom}
   defp validate_type(type) when type in @types, do: :ok
 
+  @spec validate_type([atom]) :: :ok | {:error, [atom]}
   defp validate_type(types) when is_list(types) do
     types
     |> Enum.map(&validate_type/1)
