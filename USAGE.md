@@ -24,6 +24,7 @@
   * [Size](#map_size)
 * [Multiples Types](#multi)
 * [Allow Additional Types](#allow)
+* [Constants](#const)
 * [Enumerations](#enum)
 * [Negate Schema](#not)
 * [Combine Schemas](#combine)
@@ -714,6 +715,21 @@ iex> Xema.is_valid? schema, nil
 true
 iex> Xema.is_valid? schema, ""
 false
+```
+
+## <a id="const"></a> Constants
+
+`JSON Schema Draft: -/6/7`
+
+This keyword checks if a value is equals to the given `const`.
+
+```Elixir
+iex> schema = Xema.new const: 4711
+%Xema{content: %Xema.Schema{const: 4711, type: :any}}
+iex> Xema.validate schema, 4711
+:ok
+iex> Xema.validate schema, 333
+{:error, %{const: 4711, value: 333}}
 ```
 
 ## <a id="enum"></a> Enumerations
