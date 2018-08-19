@@ -169,9 +169,10 @@ defmodule Xema.Schema do
     struct!(Schema, opts |> validate_type!() |> update())
   rescue
     e in KeyError ->
-      raise(
+      reraise(
         SchemaError,
-        message: "#{inspect(e.key)} is not a valid keyword."
+        [message: "#{inspect(e.key)} is not a valid keyword."],
+        __STACKTRACE__
       )
   end
 
