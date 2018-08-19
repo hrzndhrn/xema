@@ -64,19 +64,17 @@ defmodule Xema do
     end
   end
 
-  defp init(list, keywords) when is_list(list), do: schema({list, keywords}, [])
+  defp init(list, keywords) when is_list(list),
+    do: schema({list, keywords}, [])
 
-  defp init({type, keywords}, []), do: init(type, keywords)
+  defp init({type, keywords}, []),
+    do: init(type, keywords)
 
   defp init(tuple, keywords) when is_tuple(tuple),
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
 
-  defp init(bool, [])
-       when is_boolean(bool),
-       do: Schema.new(type: bool)
-
-  defp init(types, keywords) when is_list(types),
-    do: schema({types, keywords}, [])
+  defp init(bool, []) when is_boolean(bool),
+    do: Schema.new(type: bool)
 
   defp init(value, keywords) do
     case value in Schema.types() do
