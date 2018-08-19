@@ -4,7 +4,7 @@ defmodule Xema.MultiTypeTest do
   import Xema, only: [validate: 2]
 
   test "&new/1 called with a wrong type list raised an exception" do
-    assert_raise ArgumentError, fn ->
+    assert_raise Xema.SchemaError, "Invalid types [:foo].", fn ->
       Xema.new([:string, :foo])
     end
   end

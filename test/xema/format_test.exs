@@ -3,16 +3,6 @@ defmodule FormatTest do
 
   import Xema, only: [validate: 2]
 
-  alias Xema.SchemaError
-
-  test "returns error tuple for unsupported format" do
-    expected = "No support for semantic validation of :foo."
-
-    assert_raise SchemaError, expected, fn ->
-      Xema.new(:format, :foo) == :a
-    end
-  end
-
   describe "validation of date-time strings" do
     setup do
       %{schema: Xema.new(:format, :date_time)}
