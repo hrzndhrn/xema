@@ -22,6 +22,8 @@ defmodule Xema.Schema do
   * `additional_items` disallow additional items, if set to false. The keyword
     can also contain a schema to specify the type of additional items.
   * `additional_properties` disallow additional properties, if set to true.
+  * 'all_of' a list of schemas they must all be valid.
+  * 'any_of' a list of schemas with any valid schema.
   * `const` specifies a constant.
   * `definitions` contains schemas for reuse.
   * `dependencies` allows the schema of the map to change based on the presence
@@ -46,6 +48,7 @@ defmodule Xema.Schema do
   * `minimum` the minimum value.
   * `multiple_of` is a number greater 0. The value has to be a multiple of this
     number.
+  * `not` negates the given schema
   * `one_of` the given data must be valid against exactly one of the given
     subschemas.
   * `pattern_properties` specifies schemas for properties by patterns
@@ -61,6 +64,8 @@ defmodule Xema.Schema do
   @type t :: %Schema{
           additional_items: Xema.t() | Schema.t() | boolean | nil,
           additional_properties: map | boolean | nil,
+          all_of: [Schema.t()] | nil,
+          any_of: [Schema.t()] | nil,
           const: any,
           definitions: map,
           dependencies: list | map | nil,
@@ -81,6 +86,8 @@ defmodule Xema.Schema do
           min_properties: pos_integer | nil,
           minimum: number | nil,
           multiple_of: number | nil,
+          not: Schema.t() | nil,
+          one_of: [Schema.t()] | nil,
           pattern: Regex.t() | nil,
           pattern_properties: map | nil,
           properties: map | nil,
