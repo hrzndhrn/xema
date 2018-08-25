@@ -7,8 +7,7 @@ defmodule Draft6.AdditionalPropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
+          Xema.new(:any,
             additional_properties: false,
             pattern_properties: %{"^v": :any},
             properties: %{bar: :any, foo: :any}
@@ -51,8 +50,7 @@ defmodule Draft6.AdditionalPropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
+          Xema.new(:any,
             additional_properties: false,
             pattern_properties: %{"^á": :any}
           )
@@ -74,8 +72,7 @@ defmodule Draft6.AdditionalPropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
+          Xema.new(:any,
             additional_properties: :boolean,
             properties: %{bar: :any, foo: :any}
           )

@@ -108,11 +108,7 @@ defmodule Draft4.Optional.BignumTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
-            exclusive_minimum: true,
-            minimum: -9.727837981879871e26
-          )
+          Xema.new(:any, exclusive_minimum: true, minimum: -9.727837981879871e26)
       }
     end
 

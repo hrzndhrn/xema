@@ -43,8 +43,7 @@ defmodule Draft4.PropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
+          Xema.new(:any,
             additional_properties: :integer,
             pattern_properties: %{"f.o": {:min_items, 2}},
             properties: %{bar: :list, foo: {:list, [max_items: 3]}}

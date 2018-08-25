@@ -105,6 +105,7 @@ defmodule Xema.Validator do
          :ok <- max_items(schema, value),
          :ok <- items(schema, value, opts),
          :ok <- unique(schema, value),
+         :ok <- validate_contains(schema, value),
          do: :ok
   end
 
@@ -189,10 +190,27 @@ defmodule Xema.Validator do
   @spec validate_const(Xema.Schema.t(), any) :: result
   defp validate_const(%{const: nil}, _value), do: :ok
 
+  defp validate_const(%{const: :__nil__}, nil), do: :ok
+
+  defp validate_const(%{const: :__nil__}, value),
+    do: {:error, %{const: nil, value: value}}
+
   defp validate_const(%{const: const}, const), do: :ok
 
   defp validate_const(%{const: const}, value),
     do: {:error, %{const: const, value: value}}
+
+  @spec validate_contains(Xema.t() | Schema.t(), list) :: result
+  defp validate_contains(%{contains: nil}, _list), do: :ok
+
+  defp validate_contains(%{contains: schema}, list) do
+    list
+    |> Enum.any?(fn value -> Xema.is_valid?(schema, value) end)
+    |> case do
+      true -> :ok
+      false -> {:error, %{value: list, contains: schema}}
+    end
+  end
 
   @spec enum(Xema.Schema.t(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok

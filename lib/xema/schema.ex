@@ -25,6 +25,7 @@ defmodule Xema.Schema do
   * 'all_of' a list of schemas they must all be valid.
   * 'any_of' a list of schemas with any valid schema.
   * `const` specifies a constant.
+  * `contains` validates a list whether any item is valid for the given schema.
   * `definitions` contains schemas for reuse.
   * `dependencies` allows the schema of the map to change based on the presence
     of certain special properties
@@ -67,6 +68,7 @@ defmodule Xema.Schema do
           all_of: [Schema.t()] | nil,
           any_of: [Schema.t()] | nil,
           const: any,
+          contains: Xema.t() | Schema.t(),
           definitions: map,
           dependencies: list | map | nil,
           description: String.t() | nil,
@@ -105,6 +107,7 @@ defmodule Xema.Schema do
     :all_of,
     :any_of,
     :const,
+    :contains,
     :definitions,
     :dependencies,
     :description,

@@ -115,6 +115,12 @@ defmodule Xema.ToStringTest do
       %{"bar" => true, "foo" => false}
       """)
     end
+
+    test "const nil" do
+      assert_to_string("""
+      :const, nil
+      """)
+    end
   end
 
   describe "Xema.to_string format :data" do

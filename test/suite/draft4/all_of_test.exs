@@ -7,8 +7,7 @@ defmodule Draft4.AllOfTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :all_of,
+          Xema.new(:all_of,
             any: [properties: %{bar: :integer}, required: ["bar"]],
             any: [properties: %{foo: :string}, required: ["foo"]]
           )
@@ -40,8 +39,7 @@ defmodule Draft4.AllOfTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
+          Xema.new(:any,
             all_of: [
               any: [properties: %{foo: :string}, required: ["foo"]],
               any: [properties: %{baz: nil}, required: ["baz"]]

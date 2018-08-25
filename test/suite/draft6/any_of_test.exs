@@ -87,8 +87,7 @@ defmodule Draft6.AnyOfTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any_of,
+          Xema.new(:any_of,
             any: [properties: %{bar: :integer}, required: ["bar"]],
             any: [properties: %{foo: :string}, required: ["foo"]]
           )

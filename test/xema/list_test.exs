@@ -221,4 +221,50 @@ defmodule Xema.ListTest do
                {:error, [{2, %{type: :string, value: 13}}]}
     end
   end
+
+  describe "validate/2 list contains" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :list,
+            contains: [minimum: 4]
+          )
+      }
+    end
+
+    test "an element has a value of minium 4", %{schema: schema} do
+      assert validate(schema, [2, 3, 4]) == :ok
+    end
+
+    test "no element of minimum 4", %{schema: schema} do
+      assert validate(schema, [1, 2, 3]) ==
+               {:error,
+                %{value: [1, 2, 3], contains: Xema.new(minimum: 4).content}}
+    end
+  end
+
+  describe "validate/2 list contains (Xema)" do
+    setup do
+      minimum = Xema.new(minimum: 4)
+
+      %{
+        schema:
+          Xema.new(
+            :list,
+            contains: minimum
+          )
+      }
+    end
+
+    test "an element has a value of minium 4", %{schema: schema} do
+      assert validate(schema, [2, 3, 4]) == :ok
+    end
+
+    test "no element of minimum 4", %{schema: schema} do
+      assert validate(schema, [1, 2, 3]) ==
+               {:error,
+                %{value: [1, 2, 3], contains: Xema.new(minimum: 4).content}}
+    end
+  end
 end

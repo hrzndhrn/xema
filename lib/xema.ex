@@ -86,7 +86,7 @@ defmodule Xema do
   #
   # function: schema
   #
-  @spec schema(any, keyword) :: Xema.Schema.t()
+  @spec schema(any, keyword) :: Schema.t()
   defp schema(type, keywords \\ [])
 
   defp schema(%{__struct__: _, content: schema}, _), do: schema
@@ -122,7 +122,12 @@ defmodule Xema do
     case value in Schema.types() do
       true ->
         unless Keyword.keyword?(keywords) do
-          raise(SchemaError, message: "Wrong argument for #{inspect(value)}.")
+          raise(SchemaError,
+            message:
+              "Wrong argument for #{inspect(value)}. Argument: #{
+                inspect(keywords)
+              }"
+          )
         end
 
         keywords
@@ -145,6 +150,8 @@ defmodule Xema do
     |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
     |> Keyword.update(:all_of, nil, &schemas/1)
     |> Keyword.update(:any_of, nil, &schemas/1)
+    |> Keyword.update(:const, nil, &mark_nil/1)
+    |> Keyword.update(:contains, nil, &schema/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
     |> Keyword.update(:items, nil, &items/1)
     |> Keyword.update(:not, nil, &schema/1)
@@ -155,6 +162,11 @@ defmodule Xema do
     |> Keyword.update(:required, nil, &MapSet.new/1)
     |> update_allow()
   end
+
+  @spec mark_nil(any) :: any | :__nil__
+  defp mark_nil(nil), do: :__nil__
+
+  defp mark_nil(value), do: value
 
   @spec schemas(list) :: list
   defp schemas(list), do: Enum.map(list, fn schema -> schema(schema) end)
@@ -174,7 +186,7 @@ defmodule Xema do
         {key, dep} -> {key, schema(dep)}
       end)
 
-  @spec bool_or_schema(boolean | atom) :: boolean | Xema.Schema.t()
+  @spec bool_or_schema(boolean | atom) :: boolean | Schema.t()
   defp bool_or_schema(bool) when is_boolean(bool), do: bool
 
   defp bool_or_schema(schema), do: schema(schema)
@@ -276,6 +288,8 @@ defmodule Xema do
       |> Enum.map(&key_value_to_string/1)
       |> Enum.join(", ")
       |> wrap("%{", "}")
+
+  defp value_to_string(:__nil__), do: "nil"
 
   defp value_to_string(value), do: inspect(value)
 

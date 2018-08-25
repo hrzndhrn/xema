@@ -98,8 +98,7 @@ defmodule Draft6.OneOfTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :one_of,
+          Xema.new(:one_of,
             any: [properties: %{bar: :integer}, required: ["bar"]],
             any: [properties: %{foo: :string}, required: ["foo"]]
           )
