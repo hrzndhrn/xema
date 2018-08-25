@@ -44,8 +44,7 @@ defmodule Draft4.EnumTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :map,
+          Xema.new(:map,
             properties: %{bar: {:enum, ["bar"]}, foo: {:enum, ["foo"]}},
             required: ["bar"]
           )

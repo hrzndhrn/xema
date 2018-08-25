@@ -190,6 +190,11 @@ defmodule Xema.Validator do
   @spec validate_const(Xema.Schema.t(), any) :: result
   defp validate_const(%{const: nil}, _value), do: :ok
 
+  defp validate_const(%{const: :__nil__}, nil), do: :ok
+
+  defp validate_const(%{const: :__nil__}, value),
+    do: {:error, %{const: nil, value: value}}
+
   defp validate_const(%{const: const}, const), do: :ok
 
   defp validate_const(%{const: const}, value),

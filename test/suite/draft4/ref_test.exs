@@ -7,8 +7,7 @@ defmodule Draft4.RefTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
+          Xema.new(:any,
             additional_properties: false,
             properties: %{foo: {:ref, "#"}}
           )
@@ -78,8 +77,7 @@ defmodule Draft4.RefTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :any,
+          Xema.new(:any,
             definitions: %{
               a: :integer,
               b: {:ref, "#/definitions/a"},
@@ -121,8 +119,7 @@ defmodule Draft4.RefTest do
     setup do
       %{
         schema:
-          Xema.new(
-            :map,
+          Xema.new(:map,
             definitions: %{
               node:
                 {:map,
