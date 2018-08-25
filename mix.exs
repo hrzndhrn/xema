@@ -25,7 +25,9 @@ defmodule Xema.Mixfile do
         extras: ["XEMA_README.md", "USAGE.md", "UNSUPPORTED_FEATURES.md"],
         main: "xema_readme"
       ],
-      dialyzer: [ignore_warnings: "dialyzer.ignore-warnings"]
+      dialyzer: [
+        ignore_warnings: "dialyzer.ignore-warnings"
+      ]
     ]
   end
 

@@ -122,7 +122,12 @@ defmodule Xema do
     case value in Schema.types() do
       true ->
         unless Keyword.keyword?(keywords) do
-          raise(SchemaError, message: "Wrong argument for #{inspect(value)}.")
+          raise(SchemaError,
+            message:
+              "Wrong argument for #{inspect(value)}. Argument: #{
+                inspect(keywords)
+              }"
+          )
         end
 
         keywords
@@ -145,6 +150,7 @@ defmodule Xema do
     |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
     |> Keyword.update(:all_of, nil, &schemas/1)
     |> Keyword.update(:any_of, nil, &schemas/1)
+    |> Keyword.update(:contains, nil, &schema/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
     |> Keyword.update(:items, nil, &items/1)
     |> Keyword.update(:not, nil, &schema/1)
