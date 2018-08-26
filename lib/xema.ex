@@ -150,7 +150,6 @@ defmodule Xema do
     |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
     |> Keyword.update(:all_of, nil, &schemas/1)
     |> Keyword.update(:any_of, nil, &schemas/1)
-    |> Keyword.update(:const, nil, &mark_nil/1)
     |> Keyword.update(:contains, nil, &schema/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
     |> Keyword.update(:items, nil, &items/1)
@@ -163,10 +162,6 @@ defmodule Xema do
     |> update_allow()
   end
 
-  @spec mark_nil(any) :: any | :__nil__
-  defp mark_nil(nil), do: :__nil__
-
-  defp mark_nil(value), do: value
 
   @spec schemas(list) :: list
   defp schemas(list), do: Enum.map(list, fn schema -> schema(schema) end)

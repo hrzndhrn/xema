@@ -239,9 +239,15 @@ defmodule Xema.Schema do
   defp update(opts),
     do:
       opts
+      |> Keyword.update(:const, nil, &mark_nil/1)
       |> Keyword.update(:pattern, nil, &pattern/1)
       |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
       |> Keyword.update(:ref, nil, &ref/1)
+
+  @spec mark_nil(any) :: any | :__nil__
+  defp mark_nil(nil), do: :__nil__
+
+  defp mark_nil(value), do: value
 
   @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
   defp pattern(string) when is_binary(string), do: Regex.compile!(string)
