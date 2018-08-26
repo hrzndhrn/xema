@@ -162,7 +162,6 @@ defmodule Xema do
     |> update_allow()
   end
 
-
   @spec schemas(list) :: list
   defp schemas(list), do: Enum.map(list, fn schema -> schema(schema) end)
 
