@@ -602,4 +602,55 @@ defmodule Xema.MapTest do
                {:error, %{dependencies: %{penny: :pound}}}
     end
   end
+
+  describe "validate/2 property names" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            :map,
+            property_names: [min_length: 3]
+          )
+      }
+    end
+
+    test "with valid keys", %{schema: schema} do
+      data = %{
+        foo: 1,
+        bar: 2
+      }
+
+      assert validate(schema, data) == :ok
+    end
+
+    test "with invalid atom keys", %{schema: schema} do
+      data = %{
+        foo: 1,
+        a: 2,
+        b: 3
+      }
+
+      assert validate(schema, data) ==
+               {:error,
+                %{
+                  value: [:a, :b],
+                  property_names: Xema.new(min_length: 3).content
+                }}
+    end
+
+    test "with invalid string keys", %{schema: schema} do
+      data = %{
+        "foo" => 1,
+        "a" => 2,
+        "b" => 3
+      }
+
+      assert validate(schema, data) ==
+               {:error,
+                %{
+                  value: ["a", "b"],
+                  property_names: Xema.new(min_length: 3).content
+                }}
+    end
+  end
 end

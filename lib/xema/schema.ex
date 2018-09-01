@@ -55,6 +55,7 @@ defmodule Xema.Schema do
   * `pattern_properties` specifies schemas for properties by patterns
   * `pattern` restrict a string to a particular regular expression.
   * `properties` specifies schemas for properties.
+  * `property_names` a schema to check property names.
   * `ref` a reference to a schema.
   * `required` contains a set of required properties.
   * `schema` declares the used schema.
@@ -93,6 +94,7 @@ defmodule Xema.Schema do
           pattern: Regex.t() | nil,
           pattern_properties: map | nil,
           properties: map | nil,
+          property_names: Xema.t() | Schema.t() | nil,
           ref: Ref.t() | nil,
           required: MapSet.t() | nil,
           schema: String.t() | nil,
@@ -132,6 +134,7 @@ defmodule Xema.Schema do
     :pattern,
     :pattern_properties,
     :properties,
+    :property_names,
     :ref,
     :required,
     :schema,

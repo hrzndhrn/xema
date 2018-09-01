@@ -157,6 +157,7 @@ defmodule Xema do
     |> Keyword.update(:one_of, nil, &schemas/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:properties, nil, &properties/1)
+    |> Keyword.update(:property_names, nil, &schema/1)
     |> Keyword.update(:definitions, nil, &properties/1)
     |> Keyword.update(:required, nil, &MapSet.new/1)
     |> update_allow()

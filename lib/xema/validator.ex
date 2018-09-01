@@ -113,6 +113,7 @@ defmodule Xema.Validator do
     with :ok <- size(schema, value),
          :ok <- keys(schema, value),
          :ok <- required(schema, value),
+         :ok <- property_names(schema, value),
          :ok <- dependencies(schema, value, opts),
          {:ok, patts_rest} <- patterns(schema, value, opts),
          {:ok, props_rest} <- properties(schema, value, opts),
@@ -209,6 +210,23 @@ defmodule Xema.Validator do
     |> case do
       true -> :ok
       false -> {:error, %{value: list, contains: schema}}
+    end
+  end
+
+  @spec property_names(Xema.t() | Schema.t(), map) :: result
+  defp property_names(%{property_names: nil}, _map), do: :ok
+
+  defp property_names(%{property_names: schema}, map) do
+    map
+    |> Map.keys()
+    |> Enum.filter(fn
+      key when is_binary(key) -> not Xema.is_valid?(schema, key)
+      key when is_atom(key) -> not Xema.is_valid?(schema, Atom.to_string(key))
+      _ -> false
+    end)
+    |> case do
+      [] -> :ok
+      keys -> {:error, %{value: keys, property_names: schema}}
     end
   end
 
