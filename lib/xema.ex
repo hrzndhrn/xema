@@ -246,6 +246,7 @@ defmodule Xema do
 
   defp do_schema_to_string(:any, schema, true) do
     case Map.to_list(schema) do
+      [{:ref, ref}] -> ~s(:ref, "#{Ref.get_pointer(ref)}")
       [{key, value}] -> "#{inspect(key)}, #{value_to_string(value)}"
       _ -> ":any, #{schema_to_string(schema)}"
     end

@@ -84,7 +84,7 @@ defmodule Xema.RefRemoteTest do
         schema:
           Xema.new(
             :ref,
-            "http://localhost:1234/subSchemas.exon#/definitions/int"
+            "http://localhost:1234/sub_schemas.exon#/definitions/int"
           )
       }
     end
@@ -104,7 +104,7 @@ defmodule Xema.RefRemoteTest do
         schema:
           Xema.new(
             :ref,
-            "http://localhost:1234/subSchemas.exon#/definitions/refToInt"
+            "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"
           )
       }
     end
@@ -118,6 +118,7 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
+  @tag :only
   describe "base URI change - change folder" do
     setup do
       %{
@@ -154,7 +155,7 @@ defmodule Xema.RefRemoteTest do
             :map,
             id: "http://localhost:1234/object",
             properties: %{
-              name: {:ref, "name.exon#/definitions/or_nil"}
+              name: {:ref, "xema_name.exon#/definitions/or_nil"}
             }
           )
       }
@@ -184,7 +185,7 @@ defmodule Xema.RefRemoteTest do
             :map,
             id: "http://localhost:1234",
             properties: %{
-              name: {:ref, "name.exon#/definitions/or_nil"}
+              name: {:ref, "xema_name.exon#/definitions/or_nil"}
             }
           )
       }

@@ -900,8 +900,8 @@ You can use the schema above as follow.
 iex> schema = Xema.new :map,
 ...>   id: "http://localhost:1234",
 ...>   properties: %{
-...>     name: {:ref, "name.exon#/definitions/or_nil"},
-...>     str: {:ref, "name.exon"}
+...>     name: {:ref, "xema_name.exon#/definitions/or_nil"},
+...>     str: {:ref, "xema_name.exon"}
 ...>   }
 ...>
 ...> Xema.validate schema, %{str: "foo"}
@@ -972,7 +972,7 @@ end
 The function `get/1` will be called by `Xema` and expects a `binary`. In the
 example in the section
 "[Structuring schemas in multiple files](#multiple-files)" `get/1` gets the
-`binary` `"http://localhost:1234/name.exon"`.
+`binary` `"http://localhost:1234/xema_name.exon"`.
 
 **Note!** This resolver use `Code.eval_string/1` and eval is always evil.
 

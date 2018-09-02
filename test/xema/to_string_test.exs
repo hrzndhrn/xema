@@ -121,6 +121,11 @@ defmodule Xema.ToStringTest do
       :const, nil
       """)
     end
+
+    @tag :only
+    test "ref" do
+      assert_to_string(~s(:ref, "http://localhost:1234/integer.exon"))
+    end
   end
 
   describe "Xema.to_string format :data" do
