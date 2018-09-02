@@ -13,6 +13,7 @@ defmodule Xema.Format do
     :uri_fragment,
     :uri_path,
     :uri_query,
+    :uri_reference,
     :uri_userinfo
   ]
 
@@ -27,6 +28,7 @@ defmodule Xema.Format do
           | :uri_fragment
           | :uri_path
           | :uri_query
+          | :uri_reference
           | :uri_userinfo
 
   defmacro __using__(_opts) do
@@ -263,10 +265,23 @@ defmodule Xema.Format do
 
   def is_uri?(%URI{scheme: nil}), do: false
 
-  def is_uri?(%URI{scheme: "mailto", path: path}), do: is_email?(path)
+  def is_uri?(%URI{} = uri), do: do_is_uri?(uri)
+
+  def is_uri?(_), do: false
+
+  @doc """
+  Checks if the value is a valid uri reference.
+  """
+  @spec is_uri_reference?(any) :: boolean
+  def is_uri_reference?(string) when is_binary(string),
+    do: do_is_uri?(URI.parse(string))
+
+  def is_uri_reference?(_), do: false
+
+  defp do_is_uri?(%URI{scheme: "mailto", path: path}), do: is_email?(path)
 
   # credo:disable-for-next-line
-  def is_uri?(%URI{} = uri) do
+  defp do_is_uri?(%URI{} = uri) do
     (is_nil(uri.host) || is_host?(uri.host)) &&
       (is_nil(uri.userinfo) || is_uri_userinfo?(uri.userinfo)) &&
       (is_nil(uri.path) || is_uri_path?(uri.path)) &&
