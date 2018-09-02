@@ -157,6 +157,7 @@ defmodule Xema do
     |> Keyword.update(:one_of, nil, &schemas/1)
     |> Keyword.update(:pattern_properties, nil, &properties/1)
     |> Keyword.update(:properties, nil, &properties/1)
+    |> Keyword.update(:property_names, nil, &schema/1)
     |> Keyword.update(:definitions, nil, &properties/1)
     |> Keyword.update(:required, nil, &MapSet.new/1)
     |> update_allow()
@@ -245,6 +246,7 @@ defmodule Xema do
 
   defp do_schema_to_string(:any, schema, true) do
     case Map.to_list(schema) do
+      [{:ref, ref}] -> ~s(:ref, "#{Ref.get_pointer(ref)}")
       [{key, value}] -> "#{inspect(key)}, #{value_to_string(value)}"
       _ -> ":any, #{schema_to_string(schema)}"
     end
