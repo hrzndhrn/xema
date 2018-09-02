@@ -14,6 +14,7 @@ defmodule Xema.Format do
     :uri_path,
     :uri_query,
     :uri_reference,
+    :uri_template,
     :uri_userinfo
   ]
 
@@ -29,6 +30,7 @@ defmodule Xema.Format do
           | :uri_path
           | :uri_query
           | :uri_reference
+          | :uri_template
           | :uri_userinfo
 
   defmacro __using__(_opts) do
@@ -261,33 +263,48 @@ defmodule Xema.Format do
   Wikipedia: [Uniform Resource Identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
   """
   @spec is_uri?(any) :: boolean
-  def is_uri?(string) when is_binary(string), do: is_uri?(URI.parse(string))
-
-  def is_uri?(%URI{scheme: nil}), do: false
-
-  def is_uri?(%URI{} = uri), do: do_is_uri?(uri)
-
-  def is_uri?(_), do: false
+  def is_uri?(string), do: do_is_uri?(string, :uri)
 
   @doc """
   Checks if the value is a valid uri reference.
   """
   @spec is_uri_reference?(any) :: boolean
-  def is_uri_reference?(string) when is_binary(string),
-    do: do_is_uri?(URI.parse(string))
+  def is_uri_reference?(string), do: do_is_uri?(string, :uri_reference)
 
-  def is_uri_reference?(_), do: false
+  @doc """
+  Checks if the value is a valid uri template.
+  """
+  def is_uri_template?(string), do: do_is_uri?(string, :uri_template)
 
-  defp do_is_uri?(%URI{scheme: "mailto", path: path}), do: is_email?(path)
+  # do_is_uri?/2 handels:
+  #   * is_uri?
+  #   * is_uri_reference?
+  #   * is_uri_template?
+
+  defp do_is_uri?(string, type) when is_binary(string),
+    do: do_is_uri?(URI.parse(string), type)
+
+  defp do_is_uri?(%URI{scheme: nil}, :uri), do: false
+
+  defp do_is_uri?(%URI{scheme: "mailto", path: path}, _), do: is_email?(path)
 
   # credo:disable-for-next-line
-  defp do_is_uri?(%URI{} = uri) do
+  defp do_is_uri?(%URI{} = uri, :uri_template) do
+    (is_nil(uri.host) || is_host?(uri.host)) &&
+      (is_nil(uri.userinfo) || is_uri_userinfo?(uri.userinfo)) &&
+      (is_nil(uri.path) || is_uri_template_path?(uri.path))
+  end
+
+  # credo:disable-for-next-line
+  defp do_is_uri?(%URI{} = uri, _) do
     (is_nil(uri.host) || is_host?(uri.host)) &&
       (is_nil(uri.userinfo) || is_uri_userinfo?(uri.userinfo)) &&
       (is_nil(uri.path) || is_uri_path?(uri.path)) &&
       (is_nil(uri.query) || is_uri_query?(uri.query)) &&
       (is_nil(uri.fragment) || is_uri_fragment?(uri.fragment))
   end
+
+  defp do_is_uri?(_, _), do: false
 
   @doc """
   Checks if the value is a valid uri user info.
@@ -337,6 +354,41 @@ defmodule Xema.Format do
   end
 
   def is_uri_path?(_), do: false
+
+  @doc """
+  Checks if the value is a valid uri path.
+  """
+  @spec is_uri_template_path?(any) :: boolean
+  def is_uri_template_path?(string) when is_binary(string) do
+    regex = ~r/
+      (?(DEFINE)
+        (?<unreserved>  [-._~[:alnum:]] )
+        (?<sub_delims>  [!$&'()*+,;=] )
+        (?<pct_encoded> %[[:xdigit:]][[:xdigit:]] )
+        (?<pchar>       @|(?&unreserved)|(?&pct_encoded)|(?&sub_delims)
+                        |(?&template) )
+        (?<seg_nz_nc>   (?&pchar)+ )
+        (?<seg_nz>      (?::|(?&pchar))+ )
+        (?<seg>         (?::|(?&pchar))* )
+        (?<rootless>    (?&seg_nz)(?:\/(?&seg))* )
+        (?<noscheme>    (?&seg_nz_nc)(?:\/(?&seg)*) )
+        (?<absolute>    \/(?:(?&seg_nz)(?:\/(?&seg))*)? )
+        (?<abempty>     (?:\/(?&seg))* )
+        (?<tmpl_char>   ([_[:alnum:]])|(?&pct_encoded) )
+        (?<operator>    [+#.,;?&=@!|\/] )
+        (?<modifier>    (?&prefix)|\* )
+        (?<prefix>      :\d+ )
+        (?<var>         (?&tmpl_char)+(?&modifier)? )
+        (?<var_list>    (?&var)(?:,(?&var))* )
+        (?<template>    (?:\{)(?&operator)?(?&var_list)\} )
+      )
+      ^(?:(?&rootless)|(?&noscheme)|(?&absolute)|(?&abempty))$
+    /x
+
+    Regex.match?(regex, string)
+  end
+
+  def is_uri_template_path?(_), do: false
 
   @doc """
   Checks if the value is a valid uri qurey.
