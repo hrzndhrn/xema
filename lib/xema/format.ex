@@ -9,6 +9,7 @@ defmodule Xema.Format do
     :hostname,
     :ipv4,
     :ipv6,
+    :json_pointer,
     :uri,
     :uri_fragment,
     :uri_path,
@@ -25,6 +26,7 @@ defmodule Xema.Format do
           | :hostname
           | :ipv4
           | :ipv6
+          | :json_pointer
           | :uri
           | :uri_fragment
           | :uri_path
@@ -235,6 +237,33 @@ defmodule Xema.Format do
   end
 
   def is_ipv6?(_), do: true
+
+  #
+  # JSON Pointer
+  #
+
+  @json_pointer ~r/
+      (?(DEFINE)
+        (?<json_pointer> (?: \/ (?&reference_token))*      )
+        (?<reference_token> (?:(?&unescaped)|(?&escaped))* )
+        (?<unescaped> [^~\/]                               )
+        (?<escaped> ~[01]                                  )
+      )
+      ^(?&json_pointer)$
+    /x
+
+  @doc """
+  Checks if the value is a valid JSON poiner.
+  """
+  @spec is_json_pointer?(any) :: boolean
+  def is_json_pointer?(string) when is_binary(string),
+    do: Regex.match?(@json_pointer, string)
+
+  def is_json_pointer?(_), do: false
+
+  #
+  # URI
+  #
 
   @doc """
   Checks if the value is a valid uri.
