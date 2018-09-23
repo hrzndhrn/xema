@@ -26,10 +26,13 @@ defmodule Xema.Schema do
   * 'any_of' a list of schemas with any valid schema.
   * `const` specifies a constant.
   * `contains` validates a list whether any item is valid for the given schema.
+  * `data` none schema data.
+  * `default` this keyword can be used to supply a default JSON value.
   * `definitions` contains schemas for reuse.
   * `dependencies` allows the schema of the map to change based on the presence
     of certain special properties
   * `description` of the schema.
+  * `else` see `if`, `then`, `else`.
   * `enum` specifies an enumeration
   * `exclusive_maximum` is a boolean. When true, it indicates that the range
     excludes the maximum value.
@@ -37,6 +40,8 @@ defmodule Xema.Schema do
     excludes the minimum value.
   * `format` semantic validation.
   * `id` a unique identifier.
+  * `if`, `then`, `else`: These keywords work together to implement conditional
+    application of a subschema based on the outcome of another subschema.
   * `items` specifies the type(s) of the items.
   * `keys` could be `:atoms` or `:strings`.
   * `max_items` the maximum length of list.
@@ -60,6 +65,7 @@ defmodule Xema.Schema do
   * `required` contains a set of required properties.
   * `schema` declares the used schema.
   * `title` of the schema.
+  * `then` see `if`, `then`, `else`
   * `type` specifies the data type for a schema.
   * `unique_items` disallow duplicate items, if set to true.
   """
@@ -70,14 +76,19 @@ defmodule Xema.Schema do
           any_of: [Schema.t()] | nil,
           const: any,
           contains: Xema.t() | Schema.t(),
+          data: any,
+          default: any,
           definitions: map,
           dependencies: list | map | nil,
           description: String.t() | nil,
+          else: Xema.t() | Schema.t() | nil,
           enum: list | nil,
+          examples: [any],
           exclusive_maximum: boolean | number | nil,
           exclusive_minimum: boolean | number | nil,
           format: atom | nil,
           id: String.t() | nil,
+          if: Xema.t() | Schema.t() | nil,
           items: list | Xema.t() | Schema.t() | nil,
           keys: atom | nil,
           max_items: pos_integer | nil,
@@ -98,6 +109,7 @@ defmodule Xema.Schema do
           ref: Ref.t() | nil,
           required: MapSet.t() | nil,
           schema: String.t() | nil,
+          then: Xema.t() | Schema.t() | nil,
           title: String.t() | nil,
           type: type | [type],
           unique_items: boolean | nil
@@ -110,14 +122,19 @@ defmodule Xema.Schema do
     :any_of,
     :const,
     :contains,
+    :data,
+    :default,
     :definitions,
     :dependencies,
     :description,
+    :else,
     :enum,
+    :examples,
     :exclusive_maximum,
     :exclusive_minimum,
     :format,
     :id,
+    :if,
     :items,
     :keys,
     :max_items,
@@ -138,6 +155,7 @@ defmodule Xema.Schema do
     :ref,
     :required,
     :schema,
+    :then,
     :title,
     :type,
     :unique_items

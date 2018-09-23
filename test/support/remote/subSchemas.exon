@@ -1,0 +1,4 @@
+%{
+  integer: :integer,
+  refToInteger: {:ref, "#/integer"}
+}

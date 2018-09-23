@@ -19,6 +19,25 @@ defmodule Draft4.RefRemoteTest do
     end
   end
 
+  describe "ref within remote ref" do
+    setup do
+      %{
+        schema:
+          Xema.new(:ref, "http://localhost:1234/subSchemas.exon#/refToInteger")
+      }
+    end
+
+    test "ref within ref valid", %{schema: schema} do
+      data = 1
+      assert is_valid?(schema, data)
+    end
+
+    test "ref within ref invalid", %{schema: schema} do
+      data = "a"
+      refute is_valid?(schema, data)
+    end
+  end
+
   describe "base URI change" do
     setup do
       %{

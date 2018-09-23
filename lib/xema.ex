@@ -9,6 +9,8 @@ defmodule Xema do
   alias Xema.Schema
   alias Xema.SchemaError
 
+  @keywords %Schema{} |> Map.keys() |> MapSet.new() |> MapSet.delete(:data)
+
   @doc """
   This function defines the schemas.
 
@@ -75,6 +77,8 @@ defmodule Xema do
 
   defp init(bool, []) when is_boolean(bool),
     do: Schema.new(type: bool)
+
+  defp init(map, []) when is_map(map), do: init(:any, Map.to_list(map))
 
   defp init(value, keywords) do
     case value in Schema.types() do
@@ -152,6 +156,8 @@ defmodule Xema do
     |> Keyword.update(:any_of, nil, &schemas/1)
     |> Keyword.update(:contains, nil, &schema/1)
     |> Keyword.update(:dependencies, nil, &dependencies/1)
+    |> Keyword.update(:else, nil, &schema/1)
+    |> Keyword.update(:if, nil, &schema/1)
     |> Keyword.update(:items, nil, &items/1)
     |> Keyword.update(:not, nil, &schema/1)
     |> Keyword.update(:one_of, nil, &schemas/1)
@@ -160,7 +166,9 @@ defmodule Xema do
     |> Keyword.update(:property_names, nil, &schema/1)
     |> Keyword.update(:definitions, nil, &properties/1)
     |> Keyword.update(:required, nil, &MapSet.new/1)
+    |> Keyword.update(:then, nil, &schema/1)
     |> update_allow()
+    |> update_data()
   end
 
   @spec schemas(list) :: list
@@ -207,6 +215,81 @@ defmodule Xema do
     end
   end
 
+  defp update_data(keywords) do
+    {data, keywords} = do_update_data(keywords)
+
+    case data do
+      data when map_size(data) == 0 ->
+        Keyword.put(keywords, :data, nil)
+
+      data ->
+        Keyword.put(keywords, :data, data)
+    end
+  end
+
+  defp do_update_data(keywords),
+    do:
+      keywords
+      |> diff_keywords()
+      |> Enum.reduce({%{}, keywords}, fn key, {data, keywords} ->
+        {value, keywords} = Keyword.pop(keywords, key)
+        {Map.put(data, key, maybe_schema(value)), keywords}
+      end)
+
+  defp maybe_schema(list) when is_list(list) do
+    case Keyword.keyword?(list) do
+      true ->
+        case has_keyword?(list) do
+          true -> schema(list)
+          false -> list
+        end
+
+      false ->
+        Enum.map(list, &maybe_schema/1)
+    end
+  end
+
+  defp maybe_schema(atom) when is_atom(atom) do
+    case atom in Schema.types() do
+      true -> schema(atom)
+      false -> atom
+    end
+  end
+
+  defp maybe_schema({:ref, str} = ref) when is_binary(str),
+    do: schema(ref)
+
+  defp maybe_schema({atom, list} = tuple)
+       when is_atom(atom) and is_list(list) do
+    case atom in Schema.types() do
+      true -> schema(tuple)
+      false -> tuple
+    end
+  end
+
+  defp maybe_schema(%{__struct__: _} = struct), do: struct
+
+  defp maybe_schema(map) when is_map(map),
+    do: Enum.into(map, %{}, fn {k, v} -> {k, maybe_schema(v)} end)
+
+  defp maybe_schema(value), do: value
+
+  defp diff_keywords(list),
+    do:
+      list
+      |> Keyword.keys()
+      |> MapSet.new()
+      |> MapSet.difference(@keywords)
+      |> MapSet.to_list()
+
+  defp has_keyword?(list),
+    do:
+      list
+      |> Keyword.keys()
+      |> MapSet.new()
+      |> MapSet.disjoint?(@keywords)
+      |> Kernel.not()
+
   #
   # to_string
   #
@@ -238,8 +321,21 @@ defmodule Xema do
     do:
       schema
       |> Enum.sort()
+      |> schema_to_string_data()
       |> Enum.map(&key_value_to_string/1)
       |> Enum.join(", ")
+
+  defp schema_to_string_data(schema) do
+    case Keyword.fetch(schema, :data) do
+      {:ok, data} ->
+        schema
+        |> Keyword.delete(:data)
+        |> Keyword.merge(Map.to_list(data))
+
+      :error ->
+        schema
+    end
+  end
 
   defp do_schema_to_string(type, schema, _root) when schema == %{},
     do: inspect(type)
