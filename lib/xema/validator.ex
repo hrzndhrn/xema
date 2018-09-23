@@ -82,6 +82,7 @@ defmodule Xema.Validator do
          :ok <- validate_any_of(schema, value, opts),
          :ok <- validate_one_of(schema, value, opts),
          :ok <- validate_const(schema, value),
+         :ok <- validate_if_then_else(schema, value),
          do: :ok
   end
 
@@ -210,6 +211,33 @@ defmodule Xema.Validator do
     |> case do
       true -> :ok
       false -> {:error, %{value: list, contains: schema}}
+    end
+  end
+
+  @spec validate_if_then_else(Xema.t() | Schema.t(), any) :: result
+  defp validate_if_then_else(%{if: nil}, _value), do: :ok
+  defp validate_if_then_else(%{then: nil, else: nil}, _value), do: :ok
+
+  defp validate_if_then_else(
+         %{if: schema_if, then: schema_then, else: schema_else},
+         value
+       ) do
+    case Xema.is_valid?(schema_if, value) do
+      true ->
+        validate_if(:then, schema_then, value)
+
+      false ->
+        validate_if(:else, schema_else, value)
+    end
+  end
+
+  @spec validate_if(atom, Schema.t() | nil, any) :: result
+  defp validate_if(_key, nil, _value), do: :ok
+
+  defp validate_if(key, schema, value) do
+    case Xema.validate(schema, value) do
+      :ok -> :ok
+      {:error, reason} -> {:error, Map.new([{key, reason}])}
     end
   end
 

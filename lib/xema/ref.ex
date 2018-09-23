@@ -23,6 +23,10 @@ defmodule Xema.Ref do
             remote: false,
             url: nil
 
+  @keywords %Schema{}
+            |> Map.keys()
+            |> Enum.map(fn key -> Atom.to_string(key) end)
+
   @doc """
   Creates a new reference from the given `pointer`.
 
@@ -139,6 +143,10 @@ defmodule Xema.Ref do
   end
 
   defp do_get([], schema), do: {:ok, schema}
+
+  defp do_get([step | _] = steps, %Schema{} = schema)
+       when not (step in @keywords),
+       do: do_get(steps, schema.data)
 
   defp do_get([step | steps], schema) when is_map(schema) do
     case get_value(schema, decode(step)) do

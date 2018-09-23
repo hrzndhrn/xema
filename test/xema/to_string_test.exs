@@ -122,9 +122,24 @@ defmodule Xema.ToStringTest do
       """)
     end
 
-    @tag :only
     test "ref" do
       assert_to_string(~s(:ref, "http://localhost:1234/integer.exon"))
+    end
+
+    test "data" do
+      assert_to_string("""
+      :any,
+      properties: %{
+        bar: {:ref, "#/zzz/neg"},
+        foo: {:ref, "#/zzz/def/pos"}
+      },
+      zzz: %{
+        def: %{
+          pos: {:integer, minimum: 0}
+        },
+        neg: {:integer, maximum: 0}
+      }
+      """)
     end
   end
 
@@ -139,7 +154,7 @@ defmodule Xema.ToStringTest do
 
   defp assert_to_string(str) do
     str = trim(str)
-    assert str |> trim() |> xema() |> Xema.to_string() == "Xema.new(#{str})"
+    assert str |> xema() |> Xema.to_string() == "Xema.new(#{str})"
   end
 
   defp xema(str) do
@@ -149,5 +164,11 @@ defmodule Xema.ToStringTest do
     end
   end
 
-  defp trim(str), do: str |> String.trim() |> String.replace(~r/\s+/, " ")
+  defp trim(str),
+    do:
+      str
+      |> String.trim()
+      |> String.replace(~r/\s+/, " ")
+      |> String.replace(~r/{\s+/, "{")
+      |> String.replace(~r/\s+}/, "}")
 end

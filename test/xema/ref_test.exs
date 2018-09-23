@@ -120,6 +120,41 @@ defmodule Xema.RefTest do
     end
   end
 
+  describe "schema with ref to custom data" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            properties: %{
+              foo: {:ref, "#/abc/def/pos"},
+              bar: {:ref, "#/abc/neg"}
+            },
+            abc: %{
+              def: %{
+                pos: {:integer, minimum: 0}
+              },
+              neg: {:integer, maximum: 0}
+            }
+          )
+      }
+    end
+
+    test "validate/2 with valid values", %{schema: schema} do
+      assert validate(schema, %{foo: 5, bar: -1}) == :ok
+    end
+
+    test "validate/2 with invalid values", %{schema: schema} do
+      assert validate(schema, %{foo: -1, bar: 1}) ==
+               {:error,
+                %{
+                  properties: %{
+                    bar: %{maximum: 0, value: 1},
+                    foo: %{minimum: 0, value: -1}
+                  }
+                }}
+    end
+  end
+
   describe "schema with ref chain" do
     setup do
       %{
@@ -525,7 +560,6 @@ defmodule Xema.RefTest do
       }
     end
 
-    @tag :only
     test "with valid data", %{schema: schema} do
       assert validate(schema, 1) == :ok
     end
