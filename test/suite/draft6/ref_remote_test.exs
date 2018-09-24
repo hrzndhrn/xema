@@ -85,6 +85,38 @@ defmodule Draft6.RefRemoteTest do
     end
   end
 
+  describe "base URI change - change folder in subschema" do
+    setup do
+      %{
+        schema:
+          Xema.new(:map,
+            definitions: %{
+              baz:
+                {:any,
+                 [
+                   definitions: %{
+                     bar: {:list, [items: {:ref, "folderInteger.exon"}]}
+                   },
+                   id: "folder/"
+                 ]}
+            },
+            id: "http://localhost:1234/scope_change_defs2.exon",
+            properties: %{list: {:ref, "#/definitions/baz/definitions/bar"}}
+          )
+      }
+    end
+
+    test "number is valid", %{schema: schema} do
+      data = %{list: [1]}
+      assert is_valid?(schema, data)
+    end
+
+    test "string is invalid", %{schema: schema} do
+      data = %{list: ["a"]}
+      refute is_valid?(schema, data)
+    end
+  end
+
   describe "root ref in remote ref" do
     setup do
       %{
