@@ -79,21 +79,21 @@ defmodule Xema.Base do
       defoverridable on_error: 1
 
       defp get_refs(%Schema{} = schema) do
-        refs =
-          reduce(schema, %{id: nil}, fn
-            %Ref{} = ref, acc, _path ->
-              put_ref(acc, ref)
+        schema
+        |> reduce(%{id: nil}, fn
+          %Ref{} = ref, acc, _path ->
+            put_ref(acc, ref)
 
-            %Schema{id: id}, acc, _path when not is_nil(id) ->
-              update_id(acc, id)
+          %Schema{id: id}, acc, _path when not is_nil(id) ->
+            update_id(acc, id)
 
-            _xema, acc, _path ->
-              acc
-          end)
-
-        refs = Map.delete(refs, :id)
-
-        if refs == %{}, do: nil, else: refs
+          _xema, acc, _path ->
+            acc
+        end)
+        |> case do
+          empty when empty == %{} -> nil
+          refs -> Map.delete(refs, :id)
+        end
       end
 
       defp put_ref(%{id: id} = acc, %Ref{remote: true, url: nil} = ref) do
