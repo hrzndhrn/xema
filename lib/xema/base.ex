@@ -109,7 +109,7 @@ defmodule Xema.Base do
       defp put_ref(map, _ref), do: map
 
       defp get_schema(uri) do
-        case resolver_get(uri) do
+        case resolve(uri) do
           {:ok, data} ->
             new(data)
 
@@ -123,6 +123,8 @@ defmodule Xema.Base do
     end
   end
 
+  defp resolve(uri), do:
+    Application.get_env(:xema, :resolver, NoResolver).get(uri)
 
   @spec get_ids(Schema.t()) :: map | nil
   def get_ids(%Schema{} = schema) do
@@ -166,6 +168,4 @@ defmodule Xema.Base do
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 
-  def resolver_get(uri), do:
-    Application.get_env(:xema, :resolver, NoResolver).get(uri)
 end
