@@ -123,8 +123,6 @@ defmodule Xema.Base do
     end
   end
 
-  @spec resolver_get(String.t()) :: {:ok, any} | {:error, any}
-  def resolver_get(uri), do: resolver().get(uri)
 
   @spec get_ids(Schema.t()) :: map | nil
   def get_ids(%Schema{} = schema) do
@@ -168,5 +166,6 @@ defmodule Xema.Base do
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 
-  defp resolver, do: Application.get_env(:xema, :resolver, NoResolver)
+  def resolver_get(uri), do:
+    Application.get_env(:xema, :resolver, NoResolver).get(uri)
 end
