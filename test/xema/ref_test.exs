@@ -63,6 +63,7 @@ defmodule Xema.RefTest do
       }
     end
 
+    @tag :new_ref
     test "validate/2 with valid data", %{schema: schema} do
       assert validate(schema, %{foo: 42}) == :ok
       assert validate(schema, %{bar: 42}) == :ok

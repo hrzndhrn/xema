@@ -118,7 +118,7 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
-  @tag :only
+  @tag :new_ref
   describe "base URI change - change folder" do
     setup do
       %{
