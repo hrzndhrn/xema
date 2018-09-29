@@ -71,6 +71,18 @@ defmodule Xema.Ref do
   """
   @spec validate(Ref.t(), any, keyword) :: :ok | {:error, map}
   def validate(ref, value, opts) do
+    IO.inspect("--------------")
+    IO.inspect(ref, label: :ref, limit: :infinity)
+    IO.inspect(opts[:id], label: :opts_id, limit: :infinity)
+    root = opts[:root]
+
+    unless is_nil(root.ids),
+      do: IO.inspect(Map.keys(root.ids), label: :root_ids_keys)
+
+    unless is_nil(root.refs),
+      do: IO.inspect(Map.keys(root.refs), label: :root_ids_keys)
+
+    # IO.inspect opts, label: :opts, limits: :infinity
     case get(ref, opts) do
       {:ok, %Schema{} = schema, opts} ->
         Xema.validate(schema, value, opts)
@@ -100,12 +112,15 @@ defmodule Xema.Ref do
 
   defp get(%Ref{remote: true, url: nil, path: path, pointer: pointer}, opts) do
     uri = URI.parse(opts[:id])
+    IO.inspect(URI.to_string(uri), label: :uri)
 
     uri =
       case is_nil(uri.path) || !String.ends_with?(uri.path, "/") do
         true -> Map.put(uri, :path, Path.join("/", path))
         false -> Map.put(uri, :path, Path.join(uri.path, path))
       end
+
+    IO.inspect(URI.to_string(uri), label: :uri)
 
     with {:ok, xema} <- get_xema(opts[:root], URI.to_string(uri)),
          {:ok, schema} <- do_get(pointer, xema),
