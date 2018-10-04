@@ -664,7 +664,7 @@ defmodule Xema.Validator do
         do_properties(
           props,
           Map.delete(map, prop),
-          Map.put(errors, get_key(map, prop), reason),
+          Map.put(errors, Mapz.get_key(map, prop), reason),
           opts
         )
     end
@@ -689,7 +689,7 @@ defmodule Xema.Validator do
   defp required(%{required: nil}, _map), do: :ok
 
   defp required(%{required: required}, map) do
-    case Enum.filter(required, fn key -> !has_key?(map, key) end) do
+    case Enum.filter(required, fn key -> !Mapz.has_key?(map, key) end) do
       [] ->
         :ok
 
@@ -784,7 +784,7 @@ defmodule Xema.Validator do
   defp dependencies(%{dependencies: dependencies}, map, opts) do
     dependencies
     |> Map.to_list()
-    |> Enum.filter(fn {key, _} -> has_key?(map, key) end)
+    |> Enum.filter(fn {key, _} -> Mapz.has_key?(map, key) end)
     |> do_dependencies(map, opts)
   end
 
@@ -821,7 +821,7 @@ defmodule Xema.Validator do
   defp do_dependencies_list(_key, [], _map, _opts), do: :ok
 
   defp do_dependencies_list(key, [dependency | dependencies], map, opts) do
-    case has_key?(map, dependency) do
+    case Mapz.has_key?(map, dependency) do
       true ->
         do_dependencies_list(key, dependencies, map, opts)
 
