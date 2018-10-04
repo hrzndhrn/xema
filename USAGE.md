@@ -27,6 +27,7 @@
 * [Constants](#const)
 * [Enumerations](#enum)
 * [Negate Schema](#not)
+* [If-Then-Else](#if_then_else)
 * [Combine Schemas](#combine)
 * [Structuring a schema](#structuring)
   * [`definitions` and `ref`](#def-ref)
@@ -761,6 +762,28 @@ iex> schema = Xema.new :not, {:integer, minimum: 0}
 iex> Xema.is_valid? schema, 10
 false
 iex> Xema.is_valid? schema, -10
+true
+```
+## <a id="if_then_else"></a> If-Then-Else
+
+The keywords `if`, `then`, `else` work together to implement conditional
+application of a subschema based on the outcome of another subschema.
+
+```Elixir
+iex> schema =
+...>   Xema.new(
+...>     if: :list,
+...>     then: [items: :integer, min_items: 2],
+...>     else: :integer
+...>   )
+...>
+...> Xema.is_valid?(schema, 3)
+true
+iex> Xema.is_valid?(schema, "3")
+false
+iex> Xema.is_valid?(schema, [1])
+false
+iex> Xema.is_valid?(schema, [1, 2])
 true
 ```
 
