@@ -362,10 +362,6 @@ defmodule Xema do
   defp value_to_string(%{__struct__: MapSet} = map_set),
     do: value_to_string(map_set |> MapSet.new() |> MapSet.to_list())
 
-  defp value_to_string(%{__struct__: Xema.Ref} = ref) do
-    "#{ref}"
-  end
-
   defp value_to_string(list) when is_list(list),
     do:
       list

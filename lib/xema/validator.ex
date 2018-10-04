@@ -113,7 +113,7 @@ defmodule Xema.Validator do
          :ok <- dependencies(schema, value, opts),
          {:ok, patts_rest} <- patterns(schema, value, opts),
          {:ok, props_rest} <- properties(schema, value, opts),
-         value <- intersection(props_rest, patts_rest),
+         value <- Mapz.intersection(props_rest, patts_rest),
          :ok <- additionals(schema, value, opts),
          do: :ok
   end
@@ -653,12 +653,12 @@ defmodule Xema.Validator do
          :ok <- do_validate(schema, value, opts) do
       case Mapz.has_key?(props, prop) do
         true -> do_properties(props, map, errors, opts)
-        false -> do_properties(props, delete_property(map, prop), errors, opts)
+        false -> do_properties(props, Mapz.delete(map, prop), errors, opts)
       end
     else
       # The property is not in the map.
       :error ->
-        do_properties(props, delete_property(map, prop), errors, opts)
+        do_properties(props, Mapz.delete(map, prop), errors, opts)
 
       {:error, reason} ->
         do_properties(
@@ -670,20 +670,6 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec delete_property(map, String.t() | atom) :: map
-  defp delete_property(map, prop) when is_map(map) and is_atom(prop) do
-    case Map.has_key?(map, prop) do
-      true -> Map.delete(map, prop)
-      false -> Map.delete(map, Atom.to_string(prop))
-    end
-  end
-
-  defp delete_property(map, prop) when is_map(map) and is_binary(prop) do
-    case Map.has_key?(map, prop) do
-      true -> Map.delete(map, prop)
-      false -> Map.delete(map, to_existing_atom(prop))
-    end
-  end
 
   @spec required(Xema.Schema.t(), map) :: result
   defp required(%{required: nil}, _map), do: :ok

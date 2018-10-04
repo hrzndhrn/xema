@@ -38,6 +38,22 @@ defmodule Xema.Mapz do
     end
   end
 
+
+  @spec delete(map, String.t() | atom) :: map
+  def delete(map, prop) when is_map(map) and is_atom(prop) do
+    case Map.has_key?(map, prop) do
+      true -> Map.delete(map, prop)
+      false -> Map.delete(map, Atom.to_string(prop))
+    end
+  end
+
+  def delete(map, prop) when is_map(map) and is_binary(prop) do
+    case Map.has_key?(map, prop) do
+      true -> Map.delete(map, prop)
+      false -> Map.delete(map, to_existing_atom(prop))
+    end
+  end
+
   @spec get_key(map, String.t() | atom) :: atom | String.t()
   def get_key(map, key) when is_map(map) and is_atom(key) do
     if Map.has_key?(map, key), do: key, else: to_string(key)

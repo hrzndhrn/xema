@@ -12,15 +12,6 @@ defmodule Xema.Utils do
     _ -> nil
   end
 
-  @spec intersection(map, map) :: map
-  def intersection(a, b) when is_map(a) and is_map(b),
-    do:
-      for(
-        key <- Map.keys(a),
-        true == Map.has_key?(b, key),
-        into: %{},
-        do: {key, Map.get(b, key)}
-      )
 
   @spec update_id(map, binary) :: map
   def update_id(%{id: a} = map, b) do

@@ -143,15 +143,4 @@ defmodule Xema.Ref do
   rescue
     _ -> str
   end
-
-  @doc """
-  Returns the binary representation of a reference.
-  """
-  @spec to_string(Ref.t()) :: String.t()
-  def to_string(ref), do: ~s({:ref, "#{ref.pointer}"})
-end
-
-defimpl String.Chars, for: Xema.Ref do
-  @spec to_string(Xema.Ref.t()) :: String.t()
-  def to_string(ref), do: Xema.Ref.to_string(ref)
 end
