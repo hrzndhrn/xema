@@ -38,10 +38,6 @@ defmodule Xema.Mapz do
     end
   end
 
-  @spec update_nil(any, any) :: any
-  def update_nil(nil, b), do: b
-  def update_nil(a, _b), do: a
-
   @spec get_key(map, String.t() | atom) :: atom | String.t()
   def get_key(map, key) when is_map(map) and is_atom(key) do
     if Map.has_key?(map, key), do: key, else: to_string(key)

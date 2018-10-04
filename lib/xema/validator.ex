@@ -520,7 +520,7 @@ defmodule Xema.Validator do
        do:
          items_tuple(
            items,
-           update_nil(additional_items, true),
+           default(additional_items, true),
            list,
            0,
            [],

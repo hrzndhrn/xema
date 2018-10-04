@@ -26,9 +26,9 @@ defmodule Xema.Utils do
     end
   end
 
-  @spec update_nil(any, any) :: any
-  def update_nil(nil, b), do: b
-  def update_nil(a, _b), do: a
+  @spec default(any, any) :: any
+  def default(nil, b), do: b
+  def default(a, _b), do: a
 
   @spec get_key(map, String.t() | atom) :: atom | String.t()
   def get_key(map, key) when is_map(map) and is_atom(key) do
@@ -69,22 +69,13 @@ defmodule Xema.Utils do
         do: {key, Map.get(b, key)}
       )
 
-  @spec update_id(list, binary) :: keyword
-  def update_id(kw, b) when is_list(kw) do
-    Keyword.put(kw, :id, update_id(Keyword.get(kw, :id), b))
-  end
-
   @spec update_id(map, binary) :: map
   def update_id(%{id: a} = map, b) do
-    Map.put(map, :id, update_id(a, b))
+    Map.put(map, :id, update_uri(a, b))
   end
 
-  @spec update_id(nil, binary) :: binary
-  def update_id(a, b) when is_nil(a), do: b
 
-  @spec update_id(binary, binary) :: binary
-  def update_id(a, b), do: a |> URI.merge(b) |> URI.to_string()
-
+  @spec update_uri(URI.t() | nil, URI.t() | nil) :: URI.t() | nil
   def update_uri(nil, nil), do: nil
 
   def update_uri(id, nil), do: URI.parse(id)
