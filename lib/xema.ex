@@ -5,7 +5,6 @@ defmodule Xema do
 
   use Xema.Base
 
-  alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaError
 
@@ -342,7 +341,7 @@ defmodule Xema do
 
   defp do_schema_to_string(:any, schema, true) do
     case Map.to_list(schema) do
-      [{:ref, ref}] -> ~s(:ref, "#{Ref.get_pointer(ref)}")
+      [{:ref, ref}] -> ~s(:ref, "#{ref.pointer}")
       [{key, value}] -> "#{inspect(key)}, #{value_to_string(value)}"
       _ -> ":any, #{schema_to_string(schema)}"
     end
@@ -387,7 +386,7 @@ defmodule Xema do
 
   @spec key_value_to_string({atom | String.t(), any}) :: String.t()
   defp key_value_to_string({:ref, %{__struct__: Xema.Ref} = ref}),
-    do: "ref: #{inspect(Ref.get_pointer(ref))}"
+    do: ~s(ref: "#{ref.pointer}")
 
   defp key_value_to_string({key, value}) when is_atom(key),
     do: "#{key}: #{value_to_string(value)}"

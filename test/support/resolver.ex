@@ -5,7 +5,13 @@ defmodule Test.Resolver do
 
   @spec get(binary) :: {:ok, map} | {:error, any}
   def get(uri) do
-    with {:ok, response} <- get_response(uri), do: eval(response, uri)
+    case remote?(uri) do
+      true ->
+        with {:ok, response} <- get_response(uri), do: eval(response, uri)
+
+      false ->
+        {:ok, nil}
+    end
   end
 
   defp get_response(uri) do
@@ -24,10 +30,14 @@ defmodule Test.Resolver do
     end
   end
 
+  defp remote?(%URI{path: nil}), do: false
+
+  defp remote?(%URI{path: path}), do: String.ends_with?(path, ".exon")
+
   defp eval(str, uri) do
     {data, _} = Code.eval_string(str)
     {:ok, data}
   rescue
-    error -> {:error, %{error | file: uri}}
+    error -> {:error, %{error | file: URI.to_string(uri)}}
   end
 end

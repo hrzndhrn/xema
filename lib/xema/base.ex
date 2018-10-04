@@ -16,32 +16,28 @@ defmodule Xema.Base do
 
       @type t :: %__MODULE__{
               content: Schema.t(),
-              ids: nil | map,
-              refs: nil | map
+              ids:  map,
+              refs: map
             }
 
       defstruct [
-        :content,
-        :ids,
-        :refs
+        content: %Schema{},
+        ids: %{},
+        refs: %{}
       ]
 
       def new(data, opts \\ [])
 
       def new(%Schema{} = content, opts) do
-        IO.inspect("--- base new ---")
-        IO.inspect(content, limit: :infinity)
-        IO.inspect(">>> ref ---")
         content = map_refs(content)
+        ids = get_ids(content)
+        refs = get_refs(content)
 
-        IO.inspect("<<< ref ---")
-        IO.inspect("-----------------------------------------------")
-
-        struct(
+        struct!(
           __MODULE__,
           content: content,
-          ids: get_ids(content),
-          refs: get_refs(content)
+          ids: Map.merge(ids, refs),
+          refs: refs
         )
       end
 
@@ -88,17 +84,12 @@ defmodule Xema.Base do
       defp map_refs(%Schema{} = schema) do
         map(schema, fn
           %Schema{ref: ref} = schema, id when not is_nil(ref) ->
-            IO.inspect(id, label: :ref_id)
-            IO.inspect(ref, label: :ref)
-            # Ref.new(ref, id)
             %{schema | ref: Ref.new(ref, id)}
 
           %Schema{} = schema, id ->
-            IO.inspect(id, label: :schema_id)
             schema
 
           value, id ->
-            IO.inspect(id, label: :value_id)
             value
         end)
       end
@@ -112,7 +103,7 @@ defmodule Xema.Base do
           %Schema{id: id}, acc, _path when not is_nil(id) ->
             Utils.update_id(acc, id)
 
-          _xema, acc, _path ->
+          _schema, acc, _path ->
             acc
         end)
         |> case do
@@ -121,13 +112,23 @@ defmodule Xema.Base do
         end
       end
 
-      defp put_ref(map, ref) do
-        IO.inspect(ref)
-        map
+      defp put_ref(map, %Ref{uri: uri}) when not is_nil(uri) do
+        case get_schema(uri) do
+          nil ->
+            map
+
+          schema ->
+            Map.put(map, URI.to_string(uri), schema)
+        end
       end
+
+      defp put_ref(map, _), do: map
 
       defp get_schema(uri) do
         case resolve(uri) do
+          {:ok, nil} ->
+            nil
+
           {:ok, data} ->
             new(data)
 
@@ -146,16 +147,13 @@ defmodule Xema.Base do
 
   @spec get_ids(Schema.t()) :: map | nil
   def get_ids(%Schema{} = schema) do
-    ids =
-      reduce(schema, %{}, fn
-        %Schema{id: id}, acc, path when not is_nil(id) ->
-          Map.put(acc, id, Ref.new(path))
+    reduce(schema, %{}, fn
+      %Schema{id: id}, acc, path when not is_nil(id) ->
+        Map.put(acc, id, Ref.new(path))
 
-        _xema, acc, _path ->
-          acc
-      end)
-
-    if ids == %{}, do: nil, else: ids
+      _xema, acc, _path ->
+        acc
+    end)
   end
 
   @spec reduce(Schema.t(), any, function) :: any

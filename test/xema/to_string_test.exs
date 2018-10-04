@@ -90,6 +90,7 @@ defmodule Xema.ToStringTest do
       assert_to_string(~s(:definitions, %{foo: :integer}))
     end
 
+    @tag :only
     test "definitions and ref" do
       assert_to_string(~s(:any, definitions: %{foo: :integer}, ref: "#/go"))
     end

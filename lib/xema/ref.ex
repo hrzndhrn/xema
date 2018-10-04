@@ -3,8 +3,6 @@ defmodule Xema.Ref do
   This module contains a struct and function to represent and handle references.
   """
 
-  import Xema.Utils, only: [get_value: 2, update_nil: 2]
-
   alias Xema.Mapz
   alias Xema.Ref
   alias Xema.Schema
@@ -21,10 +19,6 @@ defmodule Xema.Ref do
   defstruct pointer: nil,
             uri: nil
 
-  @keywords %Schema{}
-            |> Map.keys()
-            |> Enum.map(fn key -> Atom.to_string(key) end)
-
   @doc """
   Creates a new reference from the given `pointer`.
   """
@@ -32,40 +26,23 @@ defmodule Xema.Ref do
   def new(pointer), do: %Ref{pointer: pointer}
 
   @spec new(String.t(), URI.t() | nil) :: Ref.t()
-  def new("#" <> _ = pointer, _uri) do
-    IO.inspect("--- Ref.new --- without uri")
+  def new("#" <> _ = pointer, _uri), do: new(pointer)
 
-    new(pointer)
-  end
-
-  def new(pointer, uri) when is_binary(pointer) do
-    IO.inspect("--- Ref.new --- with uri")
-
-    %Ref{
+  def new(pointer, uri) when is_binary(pointer),
+    do: %Ref{
       pointer: pointer,
       uri: Utils.update_uri(uri, pointer)
     }
-    |> IO.inspect()
-  end
 
   @doc """
   Validates the given value with the referenced schema.
   """
   @spec validate(Ref.t(), any, keyword) :: :ok | {:error, map}
   def validate(ref, value, opts) do
-    IO.inspect("--- validate ---")
-    IO.inspect(ref, label: :ref, limit: :infinity)
-    IO.inspect(opts[:id], label: :opts_id, limit: :infinity)
-    root = opts[:root]
-
-    unless is_nil(root.ids),
-      do: IO.inspect(Map.keys(root.ids), label: :root_ids_keys)
-
-    unless is_nil(root.refs),
-      do: IO.inspect(Map.keys(root.refs), label: :root_ids_keys)
-
-    # IO.inspect opts, label: :opts, limits: :infinity
     case get(ref, opts) do
+      {:ok, %Xema{} = xema, opts} ->
+        Xema.validate(xema, value, opts)
+
       {:ok, %Schema{} = schema, opts} ->
         Xema.validate(schema, value, opts)
 
@@ -79,30 +56,80 @@ defmodule Xema.Ref do
   end
 
   defp get(%Ref{pointer: pointer, uri: nil}, opts) do
-    IO.inspect("--- get ---")
-    IO.inspect(pointer)
-    # IO.inspect(schema)
-    IO.inspect(to_path(pointer))
-    {:error, :not_found}
-    %Xema{content: schema} = opts[:root]
+    with {:ok, schema} <- fetch_by_pointer(opts[:root], pointer),
+         do: {:ok, schema, opts}
+  end
 
-    with {:ok, schema} <- get(schema, to_path(pointer)) do
+  defp get(%Ref{uri: uri}, opts) do
+    with {:ok, xema} <- fetch_by_id(uri, opts[:root]),
+         {:ok, schema} <- fetch_by_fragment(xema, uri) do
+      opts =
+        case xema == schema do
+          true -> opts
+          false -> Keyword.put(opts, :root, xema)
+        end
+
       {:ok, schema, opts}
     end
   end
 
-  defp get(nil, _), do: {:error, :not_found}
+  defp fetch_by_fragment(xema, %URI{fragment: nil}), do: {:ok, xema}
 
-  defp get(schema, []), do: {:ok, schema}
+  defp fetch_by_fragment(%Xema{content: schema}, %URI{fragment: fragment}),
+    do: fetch_by_path(schema, to_path(fragment))
 
-  defp get(schema, [key | keys]),
-    do:
-      schema
-      |> Mapz.get(decode(key))
-      |> IO.inspect()
-      |> get(keys)
+  defp fetch_by_pointer(%Xema{content: schema}, "#"),
+    do: fetch_by_path(schema, [])
 
-  defp to_path("#" <> pointer),
+  defp fetch_by_pointer(%Xema{content: schema}, "#/" <> _ = pointer),
+    do: fetch_by_path(schema, to_path(pointer))
+
+  defp fetch_by_pointer(%Xema{ids: ids}, pointer) do
+    case Map.get(ids, pointer) do
+      nil -> {:error, :not_found}
+      val -> {:ok, val}
+    end
+  end
+
+  defp fetch_by_path(nil, _), do: {:error, :not_found}
+
+  defp fetch_by_path(schema, []), do: {:ok, schema}
+
+  defp fetch_by_path(schemas, [key | keys]) when is_list(schemas) do
+    index = String.to_integer(key)
+    fetch_by_path(Enum.at(schemas, index), keys)
+  rescue
+    _ -> {:error, :not_found}
+  end
+
+  defp fetch_by_path(schema, [key | keys]) do
+    key = decode(key)
+
+    case Mapz.get(schema, key) do
+      nil ->
+        case Map.get(schema, :data) do
+          nil -> nil
+          val -> Mapz.get(val, key)
+        end
+
+      val ->
+        val
+    end
+    |> fetch_by_path(keys)
+  end
+
+  defp fetch_by_id(_uri, %Xema{ids: nil}), do: {:error, :not_found}
+
+  defp fetch_by_id(uri, %Xema{ids: ids}) do
+    case Map.get(ids, URI.to_string(uri)) do
+      nil -> {:error, :not_found}
+      val -> {:ok, val}
+    end
+  end
+
+  defp to_path("#" <> pointer), do: to_path(pointer)
+
+  defp to_path(pointer),
     do:
       pointer
       |> String.split("/")
@@ -121,7 +148,7 @@ defmodule Xema.Ref do
   Returns the binary representation of a reference.
   """
   @spec to_string(Ref.t()) :: String.t()
-  def to_string(ref), do: "{:ref, #{inspect(ref.pointer)}}"
+  def to_string(ref), do: ~s({:ref, "#{ref.pointer}"})
 end
 
 defimpl String.Chars, for: Xema.Ref do
