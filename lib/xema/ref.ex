@@ -84,8 +84,8 @@ defmodule Xema.Ref do
   defp fetch_by_pointer(%Xema{content: schema}, "#/" <> _ = pointer),
     do: fetch_by_path(schema, to_path(pointer))
 
-  defp fetch_by_pointer(%Xema{ids: ids}, pointer) do
-    case Map.get(ids, pointer) do
+  defp fetch_by_pointer(%Xema{refs: refs}, pointer) do
+    case Map.get(refs, pointer) do
       nil -> {:error, :not_found}
       val -> {:ok, val}
     end
@@ -118,10 +118,10 @@ defmodule Xema.Ref do
     |> fetch_by_path(keys)
   end
 
-  defp fetch_by_id(_uri, %Xema{ids: nil}), do: {:error, :not_found}
+  defp fetch_by_id(_uri, %Xema{refs: nil}), do: {:error, :not_found}
 
-  defp fetch_by_id(uri, %Xema{ids: ids}) do
-    case Map.get(ids, URI.to_string(uri)) do
+  defp fetch_by_id(uri, %Xema{refs: refs}) do
+    case Map.get(refs, URI.to_string(uri)) do
       nil -> {:error, :not_found}
       val -> {:ok, val}
     end

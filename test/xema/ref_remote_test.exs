@@ -65,7 +65,7 @@ defmodule Xema.RefRemoteTest do
       schema =
         :ref
         |> Xema.new("http://localhost:1234/integer.exon")
-        |> Map.put(:ids, nil)
+        |> Map.put(:refs, nil)
 
       %{schema: schema}
     end

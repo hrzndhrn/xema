@@ -16,15 +16,11 @@ defmodule Xema.Base do
 
       @type t :: %__MODULE__{
               content: Schema.t(),
-              ids:  map,
               refs: map
             }
 
-      defstruct [
-        content: %Schema{},
-        ids: %{},
-        refs: %{}
-      ]
+      defstruct content: %Schema{},
+                refs: %{}
 
       def new(data, opts \\ [])
 
@@ -36,8 +32,7 @@ defmodule Xema.Base do
         struct!(
           __MODULE__,
           content: content,
-          ids: Map.merge(ids, refs),
-          refs: refs
+          refs: Map.merge(ids, refs)
         )
       end
 

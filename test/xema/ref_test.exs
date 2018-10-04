@@ -447,9 +447,8 @@ defmodule Xema.RefTest do
       assert validate(schema, tree) == :ok
     end
 
-    @tag :ids
-    test "ids", %{schema: schema} do
-      assert schema.ids == %{
+    test "refs", %{schema: schema} do
+      assert schema.refs == %{
                "http://localhost:1234/node" => %Ref{
                  uri: nil,
                  pointer: "#/definitions/node"
