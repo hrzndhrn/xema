@@ -1,7 +1,7 @@
 defmodule Draft6.PatternPropertiesTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "patternProperties validates properties matching a regex" do
     setup do
@@ -10,37 +10,37 @@ defmodule Draft6.PatternPropertiesTest do
 
     test "a single valid match is valid", %{schema: schema} do
       data = %{foo: 1}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "multiple valid matches is valid", %{schema: schema} do
       data = %{foo: 1, foooooo: 2}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "a single invalid match is invalid", %{schema: schema} do
       data = %{foo: "bar", fooooo: 2}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "multiple invalid matches is invalid", %{schema: schema} do
       data = %{foo: "bar", foooooo: "baz"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "ignores arrays", %{schema: schema} do
       data = ["foo"]
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "ignores strings", %{schema: schema} do
       data = "foo"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "ignores other non-objects", %{schema: schema} do
       data = 12
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -57,32 +57,32 @@ defmodule Draft6.PatternPropertiesTest do
 
     test "a single valid match is valid", %{schema: schema} do
       data = %{a: 21}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "a simultaneous match is valid", %{schema: schema} do
       data = %{aaaa: 18}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "multiple matches is valid", %{schema: schema} do
       data = %{a: 21, aaaa: 18}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "an invalid due to one is invalid", %{schema: schema} do
       data = %{a: "bar"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "an invalid due to the other is invalid", %{schema: schema} do
       data = %{aaaa: 31}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "an invalid due to both is invalid", %{schema: schema} do
       data = %{aaa: "foo", aaaa: 31}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -96,22 +96,22 @@ defmodule Draft6.PatternPropertiesTest do
 
     test "non recognized members are ignored", %{schema: schema} do
       data = %{"answer 1": "42"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "recognized members are accounted for", %{schema: schema} do
       data = %{a31b: nil}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "regexes are case sensitive", %{schema: schema} do
       data = %{a_x_3: 3}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "regexes are case sensitive, 2", %{schema: schema} do
       data = %{a_X_3: 3}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -122,24 +122,24 @@ defmodule Draft6.PatternPropertiesTest do
 
     test "object with property matching schema true is valid", %{schema: schema} do
       data = %{foo: 1}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "object with property matching schema false is invalid", %{
       schema: schema
     } do
       data = %{bar: 2}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "object with both properties is invalid", %{schema: schema} do
       data = %{bar: 2, foo: 1}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "empty object is valid", %{schema: schema} do
       data = %{}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 end

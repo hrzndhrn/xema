@@ -46,6 +46,14 @@ defmodule Xema.Base do
       Returns true if the value is a valid value against the given schema;
       otherwise returns false.
       """
+      @spec valid?(__MODULE__.t(), any) :: boolean
+      def valid?(schema, value), do: validate(schema, value) == :ok
+
+      @doc """
+      Returns true if the value is a valid value against the given schema;
+      otherwise returns false.
+      """
+      @deprecated "Use valid? instead"
       @spec is_valid?(__MODULE__.t(), any) :: boolean
       def is_valid?(schema, value), do: validate(schema, value) == :ok
 

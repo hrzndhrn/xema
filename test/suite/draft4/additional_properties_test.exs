@@ -1,7 +1,7 @@
 defmodule Draft4.AdditionalPropertiesTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "additionalProperties being false does not allow other properties" do
     setup do
@@ -17,32 +17,32 @@ defmodule Draft4.AdditionalPropertiesTest do
 
     test "no additional properties is valid", %{schema: schema} do
       data = %{foo: 1}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "an additional property is invalid", %{schema: schema} do
       data = %{bar: 2, foo: 1, quux: "boom"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "ignores arrays", %{schema: schema} do
       data = [1, 2, 3]
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "ignores strings", %{schema: schema} do
       data = "foobarbaz"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "ignores other non-objects", %{schema: schema} do
       data = 12
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "patternProperties are not additional properties", %{schema: schema} do
       data = %{foo: 1, vroom: 2}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -59,12 +59,12 @@ defmodule Draft4.AdditionalPropertiesTest do
 
     test "matching the pattern is valid", %{schema: schema} do
       data = %{ármányos: 2}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "not matching the pattern is invalid", %{schema: schema} do
       data = %{élmény: 2}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -81,17 +81,17 @@ defmodule Draft4.AdditionalPropertiesTest do
 
     test "no additional properties is valid", %{schema: schema} do
       data = %{foo: 1}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "an additional valid property is valid", %{schema: schema} do
       data = %{bar: 2, foo: 1, quux: true}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "an additional invalid property is invalid", %{schema: schema} do
       data = %{bar: 2, foo: 1, quux: 12}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -102,12 +102,12 @@ defmodule Draft4.AdditionalPropertiesTest do
 
     test "an additional valid property is valid", %{schema: schema} do
       data = %{foo: true}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "an additional invalid property is invalid", %{schema: schema} do
       data = %{foo: 1}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -118,7 +118,7 @@ defmodule Draft4.AdditionalPropertiesTest do
 
     test "additional properties are allowed", %{schema: schema} do
       data = %{bar: 2, foo: 1, quux: true}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 end

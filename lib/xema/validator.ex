@@ -199,7 +199,7 @@ defmodule Xema.Validator do
 
   defp validate_contains(%{contains: schema}, list) do
     list
-    |> Enum.any?(fn value -> Xema.is_valid?(schema, value) end)
+    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
     |> case do
       true -> :ok
       false -> {:error, %{value: list, contains: schema}}
@@ -214,7 +214,7 @@ defmodule Xema.Validator do
          %{if: schema_if, then: schema_then, else: schema_else},
          value
        ) do
-    case Xema.is_valid?(schema_if, value) do
+    case Xema.valid?(schema_if, value) do
       true ->
         validate_if(:then, schema_then, value)
 
@@ -240,8 +240,8 @@ defmodule Xema.Validator do
     map
     |> Map.keys()
     |> Enum.filter(fn
-      key when is_binary(key) -> not Xema.is_valid?(schema, key)
-      key when is_atom(key) -> not Xema.is_valid?(schema, Atom.to_string(key))
+      key when is_binary(key) -> not Xema.valid?(schema, key)
+      key when is_atom(key) -> not Xema.valid?(schema, Atom.to_string(key))
       _ -> false
     end)
     |> case do

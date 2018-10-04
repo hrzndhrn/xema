@@ -1,7 +1,7 @@
 defmodule Draft6.RefTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "root pointer ref" do
     setup do
@@ -16,22 +16,22 @@ defmodule Draft6.RefTest do
 
     test "match", %{schema: schema} do
       data = %{foo: false}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "recursive match", %{schema: schema} do
       data = %{foo: %{foo: false}}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "mismatch", %{schema: schema} do
       data = %{bar: false}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "recursive mismatch", %{schema: schema} do
       data = %{foo: %{bar: false}}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -48,12 +48,12 @@ defmodule Draft6.RefTest do
 
     test "match", %{schema: schema} do
       data = %{bar: 3}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "mismatch", %{schema: schema} do
       data = %{bar: true}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -64,12 +64,12 @@ defmodule Draft6.RefTest do
 
     test "match array", %{schema: schema} do
       data = [1, 2]
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "mismatch array", %{schema: schema} do
       data = [1, "foo"]
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -92,32 +92,32 @@ defmodule Draft6.RefTest do
 
     test "slash invalid", %{schema: schema} do
       data = %{slash: "aoeu"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "tilda invalid", %{schema: schema} do
       data = %{tilda: "aoeu"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "percent invalid", %{schema: schema} do
       data = %{percent: "aoeu"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "slash valid", %{schema: schema} do
       data = %{slash: 123}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "tilda valid", %{schema: schema} do
       data = %{tilda: 123}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "percent valid", %{schema: schema} do
       data = %{percent: 123}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -138,12 +138,12 @@ defmodule Draft6.RefTest do
 
     test "nested ref valid", %{schema: schema} do
       data = 5
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "nested ref invalid", %{schema: schema} do
       data = "a"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -154,12 +154,12 @@ defmodule Draft6.RefTest do
 
     test "property named $ref valid", %{schema: schema} do
       data = %{"$ref": "a"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "property named $ref invalid", %{schema: schema} do
       data = %{"$ref": 2}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -173,7 +173,7 @@ defmodule Draft6.RefTest do
 
     test "any value is valid", %{schema: schema} do
       data = "foo"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -187,7 +187,7 @@ defmodule Draft6.RefTest do
 
     test "any value is invalid", %{schema: schema} do
       data = "foo"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -232,7 +232,7 @@ defmodule Draft6.RefTest do
         ]
       }
 
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "invalid tree", %{schema: schema} do
@@ -253,7 +253,7 @@ defmodule Draft6.RefTest do
         ]
       }
 
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 end

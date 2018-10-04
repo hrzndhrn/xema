@@ -1,7 +1,7 @@
 defmodule Draft6.RefRemoteTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "remote ref" do
     setup do
@@ -10,12 +10,12 @@ defmodule Draft6.RefRemoteTest do
 
     test "remote ref valid", %{schema: schema} do
       data = 1
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "remote ref invalid", %{schema: schema} do
       data = "a"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -29,12 +29,12 @@ defmodule Draft6.RefRemoteTest do
 
     test "ref within ref valid", %{schema: schema} do
       data = 1
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "ref within ref invalid", %{schema: schema} do
       data = "a"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -51,12 +51,12 @@ defmodule Draft6.RefRemoteTest do
 
     test "base URI change ref valid", %{schema: schema} do
       data = [[1]]
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "base URI change ref invalid", %{schema: schema} do
       data = [["a"]]
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -76,12 +76,12 @@ defmodule Draft6.RefRemoteTest do
 
     test "number is valid", %{schema: schema} do
       data = %{list: [1]}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "string is invalid", %{schema: schema} do
       data = %{list: ["a"]}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -108,12 +108,12 @@ defmodule Draft6.RefRemoteTest do
 
     test "number is valid", %{schema: schema} do
       data = %{list: [1]}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "string is invalid", %{schema: schema} do
       data = %{list: ["a"]}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -130,17 +130,17 @@ defmodule Draft6.RefRemoteTest do
 
     test "string is valid", %{schema: schema} do
       data = %{name: "foo"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "null is valid", %{schema: schema} do
       data = %{name: nil}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "object is invalid", %{schema: schema} do
       data = %{name: %{name: nil}}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 end

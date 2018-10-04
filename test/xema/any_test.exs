@@ -1,27 +1,27 @@
 defmodule Xema.AnyTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema, only: [valid?: 2, validate: 2]
 
   describe "'any' schema" do
     setup do
       %{schema: Xema.new(:any)}
     end
 
-    test "is_valid?/2 with a string", %{schema: schema} do
-      assert is_valid?(schema, "foo")
+    test "valid?/2 with a string", %{schema: schema} do
+      assert valid?(schema, "foo")
     end
 
-    test "is_valid?/2 with a number", %{schema: schema} do
-      assert is_valid?(schema, 42)
+    test "valid?/2 with a number", %{schema: schema} do
+      assert valid?(schema, 42)
     end
 
-    test "is_valid?/2 with nil", %{schema: schema} do
-      assert is_valid?(schema, nil)
+    test "valid?/2 with nil", %{schema: schema} do
+      assert valid?(schema, nil)
     end
 
-    test "is_valid?/2 with a list", %{schema: schema} do
-      assert is_valid?(schema, [1, 2, 3])
+    test "valid?/2 with a list", %{schema: schema} do
+      assert valid?(schema, [1, 2, 3])
     end
 
     test "validate/2 with a string", %{schema: schema} do
@@ -61,12 +61,12 @@ defmodule Xema.AnyTest do
       assert validate(schema, 2) == expected
     end
 
-    test "is_valid?/2 with a valid value", %{schema: schema} do
-      assert is_valid?(schema, 1)
+    test "valid?/2 with a valid value", %{schema: schema} do
+      assert valid?(schema, 1)
     end
 
-    test "is_valid?/2 with an invalid value", %{schema: schema} do
-      refute is_valid?(schema, 5)
+    test "valid?/2 with an invalid value", %{schema: schema} do
+      refute valid?(schema, 5)
     end
   end
 

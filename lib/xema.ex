@@ -47,7 +47,7 @@ defmodule Xema do
       }
       iex> Xema.validate(schema, [2, 3, 4])
       :ok
-      iex> Xema.is_valid?(schema, [2, 3, 4])
+      iex> Xema.valid?(schema, [2, 3, 4])
       true
       iex> Xema.validate(schema, [2, 3, 1])
       {:error, [{2, %{value: 1, minimum: 2}}]}
