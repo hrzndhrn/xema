@@ -34,12 +34,6 @@ defmodule Xema.Validator do
   defp do_validate(%{type: false}, _value, _opts), do: {:error, %{type: false}}
 
   defp do_validate(schema, value, opts) do
-    opts =
-      case schema.id do
-        nil -> opts
-        id -> update_id(opts, id)
-      end
-
     case schema do
       %{type: list} when is_list(list) ->
         with {:ok, type} <- types(schema, value),
@@ -655,16 +649,15 @@ defmodule Xema.Validator do
     do: {:error, %{properties: errors}}
 
   defp do_properties([{prop, schema} | props], map, errors, opts) do
-    with true <- has_key?(map, prop),
-         {:ok, value} <- Mapz.fetch(map, prop),
+    with {:ok, value} <- Mapz.fetch(map, prop),
          :ok <- do_validate(schema, value, opts) do
-      case has_key?(props, prop) do
+      case Mapz.has_key?(props, prop) do
         true -> do_properties(props, map, errors, opts)
         false -> do_properties(props, delete_property(map, prop), errors, opts)
       end
     else
       # The property is not in the map.
-      false ->
+      :error ->
         do_properties(props, delete_property(map, prop), errors, opts)
 
       {:error, reason} ->
