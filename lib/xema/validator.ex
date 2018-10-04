@@ -26,9 +26,6 @@ defmodule Xema.Validator do
   defp do_validate(%{content: schema}, value, opts),
     do: do_validate(schema, value, opts)
 
-  defp do_validate(%Ref{} = ref, value, opts),
-    do: Ref.validate(ref, value, opts)
-
   defp do_validate(%Schema{type: true}, _value, _opts), do: :ok
 
   defp do_validate(%{type: false}, _value, _opts), do: {:error, %{type: false}}
@@ -669,7 +666,6 @@ defmodule Xema.Validator do
         )
     end
   end
-
 
   @spec required(Xema.Schema.t(), map) :: result
   defp required(%{required: nil}, _map), do: :ok

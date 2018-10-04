@@ -38,7 +38,6 @@ defmodule Xema.Mapz do
     end
   end
 
-
   @spec delete(map, String.t() | atom) :: map
   def delete(map, prop) when is_map(map) and is_atom(prop) do
     case Map.has_key?(map, prop) do

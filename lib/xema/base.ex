@@ -187,18 +187,13 @@ defmodule Xema.Base do
   defp map(%Schema{} = schema, fun, id) do
     id = Utils.update_uri(id, schema.id)
 
-    case fun.(schema, id) do
-      %Schema{} = schema ->
-        struct(
-          Schema,
-          schema
-          |> Map.to_list()
-          |> Enum.map(fn {k, v} -> {k, map(v, fun, id)} end)
-        )
-
-      %Ref{} = ref ->
-        ref
-    end
+    struct(
+      Schema,
+      schema
+      |> fun.(id)
+      |> Map.from_struct()
+      |> Enum.map(fn {k, v} -> {k, map(v, fun, id)} end)
+    )
   end
 
   defp map(%{__struct__: _} = struct, _fun, _id), do: struct

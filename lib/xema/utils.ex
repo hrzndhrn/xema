@@ -12,7 +12,6 @@ defmodule Xema.Utils do
     _ -> nil
   end
 
-
   @spec update_id(map, binary) :: map
   def update_id(%{id: a} = map, b) do
     Map.put(map, :id, update_uri(a, b))
