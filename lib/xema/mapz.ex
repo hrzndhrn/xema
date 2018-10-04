@@ -23,15 +23,15 @@ defmodule Xema.Mapz do
   end
 
   defp do_fetch(map, key_string, key_atom) do
-    case {Map.get(map, key_string), Map.get(map, key_atom)} do
-      {nil, nil} ->
-        {:ok, nil}
+    case {Map.fetch(map, key_string), Map.fetch(map, key_atom)} do
+      {:error, :error} ->
+        :error
 
-      {nil, value} ->
-        {:ok, value}
+      {:error, {:ok, _} = value} ->
+        value
 
-      {value, nil} ->
-        {:ok, value}
+      {{:ok, _} = value, :error} ->
+        value
 
       _ ->
         {:error, :mixed_map}
