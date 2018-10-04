@@ -136,7 +136,7 @@ defmodule Xema.Base do
       end
 
       defp resolve(uri),
-        do: Application.get_env(:xema, :resolver, NoResolver).get(uri)
+        do: Application.get_env(:xema, :resolver, NoResolver).fetch(uri)
     end
   end
 

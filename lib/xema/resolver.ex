@@ -3,8 +3,5 @@ defmodule Xema.Resolver do
   The behaviour for resolvers.
   """
 
-  @type exon :: atom | tuple | list | map
-  @type reason :: any
-
-  @callback get(uri :: binary) :: {:ok, exon} | {:error, reason}
+  @callback fetch(uri :: binary) :: {:ok, any} | {:error, any}
 end

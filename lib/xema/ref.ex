@@ -105,7 +105,9 @@ defmodule Xema.Ref do
   defp fetch_by_path(schema, [key | keys]) do
     key = decode(key)
 
-    case Mapz.get(schema, key) do
+    schema
+    |> Mapz.get(key)
+    |> case do
       nil ->
         case Map.get(schema, :data) do
           nil -> nil
