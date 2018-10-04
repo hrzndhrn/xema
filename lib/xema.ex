@@ -109,7 +109,7 @@ defmodule Xema do
        when not is_tuple(value),
        do: schema({value, []}, keywords)
 
-  defp schema({:ref, pointer}, _), do: Ref.new(pointer)
+  # TODO: defp schema({:ref, pointer}, _), do: Ref.new(pointer)
 
   defp schema({list, keywords}, _) when is_list(list),
     do:

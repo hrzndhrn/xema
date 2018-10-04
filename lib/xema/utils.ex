@@ -84,4 +84,12 @@ defmodule Xema.Utils do
 
   @spec update_id(binary, binary) :: binary
   def update_id(a, b), do: a |> URI.merge(b) |> URI.to_string()
+
+  def update_uri(nil, nil), do: nil
+
+  def update_uri(id, nil), do: URI.parse(id)
+
+  def update_uri(nil, id), do: URI.parse(id)
+
+  def update_uri(old, new), do: old |> URI.merge(new)
 end

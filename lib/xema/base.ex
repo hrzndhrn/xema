@@ -1,12 +1,11 @@
 defmodule Xema.Base do
   @moduledoc false
 
-  import Xema.Utils, only: [update_id: 2]
-
   alias Xema.NoResolver
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaError
+  alias Xema.Utils
   alias Xema.Validator
 
   defmacro __using__(_opts) do
@@ -30,6 +29,14 @@ defmodule Xema.Base do
       def new(data, opts \\ [])
 
       def new(%Schema{} = content, opts) do
+        IO.inspect("--- base new ---")
+        IO.inspect(content, limit: :infinity)
+        IO.inspect(">>> ref ---")
+        content = map_refs(content)
+
+        IO.inspect("<<< ref ---")
+        IO.inspect("-----------------------------------------------")
+
         struct(
           __MODULE__,
           content: content,
@@ -78,6 +85,23 @@ defmodule Xema.Base do
       defp on_error(error), do: error
       defoverridable on_error: 1
 
+      defp map_refs(%Schema{} = schema) do
+        map(schema, fn
+          %Schema{ref: ref}, id when not is_nil(ref) ->
+            IO.inspect(id, label: :ref_id)
+            IO.inspect(ref, label: :ref)
+            Ref.new(ref, id)
+
+          %Schema{} = schema, id ->
+            IO.inspect(id, label: :schema_id)
+            schema
+
+          value, id ->
+            IO.inspect(id, label: :value_id)
+            value
+        end)
+      end
+
       defp get_refs(%Schema{} = schema) do
         schema
         |> reduce(%{id: nil}, fn
@@ -85,7 +109,7 @@ defmodule Xema.Base do
             put_ref(acc, ref)
 
           %Schema{id: id}, acc, _path when not is_nil(id) ->
-            update_id(acc, id)
+            Utils.update_id(acc, id)
 
           _xema, acc, _path ->
             acc
@@ -96,17 +120,10 @@ defmodule Xema.Base do
         end
       end
 
-      defp put_ref(%{id: id} = acc, %Ref{remote: true, url: nil} = ref) do
-        uri = update_id(id, ref.path)
-        Map.put(acc, uri, get_schema(uri))
+      defp put_ref(map, ref) do
+        IO.inspect(ref)
+        map
       end
-
-      defp put_ref(acc, %Ref{remote: true, url: url} = ref) do
-        uri = Path.join(url, ref.path)
-        Map.put(acc, uri, get_schema(uri))
-      end
-
-      defp put_ref(map, _ref), do: map
 
       defp get_schema(uri) do
         case resolve(uri) do
@@ -120,11 +137,11 @@ defmodule Xema.Base do
             raise reason
         end
       end
+
+      defp resolve(uri),
+        do: Application.get_env(:xema, :resolver, NoResolver).get(uri)
     end
   end
-
-  defp resolve(uri), do:
-    Application.get_env(:xema, :resolver, NoResolver).get(uri)
 
   @spec get_ids(Schema.t()) :: map | nil
   def get_ids(%Schema{} = schema) do
@@ -168,4 +185,40 @@ defmodule Xema.Base do
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 
+  @spec map(Schema.t(), function) :: Schema.t() | Ref.t()
+  def map(schema, fun) do
+    map(schema, fun, nil)
+  end
+
+  defp map(%Schema{} = schema, fun, id) do
+    id = Utils.update_uri(id, schema.id)
+
+    case fun.(schema, id) do
+      %Schema{} = schema ->
+        struct(
+          Schema,
+          schema
+          |> Map.to_list()
+          |> Enum.map(fn {k, v} -> {k, map(v, fun, id)} end)
+        )
+
+      %Ref{} = ref ->
+        ref
+    end
+  end
+
+  defp map(%{__struct__: _} = struct, _fun, _id), do: struct
+
+  defp map(map, fun, id) when is_map(map),
+    do:
+      map
+      |> Map.to_list()
+      |> Enum.into(%{}, fn {k, v} -> {k, map(v, fun, id)} end)
+
+  defp map(list, fun, id) when is_list(list),
+    do:
+      list
+      |> Enum.map(fn v -> map(v, fun, id) end)
+
+  defp map(value, _fun, _id), do: value
 end

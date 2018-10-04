@@ -218,6 +218,7 @@ defmodule Xema.RefTest do
       }
     end
 
+    @tag :new_ref_3
     test "validate/2 with valid value", %{schema: schema} do
       assert validate(schema, 42) == :ok
     end
@@ -448,19 +449,16 @@ defmodule Xema.RefTest do
       assert validate(schema, tree) == :ok
     end
 
+    @tag :new_ref_2
     test "ids", %{schema: schema} do
       assert schema.ids == %{
                "http://localhost:1234/node" => %Ref{
-                 path: nil,
-                 remote: false,
-                 url: nil,
-                 pointer: "/definitions/node"
+                 uri: nil,
+                 pointer: "#/definitions/node"
                },
                "http://localhost:1234/tree" => %Ref{
-                 path: nil,
-                 remote: false,
-                 url: nil,
-                 pointer: ""
+                 uri: nil,
+                 pointer: "#"
                }
              }
     end
