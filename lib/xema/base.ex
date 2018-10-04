@@ -87,10 +87,11 @@ defmodule Xema.Base do
 
       defp map_refs(%Schema{} = schema) do
         map(schema, fn
-          %Schema{ref: ref}, id when not is_nil(ref) ->
+          %Schema{ref: ref} = schema, id when not is_nil(ref) ->
             IO.inspect(id, label: :ref_id)
             IO.inspect(ref, label: :ref)
-            Ref.new(ref, id)
+            # Ref.new(ref, id)
+            %{schema | ref: Ref.new(ref, id)}
 
           %Schema{} = schema, id ->
             IO.inspect(id, label: :schema_id)
