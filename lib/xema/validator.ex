@@ -5,6 +5,7 @@ defmodule Xema.Validator do
 
   import Xema.Utils
 
+  alias Xema.Mapz
   alias Xema.Ref
   alias Xema.Schema
 
@@ -655,7 +656,7 @@ defmodule Xema.Validator do
 
   defp do_properties([{prop, schema} | props], map, errors, opts) do
     with true <- has_key?(map, prop),
-         {:ok, value} <- get_value(map, prop),
+         {:ok, value} <- Mapz.fetch(map, prop),
          :ok <- do_validate(schema, value, opts) do
       case has_key?(props, prop) do
         true -> do_properties(props, map, errors, opts)
