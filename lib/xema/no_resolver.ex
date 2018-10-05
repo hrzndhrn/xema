@@ -8,6 +8,6 @@ defmodule Xema.NoResolver do
   @doc """
   Returns always the error tuple `{:error, "No resolver configured."}`.
   """
-  @spec get(binary) :: {:error, binary}
-  def get(_), do: {:error, "No resolver configured."}
+  @spec fetch(binary) :: {:error, binary}
+  def fetch(_), do: {:error, "No resolver configured."}
 end

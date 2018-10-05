@@ -1,7 +1,7 @@
 defmodule Xema.ListTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema, only: [valid?: 2, validate: 2]
 
   describe "'list' schema" do
     setup do
@@ -22,12 +22,12 @@ defmodule Xema.ListTest do
       assert validate(schema, "not an array") == expected
     end
 
-    test "is_valid?/2 with a valid value", %{schema: schema} do
-      assert is_valid?(schema, [1])
+    test "valid?/2 with a valid value", %{schema: schema} do
+      assert valid?(schema, [1])
     end
 
-    test "is_valid?/2 with an invalid value", %{schema: schema} do
-      refute is_valid?(schema, 42)
+    test "valid?/2 with an invalid value", %{schema: schema} do
+      refute valid?(schema, 42)
     end
   end
 

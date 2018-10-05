@@ -1,7 +1,7 @@
 defmodule Draft4.DefaultTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "invalid type for default" do
     setup do
@@ -10,12 +10,12 @@ defmodule Draft4.DefaultTest do
 
     test "valid when property is specified", %{schema: schema} do
       data = %{foo: 13}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "still valid when the invalid default is used", %{schema: schema} do
       data = %{}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -31,12 +31,12 @@ defmodule Draft4.DefaultTest do
 
     test "valid when property is specified", %{schema: schema} do
       data = %{bar: "good"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "still valid when the invalid default is used", %{schema: schema} do
       data = %{}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 end

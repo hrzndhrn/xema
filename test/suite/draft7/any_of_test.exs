@@ -1,7 +1,7 @@
 defmodule Draft7.AnyOfTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "anyOf" do
     setup do
@@ -10,22 +10,22 @@ defmodule Draft7.AnyOfTest do
 
     test "first anyOf valid", %{schema: schema} do
       data = 1
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "second anyOf valid", %{schema: schema} do
       data = 2.5
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "both anyOf valid", %{schema: schema} do
       data = 3
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "neither anyOf valid", %{schema: schema} do
       data = 1.5
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -36,17 +36,17 @@ defmodule Draft7.AnyOfTest do
 
     test "mismatch base schema", %{schema: schema} do
       data = 3
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "one anyOf valid", %{schema: schema} do
       data = "foobar"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "both anyOf invalid", %{schema: schema} do
       data = "foo"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -57,7 +57,7 @@ defmodule Draft7.AnyOfTest do
 
     test "any value is valid", %{schema: schema} do
       data = "foo"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -68,7 +68,7 @@ defmodule Draft7.AnyOfTest do
 
     test "any value is valid", %{schema: schema} do
       data = "foo"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -79,7 +79,7 @@ defmodule Draft7.AnyOfTest do
 
     test "any value is invalid", %{schema: schema} do
       data = "foo"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -96,22 +96,22 @@ defmodule Draft7.AnyOfTest do
 
     test "first anyOf valid (complex)", %{schema: schema} do
       data = %{bar: 2}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "second anyOf valid (complex)", %{schema: schema} do
       data = %{foo: "baz"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "both anyOf valid (complex)", %{schema: schema} do
       data = %{bar: 2, foo: "baz"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "neither anyOf valid (complex)", %{schema: schema} do
       data = %{bar: "quux", foo: 2}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 end

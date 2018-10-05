@@ -1,7 +1,7 @@
 defmodule Draft6.MaxPropertiesTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "maxProperties validation" do
     setup do
@@ -10,32 +10,32 @@ defmodule Draft6.MaxPropertiesTest do
 
     test "shorter is valid", %{schema: schema} do
       data = %{foo: 1}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "exact length is valid", %{schema: schema} do
       data = %{bar: 2, foo: 1}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "too long is invalid", %{schema: schema} do
       data = %{bar: 2, baz: 3, foo: 1}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "ignores arrays", %{schema: schema} do
       data = [1, 2, 3]
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "ignores strings", %{schema: schema} do
       data = "foobar"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "ignores other non-objects", %{schema: schema} do
       data = 12
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 end

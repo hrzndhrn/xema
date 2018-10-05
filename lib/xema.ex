@@ -5,7 +5,6 @@ defmodule Xema do
 
   use Xema.Base
 
-  alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaError
 
@@ -48,7 +47,7 @@ defmodule Xema do
       }
       iex> Xema.validate(schema, [2, 3, 4])
       :ok
-      iex> Xema.is_valid?(schema, [2, 3, 4])
+      iex> Xema.valid?(schema, [2, 3, 4])
       true
       iex> Xema.validate(schema, [2, 3, 1])
       {:error, [{2, %{value: 1, minimum: 2}}]}
@@ -108,8 +107,6 @@ defmodule Xema do
   defp schema(value, keywords)
        when not is_tuple(value),
        do: schema({value, []}, keywords)
-
-  defp schema({:ref, pointer}, _), do: Ref.new(pointer)
 
   defp schema({list, keywords}, _) when is_list(list),
     do:
@@ -342,7 +339,7 @@ defmodule Xema do
 
   defp do_schema_to_string(:any, schema, true) do
     case Map.to_list(schema) do
-      [{:ref, ref}] -> ~s(:ref, "#{Ref.get_pointer(ref)}")
+      [{:ref, ref}] -> ~s(:ref, "#{ref.pointer}")
       [{key, value}] -> "#{inspect(key)}, #{value_to_string(value)}"
       _ -> ":any, #{schema_to_string(schema)}"
     end
@@ -362,10 +359,6 @@ defmodule Xema do
 
   defp value_to_string(%{__struct__: MapSet} = map_set),
     do: value_to_string(map_set |> MapSet.new() |> MapSet.to_list())
-
-  defp value_to_string(%{__struct__: Xema.Ref} = ref) do
-    "#{ref}"
-  end
 
   defp value_to_string(list) when is_list(list),
     do:
@@ -387,7 +380,7 @@ defmodule Xema do
 
   @spec key_value_to_string({atom | String.t(), any}) :: String.t()
   defp key_value_to_string({:ref, %{__struct__: Xema.Ref} = ref}),
-    do: "ref: #{inspect(Ref.get_pointer(ref))}"
+    do: ~s(ref: "#{ref.pointer}")
 
   defp key_value_to_string({key, value}) when is_atom(key),
     do: "#{key}: #{value_to_string(value)}"
