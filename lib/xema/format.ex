@@ -4,6 +4,7 @@ defmodule Xema.Format do
   """
 
   @formats [
+    :date,
     :date_time,
     :email,
     :hostname,
@@ -23,7 +24,8 @@ defmodule Xema.Format do
 
   @typedoc "The list of supported validators."
   @type format ::
-          :date_time
+          :date
+          | :date_time
           | :email
           | :hostname
           | :ipv4
@@ -117,6 +119,20 @@ defmodule Xema.Format do
   @spec time?(any) :: boolean
   def time?(string) when is_binary(string),
     do: date_time?("2000-01-01T#{string}")
+
+  #
+  # Date
+  #
+
+  @doc """
+  Checks if the value is a valid date.
+
+  This function returns `true` if the value is a string and is formatted as
+  defined by [RFC 3339](https://tools.ietf.org/html/rfc3339), `false` otherwise.
+  """
+  @spec time?(any) :: boolean
+  def date?(string) when is_binary(string),
+    do: date_time?("#{string}T00:00:00.0Z")
 
   #
   # Email
