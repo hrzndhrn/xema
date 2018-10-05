@@ -24,6 +24,7 @@ defmodule Xema.Schema do
   * `additional_properties` disallow additional properties, if set to true.
   * 'all_of' a list of schemas they must all be valid.
   * 'any_of' a list of schemas with any valid schema.
+  * `comment` for the schema.
   * `const` specifies a constant.
   * `contains` validates a list whether any item is valid for the given schema.
   * `data` none schema data.
@@ -34,6 +35,8 @@ defmodule Xema.Schema do
   * `description` of the schema.
   * `else` see `if`, `then`, `else`.
   * `enum` specifies an enumeration
+  * `examples` the value of this keyword must be an array. There are no
+    restrictions placed on the values within the array.
   * `exclusive_maximum` is a boolean. When true, it indicates that the range
     excludes the maximum value.
   * `exclusive_minimum` is a boolean. When true, it indicates that the range
@@ -74,6 +77,7 @@ defmodule Xema.Schema do
           additional_properties: map | boolean | nil,
           all_of: [Schema.t()] | nil,
           any_of: [Schema.t()] | nil,
+          comment: String.t() |nil,
           const: any,
           contains: Xema.t() | Schema.t(),
           data: any,
@@ -120,6 +124,7 @@ defmodule Xema.Schema do
     :additional_properties,
     :all_of,
     :any_of,
+    :comment,
     :const,
     :contains,
     :data,
