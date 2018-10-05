@@ -11,6 +11,7 @@ defmodule Xema.Format do
     :ipv6,
     :json_pointer,
     :relative_json_pointer,
+    :time,
     :uri,
     :uri_fragment,
     :uri_path,
@@ -29,6 +30,7 @@ defmodule Xema.Format do
           | :ipv6
           | :json_pointer
           | :relative_json_pointer
+          | :time
           | :uri
           | :uri_fragment
           | :uri_path
@@ -59,6 +61,10 @@ defmodule Xema.Format do
       unquote(:"#{Atom.to_string(fmt)}?")(string)
     end
   end
+
+  #
+  # Date-Time
+  #
 
   @doc """
   Checks if the value is a valid date time.
@@ -97,6 +103,24 @@ defmodule Xema.Format do
       _ -> false
     end
   end
+
+  #
+  # Time
+  #
+
+  @doc """
+  Checks if the value is a valid time.
+
+  This function returns `true` if the value is a string and is formatted as
+  defined by [RFC 3339](https://tools.ietf.org/html/rfc3339), `false` otherwise.
+  """
+  @spec time?(any) :: boolean
+  def time?(string) when is_binary(string),
+    do: date_time?("2000-01-01T#{string}")
+
+  #
+  # Email
+  #
 
   @doc """
   Checks if the value is a valid email.
@@ -285,6 +309,7 @@ defmodule Xema.Format do
     case String.split(string, "/", parts: 2) do
       [pre, pointer] ->
         Regex.match?(~r/^\d+$/, pre) && json_pointer?("/#{pointer}")
+
       _ ->
         false
     end
