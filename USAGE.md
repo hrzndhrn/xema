@@ -3,6 +3,7 @@
 * [Type any](#any)
 * [Type nil](#nil)
 * [Type boolean](#boolean)
+* [Type atom](#atom)
 * [Type string](#string)
   * [Length](#length)
   * [Regular Expression](#regex)
@@ -78,6 +79,25 @@ iex> Xema.validate schema, 0
 {:error, %{type: :boolean, value: 0}}
 iex> Xema.valid? schema, nil
 false
+```
+
+## <a id="atom"></a> Type atom
+
+The atom type matches only atoms. Schemas of type atom match also the atoms
+`true`, `false`, and `nil`.
+```Elixir
+iex> schema = Xema.new :atom
+%Xema{content: %Xema.Schema{type: :atom}}
+iex> Xema.validate schema, :foo
+:ok
+iex> Xema.valid? schema, "foo"
+false
+iex> Xema.validate schema, 0
+{:error, %{type: :atom, value: 0}}
+iex> Xema.valid? schema, nil
+true
+iex> Xema.valid? schema, false
+true
 ```
 
 ## <a id="string"></a> Type string
