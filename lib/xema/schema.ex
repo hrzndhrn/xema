@@ -26,6 +26,8 @@ defmodule Xema.Schema do
   * 'any_of' a list of schemas with any valid schema.
   * `comment` for the schema.
   * `const` specifies a constant.
+  * `content_encoding` annotation for the encoding.
+  * `content_media_type` annotation for the media type.
   * `contains` validates a list whether any item is valid for the given schema.
   * `data` none schema data.
   * `default` this keyword can be used to supply a default JSON value.
@@ -79,6 +81,8 @@ defmodule Xema.Schema do
           any_of: [Schema.t()] | nil,
           comment: String.t() |nil,
           const: any,
+          content_encoding: String.t() |nil,
+          content_media_type: String.t() |nil,
           contains: Xema.t() | Schema.t(),
           data: any,
           default: any,
@@ -126,6 +130,8 @@ defmodule Xema.Schema do
     :any_of,
     :comment,
     :const,
+    :content_encoding,
+    :content_media_type,
     :contains,
     :data,
     :default,

@@ -9,6 +9,8 @@ defmodule Xema.AnnotationsTest do
     examples = [%{test: "data"}]
     default = 42
     comment = "No"
+    content_media_type = "media"
+    content_encoding = "encoding"
 
     xema =
       Xema.new(
@@ -19,7 +21,9 @@ defmodule Xema.AnnotationsTest do
         description: description,
         examples: examples,
         default: default,
-        comment: comment
+        comment: comment,
+        content_media_type: content_media_type,
+        content_encoding: content_encoding
       )
 
     assert xema.content.id == id
@@ -29,5 +33,7 @@ defmodule Xema.AnnotationsTest do
     assert xema.content.examples == examples
     assert xema.content.default == default
     assert xema.content.comment == comment
+    assert xema.content.content_media_type == content_media_type
+    assert xema.content.content_encoding == content_encoding
   end
 end
