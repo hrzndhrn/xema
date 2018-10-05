@@ -10,6 +10,7 @@ defmodule Xema.Format do
     :ipv4,
     :ipv6,
     :json_pointer,
+    :relative_json_pointer,
     :uri,
     :uri_fragment,
     :uri_path,
@@ -27,6 +28,7 @@ defmodule Xema.Format do
           | :ipv4
           | :ipv6
           | :json_pointer
+          | :relative_json_pointer
           | :uri
           | :uri_fragment
           | :uri_path
@@ -260,6 +262,33 @@ defmodule Xema.Format do
     do: Regex.match?(@json_pointer, string)
 
   def json_pointer?(_), do: false
+
+  #
+  # Relative JSON Pointer
+  #
+
+  @doc """
+  Checks if the value is a valid JSON poiner.
+  """
+  @spec relative_json_pointer?(any) :: boolean
+  def relative_json_pointer?(string) when is_binary(string) do
+    with false <- Regex.match?(~r/^\d#$/, string),
+         false <- Regex.match?(~r/^\d$/, string),
+         false <- do_relative_json_pointer?(string) do
+      false
+    end
+  end
+
+  def relative_json_pointer?(_), do: false
+
+  def do_relative_json_pointer?(string) do
+    case String.split(string, "/", parts: 2) do
+      [pre, pointer] ->
+        Regex.match?(~r/^\d+$/, pre) && json_pointer?("/#{pointer}")
+      _ ->
+        false
+    end
+  end
 
   #
   # URI
