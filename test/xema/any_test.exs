@@ -44,7 +44,7 @@ defmodule Xema.AnyTest do
   describe "'any' schema with enum:" do
     setup do
       %{
-        schema: Xema.new(:any, enum: [1, 1.2, [1], "foo"])
+        schema: Xema.new(:any, enum: [1, 1.2, [1], "foo", :bar])
       }
     end
 
@@ -53,10 +53,11 @@ defmodule Xema.AnyTest do
       assert validate(schema, 1.2) == :ok
       assert validate(schema, "foo") == :ok
       assert validate(schema, [1]) == :ok
+      assert validate(schema, :bar) == :ok
     end
 
     test "validate/2 with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{value: 2, enum: [1, 1.2, [1], "foo"]}}
+      expected = {:error, %{value: 2, enum: [1, 1.2, [1], "foo", :bar]}}
 
       assert validate(schema, 2) == expected
     end
