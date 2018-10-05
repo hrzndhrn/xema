@@ -187,6 +187,7 @@ defmodule Xema.Schema do
 
   @types [
     :any,
+    :atom,
     :boolean,
     false,
     :float,

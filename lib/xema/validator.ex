@@ -62,6 +62,9 @@ defmodule Xema.Validator do
              :ok <- do_validate(:map, schema, value, opts),
              do: :ok
 
+      %{type: :atom} ->
+        type(schema, value)
+
       %{type: type} when is_atom(type) ->
         do_validate(type, schema, value, opts)
     end
