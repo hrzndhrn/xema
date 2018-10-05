@@ -9,3 +9,6 @@
 + Add annotation keywords
   + `examples`
   + `comment`
+  + `contentEncoding`
+  + `contentMediaType`contentMediaType
++ Add new `format` checks.

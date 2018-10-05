@@ -4,12 +4,15 @@ defmodule Xema.Format do
   """
 
   @formats [
+    :date,
     :date_time,
     :email,
     :hostname,
     :ipv4,
     :ipv6,
     :json_pointer,
+    :relative_json_pointer,
+    :time,
     :uri,
     :uri_fragment,
     :uri_path,
@@ -21,12 +24,15 @@ defmodule Xema.Format do
 
   @typedoc "The list of supported validators."
   @type format ::
-          :date_time
+          :date
+          | :date_time
           | :email
           | :hostname
           | :ipv4
           | :ipv6
           | :json_pointer
+          | :relative_json_pointer
+          | :time
           | :uri
           | :uri_fragment
           | :uri_path
@@ -57,6 +63,10 @@ defmodule Xema.Format do
       unquote(:"#{Atom.to_string(fmt)}?")(string)
     end
   end
+
+  #
+  # Date-Time
+  #
 
   @doc """
   Checks if the value is a valid date time.
@@ -95,6 +105,38 @@ defmodule Xema.Format do
       _ -> false
     end
   end
+
+  #
+  # Time
+  #
+
+  @doc """
+  Checks if the value is a valid time.
+
+  This function returns `true` if the value is a string and is formatted as
+  defined by [RFC 3339](https://tools.ietf.org/html/rfc3339), `false` otherwise.
+  """
+  @spec time?(any) :: boolean
+  def time?(string) when is_binary(string),
+    do: date_time?("2000-01-01T#{string}")
+
+  #
+  # Date
+  #
+
+  @doc """
+  Checks if the value is a valid date.
+
+  This function returns `true` if the value is a string and is formatted as
+  defined by [RFC 3339](https://tools.ietf.org/html/rfc3339), `false` otherwise.
+  """
+  @spec time?(any) :: boolean
+  def date?(string) when is_binary(string),
+    do: date_time?("#{string}T00:00:00.0Z")
+
+  #
+  # Email
+  #
 
   @doc """
   Checks if the value is a valid email.
@@ -260,6 +302,34 @@ defmodule Xema.Format do
     do: Regex.match?(@json_pointer, string)
 
   def json_pointer?(_), do: false
+
+  #
+  # Relative JSON Pointer
+  #
+
+  @doc """
+  Checks if the value is a valid JSON poiner.
+  """
+  @spec relative_json_pointer?(any) :: boolean
+  def relative_json_pointer?(string) when is_binary(string) do
+    with false <- Regex.match?(~r/^\d#$/, string),
+         false <- Regex.match?(~r/^\d$/, string),
+         false <- do_relative_json_pointer?(string) do
+      false
+    end
+  end
+
+  def relative_json_pointer?(_), do: false
+
+  def do_relative_json_pointer?(string) do
+    case String.split(string, "/", parts: 2) do
+      [pre, pointer] ->
+        Regex.match?(~r/^\d+$/, pre) && json_pointer?("/#{pointer}")
+
+      _ ->
+        false
+    end
+  end
 
   #
   # URI

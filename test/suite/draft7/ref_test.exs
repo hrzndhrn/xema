@@ -147,6 +147,35 @@ defmodule Draft7.RefTest do
     end
   end
 
+  describe "ref overrides any sibling keywords" do
+    setup do
+      %{
+        schema:
+          Xema.new(:any,
+            definitions: %{reffed: :list},
+            properties: %{
+              foo: {:any, [max_items: 2, ref: "#/definitions/reffed"]}
+            }
+          )
+      }
+    end
+
+    test "ref valid", %{schema: schema} do
+      data = %{foo: []}
+      assert valid?(schema, data)
+    end
+
+    test "ref valid, maxItems ignored", %{schema: schema} do
+      data = %{foo: [1, 2, 3]}
+      assert valid?(schema, data)
+    end
+
+    test "ref invalid", %{schema: schema} do
+      data = %{foo: "string"}
+      refute valid?(schema, data)
+    end
+  end
+
   describe "property named $ref that is not a reference" do
     setup do
       %{schema: Xema.new(:properties, %{"$ref": :string})}

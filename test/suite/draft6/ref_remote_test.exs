@@ -19,6 +19,24 @@ defmodule Draft6.RefRemoteTest do
     end
   end
 
+  describe "fragment within remote ref" do
+    setup do
+      %{
+        schema: Xema.new(:ref, "http://localhost:1234/subSchemas.exon#/integer")
+      }
+    end
+
+    test "remote fragment valid", %{schema: schema} do
+      data = 1
+      assert valid?(schema, data)
+    end
+
+    test "remote fragment invalid", %{schema: schema} do
+      data = "a"
+      refute valid?(schema, data)
+    end
+  end
+
   describe "ref within remote ref" do
     setup do
       %{
