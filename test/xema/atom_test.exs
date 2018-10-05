@@ -17,8 +17,7 @@ defmodule Xema.AtomTest do
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      assert validate(schema, "foo") ==
-               {:error, %{type: :atom, value: "foo"}}
+      assert validate(schema, "foo") == {:error, %{type: :atom, value: "foo"}}
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
