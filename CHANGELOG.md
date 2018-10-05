@@ -9,3 +9,4 @@
 + Add annotation keywords
   + `examples`
   + `comment`
++ Add new `format` checks.
