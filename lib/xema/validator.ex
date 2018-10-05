@@ -57,6 +57,11 @@ defmodule Xema.Validator do
              :ok <- do_validate(:list, schema, value, opts),
              do: :ok
 
+      %{type: :tuple} ->
+        with :ok <- type(schema, value),
+             :ok <- do_validate(:list, schema, value, opts),
+             do: :ok
+
       %{type: :map} ->
         with :ok <- type(schema, value),
              :ok <- do_validate(:map, schema, value, opts),
@@ -99,8 +104,8 @@ defmodule Xema.Validator do
   defp do_validate(:list, schema, value, opts) do
     with :ok <- min_items(schema, value),
          :ok <- max_items(schema, value),
-         :ok <- items(schema, value, opts),
          :ok <- unique(schema, value),
+         :ok <- items(schema, value, opts),
          :ok <- validate_contains(schema, value),
          do: :ok
   end
@@ -162,13 +167,14 @@ defmodule Xema.Validator do
   @spec type?(atom, any) :: boolean
   defp type?(:any, _value), do: true
   defp type?(:atom, value), do: is_atom(value)
+  defp type?(:boolean, value), do: is_boolean(value)
   defp type?(:string, value), do: is_binary(value)
+  defp type?(:tuple, value), do: is_tuple(value)
   defp type?(:number, value), do: is_number(value)
   defp type?(:integer, value), do: is_integer(value)
   defp type?(:float, value), do: is_float(value)
   defp type?(:map, value), do: is_map(value)
   defp type?(:list, value), do: is_list(value)
-  defp type?(:boolean, value), do: is_boolean(value)
   defp type?(nil, nil), do: true
   defp type?(_, _), do: false
 
@@ -200,12 +206,22 @@ defmodule Xema.Validator do
   @spec validate_contains(Xema.t() | Schema.t(), list) :: result
   defp validate_contains(%{contains: nil}, _list), do: :ok
 
-  defp validate_contains(%{contains: schema}, list) do
+  defp validate_contains(%{contains: schema}, list) when is_list(list) do
     list
     |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
     |> case do
       true -> :ok
       false -> {:error, %{value: list, contains: schema}}
+    end
+  end
+
+  defp validate_contains(%{contains: schema}, tuple) when is_tuple(tuple) do
+    tuple
+    |> Tuple.to_list()
+    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
+    |> case do
+      true -> :ok
+      false -> {:error, %{value: tuple, contains: schema}}
     end
   end
 
@@ -471,33 +487,43 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec min_items(Xema.Schema.t(), list) :: result
-  defp min_items(%{min_items: nil}, _list), do: :ok
+  @spec min_items(Xema.Schema.t(), list | tuple) :: result
+  defp min_items(%{min_items: nil}, _), do: :ok
 
-  defp min_items(%{min_items: min}, list) when length(list) >= min do
-    :ok
+  defp min_items(%{min_items: min}, val) do
+    case size(val) >= min do
+      true -> :ok
+      false -> {:error, %{value: val, min_items: min}}
+    end
   end
 
-  defp min_items(%{min_items: min}, list),
-    do: {:error, %{value: list, min_items: min}}
-
-  @spec max_items(Xema.Schema.t(), list) :: result
+  @spec max_items(Xema.Schema.t(), list | tuple) :: result
   defp max_items(%{max_items: nil}, _list), do: :ok
 
-  defp max_items(%{max_items: max}, list) when length(list) <= max do
-    :ok
+  defp max_items(%{max_items: max}, val) do
+    case size(val) <= max do
+      true -> :ok
+      false -> {:error, %{value: val, max_items: max}}
+    end
   end
 
-  defp max_items(%{max_items: max}, list),
-    do: {:error, %{value: list, max_items: max}}
-
-  @spec unique(Xema.Schema.t(), list) :: result
+  @spec unique(Xema.Schema.t(), list | tuple) :: result
   defp unique(%{unique_items: nil}, _list), do: :ok
 
-  defp unique(%{unique_items: true}, list) do
+  defp unique(%{unique_items: true}, list) when is_list(list) do
     case is_unique?(list) do
       true -> :ok
       false -> {:error, %{value: list, unique_items: true}}
+    end
+  end
+
+  defp unique(%{unique_items: true}, tuple) when is_tuple(tuple) do
+    tuple
+    |> Tuple.to_list()
+    |> is_unique?()
+    |> case do
+      true -> :ok
+      false -> {:error, %{value: tuple, unique_items: true}}
     end
   end
 
@@ -514,6 +540,9 @@ defmodule Xema.Validator do
 
   @spec items(Xema.Schema.t(), list, keyword) :: result
   defp items(%{items: nil}, _list, _opts), do: :ok
+
+  defp items(schema, tuple, opts) when is_tuple(tuple),
+    do: items(schema, Tuple.to_list(tuple), opts)
 
   defp items(%{items: items, additional_items: additional_items}, list, opts)
        when is_list(items),

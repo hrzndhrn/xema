@@ -197,7 +197,8 @@ defmodule Xema.Schema do
     nil,
     :number,
     :string,
-    true
+    true,
+    :tuple
   ]
 
   @spec new(keyword) :: Schema.t()

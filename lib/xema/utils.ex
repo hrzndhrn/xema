@@ -25,4 +25,11 @@ defmodule Xema.Utils do
   def update_uri(nil, id), do: URI.parse(id)
 
   def update_uri(old, new), do: old |> URI.merge(new)
+
+  @spec size(map | list | tuple) :: integer
+  def size(map) when is_map(map), do: map_size(map)
+
+  def size(list) when is_list(list), do: length(list)
+
+  def size(tuple) when is_tuple(tuple), do: tuple_size(tuple)
 end
