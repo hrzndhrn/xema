@@ -1,7 +1,7 @@
 defmodule Draft7.IfThenElseTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "ignore if without then or else" do
     setup do
@@ -10,12 +10,12 @@ defmodule Draft7.IfThenElseTest do
 
     test "valid when valid against lone if", %{schema: schema} do
       data = 0
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "valid when invalid against lone if", %{schema: schema} do
       data = "hello"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -26,12 +26,12 @@ defmodule Draft7.IfThenElseTest do
 
     test "valid when valid against lone then", %{schema: schema} do
       data = 0
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "valid when invalid against lone then", %{schema: schema} do
       data = "hello"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -42,12 +42,12 @@ defmodule Draft7.IfThenElseTest do
 
     test "valid when valid against lone else", %{schema: schema} do
       data = 0
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "valid when invalid against lone else", %{schema: schema} do
       data = "hello"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -61,17 +61,17 @@ defmodule Draft7.IfThenElseTest do
 
     test "valid through then", %{schema: schema} do
       data = -1
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "invalid through then", %{schema: schema} do
       data = -100
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "valid when if test fails", %{schema: schema} do
       data = 3
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -85,17 +85,17 @@ defmodule Draft7.IfThenElseTest do
 
     test "valid when if test passes", %{schema: schema} do
       data = -1
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "valid through else", %{schema: schema} do
       data = 4
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "invalid through else", %{schema: schema} do
       data = 3
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -113,22 +113,22 @@ defmodule Draft7.IfThenElseTest do
 
     test "valid through then", %{schema: schema} do
       data = -1
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "invalid through then", %{schema: schema} do
       data = -100
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "valid through else", %{schema: schema} do
       data = 4
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "invalid through else", %{schema: schema} do
       data = 3
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -146,12 +146,12 @@ defmodule Draft7.IfThenElseTest do
 
     test "valid, but woud have been invalid through then", %{schema: schema} do
       data = -100
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "valid, but would have been invalid through else", %{schema: schema} do
       data = 3
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 end

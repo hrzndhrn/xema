@@ -1,7 +1,7 @@
 defmodule Draft7.Optional.BignumTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "integer (1)" do
     setup do
@@ -12,7 +12,7 @@ defmodule Draft7.Optional.BignumTest do
       data =
         12_345_678_910_111_213_141_516_171_819_202_122_232_425_262_728_293_031
 
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -25,7 +25,7 @@ defmodule Draft7.Optional.BignumTest do
       data =
         98_249_283_749_234_923_498_293_171_823_948_729_348_710_298_301_928_331
 
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -38,7 +38,7 @@ defmodule Draft7.Optional.BignumTest do
       data =
         -12_345_678_910_111_213_141_516_171_819_202_122_232_425_262_728_293_031
 
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -51,7 +51,7 @@ defmodule Draft7.Optional.BignumTest do
       data =
         -98_249_283_749_234_923_498_293_171_823_948_729_348_710_298_301_928_331
 
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -64,7 +64,7 @@ defmodule Draft7.Optional.BignumTest do
       data =
         98_249_283_749_234_923_498_293_171_823_948_729_348_710_298_301_928_331
 
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -75,7 +75,7 @@ defmodule Draft7.Optional.BignumTest do
 
     test "comparison works for high numbers", %{schema: schema} do
       data = 18_446_744_073_709_551_600
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -86,7 +86,7 @@ defmodule Draft7.Optional.BignumTest do
 
     test "comparison works for high numbers", %{schema: schema} do
       data = 9.727837981879871e26
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -97,7 +97,7 @@ defmodule Draft7.Optional.BignumTest do
 
     test "comparison works for very negative numbers", %{schema: schema} do
       data = -18_446_744_073_709_551_600
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -108,7 +108,7 @@ defmodule Draft7.Optional.BignumTest do
 
     test "comparison works for very negative numbers", %{schema: schema} do
       data = -9.727837981879871e26
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 end

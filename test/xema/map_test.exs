@@ -1,7 +1,7 @@
 defmodule Xema.MapTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema, only: [valid?: 2, validate: 2]
 
   describe "empty 'map' schema" do
     setup do
@@ -18,12 +18,12 @@ defmodule Xema.MapTest do
       assert validate(schema, "foo") == expected
     end
 
-    test "is_valid?/2 with a valid value", %{schema: schema} do
-      assert is_valid?(schema, %{})
+    test "valid?/2 with a valid value", %{schema: schema} do
+      assert valid?(schema, %{})
     end
 
-    test "is_valid?/2 with an invalid value", %{schema: schema} do
-      refute is_valid?(schema, 55)
+    test "valid?/2 with an invalid value", %{schema: schema} do
+      refute valid?(schema, 55)
     end
   end
 
@@ -586,15 +586,15 @@ defmodule Xema.MapTest do
     end
 
     test "a cent", %{schema: schema} do
-      assert is_valid?(schema, %{cent: 1})
+      assert valid?(schema, %{cent: 1})
     end
 
     test "a pound", %{schema: schema} do
-      assert is_valid?(schema, %{pound: 1})
+      assert valid?(schema, %{pound: 1})
     end
 
     test "a penny and a pound", %{schema: schema} do
-      assert is_valid?(schema, %{penny: 1, pound: 1})
+      assert valid?(schema, %{penny: 1, pound: 1})
     end
 
     test "a penny", %{schema: schema} do

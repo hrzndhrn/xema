@@ -1,7 +1,7 @@
 defmodule Draft7.AllOfTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "allOf" do
     setup do
@@ -16,22 +16,22 @@ defmodule Draft7.AllOfTest do
 
     test "allOf", %{schema: schema} do
       data = %{bar: 2, foo: "baz"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "mismatch second", %{schema: schema} do
       data = %{foo: "baz"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "mismatch first", %{schema: schema} do
       data = %{bar: 2}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "wrong type", %{schema: schema} do
       data = %{bar: "quux", foo: "baz"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -52,27 +52,27 @@ defmodule Draft7.AllOfTest do
 
     test "valid", %{schema: schema} do
       data = %{bar: 2, baz: nil, foo: "quux"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "mismatch base schema", %{schema: schema} do
       data = %{baz: nil, foo: "quux"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "mismatch first allOf", %{schema: schema} do
       data = %{bar: 2, baz: nil}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "mismatch second allOf", %{schema: schema} do
       data = %{bar: 2, foo: "quux"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "mismatch both", %{schema: schema} do
       data = %{bar: 2}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -83,12 +83,12 @@ defmodule Draft7.AllOfTest do
 
     test "valid", %{schema: schema} do
       data = 25
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "mismatch one", %{schema: schema} do
       data = 35
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -99,7 +99,7 @@ defmodule Draft7.AllOfTest do
 
     test "any value is valid", %{schema: schema} do
       data = "foo"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -110,7 +110,7 @@ defmodule Draft7.AllOfTest do
 
     test "any value is invalid", %{schema: schema} do
       data = "foo"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -121,7 +121,7 @@ defmodule Draft7.AllOfTest do
 
     test "any value is invalid", %{schema: schema} do
       data = "foo"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 end

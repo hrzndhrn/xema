@@ -1,7 +1,7 @@
 defmodule Draft4.MultipleOfTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "by int" do
     setup do
@@ -10,17 +10,17 @@ defmodule Draft4.MultipleOfTest do
 
     test "int by int", %{schema: schema} do
       data = 10
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "int by int fail", %{schema: schema} do
       data = 7
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "ignores non-numbers", %{schema: schema} do
       data = "foo"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -31,17 +31,17 @@ defmodule Draft4.MultipleOfTest do
 
     test "zero is multiple of anything", %{schema: schema} do
       data = 0
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "4.5 is multiple of 1.5", %{schema: schema} do
       data = 4.5
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "35 is not multiple of 1.5", %{schema: schema} do
       data = 35
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -52,12 +52,12 @@ defmodule Draft4.MultipleOfTest do
 
     test "0.0075 is multiple of 0.0001", %{schema: schema} do
       data = 0.0075
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "0.00751 is not multiple of 0.0001", %{schema: schema} do
       data = 0.00751
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 end

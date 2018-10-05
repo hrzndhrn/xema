@@ -1,7 +1,7 @@
 defmodule Draft7.EnumTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "simple enum validation" do
     setup do
@@ -10,12 +10,12 @@ defmodule Draft7.EnumTest do
 
     test "one of the enum is valid", %{schema: schema} do
       data = 1
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "something else is invalid", %{schema: schema} do
       data = 4
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -26,17 +26,17 @@ defmodule Draft7.EnumTest do
 
     test "one of the enum is valid", %{schema: schema} do
       data = []
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "something else is invalid", %{schema: schema} do
       data = nil
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "objects are deep compared", %{schema: schema} do
       data = %{foo: false}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 
@@ -53,22 +53,22 @@ defmodule Draft7.EnumTest do
 
     test "both properties are valid", %{schema: schema} do
       data = %{bar: "bar", foo: "foo"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "missing optional property is valid", %{schema: schema} do
       data = %{bar: "bar"}
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "missing required property is invalid", %{schema: schema} do
       data = %{foo: "foo"}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "missing all properties is invalid", %{schema: schema} do
       data = %{}
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
   end
 end

@@ -1,7 +1,7 @@
 defmodule Xema.IntegerTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2, validate: 2]
+  import Xema, only: [valid?: 2, validate: 2]
 
   describe "'integer' schema" do
     setup do
@@ -21,12 +21,12 @@ defmodule Xema.IntegerTest do
                {:error, %{type: :integer, value: "foo"}}
     end
 
-    test "is_valid?/2 with a valid value", %{schema: schema} do
-      assert is_valid?(schema, 5)
+    test "valid?/2 with a valid value", %{schema: schema} do
+      assert valid?(schema, 5)
     end
 
-    test "is_valid?/2 with an invalid value", %{schema: schema} do
-      refute(is_valid?(schema, [1]))
+    test "valid?/2 with an invalid value", %{schema: schema} do
+      refute(valid?(schema, [1]))
     end
   end
 

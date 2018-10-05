@@ -3,68 +3,36 @@ defmodule Xema.Ref do
   This module contains a struct and function to represent and handle references.
   """
 
-  import Xema.Utils, only: [get_value: 2, update_nil: 2]
-
+  alias Xema.Mapz
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaError
+  alias Xema.Utils
 
   require Logger
 
   @type t :: %Xema.Ref{
-          path: String.t() | nil,
           pointer: String.t(),
-          remote: boolean(),
-          url: String.t() | nil
+          uri: URI.t() | nil
         }
 
   defstruct pointer: nil,
-            path: nil,
-            remote: false,
-            url: nil
-
-  @keywords %Schema{}
-            |> Map.keys()
-            |> Enum.map(fn key -> Atom.to_string(key) end)
+            uri: nil
 
   @doc """
   Creates a new reference from the given `pointer`.
-
-  ## Examples
-
-      iex> Xema.Ref.new("http://foo.com/bar/baz.exon#/definitions/abc")
-      %Xema.Ref{
-        path: "/bar/baz.exon",
-        pointer: "/definitions/abc",
-        remote: true,
-        url: "http://foo.com:80"
-      }
-
   """
   @spec new(String.t()) :: Ref.t()
-  def new(pointer) when is_binary(pointer) do
-    uri = URI.parse(pointer)
-    path = uri |> Map.get(:path)
-    pointer = uri |> Map.get(:fragment)
-    remote = !is_nil(path) && Regex.match?(~r/(?:\..+#)|(?:\..+$)/, path)
+  def new(pointer), do: %Ref{pointer: pointer}
 
-    url =
-      unless is_nil(uri.scheme) do
-        port =
-          if is_nil(uri.port),
-            do: "",
-            else: ":#{Integer.to_string(uri.port)}"
+  @spec new(String.t(), URI.t() | nil) :: Ref.t()
+  def new("#" <> _ = pointer, _uri), do: new(pointer)
 
-        "#{uri.scheme}://#{uri.host}#{port}"
-      end
-
-    %Ref{
+  def new(pointer, uri) when is_binary(pointer),
+    do: %Ref{
       pointer: pointer,
-      path: path,
-      remote: remote,
-      url: url
+      uri: Utils.update_uri(uri, pointer)
     }
-  end
 
   @doc """
   Validates the given value with the referenced schema.
@@ -72,6 +40,9 @@ defmodule Xema.Ref do
   @spec validate(Ref.t(), any, keyword) :: :ok | {:error, map}
   def validate(ref, value, opts) do
     case get(ref, opts) do
+      {:ok, %Xema{} = xema, opts} ->
+        Xema.validate(xema, value, opts)
+
       {:ok, %Schema{} = schema, opts} ->
         Xema.validate(schema, value, opts)
 
@@ -80,113 +51,91 @@ defmodule Xema.Ref do
 
       {:error, :not_found} ->
         raise SchemaError,
-          message: "Reference '#{Ref.get_pointer(ref)}' not found."
+          message: "Reference '#{ref.pointer}' not found."
     end
   end
 
-  defp get(%Ref{remote: false, path: nil, pointer: pointer}, opts) do
-    with {:ok, schema} <- do_get(pointer, opts[:root]), do: {:ok, schema, opts}
+  defp get(%Ref{pointer: pointer, uri: nil}, opts) do
+    with {:ok, schema} <- fetch_by_pointer(opts[:root], pointer),
+         do: {:ok, schema, opts}
   end
 
-  defp get(%Ref{remote: false, path: path, pointer: nil}, opts) do
-    id =
-      opts[:id]
-      |> URI.parse()
-      |> Map.put(:path, Path.join("/", path))
-      |> URI.to_string()
+  defp get(%Ref{uri: uri}, opts) do
+    with {:ok, xema} <- fetch_by_id(uri, opts[:root]),
+         {:ok, schema} <- fetch_by_fragment(xema, uri) do
+      opts =
+        case xema == schema do
+          true -> opts
+          false -> Keyword.put(opts, :root, xema)
+        end
 
-    with {:ok, ref} <- get_ref(opts[:root], id), do: {:ok, ref, opts}
-  end
-
-  defp get(%Ref{remote: true, url: nil, path: path, pointer: pointer}, opts) do
-    uri = URI.parse(opts[:id])
-
-    uri =
-      case is_nil(uri.path) || !String.ends_with?(uri.path, "/") do
-        true -> Map.put(uri, :path, Path.join("/", path))
-        false -> Map.put(uri, :path, Path.join(uri.path, path))
-      end
-
-    with {:ok, xema} <- get_xema(opts[:root], URI.to_string(uri)),
-         {:ok, schema} <- do_get(pointer, xema),
-         do: {:ok, schema, root: xema}
-  end
-
-  defp get(%Ref{remote: true, url: url, path: path, pointer: pointer}, opts) do
-    uri = Path.join(url, path)
-
-    # xema = Map.get(opts[:root].refs, uri)
-
-    with {:ok, xema} <- get_xema(opts[:root], uri),
-         {:ok, schema} <- do_get(pointer, xema),
-         do: {:ok, schema, root: xema}
-  end
-
-  defp get(_ref, _opts), do: {:error, :not_found}
-
-  defp do_get(_, nil), do: {:error, :not_found}
-
-  defp do_get(nil, %{__struct__: _, content: schema}), do: {:ok, schema}
-
-  defp do_get("", %{__struct__: _, content: schema}), do: {:ok, schema}
-
-  defp do_get("/" <> pointer, %{__struct__: _, content: schema})
-       when is_binary(pointer),
-       do:
-         pointer
-         |> String.trim("/")
-         |> String.split("/")
-         |> do_get(schema)
-
-  defp do_get(pointer, xema) when is_binary(pointer) do
-    with {:ok, ref} <- get_ref(xema, "#" <> pointer), do: get(ref, root: xema)
-  end
-
-  defp do_get([], schema), do: {:ok, schema}
-
-  defp do_get([step | _] = steps, %Schema{} = schema)
-       when not (step in @keywords),
-       do: do_get(steps, schema.data)
-
-  defp do_get([step | steps], schema) when is_map(schema) do
-    case get_value(schema, decode(step)) do
-      {:ok, value} ->
-        do_get(steps, value)
-
-      {:error, _} ->
-        {:error, :not_found}
+      {:ok, schema, opts}
     end
   end
 
-  defp do_get([step | steps], schema) when is_list(schema) do
-    with {:ok, index} <- to_integer(step) do
-      case Enum.at(schema, index) do
-        nil -> {:error, :not_found}
-        value -> do_get(steps, value)
-      end
-    end
-  end
+  defp fetch_by_fragment(xema, %URI{fragment: nil}), do: {:ok, xema}
 
-  defp get_ref(%{ids: refs}, id) do
-    case Map.get(refs, id) do
+  defp fetch_by_fragment(%Xema{content: schema}, %URI{fragment: fragment}),
+    do: fetch_by_path(schema, to_path(fragment))
+
+  defp fetch_by_pointer(%Xema{content: schema}, "#"),
+    do: fetch_by_path(schema, [])
+
+  defp fetch_by_pointer(%Xema{content: schema}, "#/" <> _ = pointer),
+    do: fetch_by_path(schema, to_path(pointer))
+
+  defp fetch_by_pointer(%Xema{refs: refs}, pointer) do
+    case Map.get(refs, pointer) do
       nil -> {:error, :not_found}
-      ref -> {:ok, ref}
+      val -> {:ok, val}
     end
   end
 
-  defp get_ref(_, _), do: {:error, :not_found}
+  defp fetch_by_path(nil, _), do: {:error, :not_found}
 
-  defp get_xema(%{refs: xemas}, pointer) do
-    case Map.get(xemas, pointer) do
+  defp fetch_by_path(schema, []), do: {:ok, schema}
+
+  defp fetch_by_path(schemas, [key | keys]) when is_list(schemas) do
+    index = String.to_integer(key)
+    fetch_by_path(Enum.at(schemas, index), keys)
+  rescue
+    _ -> {:error, :not_found}
+  end
+
+  defp fetch_by_path(schema, [key | keys]) do
+    key = decode(key)
+
+    schema
+    |> Mapz.get(key)
+    |> case do
       nil ->
-        {:error, :not_found}
+        case Map.get(schema, :data) do
+          nil -> nil
+          val -> Mapz.get(val, key)
+        end
 
-      xema ->
-        {:ok, xema}
+      val ->
+        val
+    end
+    |> fetch_by_path(keys)
+  end
+
+  defp fetch_by_id(_uri, %Xema{refs: nil}), do: {:error, :not_found}
+
+  defp fetch_by_id(uri, %Xema{refs: refs}) do
+    case Map.get(refs, URI.to_string(uri)) do
+      nil -> {:error, :not_found}
+      val -> {:ok, val}
     end
   end
 
-  defp get_xema(_, _), do: {:error, :not_found}
+  defp to_path("#" <> pointer), do: to_path(pointer)
+
+  defp to_path(pointer),
+    do:
+      pointer
+      |> String.split("/")
+      |> Enum.filter(fn str -> str != "" end)
 
   defp decode(str) do
     str
@@ -196,43 +145,4 @@ defmodule Xema.Ref do
   rescue
     _ -> str
   end
-
-  defp to_integer(str) do
-    case Regex.run(~r/\d+/, str) do
-      nil -> {:error, :not_found}
-      [int] -> {:ok, String.to_integer(int)}
-    end
-  end
-
-  @doc """
-  Returns the `pointer` of the given reference.
-  """
-  @spec get_pointer(Ref.t()) :: String.t()
-  def get_pointer(ref) do
-    ref.url
-    |> update_nil("")
-    |> URI.parse()
-    |> Map.put(:path, ref.path)
-    |> Map.put(:fragment, ref.pointer)
-    |> URI.to_string()
-  end
-
-  @doc """
-  Returns the binary representation of a reference.
-
-  ## Examples
-
-      iex> "http://foo.com/bar/baz.exon#/definitions/abc"
-      ...> |> Xema.Ref.new()
-      ...> |> Xema.Ref.to_string()
-      "{:ref, \\"http://foo.com/bar/baz.exon#/definitions/abc\\"}"
-
-  """
-  @spec to_string(Ref.t()) :: String.t()
-  def to_string(ref), do: "{:ref, #{inspect(get_pointer(ref))}}"
-end
-
-defimpl String.Chars, for: Xema.Ref do
-  @spec to_string(Xema.Ref.t()) :: String.t()
-  def to_string(ref), do: Xema.Ref.to_string(ref)
 end

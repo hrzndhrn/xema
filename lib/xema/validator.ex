@@ -5,6 +5,7 @@ defmodule Xema.Validator do
 
   import Xema.Utils
 
+  alias Xema.Mapz
   alias Xema.Ref
   alias Xema.Schema
 
@@ -25,20 +26,11 @@ defmodule Xema.Validator do
   defp do_validate(%{content: schema}, value, opts),
     do: do_validate(schema, value, opts)
 
-  defp do_validate(%Ref{} = ref, value, opts),
-    do: Ref.validate(ref, value, opts)
-
   defp do_validate(%Schema{type: true}, _value, _opts), do: :ok
 
   defp do_validate(%{type: false}, _value, _opts), do: {:error, %{type: false}}
 
   defp do_validate(schema, value, opts) do
-    opts =
-      case schema.id do
-        nil -> opts
-        id -> update_id(opts, id)
-      end
-
     case schema do
       %{type: list} when is_list(list) ->
         with {:ok, type} <- types(schema, value),
@@ -118,7 +110,7 @@ defmodule Xema.Validator do
          :ok <- dependencies(schema, value, opts),
          {:ok, patts_rest} <- patterns(schema, value, opts),
          {:ok, props_rest} <- properties(schema, value, opts),
-         value <- intersection(props_rest, patts_rest),
+         value <- Mapz.intersection(props_rest, patts_rest),
          :ok <- additionals(schema, value, opts),
          do: :ok
   end
@@ -207,7 +199,7 @@ defmodule Xema.Validator do
 
   defp validate_contains(%{contains: schema}, list) do
     list
-    |> Enum.any?(fn value -> Xema.is_valid?(schema, value) end)
+    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
     |> case do
       true -> :ok
       false -> {:error, %{value: list, contains: schema}}
@@ -222,7 +214,7 @@ defmodule Xema.Validator do
          %{if: schema_if, then: schema_then, else: schema_else},
          value
        ) do
-    case Xema.is_valid?(schema_if, value) do
+    case Xema.valid?(schema_if, value) do
       true ->
         validate_if(:then, schema_then, value)
 
@@ -248,8 +240,8 @@ defmodule Xema.Validator do
     map
     |> Map.keys()
     |> Enum.filter(fn
-      key when is_binary(key) -> not Xema.is_valid?(schema, key)
-      key when is_atom(key) -> not Xema.is_valid?(schema, Atom.to_string(key))
+      key when is_binary(key) -> not Xema.valid?(schema, key)
+      key when is_atom(key) -> not Xema.valid?(schema, Atom.to_string(key))
       _ -> false
     end)
     |> case do
@@ -525,7 +517,7 @@ defmodule Xema.Validator do
        do:
          items_tuple(
            items,
-           update_nil(additional_items, true),
+           default(additional_items, true),
            list,
            0,
            [],
@@ -654,40 +646,24 @@ defmodule Xema.Validator do
     do: {:error, %{properties: errors}}
 
   defp do_properties([{prop, schema} | props], map, errors, opts) do
-    with true <- has_key?(map, prop),
-         {:ok, value} <- get_value(map, prop),
+    with {:ok, value} <- Mapz.fetch(map, prop),
          :ok <- do_validate(schema, value, opts) do
-      case has_key?(props, prop) do
+      case Mapz.has_key?(props, prop) do
         true -> do_properties(props, map, errors, opts)
-        false -> do_properties(props, delete_property(map, prop), errors, opts)
+        false -> do_properties(props, Mapz.delete(map, prop), errors, opts)
       end
     else
       # The property is not in the map.
-      false ->
-        do_properties(props, delete_property(map, prop), errors, opts)
+      :error ->
+        do_properties(props, Mapz.delete(map, prop), errors, opts)
 
       {:error, reason} ->
         do_properties(
           props,
           Map.delete(map, prop),
-          Map.put(errors, get_key(map, prop), reason),
+          Map.put(errors, Mapz.get_key(map, prop), reason),
           opts
         )
-    end
-  end
-
-  @spec delete_property(map, String.t() | atom) :: map
-  defp delete_property(map, prop) when is_map(map) and is_atom(prop) do
-    case Map.has_key?(map, prop) do
-      true -> Map.delete(map, prop)
-      false -> Map.delete(map, Atom.to_string(prop))
-    end
-  end
-
-  defp delete_property(map, prop) when is_map(map) and is_binary(prop) do
-    case Map.has_key?(map, prop) do
-      true -> Map.delete(map, prop)
-      false -> Map.delete(map, to_existing_atom(prop))
     end
   end
 
@@ -695,7 +671,7 @@ defmodule Xema.Validator do
   defp required(%{required: nil}, _map), do: :ok
 
   defp required(%{required: required}, map) do
-    case Enum.filter(required, fn key -> !has_key?(map, key) end) do
+    case Enum.filter(required, fn key -> !Mapz.has_key?(map, key) end) do
       [] ->
         :ok
 
@@ -790,7 +766,7 @@ defmodule Xema.Validator do
   defp dependencies(%{dependencies: dependencies}, map, opts) do
     dependencies
     |> Map.to_list()
-    |> Enum.filter(fn {key, _} -> has_key?(map, key) end)
+    |> Enum.filter(fn {key, _} -> Mapz.has_key?(map, key) end)
     |> do_dependencies(map, opts)
   end
 
@@ -827,7 +803,7 @@ defmodule Xema.Validator do
   defp do_dependencies_list(_key, [], _map, _opts), do: :ok
 
   defp do_dependencies_list(key, [dependency | dependencies], map, opts) do
-    case has_key?(map, dependency) do
+    case Mapz.has_key?(map, dependency) do
       true ->
         do_dependencies_list(key, dependencies, map, opts)
 

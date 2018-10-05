@@ -1,7 +1,7 @@
 defmodule Draft4.PatternTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [is_valid?: 2]
+  import Xema, only: [valid?: 2]
 
   describe "pattern validation" do
     setup do
@@ -10,17 +10,17 @@ defmodule Draft4.PatternTest do
 
     test "a matching pattern is valid", %{schema: schema} do
       data = "aaa"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
 
     test "a non-matching pattern is invalid", %{schema: schema} do
       data = "abc"
-      refute is_valid?(schema, data)
+      refute valid?(schema, data)
     end
 
     test "ignores non-strings", %{schema: schema} do
       data = true
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 
@@ -31,7 +31,7 @@ defmodule Draft4.PatternTest do
 
     test "matches a substring", %{schema: schema} do
       data = "xxaayy"
-      assert is_valid?(schema, data)
+      assert valid?(schema, data)
     end
   end
 end

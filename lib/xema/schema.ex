@@ -263,7 +263,8 @@ defmodule Xema.Schema do
       |> Keyword.update(:const, nil, &mark_nil/1)
       |> Keyword.update(:pattern, nil, &pattern/1)
       |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
-      |> Keyword.update(:ref, nil, &ref/1)
+
+  # |> Keyword.update(:ref, nil, &ref/1)
 
   @spec mark_nil(any) :: any | :__nil__
   defp mark_nil(nil), do: :__nil__
@@ -297,7 +298,4 @@ defmodule Xema.Schema do
   @spec delete_nils(map) :: map
   defp delete_nils(schema),
     do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
-
-  @spec ref(String.t()) :: Ref.t()
-  defp ref(pointer), do: Ref.new(pointer)
 end

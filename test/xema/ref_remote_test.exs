@@ -51,6 +51,7 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
+      # IO.inspect schema, limit: :infinity
       assert validate(schema, 1) == :ok
     end
 
@@ -64,7 +65,7 @@ defmodule Xema.RefRemoteTest do
       schema =
         :ref
         |> Xema.new("http://localhost:1234/integer.exon")
-        |> Map.delete(:refs)
+        |> Map.put(:refs, nil)
 
       %{schema: schema}
     end
@@ -118,7 +119,6 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
-  @tag :only
   describe "base URI change - change folder" do
     setup do
       %{
