@@ -19,7 +19,7 @@ defmodule Xema.SchemaTest do
       end)
     end
 
-    test "raises an error for for an invalid type" do
+    test "raises an error for an invalid type" do
       assert_raise(SchemaError, "Invalid type :foo.", fn ->
         Schema.new(type: :foo)
       end)
