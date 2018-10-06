@@ -11,7 +11,18 @@ defmodule Xema.Validator do
 
   @type result :: :ok | {:error, map}
 
-  @types [:boolean, :atom, :string, :integer, :float, :number, :list, :map, nil]
+  @types [
+    :atom,
+    :boolean,
+    :float,
+    :integer,
+    :list,
+    :map,
+    nil,
+    :number,
+    :string,
+    :tuple
+  ]
 
   @spec validate(Xema.t(), any, keyword) :: result
   def validate(%{content: schema} = xema, value, opts) do
@@ -100,6 +111,9 @@ defmodule Xema.Validator do
 
   defp do_validate(nil, schema, value, _opts),
     do: {:error, %{value: value, type: schema.type}}
+
+  defp do_validate(:tuple, schema, value, opts),
+    do: do_validate(:list, schema, value, opts)
 
   defp do_validate(:list, schema, value, opts) do
     with :ok <- min_items(schema, value),
