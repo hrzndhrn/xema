@@ -51,7 +51,6 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
-      # IO.inspect schema, limit: :infinity
       assert validate(schema, 1) == :ok
     end
 
