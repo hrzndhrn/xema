@@ -3,7 +3,7 @@ defmodule Xema.MapTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
-  describe "empty 'map' schema" do
+  describe "empty map schema" do
     setup do
       %{schema: Xema.new(:map)}
     end
@@ -27,7 +27,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with properties (atom keys)" do
+  describe "map schema with properties (atom keys)" do
     setup do
       %{
         schema:
@@ -81,7 +81,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with properties (string keys)" do
+  describe "map schema with properties (string keys)" do
     setup do
       %{
         schema:
@@ -126,7 +126,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with keys: :atoms" do
+  describe "map schema with keys: :atoms" do
     setup do
       %{
         schema:
@@ -150,7 +150,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with keys: :strings" do
+  describe "map schema with keys: :strings" do
     setup do
       %{
         schema:
@@ -174,7 +174,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema with min/max properties" do
+  describe "map schema with min/max properties" do
     setup do
       %{schema: Xema.new(:map, min_properties: 2, max_properties: 3)}
     end
@@ -193,7 +193,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema without additional properties (atom properties)" do
+  describe "map schema without additional properties (atom properties)" do
     setup do
       %{
         schema:
@@ -232,7 +232,7 @@ defmodule Xema.MapTest do
     end
   end
 
-  describe "'map' schema without additional properties (string properties)" do
+  describe "map schema without additional properties (string properties)" do
     setup do
       %{
         schema:
