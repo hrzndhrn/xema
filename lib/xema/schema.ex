@@ -192,6 +192,7 @@ defmodule Xema.Schema do
     false,
     :float,
     :integer,
+    :keyword,
     :list,
     :map,
     nil,
