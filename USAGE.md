@@ -16,6 +16,7 @@
   * [Additional Items](#additional_items)
   * [Length](#list_length)
   * [Uniqueness](#unique)
+* [Type tuple](#tuple)
 * [Type map](#map)
   * [Keys](#keys)
   * [Properties](#properties)
@@ -456,6 +457,24 @@ iex> Xema.valid? schema, [1, 2, 3]
 true
 iex> Xema.validate schema, [1, 2, 3, 2, 1]
 {:error, %{value: [1, 2, 3, 2, 1], unique_items: true}}
+```
+
+## <a id="tuple"></a> Type tuple
+
+Tuples are intended as fixed-size containers for multiple elements. The
+validation of tuples is similar to lists.
+
+```Elixir
+iex> schema = Xema.new :tuple, min_items: 2, max_items: 3
+%Xema{content: %Xema.Schema{min_items: 2, max_items: 3, type: :tuple}}
+iex> Xema.validate schema, {1}
+{:error, %{value: {1}, min_items: 2}}
+iex> Xema.validate schema, {1, 2}
+:ok
+iex> Xema.validate schema, {1, 2, 3}
+:ok
+iex> Xema.validate schema, {1, 2, 3, 4}
+{:error, %{value: {1, 2, 3, 4}, max_items: 3}}
 ```
 
 ## <a id="map"></a> Type map
