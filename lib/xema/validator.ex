@@ -16,6 +16,7 @@ defmodule Xema.Validator do
     :boolean,
     :float,
     :integer,
+    :keyword,
     :list,
     :map,
     nil,
@@ -25,21 +26,19 @@ defmodule Xema.Validator do
   ]
 
   @spec validate(Xema.t(), any, keyword) :: result
-  def validate(%{content: schema} = xema, value, opts) do
-    opts = Keyword.put_new(opts, :root, xema)
-    do_validate(schema, value, opts)
-  end
+  def validate(%Xema{content: schema} = xema, value, opts),
+    do: do_validate(schema, value, Keyword.put_new(opts, :root, xema))
 
   def validate(%Schema{} = schema, value, opts),
     do: do_validate(schema, value, opts)
 
   @spec do_validate(Xema.t() | Xema.Schema.t(), any, keyword) :: result
-  defp do_validate(%{content: schema}, value, opts),
+  defp do_validate(%Xema{content: schema}, value, opts),
     do: do_validate(schema, value, opts)
 
-  defp do_validate(%Schema{type: true}, _value, _opts), do: :ok
+  defp do_validate(%Schema{type: true}, _, _), do: :ok
 
-  defp do_validate(%{type: false}, _value, _opts), do: {:error, %{type: false}}
+  defp do_validate(%Schema{type: false}, _, _), do: {:error, %{type: false}}
 
   defp do_validate(schema, value, opts) do
     case schema do
@@ -50,8 +49,8 @@ defmodule Xema.Validator do
 
       %{type: :any, ref: nil} ->
         with type <- get_type(value),
-             :ok <- do_validate(:default, schema, value, opts),
-             :ok <- do_validate(type, schema, value, opts),
+             :ok <- validate_by(:default, schema, value, opts),
+             :ok <- validate_by(type, schema, value, opts),
              do: :ok
 
       %{type: :any, ref: ref} ->
@@ -59,45 +58,50 @@ defmodule Xema.Validator do
 
       %{type: :string} ->
         with :ok <- type(schema, value),
-             :ok <- do_validate(:default, schema, value, opts),
-             :ok <- do_validate(:string, schema, value, opts),
+             :ok <- validate_by(:default, schema, value, opts),
+             :ok <- validate_by(:string, schema, value, opts),
              do: :ok
 
       %{type: :list} ->
         with :ok <- type(schema, value),
-             :ok <- do_validate(:list, schema, value, opts),
+             :ok <- validate_by(:list, schema, value, opts),
              do: :ok
 
       %{type: :tuple} ->
         with :ok <- type(schema, value),
-             :ok <- do_validate(:list, schema, value, opts),
+             :ok <- validate_by(:list, schema, value, opts),
              do: :ok
 
       %{type: :map} ->
         with :ok <- type(schema, value),
-             :ok <- do_validate(:map, schema, value, opts),
+             :ok <- validate_by(:map, schema, value, opts),
+             do: :ok
+
+      %{type: :keyword} ->
+        with :ok <- type(schema, value),
+             :ok <- validate_by(:keyword, schema, value, opts),
              do: :ok
 
       %{type: :atom} ->
         type(schema, value)
 
       %{type: type} when is_atom(type) ->
-        do_validate(type, schema, value, opts)
+        validate_by(type, schema, value, opts)
     end
   end
 
-  defp do_validate(:default, schema, value, opts) do
+  defp validate_by(:default, schema, value, opts) do
     with :ok <- enum(schema, value),
-         :ok <- validate_not(schema, value, opts),
-         :ok <- validate_all_of(schema, value, opts),
-         :ok <- validate_any_of(schema, value, opts),
-         :ok <- validate_one_of(schema, value, opts),
-         :ok <- validate_const(schema, value),
-         :ok <- validate_if_then_else(schema, value),
+         :ok <- _not(schema, value, opts),
+         :ok <- all_of(schema, value, opts),
+         :ok <- any_of(schema, value, opts),
+         :ok <- one_of(schema, value, opts),
+         :ok <- const(schema, value),
+         :ok <- if_then_else(schema, value),
          do: :ok
   end
 
-  defp do_validate(:string, schema, value, _opts) do
+  defp validate_by(:string, schema, value, _opts) do
     with length <- String.length(value),
          :ok <- min_length(schema, length, value),
          :ok <- max_length(schema, length, value),
@@ -107,24 +111,24 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp do_validate(nil, _schema, nil, _opts), do: :ok
+  defp validate_by(nil, _schema, nil, _opts), do: :ok
 
-  defp do_validate(nil, schema, value, _opts),
+  defp validate_by(nil, schema, value, _opts),
     do: {:error, %{value: value, type: schema.type}}
 
-  defp do_validate(:tuple, schema, value, opts),
-    do: do_validate(:list, schema, value, opts)
+  defp validate_by(:tuple, schema, value, opts),
+    do: validate_by(:list, schema, value, opts)
 
-  defp do_validate(:list, schema, value, opts) do
+  defp validate_by(:list, schema, value, opts) do
     with :ok <- min_items(schema, value),
          :ok <- max_items(schema, value),
          :ok <- unique(schema, value),
          :ok <- items(schema, value, opts),
-         :ok <- validate_contains(schema, value),
+         :ok <- contains(schema, value),
          do: :ok
   end
 
-  defp do_validate(:map, schema, value, opts) do
+  defp validate_by(:map, schema, value, opts) do
     with :ok <- size(schema, value),
          :ok <- keys(schema, value),
          :ok <- required(schema, value),
@@ -137,35 +141,51 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp do_validate(:boolean, schema, value, _opts) do
+  defp validate_by(:keyword, schema, value, opts) do
+    with :ok <- dependencies(schema, value, opts),
+         value <- Enum.into(value, %{}),
+         :ok <- size(schema, value),
+         :ok <- keys(schema, value),
+         :ok <- required(schema, value),
+         :ok <- property_names(schema, value),
+         {:ok, patts_rest} <- patterns(schema, value, opts),
+         {:ok, props_rest} <- properties(schema, value, opts),
+         value <- Mapz.intersection(props_rest, patts_rest),
+         :ok <- additionals(schema, value, opts),
+         do: :ok
+  end
+
+  defp validate_by(:boolean, schema, value, _opts) do
     case is_boolean(value) do
       true -> :ok
       false -> {:error, %{value: value, type: schema.type}}
     end
   end
 
-  defp do_validate(:integer, schema, value, opts),
-    do: do_validate(:number, schema, value, opts)
+  defp validate_by(:integer, schema, value, opts),
+    do: validate_by(:number, schema, value, opts)
 
-  defp do_validate(:float, schema, value, opts),
-    do: do_validate(:number, schema, value, opts)
+  defp validate_by(:float, schema, value, opts),
+    do: validate_by(:number, schema, value, opts)
 
-  defp do_validate(:number, schema, value, opts) do
+  defp validate_by(:number, schema, value, opts) do
     with :ok <- type(schema, value),
          :ok <- minimum(schema, value),
          :ok <- maximum(schema, value),
          :ok <- exclusive_maximum(schema, value),
          :ok <- exclusive_minimum(schema, value),
          :ok <- multiple_of(schema, value),
-         :ok <- do_validate(:default, schema, value, opts),
+         :ok <- validate_by(:default, schema, value, opts),
          do: :ok
   end
 
-  defp do_validate(:atom, _, _, _), do: :ok
+  defp validate_by(:atom, _, _, _), do: :ok
 
   #
   # Schema type handling
   #
+
+  defp get_type([]), do: :list
 
   defp get_type(value),
     do: Enum.find(@types, fn type -> type?(type, value) end)
@@ -184,6 +204,7 @@ defmodule Xema.Validator do
   defp type?(:boolean, value), do: is_boolean(value)
   defp type?(:string, value), do: is_binary(value)
   defp type?(:tuple, value), do: is_tuple(value)
+  defp type?(:keyword, value), do: Keyword.keyword?(value)
   defp type?(:number, value), do: is_number(value)
   defp type?(:integer, value), do: is_integer(value)
   defp type?(:float, value), do: is_float(value)
@@ -204,23 +225,23 @@ defmodule Xema.Validator do
   # Validators
   #
 
-  @spec validate_const(Xema.Schema.t(), any) :: result
-  defp validate_const(%{const: nil}, _value), do: :ok
+  @spec const(Xema.Schema.t(), any) :: result
+  defp const(%{const: nil}, _value), do: :ok
 
-  defp validate_const(%{const: :__nil__}, nil), do: :ok
+  defp const(%{const: :__nil__}, nil), do: :ok
 
-  defp validate_const(%{const: :__nil__}, value),
+  defp const(%{const: :__nil__}, value),
     do: {:error, %{const: nil, value: value}}
 
-  defp validate_const(%{const: const}, const), do: :ok
+  defp const(%{const: const}, const), do: :ok
 
-  defp validate_const(%{const: const}, value),
+  defp const(%{const: const}, value),
     do: {:error, %{const: const, value: value}}
 
-  @spec validate_contains(Xema.t() | Schema.t(), list) :: result
-  defp validate_contains(%{contains: nil}, _list), do: :ok
+  @spec contains(Xema.t() | Schema.t(), list) :: result
+  defp contains(%{contains: nil}, _list), do: :ok
 
-  defp validate_contains(%{contains: schema}, list) when is_list(list) do
+  defp contains(%{contains: schema}, list) when is_list(list) do
     list
     |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
     |> case do
@@ -229,7 +250,7 @@ defmodule Xema.Validator do
     end
   end
 
-  defp validate_contains(%{contains: schema}, tuple) when is_tuple(tuple) do
+  defp contains(%{contains: schema}, tuple) when is_tuple(tuple) do
     tuple
     |> Tuple.to_list()
     |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
@@ -239,27 +260,27 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec validate_if_then_else(Xema.t() | Schema.t(), any) :: result
-  defp validate_if_then_else(%{if: nil}, _value), do: :ok
-  defp validate_if_then_else(%{then: nil, else: nil}, _value), do: :ok
+  @spec if_then_else(Xema.t() | Schema.t(), any) :: result
+  defp if_then_else(%{if: nil}, _value), do: :ok
+  defp if_then_else(%{then: nil, else: nil}, _value), do: :ok
 
-  defp validate_if_then_else(
+  defp if_then_else(
          %{if: schema_if, then: schema_then, else: schema_else},
          value
        ) do
     case Xema.valid?(schema_if, value) do
       true ->
-        validate_if(:then, schema_then, value)
+        if_then_else(:then, schema_then, value)
 
       false ->
-        validate_if(:else, schema_else, value)
+        if_then_else(:else, schema_else, value)
     end
   end
 
-  @spec validate_if(atom, Schema.t() | nil, any) :: result
-  defp validate_if(_key, nil, _value), do: :ok
+  @spec if_then_else(atom, Schema.t() | nil, any) :: result
+  defp if_then_else(_key, nil, _value), do: :ok
 
-  defp validate_if(key, schema, value) do
+  defp if_then_else(key, schema, value) do
     case Xema.validate(schema, value) do
       :ok -> :ok
       {:error, reason} -> {:error, Map.new([{key, reason}])}
@@ -293,50 +314,50 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec validate_not(Xema.Schema.t(), any, keyword) :: result
-  defp validate_not(%{not: nil}, _value, _opts), do: :ok
+  @spec _not(Xema.Schema.t(), any, keyword) :: result
+  defp _not(%{not: nil}, _value, _opts), do: :ok
 
-  defp validate_not(%{not: schema}, value, opts) do
+  defp _not(%{not: schema}, value, opts) do
     case do_validate(schema, value, opts) do
       :ok -> {:error, %{not: :ok, value: value}}
       _ -> :ok
     end
   end
 
-  @spec validate_all_of(Xema.Schema.t(), any, keyword) :: result
-  defp validate_all_of(%{all_of: nil}, _value, _opts), do: :ok
+  @spec all_of(Xema.Schema.t(), any, keyword) :: result
+  defp all_of(%{all_of: nil}, _value, _opts), do: :ok
 
-  defp validate_all_of(%{all_of: schemas}, value, opts) do
-    case do_validate_all_of(schemas, value, opts) do
+  defp all_of(%{all_of: schemas}, value, opts) do
+    case do_all_of(schemas, value, opts) do
       :ok -> :ok
       {:error, errors} -> {:error, %{all_of: errors, value: value}}
     end
   end
 
-  @spec do_validate_all_of(list, any, keyword, [map]) :: result
-  defp do_validate_all_of(schemas, value, opts, errors \\ [])
+  @spec do_all_of(list, any, keyword, [map]) :: result
+  defp do_all_of(schemas, value, opts, errors \\ [])
 
-  defp do_validate_all_of([], _value, _opts, []), do: :ok
+  defp do_all_of([], _value, _opts, []), do: :ok
 
-  defp do_validate_all_of([], _value, _opts, errors),
+  defp do_all_of([], _value, _opts, errors),
     do: {:error, Enum.reverse(errors)}
 
-  defp do_validate_all_of([schema | schemas], value, opts, errors) do
+  defp do_all_of([schema | schemas], value, opts, errors) do
     case do_validate(schema, value, opts) do
       :ok ->
-        do_validate_all_of(schemas, value, opts, errors)
+        do_all_of(schemas, value, opts, errors)
 
       {:error, error} ->
         error = Map.delete(error, :value)
-        do_validate_all_of(schemas, value, opts, [error | errors])
+        do_all_of(schemas, value, opts, [error | errors])
     end
   end
 
-  @spec validate_any_of(Xema.Schema.t(), any, keyword) :: result
-  defp validate_any_of(%{any_of: nil}, _value, _opts), do: :ok
+  @spec any_of(Xema.Schema.t(), any, keyword) :: result
+  defp any_of(%{any_of: nil}, _value, _opts), do: :ok
 
-  defp validate_any_of(%{any_of: schemas}, value, opts) do
-    case do_validate_any_of(schemas, value, opts) do
+  defp any_of(%{any_of: schemas}, value, opts) do
+    case do_any_of(schemas, value, opts) do
       :ok ->
         :ok
 
@@ -345,30 +366,29 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_validate_any_of(list, any, keyword, [map]) ::
-          :ok | {:error, list(map)}
-  defp do_validate_any_of(schemas, value, opts, errors \\ [])
+  @spec do_any_of(list, any, keyword, [map]) :: :ok | {:error, list(map)}
+  defp do_any_of(schemas, value, opts, errors \\ [])
 
-  defp do_validate_any_of([], _value, _opts, errors) do
+  defp do_any_of([], _value, _opts, errors) do
     {:error, errors}
   end
 
-  defp do_validate_any_of([schema | schemas], value, opts, errors) do
+  defp do_any_of([schema | schemas], value, opts, errors) do
     case do_validate(schema, value, opts) do
       :ok ->
         :ok
 
       {:error, error} ->
         error = Map.delete(error, :value)
-        do_validate_any_of(schemas, value, opts, [error | errors])
+        do_any_of(schemas, value, opts, [error | errors])
     end
   end
 
-  @spec validate_one_of(Xema.Schema.t(), any, keyword) :: result
-  defp validate_one_of(%{one_of: nil}, _value, _opts), do: :ok
+  @spec one_of(Xema.Schema.t(), any, keyword) :: result
+  defp one_of(%{one_of: nil}, _value, _opts), do: :ok
 
-  defp validate_one_of(%{one_of: schemas}, value, opts) do
-    errors = do_validate_one_of(schemas, value, opts)
+  defp one_of(%{one_of: schemas}, value, opts) do
+    errors = do_one_of(schemas, value, opts)
 
     case length(schemas) - length(errors) do
       1 -> :ok
@@ -376,8 +396,8 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_validate_one_of(list, any, keyword) :: [map]
-  defp do_validate_one_of(schemas, value, opts),
+  @spec do_one_of(list, any, keyword) :: [map]
+  defp do_one_of(schemas, value, opts),
     do:
       Enum.reduce(schemas, [], fn schema, acc ->
         case do_validate(schema, value, opts) do
@@ -694,7 +714,7 @@ defmodule Xema.Validator do
   defp do_properties([{prop, schema} | props], map, errors, opts) do
     with {:ok, value} <- Mapz.fetch(map, prop),
          :ok <- do_validate(schema, value, opts) do
-      case Mapz.has_key?(props, prop) do
+      case has_key?(props, prop) do
         true -> do_properties(props, map, errors, opts)
         false -> do_properties(props, Mapz.delete(map, prop), errors, opts)
       end
@@ -811,8 +831,7 @@ defmodule Xema.Validator do
 
   defp dependencies(%{dependencies: dependencies}, map, opts) do
     dependencies
-    |> Map.to_list()
-    |> Enum.filter(fn {key, _} -> Mapz.has_key?(map, key) end)
+    |> Enum.filter(fn {key, _} -> has_key?(map, key) end)
     |> do_dependencies(map, opts)
   end
 
@@ -824,16 +843,6 @@ defmodule Xema.Validator do
       do_dependencies(tail, map, opts)
     end
   end
-
-  # defp do_dependencies([{_key, true} | tail], map),
-  #  do: do_dependencies(tail, map)
-  #
-  # defp do_dependencies([{key, false} | tail], map) do
-  #  case Map.has_key?(map, key) do
-  #    true -> {:error, %{dependencies: %{key => false}}}
-  #    false -> do_dependencies(tail, map)
-  #  end
-  # end
 
   defp do_dependencies([{key, schema} | tail], map, opts) do
     case do_validate(schema, map, opts) do
@@ -849,7 +858,7 @@ defmodule Xema.Validator do
   defp do_dependencies_list(_key, [], _map, _opts), do: :ok
 
   defp do_dependencies_list(key, [dependency | dependencies], map, opts) do
-    case Mapz.has_key?(map, dependency) do
+    case has_key?(map, dependency) do
       true ->
         do_dependencies_list(key, dependencies, map, opts)
 

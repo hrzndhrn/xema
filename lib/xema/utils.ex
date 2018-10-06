@@ -1,6 +1,8 @@
 defmodule Xema.Utils do
   @moduledoc false
 
+  alias Xema.Mapz
+
   @spec default(any, any) :: any
   def default(nil, b), do: b
   def default(a, _b), do: a
@@ -10,6 +12,18 @@ defmodule Xema.Utils do
     String.to_existing_atom(str)
   rescue
     _ -> nil
+  end
+
+  @spec has_key?(map | keyword | list, any) :: boolean
+  def has_key?([], _), do: false
+
+  def has_key?(map, key) when is_map(map), do: Mapz.has_key?(map, key)
+
+  def has_key?(list, key) when is_list(list) do
+    case Keyword.keyword?(list) do
+      true -> Keyword.has_key?(list, key)
+      false -> Enum.any?(list, fn {k, _} -> k == key end)
+    end
   end
 
   @spec update_id(map, binary) :: map

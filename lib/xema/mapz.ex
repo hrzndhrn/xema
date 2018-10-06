@@ -66,10 +66,6 @@ defmodule Xema.Mapz do
   def has_key?(map, key) when is_map(map),
     do: Map.has_key?(map, key) || Map.has_key?(map, toggle_key(key))
 
-  def has_key?(list, key) when is_list(list) do
-    Enum.any?(list, fn {k, _} -> k == key end)
-  end
-
   @spec toggle_key(String.t() | atom) :: atom | String.t()
   def toggle_key(key) when is_binary(key), do: to_existing_atom(key)
 
