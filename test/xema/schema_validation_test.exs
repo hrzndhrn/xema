@@ -67,77 +67,91 @@ defmodule Xema.SchemaValidationTest do
   test "invalid type", %{schema: schema} do
     xema = {:foo, []}
 
-    assert Xema.validate(schema, xema) ==
-             {:error,
-              [
-                {0,
-                 %{
-                   value: :foo,
-                   enum: [
-                     :any,
-                     :atom,
-                     :boolean,
-                     false,
-                     :float,
-                     :integer,
-                     :keyword,
-                     :list,
-                     :map,
-                     nil,
-                     :number,
-                     :string,
-                     true,
-                     :tuple
-                   ]
-                 }}
-              ]}
+    error =
+      {:error,
+       %{
+         items: [
+           {0,
+            %{
+              any_of: [
+                %{
+                  enum: [
+                    :any,
+                    :atom,
+                    :boolean,
+                    false,
+                    :float,
+                    :integer,
+                    :keyword,
+                    :list,
+                    :map,
+                    nil,
+                    :number,
+                    :string,
+                    true,
+                    :tuple
+                  ],
+                  value: :foo
+                },
+                %{type: :list, value: :foo}
+              ],
+              value: :foo
+            }}
+         ]
+       }}
+
+    assert Xema.validate(schema, xema) == error
   end
 
   @tag :only
   test "invalid type in list", %{schema: schema} do
     xema = {[:integer, :foo], []}
 
-    assert Xema.validate(schema, xema) ==
-             {:error,
-              %{
-                items: [
-                  {0,
-                   %{
-                     any_of: [
-                       %{type: :atom, value: [:integer, :foo]},
-                       %{
-                         items: [
-                           {1,
-                            %{
-                              any_of: [
-                                %{
-                                  enum: [
-                                    :any,
-                                    :atom,
-                                    :boolean,
-                                    false,
-                                    :float,
-                                    :integer,
-                                    :keyword,
-                                    :list,
-                                    :map,
-                                    nil,
-                                    :number,
-                                    :string,
-                                    true,
-                                    :tuple
-                                  ],
-                                  value: :foo
-                                },
-                                %{type: :list, value: :foo}
-                              ]
-                            }}
-                         ]
-                       }
-                     ]
-                   }}
-                ]
-              }}
+    error =
+      {:error,
+       %{
+         items: [
+           {0,
+            %{
+              any_of: [
+                %{type: :atom, value: [:integer, :foo]},
+                %{
+                  items: [
+                    {1,
+                     %{
+                       any_of: [
+                         %{
+                           enum: [
+                             :any,
+                             :atom,
+                             :boolean,
+                             false,
+                             :float,
+                             :integer,
+                             :keyword,
+                             :list,
+                             :map,
+                             nil,
+                             :number,
+                             :string,
+                             true,
+                             :tuple
+                           ],
+                           value: :foo
+                         },
+                         %{type: :list, value: :foo}
+                       ],
+                       value: :foo
+                     }}
+                  ]
+                }
+              ],
+              value: [:integer, :foo]
+            }}
+         ]
+       }}
+
+    assert Xema.validate(schema, xema) == error
   end
 
   test "keyword minimum with valid value", %{schema: schema} do
@@ -151,6 +165,10 @@ defmodule Xema.SchemaValidationTest do
 
     assert Xema.validate(schema, xema) ==
              {:error,
-              [{1, %{properties: %{minimum: %{type: :integer, value: "2"}}}}]}
+              %{
+                items: [
+                  {1, %{properties: %{minimum: %{type: :integer, value: "2"}}}}
+                ]
+              }}
   end
 end

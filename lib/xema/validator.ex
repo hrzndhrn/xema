@@ -363,7 +363,7 @@ defmodule Xema.Validator do
         :ok
 
       {:error, errors} ->
-        {:error, %{any_of: Enum.reverse(errors)}}
+        {:error, %{any_of: Enum.reverse(errors), value: value}}
     end
   end
 
