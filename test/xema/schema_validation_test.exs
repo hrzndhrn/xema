@@ -97,7 +97,47 @@ defmodule Xema.SchemaValidationTest do
   test "invalid type in list", %{schema: schema} do
     xema = {[:integer, :foo], []}
 
-    assert Xema.validate(schema, xema) == :error
+    assert Xema.validate(schema, xema) ==
+             {:error,
+              %{
+                items: [
+                  {0,
+                   %{
+                     any_of: [
+                       %{type: :atom, value: [:integer, :foo]},
+                       %{
+                         items: [
+                           {1,
+                            %{
+                              any_of: [
+                                %{
+                                  enum: [
+                                    :any,
+                                    :atom,
+                                    :boolean,
+                                    false,
+                                    :float,
+                                    :integer,
+                                    :keyword,
+                                    :list,
+                                    :map,
+                                    nil,
+                                    :number,
+                                    :string,
+                                    true,
+                                    :tuple
+                                  ],
+                                  value: :foo
+                                },
+                                %{type: :list, value: :foo}
+                              ]
+                            }}
+                         ]
+                       }
+                     ]
+                   }}
+                ]
+              }}
   end
 
   test "keyword minimum with valid value", %{schema: schema} do

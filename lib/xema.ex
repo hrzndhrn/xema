@@ -7,7 +7,7 @@ defmodule Xema do
 
   alias Xema.Schema
   alias Xema.SchemaError
-  alias Xema.SchemaValidator
+  # alias Xema.SchemaValidator
 
   @keywords %Schema{} |> Map.keys() |> MapSet.new() |> MapSet.delete(:data)
 
@@ -57,14 +57,10 @@ defmodule Xema do
   @spec new(Schema.t() | Schema.type() | tuple, keyword) :: Xema.t()
   def new(type, keywords)
 
-  defp init(type, keywords) when is_atom(type) do
+  defp init(type, keywords) do
     # IO.inspect({type, keywords})
-    SchemaValidator.validate!({type, keywords})
+    # SchemaValidator.validate!({type, keywords})
     do_init(type, keywords)
-  end
-
-  defp init(keywords, _) do
-    init(:any, keywords)
   end
 
   defp do_init({type}, []), do: do_init(type, [])
