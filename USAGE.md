@@ -978,7 +978,11 @@ iex> Xema.validate schema, %{name: 66}
 {:error,
   %{
     properties: %{
-      name: %{any_of: [%{type: nil}, %{type: :string}], value: 66}
+      name: %{any_of: [
+        %{type: nil, value: 66},
+        %{type: :string, value: 66}
+      ],
+      value: 66}
     }
   }
 }

@@ -174,7 +174,13 @@ defmodule Xema.RefRemoteTest do
                {:error,
                 %{
                   properties: %{
-                    name: %{any_of: [%{type: nil}, %{type: :string}], value: 1}
+                    name: %{
+                      any_of: [
+                        %{type: nil, value: 1},
+                        %{type: :string, value: 1}
+                      ],
+                      value: 1
+                    }
                   }
                 }}
     end
@@ -204,7 +210,13 @@ defmodule Xema.RefRemoteTest do
                {:error,
                 %{
                   properties: %{
-                    name: %{any_of: [%{type: nil}, %{type: :string}], value: 1}
+                    name: %{
+                      any_of: [
+                        %{type: nil, value: 1},
+                        %{type: :string, value: 1}
+                      ],
+                      value: 1
+                    }
                   }
                 }}
     end
