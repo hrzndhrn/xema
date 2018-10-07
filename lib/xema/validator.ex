@@ -644,7 +644,7 @@ defmodule Xema.Validator do
   defp items_tuple([], true, _list, _at, [], _opts), do: :ok
 
   defp items_tuple([], true, _list, _at, errors, _opts),
-    do: {:error, Enum.reverse(errors)}
+    do: {:error, %{items: Enum.reverse(errors)}}
 
   defp items_tuple([], schema, [item | list], at, errors, opts) do
     case do_validate(schema, item, opts) do

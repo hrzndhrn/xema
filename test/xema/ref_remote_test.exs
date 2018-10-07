@@ -142,7 +142,11 @@ defmodule Xema.RefRemoteTest do
     test "validate/2 with an invalid value", %{schema: schema} do
       assert validate(schema, %{list: ["1"]}) ==
                {:error,
-                %{properties: %{list: [{0, %{type: :integer, value: "1"}}]}}}
+                %{
+                  properties: %{
+                    list: %{items: [{0, %{type: :integer, value: "1"}}]}
+                  }
+                }}
     end
   end
 

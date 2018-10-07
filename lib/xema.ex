@@ -51,7 +51,7 @@ defmodule Xema do
       iex> Xema.valid?(schema, [2, 3, 4])
       true
       iex> Xema.validate(schema, [2, 3, 1])
-      {:error, [{2, %{value: 1, minimum: 2}}]}
+      {:error, %{items: [{2, %{value: 1, minimum: 2}}]}}
 
   """
   @spec new(Schema.t() | Schema.type() | tuple, keyword) :: Xema.t()
