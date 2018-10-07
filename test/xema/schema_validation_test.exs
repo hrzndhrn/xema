@@ -28,8 +28,8 @@ defmodule Xema.SchemaValidationTest do
         Xema.new(
           :tuple,
           items: [
-            [ref: "#/definitions/type"],
-            [ref: "#/definitions/keywords"]
+            {:ref, "#/definitions/type"},
+            {:ref, "#/definitions/keywords"}
           ],
           min_items: 2,
           max_items: 2,
@@ -40,7 +40,12 @@ defmodule Xema.SchemaValidationTest do
                 minimum: :integer
               }
             },
-            type: [any_of: [type, {:list, items: [ref: "#/definitions/type"]}]]
+            type: [
+              any_of: [
+                type,
+                {:list, items: {:ref, "#/definitions/type"}}
+              ]
+            ]
           }
         )
     }

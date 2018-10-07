@@ -206,12 +206,7 @@ defmodule Xema do
   defp items(schema) when is_atom(schema) or is_tuple(schema),
     do: schema(schema)
 
-  defp items(val) when is_list(val) do
-    case Keyword.keyword?(val) do
-      true -> schema(val)
-      false -> schemas(val)
-    end
-  end
+  defp items(schemas) when is_list(schemas), do: schemas(schemas)
 
   defp items(items), do: items
 
