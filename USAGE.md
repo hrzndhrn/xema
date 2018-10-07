@@ -335,7 +335,7 @@ iex> schema = Xema.new :list, items: :string
 iex> Xema.valid? schema, ["a", "b", "abc"]
 true
 iex> Xema.validate schema, ["a", 1]
-{:error, [{1, %{type: :string, value: 1}}]}
+{:error, %{items: [{1, %{type: :string, value: 1}}]}}
 ```
 
 The next example shows how to add keywords to the items schema.
@@ -349,7 +349,7 @@ iex> schema = Xema.new :list, items: {:integer, minimum: 1, maximum: 10}
 iex> Xema.validate schema, [1, 2, 3]
 :ok
 iex> Xema.validate schema, [3, 2, 1, 0]
-{:error, [{3, %{value: 0, minimum: 1}}]}
+{:error, %{items: [{3, %{value: 0, minimum: 1}}]}}
 ```
 
 `items` can also be used to give each item a specific schema.
@@ -369,7 +369,7 @@ true
 iex> Xema.validate schema, [1, "five"]
 {
   :error,
-  [{1, %{value: "five", min_length: 5}}]
+  %{items: [{1, %{value: "five", min_length: 5}}]}
 }
 # It’s okay to not provide all of the items:
 iex> Xema.validate schema, [1]
@@ -401,12 +401,12 @@ iex> Xema.validate schema, [1]
 :ok
 # But, since additionalItems is false, we can’t provide extra items:
 iex> Xema.validate schema, [1, "hello", "foo"]
-{:error, [{2, %{additional_items: false}}]}
+{:error, %{items: [{2, %{additional_items: false}}]}}
 iex> Xema.validate schema, [1, "hello", "foo", "bar"]
-{:error, [
+{:error, %{items: [
   {2, %{additional_items: false}},
   {3, %{additional_items: false}}
-]}
+]}}
 ```
 
 The keyword can also contain a schema to specify the type of additional items.
@@ -425,7 +425,7 @@ iex> schema = Xema.new :list,
 iex> Xema.valid? schema, [1, "two", 3, 4]
 true
 iex> Xema.validate schema, [1, "two", 3, "four"]
-{:error, [{3, %{type: :integer, value: "four"}}]}
+{:error, %{items: [{3, %{type: :integer, value: "four"}}]}}
 ```
 
 ### <a id="list_length"></a> Length
