@@ -28,8 +28,8 @@ defmodule Xema.AnyOfTest do
         {:error,
          %{
            any_of: [
-             %{type: nil},
-             %{type: :integer}
+             %{type: nil, value: "foo"},
+             %{type: :integer, value: "foo"}
            ],
            value: "foo"
          }}

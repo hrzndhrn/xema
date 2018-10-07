@@ -350,7 +350,6 @@ defmodule Xema.Validator do
         do_all_of(schemas, value, opts, errors)
 
       {:error, error} ->
-        error = Map.delete(error, :value)
         do_all_of(schemas, value, opts, [error | errors])
     end
   end
@@ -406,7 +405,6 @@ defmodule Xema.Validator do
             acc
 
           {:error, error} ->
-            error = Map.delete(error, :value)
             [error | acc]
         end
       end)

@@ -24,7 +24,13 @@ defmodule Xema.OneOfTest do
 
       assert validate(schema, 4) ==
                {:error,
-                %{one_of: [%{multiple_of: 5}, %{multiple_of: 3}], value: 4}}
+                %{
+                  one_of: [
+                    %{multiple_of: 5, value: 4},
+                    %{multiple_of: 3, value: 4}
+                  ],
+                  value: 4
+                }}
     end
   end
 
@@ -65,7 +71,13 @@ defmodule Xema.OneOfTest do
 
       assert validate(schema, 4) ==
                {:error,
-                %{one_of: [%{multiple_of: 5}, %{multiple_of: 3}], value: 4}}
+                %{
+                  one_of: [
+                    %{multiple_of: 5, value: 4},
+                    %{multiple_of: 3, value: 4}
+                  ],
+                  value: 4
+                }}
     end
   end
 
