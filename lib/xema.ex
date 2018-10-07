@@ -7,6 +7,7 @@ defmodule Xema do
 
   alias Xema.Schema
   alias Xema.SchemaError
+  alias Xema.SchemaValidator
 
   @keywords %Schema{} |> Map.keys() |> MapSet.new() |> MapSet.delete(:data)
 
@@ -56,33 +57,43 @@ defmodule Xema do
   @spec new(Schema.t() | Schema.type() | tuple, keyword) :: Xema.t()
   def new(type, keywords)
 
-  defp init({type}, []), do: init(type, [])
+  defp init(type, keywords) when is_atom(type) do
+    # IO.inspect({type, keywords})
+    SchemaValidator.validate!({type, keywords})
+    do_init(type, keywords)
+  end
 
-  defp init(list, []) when is_list(list) do
+  defp init(keywords, _) do
+    init(:any, keywords)
+  end
+
+  defp do_init({type}, []), do: do_init(type, [])
+
+  defp do_init(list, []) when is_list(list) do
     case Keyword.keyword?(list) do
-      true -> init(:any, list)
+      true -> do_init(:any, list)
       false -> schema({list, []}, [])
     end
   end
 
-  defp init(list, keywords) when is_list(list),
+  defp do_init(list, keywords) when is_list(list),
     do: schema({list, keywords}, [])
 
-  defp init({type, keywords}, []),
-    do: init(type, keywords)
+  defp do_init({type, keywords}, []),
+    do: do_init(type, keywords)
 
-  defp init(tuple, keywords) when is_tuple(tuple),
+  defp do_init(tuple, keywords) when is_tuple(tuple),
     do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
 
-  defp init(bool, []) when is_boolean(bool),
+  defp do_init(bool, []) when is_boolean(bool),
     do: Schema.new(type: bool)
 
-  defp init(map, []) when is_map(map), do: init(:any, Map.to_list(map))
+  defp do_init(map, []) when is_map(map), do: do_init(:any, Map.to_list(map))
 
-  defp init(value, keywords) do
+  defp do_init(value, keywords) do
     case value in Schema.types() do
       true -> schema({value, keywords}, [])
-      false -> init(:any, [{value, keywords}])
+      false -> do_init(:any, [{value, keywords}])
     end
   end
 
@@ -195,7 +206,12 @@ defmodule Xema do
   defp items(schema) when is_atom(schema) or is_tuple(schema),
     do: schema(schema)
 
-  defp items(schemas) when is_list(schemas), do: schemas(schemas)
+  defp items(val) when is_list(val) do
+    case Keyword.keyword?(val) do
+      true -> schema(val)
+      false -> schemas(val)
+    end
+  end
 
   defp items(items), do: items
 
@@ -398,4 +414,22 @@ end
 defimpl String.Chars, for: Xema do
   @spec to_string(Xema.t()) :: String.t()
   def to_string(xema), do: Xema.to_string(xema)
+end
+
+defimpl Inspect, for: Xema do
+  def inspect(schema, opts) do
+    map =
+      schema
+      |> Map.from_struct()
+      |> Map.update!(:refs, fn map ->
+        case map_size(map) == 0 do
+          true -> nil
+          false -> map
+        end
+      end)
+      |> Enum.filter(fn {_, val} -> !is_nil(val) end)
+      |> Enum.into(%{})
+
+    Inspect.Map.inspect(map, "Xema", opts)
+  end
 end

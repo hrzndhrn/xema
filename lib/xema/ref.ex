@@ -146,3 +146,15 @@ defmodule Xema.Ref do
     _ -> str
   end
 end
+
+defimpl Inspect, for: Xema.Ref do
+  def inspect(schema, opts) do
+    map =
+      schema
+      |> Map.from_struct()
+      |> Enum.filter(fn {_, val} -> !is_nil(val) end)
+      |> Enum.into(%{})
+
+    Inspect.Map.inspect(map, "Xema.Ref", opts)
+  end
+end

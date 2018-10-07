@@ -168,8 +168,8 @@ defmodule Xema.Schema do
     :schema,
     :then,
     :title,
-    :type,
-    :unique_items
+    :unique_items,
+    type: :any
   ]
 
   @type type ::
@@ -312,4 +312,23 @@ defmodule Xema.Schema do
   @spec delete_nils(map) :: map
   defp delete_nils(schema),
     do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
+end
+
+defimpl Inspect, for: Xema.Schema do
+  def inspect(schema, opts) do
+    map =
+      schema
+      |> Map.from_struct()
+      |> Map.update!(
+        :type,
+        fn
+          :any -> nil
+          val -> val
+        end
+      )
+      |> Enum.filter(fn {_, val} -> !is_nil(val) end)
+      |> Enum.into(%{})
+
+    Inspect.Map.inspect(map, "Xema.Schema", opts)
+  end
 end

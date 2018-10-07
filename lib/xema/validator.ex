@@ -83,7 +83,9 @@ defmodule Xema.Validator do
              do: :ok
 
       %{type: :atom} ->
-        type(schema, value)
+        with :ok <- type(schema, value),
+             :ok <- validate_by(:default, schema, value, opts),
+             do: :ok
 
       %{type: type} when is_atom(type) ->
         validate_by(type, schema, value, opts)
@@ -362,7 +364,7 @@ defmodule Xema.Validator do
         :ok
 
       {:error, errors} ->
-        {:error, %{any_of: Enum.reverse(errors), value: value}}
+        {:error, %{any_of: Enum.reverse(errors)}}
     end
   end
 
@@ -379,7 +381,6 @@ defmodule Xema.Validator do
         :ok
 
       {:error, error} ->
-        error = Map.delete(error, :value)
         do_any_of(schemas, value, opts, [error | errors])
     end
   end
@@ -602,7 +603,7 @@ defmodule Xema.Validator do
   defp items_list(_schema, [], _at, [], _opts), do: :ok
 
   defp items_list(_schema, [], _at, errors, _opts),
-    do: {:error, Enum.reverse(errors)}
+    do: {:error, %{items: Enum.reverse(errors)}}
 
   defp items_list(schema, [item | list], at, errors, opts) do
     case do_validate(schema, item, opts) do
@@ -625,7 +626,7 @@ defmodule Xema.Validator do
   defp items_tuple(_schemas, _additonal_items, [], _at, [], _opts), do: :ok
 
   defp items_tuple(_schemas, _additonal_items, [], _at, errors, _opts),
-    do: {:error, Enum.reverse(errors)}
+    do: {:error, %{items: Enum.reverse(errors)}}
 
   defp items_tuple([], false, [_ | list], at, errors, opts),
     do:
