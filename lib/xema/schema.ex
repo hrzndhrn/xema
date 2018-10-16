@@ -57,6 +57,7 @@ defmodule Xema.Schema do
   * `min_length` the minimal length of string.
   * `min_properties` the minimal count of properties for the map.
   * `minimum` the minimum value.
+  * `module` the module of a struct.
   * `multiple_of` is a number greater 0. The value has to be a multiple of this
     number.
   * `not` negates the given schema
@@ -107,6 +108,7 @@ defmodule Xema.Schema do
           min_length: pos_integer | nil,
           min_properties: pos_integer | nil,
           minimum: number | nil,
+          module: atom | nil,
           multiple_of: number | nil,
           not: Schema.t() | nil,
           one_of: [Schema.t()] | nil,
@@ -156,6 +158,7 @@ defmodule Xema.Schema do
     :min_length,
     :min_properties,
     :minimum,
+    :module,
     :multiple_of,
     :not,
     :one_of,
@@ -174,16 +177,20 @@ defmodule Xema.Schema do
 
   @type type ::
           :any
+          | :atom
           | :boolean
           | false
           | :float
           | :integer
+          | :keyword
           | :list
           | :map
           | nil
           | :number
           | :string
+          | :struct
           | true
+          | :tuple
 
   @types [
     :any,
@@ -198,6 +205,7 @@ defmodule Xema.Schema do
     nil,
     :number,
     :string,
+    :struct,
     true,
     :tuple
   ]
