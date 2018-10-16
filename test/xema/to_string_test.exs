@@ -19,8 +19,9 @@ defmodule Xema.ToStringTest do
       assert to_string(xema) == ~s[Xema.new(:id, "foo")]
     end
 
+    @tag :only
     test "with an enum" do
-      schema = ~s(:enum, [1, 2, 3])
+      schema = ~s(enum: [1, 2, 3])
       xema = xema(schema)
 
       # Shortcuts will expand to the equivalent schema.
@@ -90,7 +91,6 @@ defmodule Xema.ToStringTest do
       assert_to_string(~s(:definitions, %{foo: :integer}))
     end
 
-    @tag :only
     test "definitions and ref" do
       assert_to_string(~s(:any, definitions: %{foo: :integer}, ref: "#/go"))
     end

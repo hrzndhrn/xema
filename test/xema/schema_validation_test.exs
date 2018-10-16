@@ -2,33 +2,16 @@ defmodule Xema.SchemaValidationTest do
   use ExUnit.Case, async: true
 
   setup do
-    type =
-      Xema.new(
-        :atom,
-        enum: [
-          :any,
-          :atom,
-          :boolean,
-          false,
-          :float,
-          :integer,
-          :keyword,
-          :list,
-          :map,
-          nil,
-          :number,
-          :string,
-          true,
-          :tuple
-        ]
-      )
-
     %{
       schema:
         Xema.new(
           :tuple,
           items: [
-            {:ref, "#/definitions/type"},
+            {:any_of,
+             [
+               {:ref, "#/definitions/type"},
+               {:ref, "#/definitions/types"}
+             ]},
             {:ref, "#/definitions/keywords"}
           ],
           min_items: 2,
@@ -37,138 +20,200 @@ defmodule Xema.SchemaValidationTest do
             keywords: {
               :keyword,
               properties: %{
-                minimum: :integer
+                id: {:string, format: :uri_reference},
+                schema: {:string, format: :uri},
+                ref: {:string, format: :uri_reference},
+                comment: :string,
+                title: :string,
+                description: :string,
+                default: true,
+                examples: {:map, items: true},
+                multiple_of: {:number, exclusive_minimum: 0},
+                maximum: :number,
+                exclusive_maximum: [:boolean, :number],
+                minimum: :number,
+                exclusive_minimum: [:boolean, :number],
+                max_length: {:ref, "#/definitions/non_negative_integer"},
+                max_length: {:ref, "#/definitions/non_negative_integer"},
+                pattern: {:string, format: :regex},
+                additional_items: {:ref, "#/definitions/schema"},
+                items:
+                  {:any_of,
+                   [
+                     {:ref, "#/definitions/schema"},
+                     {:ref, "#/definitions/schemas"}
+                   ]},
+                max_items: {:ref, "#/definitions/non_negative_integer"},
+                min_items: {:ref, "#/definitions/non_negative_integer"},
+                unique_items: :boolean,
+                contains: {:ref, "#/definitions/schema"},
+                max_properties: {:ref, "#/definitions/non_negative_integer"},
+                min_properties: {:ref, "#/definitions/non_negative_integer"},
+                required:
+                  {:any_of,
+                   [
+                     {:list, items: :string},
+                     {:list, items: :atom}
+                   ]},
+                additional_properties: {:ref, "#/definitions/schema"},
+                definitions:
+                  {:map, additional_properties: {:ref, "#/definitions/schema"}},
+                properties:
+                  {:map, additional_properties: {:ref, "#/definitions/schema"}},
+                pattern_properties:
+                  {:map,
+                   additional_properties: {:ref, "#/definitions/schema"},
+                   property_names:
+                     {:any_of,
+                      [
+                        {:string, format: :regex},
+                        :map
+                      ]}},
+                dependencies:
+                  {:map,
+                   additional_properties:
+                     {:any_of,
+                      [
+                        :string,
+                        :atom,
+                        {:list, items: :string},
+                        {:list, items: :atom},
+                        {:ref, "#/definitions/schema"}
+                      ]}},
+                property_names: {:ref, "#/definitions/schema"},
+                const: true,
+                enum: {:list, items: true, min_items: 1, unique_items: true},
+                format:
+                  {:atom,
+                   enum: [
+                     :date,
+                     :date_time,
+                     :email,
+                     :hostname,
+                     :ipv4,
+                     :ipv6,
+                     :json_pointer,
+                     :relative_json_pointer,
+                     :time,
+                     :uri,
+                     :uri_fragment,
+                     :uri_path,
+                     :uri_query,
+                     :uri_reference,
+                     :uri_template,
+                     :uri_userinfo
+                   ]},
+                if: {:ref, "#/definitions/schema"},
+                then: {:ref, "#/definitions/schema"},
+                else: {:ref, "#/definitions/schema"},
+                all_of: {:ref, "#/definitions/schemas"},
+                any_of: {:ref, "#/definitions/schemas"},
+                one_of: {:ref, "#/definitions/schemas"},
+                not: {:ref, "#/definitions/schema"}
               }
             },
-            type: [
-              any_of: [
-                type,
-                {:list, items: {:ref, "#/definitions/type"}}
-              ]
-            ]
+            non_negative_integer: {:integer, minimum: 0},
+            schema:
+              {:any_of,
+               [
+                 {:ref, "#"},
+                 {:ref, "#/definitions/type"},
+                 {:ref, "#/definitions/types"},
+                 {:ref, "#/definitions/ref"},
+                 {:ref, "#/definitions/of"},
+                 {:ref, "#/definitions/keywords"}
+               ]},
+            schemas: {:list, items: {:ref, "#/definitions/schema"}},
+            ref:
+              {:tuple,
+               min_length: 2,
+               max_length: 2,
+               items: [
+                 {:atom, const: :ref},
+                 {:ref, "#/definitions/keywords/properties/ref"}
+               ]},
+            of:
+              {:tuple,
+               min_length: 2,
+               max_length: 2,
+               items: [
+                 {:atom, enum: [:all_of, :any_of, :one_of]},
+                 {:ref, "#/definitions/schemas"}
+               ]},
+            type:
+              {:atom,
+               enum: [
+                 :any,
+                 :atom,
+                 :boolean,
+                 false,
+                 :float,
+                 :integer,
+                 :keyword,
+                 :list,
+                 :map,
+                 nil,
+                 :number,
+                 :string,
+                 true,
+                 :tuple
+               ]},
+            types: {:list, items: {:ref, "#/definitions/type"}}
           }
         )
     }
   end
 
-  test "valid type", %{schema: schema} do
-    # IO.inspect(schema)
-    xema = {:integer, []}
+  describe "type" do
+    test "with valid value", %{schema: schema} do
+      IO.inspect(schema, limit: :infinity)
+      xema = {:integer, []}
 
-    assert Xema.validate(schema, xema) == :ok
+      assert Xema.valid?(schema, xema)
+    end
+
+    test "with valid list", %{schema: schema} do
+      xema = {[:integer, :string], []}
+
+      assert Xema.valid?(schema, xema)
+    end
+
+    test "with invalid atom", %{schema: schema} do
+      xema = {:foo, []}
+
+      refute Xema.valid?(schema, xema)
+    end
+
+    test "with invalid value", %{schema: schema} do
+      xema = {"map", []}
+
+      refute Xema.valid?(schema, xema)
+    end
+
+    test "with valid keyword is not valid", %{schema: schema} do
+      xema = {:minimum, []}
+
+      refute Xema.valid?(schema, xema)
+    end
+
+    test "with valid ref is not valid", %{schema: schema} do
+      xema = {:ref, "#"}
+
+      refute Xema.valid?(schema, xema)
+    end
+
+    test "with invalid atom in list", %{schema: schema} do
+      xema = {[:integer, :foo], []}
+
+      refute Xema.valid?(schema, xema)
+    end
   end
 
-  test "valid type list", %{schema: schema} do
-    xema = {[:integer, :string], []}
+  describe "keyword" do
+    test "minimum with invalid value", %{schema: schema} do
+      xema = {:any, [minimum: "2"]}
 
-    assert Xema.validate(schema, xema) == :ok
-  end
-
-  test "invalid type", %{schema: schema} do
-    xema = {:foo, []}
-
-    error =
-      {:error,
-       %{
-         items: [
-           {0,
-            %{
-              any_of: [
-                %{
-                  enum: [
-                    :any,
-                    :atom,
-                    :boolean,
-                    false,
-                    :float,
-                    :integer,
-                    :keyword,
-                    :list,
-                    :map,
-                    nil,
-                    :number,
-                    :string,
-                    true,
-                    :tuple
-                  ],
-                  value: :foo
-                },
-                %{type: :list, value: :foo}
-              ],
-              value: :foo
-            }}
-         ]
-       }}
-
-    assert Xema.validate(schema, xema) == error
-  end
-
-  @tag :only
-  test "invalid type in list", %{schema: schema} do
-    xema = {[:integer, :foo], []}
-
-    error =
-      {:error,
-       %{
-         items: [
-           {0,
-            %{
-              any_of: [
-                %{type: :atom, value: [:integer, :foo]},
-                %{
-                  items: [
-                    {1,
-                     %{
-                       any_of: [
-                         %{
-                           enum: [
-                             :any,
-                             :atom,
-                             :boolean,
-                             false,
-                             :float,
-                             :integer,
-                             :keyword,
-                             :list,
-                             :map,
-                             nil,
-                             :number,
-                             :string,
-                             true,
-                             :tuple
-                           ],
-                           value: :foo
-                         },
-                         %{type: :list, value: :foo}
-                       ],
-                       value: :foo
-                     }}
-                  ]
-                }
-              ],
-              value: [:integer, :foo]
-            }}
-         ]
-       }}
-
-    assert Xema.validate(schema, xema) == error
-  end
-
-  test "keyword minimum with valid value", %{schema: schema} do
-    xema = {:any, [minimum: 2]}
-
-    assert Xema.validate(schema, xema) == :ok
-  end
-
-  test "keyword minimum with invalid value", %{schema: schema} do
-    xema = {:any, [minimum: "2"]}
-
-    assert Xema.validate(schema, xema) ==
-             {:error,
-              %{
-                items: [
-                  {1, %{properties: %{minimum: %{type: :integer, value: "2"}}}}
-                ]
-              }}
+      refute Xema.valid?(schema, xema)
+    end
   end
 end

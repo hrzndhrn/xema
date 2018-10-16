@@ -29,6 +29,7 @@ defmodule Xema.NotTest do
       }
     end
 
+    @tag :only
     test "equal to the long version", %{short: short, key: key} do
       assert short == Xema.new(:any, not: :integer)
       assert key == Xema.new(:any, not: :integer)

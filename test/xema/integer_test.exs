@@ -30,6 +30,20 @@ defmodule Xema.IntegerTest do
     end
   end
 
+  describe "integer schema with minimum" do
+    setup do
+      %{schema: Xema.new(minimum: 2)}
+    end
+
+    test "with a valid value", %{schema: schema} do
+      assert validate(schema, 4) == :ok
+    end
+
+    test "with an invalid value", %{schema: schema} do
+      assert validate(schema, 1) == {:error, %{minimum: 2, value: 1}}
+    end
+  end
+
   describe "integer schema with range" do
     setup do
       %{schema: Xema.new(:integer, minimum: 2, maximum: 4)}
@@ -59,6 +73,7 @@ defmodule Xema.IntegerTest do
       %{schema: Xema.new(minimum: 2, maximum: 4)}
     end
 
+    @tag :only
     test "validate/2 with a integer in range", %{schema: schema} do
       assert validate(schema, 2) == :ok
       assert validate(schema, 3) == :ok
