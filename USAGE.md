@@ -24,7 +24,8 @@
   * [Additional Properties](#additional_properties)
   * [Pattern Properties](#pattern_properties)
   * [Size](#map_size)
-* [Multiples Types](#multi)
+* [Type struct](#struct)
+* [Multiples Types](#multi_types)
 * [Allow Additional Types](#allow)
 * [Constants](#const)
 * [Enumerations](#enum)
@@ -719,11 +720,37 @@ iex> Xema.valid? schema, %{b: 1, c: 7}
 true
 ```
 
-## <a id="multi"></a> Multiples Types
+## <a id="struct"></a> Type struct
+
+Structs can also be validated.
+
+```Elixir
+iex> schema = Xema.new :struct
+%Xema{content: %Xema.Schema{type: :struct}}
+iex> Xema.valid? schema, ~r/.*/
+true
+iex> Xema.valid? schema, %{}
+false
+```
+
+### <a id="module"</a> Module
+
+The `module` keyword allows specifing which struct is expected.
+
+```Elixir
+iex> schema = Xema.new :struct, module: Regex
+%Xema{content: %Xema.Schema{type: :struct, module: Regex}}
+iex> Xema.valid? schema, ~r/.*/
+true
+iex> Xema.valid? schema, URI.parse("")
+false
+```
+
+## <a id="multi_types"></a> Multiples Types
 
 `JSON Schema Draft: 4/6/7`
 
-It is also possible to check if a value matches one of the multiple types.
+It is also possible to check if a value matches one of several types.
 
 ```Elixir
 iex> schema = Xema.new [:string, nil], min_length: 1

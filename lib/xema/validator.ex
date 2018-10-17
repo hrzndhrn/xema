@@ -13,6 +13,7 @@ defmodule Xema.Validator do
 
   @types [
     :atom,
+    :struct,
     :boolean,
     :float,
     :integer,
@@ -72,6 +73,11 @@ defmodule Xema.Validator do
              :ok <- validate_by(:list, schema, value, opts),
              do: :ok
 
+      %{type: :struct} ->
+        with :ok <- type(schema, value),
+             :ok <- validate_by(:struct, schema, value, opts),
+             do: :ok
+
       %{type: :map} ->
         with :ok <- type(schema, value),
              :ok <- validate_by(:map, schema, value, opts),
@@ -127,6 +133,12 @@ defmodule Xema.Validator do
          :ok <- unique(schema, value),
          :ok <- items(schema, value, opts),
          :ok <- contains(schema, value),
+         do: :ok
+  end
+
+  defp validate_by(:struct, schema, value, opts) do
+    with :ok <- module(schema, value),
+         :ok <- validate_by(:map, schema, value, opts),
          do: :ok
   end
 
@@ -193,10 +205,10 @@ defmodule Xema.Validator do
     do: Enum.find(@types, fn type -> type?(type, value) end)
 
   @spec type(Xema.Schema.t() | atom, any) :: result
-  defp type(%{type: type} = schema, value) do
+  defp type(%{type: type}, value) do
     case type?(type, value) do
       true -> :ok
-      false -> {:error, %{type: schema.type, value: value}}
+      false -> {:error, %{type: type, value: value}}
     end
   end
 
@@ -212,8 +224,21 @@ defmodule Xema.Validator do
   defp type?(:float, value), do: is_float(value)
   defp type?(:map, value), do: is_map(value)
   defp type?(:list, value), do: is_list(value)
+  defp type?(:struct, value), do: is_map(value) && struct?(value)
   defp type?(nil, nil), do: true
   defp type?(_, _), do: false
+
+  @spec struct?(any) :: boolean
+  defp struct?(val) when is_map(val), do: Map.has_key?(val, :__struct__)
+
+  defp struct?(_), do: false
+
+  @spec struct?(any, atom) :: boolean
+  defp struct?(val, module)
+       when is_map(val) and is_atom(module),
+       do: Map.get(val, :__struct__) == module
+
+  defp struct?(_, _), do: false
 
   @spec types(Schema.t(), any) :: {:ok, atom} | {:error, map}
   defp types(%{type: list}, value) do
@@ -313,6 +338,16 @@ defmodule Xema.Validator do
     case Enum.member?(enum, value) do
       true -> :ok
       false -> {:error, %{enum: enum, value: value}}
+    end
+  end
+
+  @spec module(Schema.t(), any) :: result
+  defp module(%{module: nil}, _val), do: :ok
+
+  defp module(%{module: module}, val) do
+    case struct?(val, module) do
+      true -> :ok
+      false -> {:error, %{module: module, value: val}}
     end
   end
 
