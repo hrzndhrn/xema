@@ -3,7 +3,7 @@ defmodule Xema.AnnotationsTest do
 
   test "schema with metadta" do
     id = "ID"
-    schema = "elixir-schema"
+    schema = "http://xema.org/version-0-5-0/schema#"
     title = "Just for fun"
     description = "Code for fun"
     examples = [%{test: "data"}]
@@ -13,7 +13,7 @@ defmodule Xema.AnnotationsTest do
     content_encoding = "encoding"
 
     xema =
-      Xema.new(
+      Xema.new({
         :any,
         id: id,
         schema: schema,
@@ -24,7 +24,7 @@ defmodule Xema.AnnotationsTest do
         comment: comment,
         content_media_type: content_media_type,
         content_encoding: content_encoding
-      )
+      })
 
     assert xema.content.id == id
     assert xema.content.schema == schema

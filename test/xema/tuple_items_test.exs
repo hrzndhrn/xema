@@ -1,11 +1,11 @@
-defmodule Draft7.TupleItemsTest do
+defmodule Xema.TupleItemsTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [valid?: 2]
 
   describe "a schema given for items" do
     setup do
-      %{schema: Xema.new(:items, :integer)}
+      %{schema: Xema.new(items: :integer)}
     end
 
     test "valid items", %{schema: schema} do
@@ -26,7 +26,7 @@ defmodule Draft7.TupleItemsTest do
 
   describe "an tuple of schemas for items" do
     setup do
-      %{schema: Xema.new(:items, [:integer, :string])}
+      %{schema: Xema.new(items: [:integer, :string])}
     end
 
     test "correct types", %{schema: schema} do
@@ -57,7 +57,7 @@ defmodule Draft7.TupleItemsTest do
 
   describe "items with boolean schema (true)" do
     setup do
-      %{schema: Xema.new(:items, true)}
+      %{schema: Xema.new(items: true)}
     end
 
     test "any tuple is valid", %{schema: schema} do
@@ -73,7 +73,7 @@ defmodule Draft7.TupleItemsTest do
 
   describe "items with boolean schema (false)" do
     setup do
-      %{schema: Xema.new(:items, false)}
+      %{schema: Xema.new(items: false)}
     end
 
     test "any non-empty tuple is invalid", %{schema: schema} do
@@ -89,7 +89,7 @@ defmodule Draft7.TupleItemsTest do
 
   describe "items with boolean schemas" do
     setup do
-      %{schema: Xema.new(:items, [true, false])}
+      %{schema: Xema.new(items: [true, false])}
     end
 
     test "tuple with one item is valid", %{schema: schema} do

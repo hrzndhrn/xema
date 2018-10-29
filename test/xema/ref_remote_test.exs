@@ -3,6 +3,7 @@ defmodule Xema.RefRemoteTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.RefError
   alias Xema.SchemaError
 
   test "http server" do
@@ -19,17 +20,18 @@ defmodule Xema.RefRemoteTest do
           "undefined function invalid/0"
 
       assert_raise CompileError, expected, fn ->
-        Xema.new(:ref, "http://localhost:1234/compile-error.exon")
+        Xema.new({:ref, "http://localhost:1234/compile-error.exon"})
       end
     end
 
+    @tag :only
     test "syntax error" do
       expected =
         "http://localhost:1234/syntax-error.exon:2: " <>
           "keyword argument must be followed by space after: a:"
 
       assert_raise SyntaxError, expected, fn ->
-        Xema.new(:ref, "http://localhost:1234/syntax-error.exon")
+        Xema.new({:ref, "http://localhost:1234/syntax-error.exon"})
       end
     end
   end
@@ -40,14 +42,14 @@ defmodule Xema.RefRemoteTest do
         "Remote schema 'http://localhost:1234/not-found.exon' not found."
 
       assert_raise SchemaError, expected, fn ->
-        Xema.new(:ref, "http://localhost:1234/not-found.exon")
+        Xema.new({:ref, "http://localhost:1234/not-found.exon"})
       end
     end
   end
 
   describe "remote ref" do
     setup do
-      %{schema: Xema.new(:ref, "http://localhost:1234/integer.exon")}
+      %{schema: Xema.new({:ref, "http://localhost:1234/integer.exon"})}
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -62,8 +64,8 @@ defmodule Xema.RefRemoteTest do
   describe "schema with invalid ref" do
     setup do
       schema =
-        :ref
-        |> Xema.new("http://localhost:1234/integer.exon")
+        {:ref, "http://localhost:1234/integer.exon"}
+        |> Xema.new()
         |> Map.put(:refs, nil)
 
       %{schema: schema}
@@ -72,7 +74,7 @@ defmodule Xema.RefRemoteTest do
     test "validate/2 with a valid value", %{schema: schema} do
       expected = "Reference 'http://localhost:1234/integer.exon' not found."
 
-      assert_raise SchemaError, expected, fn ->
+      assert_raise RefError, expected, fn ->
         validate(schema, 1)
       end
     end
@@ -82,10 +84,10 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :ref,
             "http://localhost:1234/sub_schemas.exon#/definitions/int"
-          )
+          })
       }
     end
 
@@ -102,10 +104,10 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :ref,
             "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"
-          )
+          })
       }
     end
 
@@ -122,7 +124,7 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             id: "http://localhost:1234/scope_change_defs1.exon",
             properties: %{
@@ -131,7 +133,7 @@ defmodule Xema.RefRemoteTest do
             definitions: %{
               baz: {:list, id: "folder/", items: {:ref, "folderInteger.exon"}}
             }
-          )
+          })
       }
     end
 
@@ -154,13 +156,13 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             id: "http://localhost:1234/object",
             properties: %{
               name: {:ref, "xema_name.exon#/definitions/or_nil"}
             }
-          )
+          })
       }
     end
 
@@ -190,13 +192,13 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             id: "http://localhost:1234",
             properties: %{
               name: {:ref, "xema_name.exon#/definitions/or_nil"}
             }
-          )
+          })
       }
     end
 

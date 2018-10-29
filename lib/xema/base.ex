@@ -22,9 +22,7 @@ defmodule Xema.Base do
       defstruct content: %Schema{},
                 refs: %{}
 
-      def new(data, opts \\ [])
-
-      def new(%Schema{} = content, opts) do
+      def new(%Schema{} = content) do
         content = map_refs(content)
         ids = get_ids(content)
         refs = get_refs(content)
@@ -36,10 +34,10 @@ defmodule Xema.Base do
         )
       end
 
-      def new(data, opts),
+      def new(data),
         do:
           data
-          |> init(opts)
+          |> init()
           |> new()
 
       @doc """
@@ -135,11 +133,8 @@ defmodule Xema.Base do
           {:ok, data} ->
             new(data)
 
-          {:error, reason} when is_binary(reason) ->
-            raise SchemaError, message: reason
-
           {:error, reason} ->
-            raise reason
+            raise SchemaError, reason
         end
       end
 

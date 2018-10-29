@@ -1,4 +1,4 @@
 {:string,
 definitions: %{
-  or_nil: {:any_of, [:nil, {:ref, "#"}]}
+  or_nil: [any_of: [:nil, {:ref, "#"}]]
 }}

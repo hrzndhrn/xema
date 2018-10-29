@@ -31,13 +31,13 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               foo: :number,
               bar: :string
             }
-          )
+          })
       }
     end
 
@@ -85,13 +85,13 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               "foo" => :number,
               "bar" => :string
             }
-          )
+          })
       }
     end
 
@@ -130,14 +130,14 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             keys: :atoms,
             properties: %{
               "foo" => :number,
               "bar" => :string
             }
-          )
+          })
       }
     end
 
@@ -154,14 +154,14 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             keys: :strings,
             properties: %{
               "foo" => :number,
               "bar" => :string
             }
-          )
+          })
       }
     end
 
@@ -176,7 +176,7 @@ defmodule Xema.MapTest do
 
   describe "map schema with min/max properties" do
     setup do
-      %{schema: Xema.new(:map, min_properties: 2, max_properties: 3)}
+      %{schema: Xema.new({:map, min_properties: 2, max_properties: 3})}
     end
 
     test "validate/2 with too less properties", %{schema: schema} do
@@ -197,11 +197,10 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
-            properties: %{foo: :number},
-            additional_properties: false
-          )
+            properties: %{foo: :number}, additional_properties: false
+          })
       }
     end
 
@@ -236,11 +235,10 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
-            properties: %{"foo" => :number},
-            additional_properties: false
-          )
+            properties: %{"foo" => :number}, additional_properties: false
+          })
       }
     end
 
@@ -254,11 +252,11 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{foo: {:string, min_length: 3}},
             additional_properties: :integer
-          )
+          })
       }
     end
 
@@ -290,7 +288,7 @@ defmodule Xema.MapTest do
 
   describe "map schema with required property (atom keys)" do
     setup do
-      %{schema: Xema.new(:map, properties: %{foo: :number}, required: [:foo])}
+      %{schema: Xema.new({:map, properties: %{foo: :number}, required: [:foo]})}
     end
 
     test "validate/2 with required property (atom key)", %{schema: schema} do
@@ -314,11 +312,11 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{a: :number, b: :number, c: :number},
             required: [:a, :b, :c]
-          )
+          })
       }
     end
 
@@ -333,7 +331,9 @@ defmodule Xema.MapTest do
 
   describe "map schema with required property (string keys)" do
     setup do
-      %{schema: Xema.new(:map, properties: %{foo: :number}, required: ["foo"])}
+      %{
+        schema: Xema.new({:map, properties: %{foo: :number}, required: ["foo"]})
+      }
     end
 
     test "validate/2 with required property", %{schema: schema} do
@@ -357,14 +357,14 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             pattern_properties: %{
               ~r/^s_/ => :string,
               ~r/^i_/ => :number
             },
             additional_properties: false
-          )
+          })
       }
     end
 
@@ -387,14 +387,14 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             pattern_properties: %{
               "^s_" => :string,
               "^i_" => :number
             },
             additional_properties: false
-          )
+          })
       }
     end
 
@@ -417,14 +417,14 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             pattern_properties: %{
               "^s_": :string,
               "^i_": :number
             },
             additional_properties: false
-          )
+          })
       }
     end
 
@@ -447,14 +447,14 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               map: :number,
               items: :number,
               properties: :number
             }
-          )
+          })
       }
     end
 
@@ -467,7 +467,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               a: :number,
@@ -477,7 +477,7 @@ defmodule Xema.MapTest do
             dependencies: %{
               b: :c
             }
-          )
+          })
       }
     end
 
@@ -504,7 +504,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               a: :number,
@@ -514,7 +514,7 @@ defmodule Xema.MapTest do
             dependencies: %{
               b: [:c]
             }
-          )
+          })
       }
     end
 
@@ -539,7 +539,7 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               a: :number,
@@ -554,7 +554,7 @@ defmodule Xema.MapTest do
                 required: [:c]
               }
             }
-          )
+          })
       }
     end
 
@@ -576,12 +576,12 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             dependencies: %{
               penny: [:pound]
             }
-          )
+          })
       }
     end
 
@@ -607,10 +607,10 @@ defmodule Xema.MapTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             property_names: [min_length: 3]
-          )
+          })
       }
     end
 

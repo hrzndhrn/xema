@@ -33,7 +33,7 @@ defmodule Xema.ListTest do
 
   describe "'list' schema with size" do
     setup do
-      %{schema: Xema.new(:list, min_items: 2, max_items: 3)}
+      %{schema: Xema.new({:list, min_items: 2, max_items: 3})}
     end
 
     test "validate/2 with too short list", %{schema: schema} do
@@ -53,8 +53,8 @@ defmodule Xema.ListTest do
   describe "'list' schema with typed items" do
     setup do
       %{
-        integers: Xema.new(:list, items: :integer),
-        strings: Xema.new(:list, items: :string)
+        integers: Xema.new({:list, items: :integer}),
+        strings: Xema.new({:list, items: :string})
       }
     end
 
@@ -104,8 +104,8 @@ defmodule Xema.ListTest do
   describe "list schema with bool schema for items: " do
     setup do
       %{
-        true_schema: Xema.new(:list, items: true),
-        false_schema: Xema.new(:list, items: false)
+        true_schema: Xema.new({:list, items: true}),
+        false_schema: Xema.new({:list, items: false})
       }
     end
 
@@ -128,7 +128,7 @@ defmodule Xema.ListTest do
 
   describe "'list' schema with unique items" do
     setup do
-      %{schema: Xema.new(:list, unique_items: true)}
+      %{schema: Xema.new({:list, unique_items: true})}
     end
 
     test "validate/2 with list of unique items", %{schema: schema} do
@@ -145,13 +145,13 @@ defmodule Xema.ListTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :list,
             items: [
               {:string, min_length: 3},
               {:number, minimum: 10}
             ]
-          )
+          })
       }
     end
 
@@ -185,14 +185,14 @@ defmodule Xema.ListTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :list,
             additional_items: false,
             items: [
               {:string, min_length: 3},
               {:number, minimum: 10}
             ]
-          )
+          })
       }
     end
 
@@ -206,13 +206,13 @@ defmodule Xema.ListTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :list,
             additional_items: :string,
             items: [
               {:number, minimum: 10}
             ]
-          )
+          })
       }
     end
 
@@ -230,10 +230,10 @@ defmodule Xema.ListTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :list,
             contains: [minimum: 4]
-          )
+          })
       }
     end
 
@@ -254,10 +254,10 @@ defmodule Xema.ListTest do
 
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :list,
             contains: minimum
-          )
+          })
       }
     end
 

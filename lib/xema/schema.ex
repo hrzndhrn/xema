@@ -85,7 +85,7 @@ defmodule Xema.Schema do
           content_encoding: String.t() | nil,
           content_media_type: String.t() | nil,
           contains: Xema.t() | Schema.t(),
-          data: any,
+          data: map,
           default: any,
           definitions: map,
           dependencies: list | map | nil,
@@ -211,16 +211,7 @@ defmodule Xema.Schema do
   ]
 
   @spec new(keyword) :: Schema.t()
-  def new(opts) do
-    struct!(Schema, opts |> validate_type!() |> update())
-  rescue
-    e in KeyError ->
-      reraise(
-        SchemaError,
-        [message: "#{inspect(e.key)} is not a valid keyword."],
-        __STACKTRACE__
-      )
-  end
+  def new(opts), do: struct!(Schema, opts |> validate_type!() |> update())
 
   @spec to_map(Schema.t()) :: map
   def to_map(schema),
@@ -239,13 +230,13 @@ defmodule Xema.Schema do
       opts
     else
       {:error, :not_exist} ->
-        raise(SchemaError, message: "Missing type.")
+        raise SchemaError, :missing_type
 
       {:error, types} when is_list(types) ->
-        raise(SchemaError, message: "Invalid types #{inspect(types)}.")
+        raise SchemaError, {:invalid_types, types}
 
       {:error, type} ->
-        raise(SchemaError, message: "Invalid type #{inspect(type)}.")
+        raise SchemaError, {:invalid_type, type}
     end
   end
 

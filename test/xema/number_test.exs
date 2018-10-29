@@ -33,7 +33,7 @@ defmodule Xema.NumberTest do
 
   describe "'number' schema with range" do
     setup do
-      %{schema: Xema.new(:number, minimum: 2, maximum: 4)}
+      %{schema: Xema.new({:number, minimum: 2, maximum: 4})}
     end
 
     test "validate/2 with a number in range", %{schema: schema} do
@@ -59,13 +59,13 @@ defmodule Xema.NumberTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :number,
             minimum: 2,
             maximum: 4,
             exclusive_minimum: true,
             exclusive_maximum: true
-          )
+          })
       }
     end
 
@@ -102,11 +102,10 @@ defmodule Xema.NumberTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :number,
-            exclusive_minimum: 2,
-            exclusive_maximum: 4
-          )
+            exclusive_minimum: 2, exclusive_maximum: 4
+          })
       }
     end
 
@@ -141,7 +140,7 @@ defmodule Xema.NumberTest do
 
   describe "'number' schema with multiple-of" do
     setup do
-      %{schema: Xema.new(:number, multiple_of: 1.2)}
+      %{schema: Xema.new({:number, multiple_of: 1.2})}
     end
 
     test "validate/2 with a valid number", %{schema: schema} do
@@ -157,7 +156,7 @@ defmodule Xema.NumberTest do
 
   describe "'number' schema with enum" do
     setup do
-      %{schema: Xema.new(:number, enum: [1.2, 1.3, 3.3])}
+      %{schema: Xema.new({:number, enum: [1.2, 1.3, 3.3]})}
     end
 
     test "with a value from the enum", %{schema: schema} do

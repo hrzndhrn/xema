@@ -155,6 +155,17 @@ iex> Xema.validate schema, "foo"
 {:error, %{value: "foo", pattern: ~r/[0-9]-[A-B]+/}}
 ```
 
+The regular expression can also be a string.
+
+```Elixir
+iex> schema = Xema.new :string, pattern: "[0-9]-[A-B]"
+%Xema{content: %Xema.Schema{type: :string, pattern: ~r/[0-9]-[A-B]+/}}
+iex> Xema.validate schema, "1-AB"
+:ok
+iex> Xema.validate schema, "foo"
+{:error, %{value: "foo", pattern: ~r/[0-9]-[A-B]+/}}
+```
+
 ### <a id="fmt"></a> Format
 
 `JSON Schema Draft: 4/6/7`

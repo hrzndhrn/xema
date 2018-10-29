@@ -6,7 +6,7 @@ defmodule Xema.Ref do
   alias Xema.Mapz
   alias Xema.Ref
   alias Xema.Schema
-  alias Xema.SchemaError
+  alias Xema.RefError
   alias Xema.Utils
 
   require Logger
@@ -50,8 +50,7 @@ defmodule Xema.Ref do
         validate(ref, value, opts)
 
       {:error, :not_found} ->
-        raise SchemaError,
-          message: "Reference '#{ref.pointer}' not found."
+        raise RefError, {:not_found, ref.pointer}
     end
   end
 

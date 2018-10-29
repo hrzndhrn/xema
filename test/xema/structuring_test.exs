@@ -5,19 +5,19 @@ defmodule Xema.StructuringTest do
 
   describe "structuring schema without definitions and ref" do
     setup do
-      positive = Xema.new(:integer, minimum: 1)
-      negative = Xema.new(:integer, maximum: -1)
+      positive = Xema.new({:integer, minimum: 1})
+      negative = Xema.new({:integer, maximum: -1})
 
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               a: positive,
               b: positive,
               c: negative
             }
-          )
+          })
       }
     end
 

@@ -3,15 +3,9 @@ defmodule Xema.MultiTypeTest do
 
   import Xema, only: [validate: 2]
 
-  test "&new/1 called with a wrong type list raised an exception" do
-    assert_raise Xema.SchemaError, "Invalid types [:foo].", fn ->
-      Xema.new([:string, :foo])
-    end
-  end
-
   describe "schema with type string or nil:" do
     setup do
-      %{schema: Xema.new([:string, nil], min_length: 5)}
+      %{schema: Xema.new({[:string, nil], min_length: 5})}
     end
 
     test "with a string", %{schema: schema} do
@@ -34,7 +28,7 @@ defmodule Xema.MultiTypeTest do
 
   describe "property with type number or nil:" do
     setup do
-      %{schema: Xema.new(:properties, %{foo: [:number, nil]})}
+      %{schema: Xema.new(properties: %{foo: [:number, nil]})}
     end
 
     test "with a number", %{schema: schema} do
@@ -54,7 +48,7 @@ defmodule Xema.MultiTypeTest do
 
   describe "keyword allow:" do
     setup do
-      %{schema: Xema.new(:string, allow: nil)}
+      %{schema: Xema.new({:string, allow: nil})}
     end
 
     test "with a string", %{schema: schema} do
