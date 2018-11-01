@@ -225,7 +225,7 @@ defmodule Xema.Schema do
 
   @spec keywords :: [atom]
   def keywords,
-    do: %Schema{} |> Map.keys() |> MapSet.new() |> MapSet.delete(:data)
+    do: %Schema{} |> Map.keys() |> List.delete(:data)
 
   @spec validate_type!(keyword) :: keyword
   defp validate_type!(opts) when is_list(opts) do

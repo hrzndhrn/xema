@@ -10,35 +10,32 @@ defmodule Xema do
   alias Xema.Schema
   alias Xema.SchemaValidator
 
-  @keywords Schema.keywords()
+  @keywords MapSet.new(Schema.keywords())
   @types Schema.types()
 
   @doc """
-  TODO: update docs
-  This function defines the schemas.
-
-  The first argument sets the `type` of the schema. The second arguments
-  contains the 'keywords' of the schema.
-
-  ## Parameters
-
-    - type: type of the schema.
-    - opts: keywords of the schema.
+  This function defines the schema.
 
   ## Examples
 
-      iex> Xema.new {:string, min_length: 3, max_length: 12}
-      %Xema{
-        content: %Xema.Schema{
-          max_length: 12,
-          min_length: 3,
-          type: :string
-        }
-      }
+  Simple schema:
 
-  For nested schemas you can use `{:type, opts: ...}` like here.
+      iex> schema = Xema.new :string
+      iex> Xema.valid? schema, "hello"
+      true
+      iex> Xema.valid? schema, 42
+      false
 
-  ## Examples
+  Schema:
+
+      iex> schema = Xema.new {:string, min_length: 3, max_length: 12}
+      iex> Xema.valid? schema, "hello"
+      true
+      iex> Xema.valid? schema, "hi"
+      false
+
+  Nested schemas:
+
       iex> schema = Xema.new {:list, items: {:number, minimum: 2}}
       iex> Xema.validate(schema, [2, 3, 4])
       :ok
@@ -47,10 +44,14 @@ defmodule Xema do
       iex> Xema.validate(schema, [2, 3, 1])
       {:error, %{items: [{2, %{value: 1, minimum: 2}}]}}
 
+  More examples can be found on page
+  [Usage](https://hexdocs.pm/xema/usage.html#content).
   """
   @spec new(Schema.t() | Schema.type() | tuple | atom | keyword) :: Xema.t()
+  def new(data)
 
   @impl true
+  @doc false
   @spec init(atom | keyword | {atom, keyword}) :: Schema.t()
   def init(val) when is_atom(val) do
     init({val, []})
@@ -296,6 +297,14 @@ defmodule Xema do
   #  source/1
   #
 
+  @doc """
+  Returns the source.
+
+  ## Examples
+
+      iex> {:integer, minimum: 1} |> Xema.new() |> Xema.source()
+      {:integer, minimum: 1}
+  """
   @spec source(Xema.t()) :: atom | keyword | {atom, keyword}
   def source(%Xema{} = xema), do: source(xema.content)
 

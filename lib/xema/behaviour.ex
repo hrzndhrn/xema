@@ -1,5 +1,7 @@
 defmodule Xema.Behaviour do
-  @moduledoc false
+  @moduledoc """
+  TODO
+  """
 
   alias Xema.NoResolver
   alias Xema.Ref
@@ -17,7 +19,7 @@ defmodule Xema.Behaviour do
   defmacro __using__(_opts) do
     quote do
       @behaviour Xema.Behaviour
-      import Xema.Behaviour
+      alias Xema.Behaviour
 
       @enforce_keys [:content]
 
@@ -29,10 +31,13 @@ defmodule Xema.Behaviour do
       defstruct content: %Schema{},
                 refs: %{}
 
+      @doc """
+      TODO
+      """
       def new(%Schema{} = content) do
-        content = map_refs(content)
-        ids = get_ids(content)
-        refs = get_refs(content)
+        content = Behaviour.map_refs(content)
+        ids = Behaviour.get_ids(content)
+        refs = Behaviour.get_refs(content)
 
         struct!(
           __MODULE__,
@@ -88,69 +93,70 @@ defmodule Xema.Behaviour do
 
       defp on_error(error), do: error
       defoverridable on_error: 1
-
-      defp map_refs(%Schema{} = schema) do
-        map(schema, fn
-          %Schema{ref: ref} = schema, id when not is_nil(ref) ->
-            %{schema | ref: Ref.new(ref, id)}
-
-          # TODO: do we need this
-          %Schema{} = schema, id ->
-            schema
-
-          value, id ->
-            value
-        end)
-      end
-
-      defp get_refs(%Schema{} = schema) do
-        schema
-        |> reduce(%{id: nil}, fn
-          %Ref{} = ref, acc, _path ->
-            put_ref(acc, ref)
-
-          %Schema{id: id}, acc, _path when not is_nil(id) ->
-            Utils.update_id(acc, id)
-
-          _schema, acc, _path ->
-            acc
-        end)
-        |> case do
-          empty when empty == %{} -> nil
-          refs -> Map.delete(refs, :id)
-        end
-      end
-
-      defp put_ref(map, %Ref{uri: uri}) when not is_nil(uri) do
-        case get_schema(uri) do
-          nil ->
-            map
-
-          schema ->
-            Map.put(map, URI.to_string(uri), schema)
-        end
-      end
-
-      defp put_ref(map, _), do: map
-
-      defp get_schema(uri) do
-        case resolve(uri) do
-          {:ok, nil} ->
-            nil
-
-          {:ok, data} ->
-            new(data)
-
-          {:error, reason} ->
-            raise SchemaError, reason
-        end
-      end
-
-      defp resolve(uri),
-        do: Application.get_env(:xema, :resolver, NoResolver).fetch(uri)
     end
   end
 
+  @doc false
+  @spec map_refs(Schema.t()) :: Schema.t()
+  def map_refs(%Schema{} = schema) do
+    map(schema, fn
+      %Schema{ref: ref} = schema, id when not is_nil(ref) ->
+        %{schema | ref: Ref.new(ref, id)}
+
+      value, _id ->
+        value
+    end)
+  end
+
+  @doc false
+  @spec get_refs(Schema.t()) :: %{required(String.t()) => Ref.t()}
+  def get_refs(%Schema{} = schema) do
+    schema
+    |> reduce(%{id: nil}, fn
+      %Ref{} = ref, acc, _path ->
+        put_ref(acc, ref)
+
+      %Schema{id: id}, acc, _path when not is_nil(id) ->
+        Utils.update_id(acc, id)
+
+      _schema, acc, _path ->
+        acc
+    end)
+    |> case do
+      empty when empty == %{} -> nil
+      refs -> Map.delete(refs, :id)
+    end
+  end
+
+  defp put_ref(map, %Ref{uri: uri}) when not is_nil(uri) do
+    case get_schema(uri) do
+      nil ->
+        map
+
+      schema ->
+        Map.put(map, URI.to_string(uri), schema)
+    end
+  end
+
+  defp put_ref(map, _), do: map
+
+  defp get_schema(uri) do
+    case resolve(uri) do
+      {:ok, nil} ->
+        nil
+
+      {:ok, data} ->
+        Xema.new(data)
+
+      {:error, reason} ->
+        raise SchemaError, reason
+    end
+  end
+
+  defp resolve(uri),
+    do: Application.get_env(:xema, :resolver, NoResolver).fetch(uri)
+
+  @doc false
   @spec get_ids(Schema.t()) :: map | nil
   def get_ids(%Schema{} = schema) do
     reduce(schema, %{}, fn
@@ -190,6 +196,9 @@ defmodule Xema.Behaviour do
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 
+  @doc """
+  TODO
+  """
   @spec map(Schema.t(), function) :: Schema.t() | Ref.t()
   def map(schema, fun) do
     map(schema, fun, nil)

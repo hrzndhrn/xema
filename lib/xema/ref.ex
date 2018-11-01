@@ -104,7 +104,6 @@ defmodule Xema.Ref do
   defp fetch_by_path(schema, [key | keys]) do
     key = decode(key)
 
-    # TODO: what happens here
     schema
     |> Mapz.get(key)
     |> case do
