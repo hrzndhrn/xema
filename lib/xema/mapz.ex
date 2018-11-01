@@ -1,8 +1,28 @@
 defmodule Xema.Mapz do
   @moduledoc false
+  # A set of functions for working with maps.
+  #
+  # This functions are working a little bit different as the function of the
+  # coure `Map` module.
 
   import Xema.Utils, only: [to_existing_atom: 1]
 
+  @doc """
+  Gets the value for a specific `key` in `map`. The function will toggle the
+  `key` to get a value from an atom key or an string key.
+
+  ## Examples
+
+      iex> map = Map.merge(%{a: 1}, %{"b" => 2})
+      iex> Xema.Mapz.get(map, :a)
+      1
+      iex> Xema.Mapz.get(map, "a")
+      1
+      iex> Xema.Mapz.get(map, :b)
+      2
+      iex> Xema.Mapz.get(map, "b")
+      2
+  """
   @spec get(map, String.t() | atom) :: any
   def get(map, key) do
     map
