@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.RelativeJsonPointerTest do
 
   describe "validation of Relative JSON Pointers (RJP)" do
     setup do
-      %{schema: Xema.new(:format, :relative_json_pointer)}
+      %{schema: Xema.new(format: :relative_json_pointer)}
     end
 
     test "a valid upwards RJP", %{schema: schema} do

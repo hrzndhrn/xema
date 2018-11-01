@@ -7,9 +7,11 @@ defmodule Draft4.AllOfTest do
     setup do
       %{
         schema:
-          Xema.new(:all_of,
-            any: [properties: %{bar: :integer}, required: ["bar"]],
-            any: [properties: %{foo: :string}, required: ["foo"]]
+          Xema.new(
+            all_of: [
+              [properties: %{bar: :integer}, required: ["bar"]],
+              [properties: %{foo: :string}, required: ["foo"]]
+            ]
           )
       }
     end
@@ -39,10 +41,10 @@ defmodule Draft4.AllOfTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
             all_of: [
-              any: [properties: %{foo: :string}, required: ["foo"]],
-              any: [properties: %{baz: nil}, required: ["baz"]]
+              [properties: %{foo: :string}, required: ["foo"]],
+              [properties: %{baz: nil}, required: ["baz"]]
             ],
             properties: %{bar: :integer},
             required: ["bar"]
@@ -78,7 +80,7 @@ defmodule Draft4.AllOfTest do
 
   describe "allOf simple types" do
     setup do
-      %{schema: Xema.new(:all_of, maximum: 30, minimum: 20)}
+      %{schema: Xema.new(all_of: [[maximum: 30], [minimum: 20]])}
     end
 
     test "valid", %{schema: schema} do

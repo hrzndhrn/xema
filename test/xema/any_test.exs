@@ -44,7 +44,7 @@ defmodule Xema.AnyTest do
   describe "'any' schema with enum:" do
     setup do
       %{
-        schema: Xema.new(:any, enum: [1, 1.2, [1], "foo", :bar])
+        schema: Xema.new({:any, enum: [1, 1.2, [1], "foo", :bar]})
       }
     end
 
@@ -74,22 +74,22 @@ defmodule Xema.AnyTest do
   describe "'any' schema with enum (shortcut):" do
     setup do
       %{
-        schema: Xema.new(:enum, [1, 1.2, [1], "foo"])
+        schema: Xema.new(enum: [1, 1.2, [1], "foo"])
       }
     end
 
     test "equal long version", %{schema: schema} do
-      assert schema == Xema.new(:any, enum: [1, 1.2, [1], "foo"])
+      assert schema == Xema.new({:any, enum: [1, 1.2, [1], "foo"]})
     end
   end
 
   describe "'any' schema with keyword minimum:" do
     setup do
-      %{schema: Xema.new(:any, minimum: 2)}
+      %{schema: Xema.new({:any, minimum: 2})}
     end
 
     test "equal shortcut", %{schema: schema} do
-      assert schema == Xema.new(:minimum, 2)
+      assert schema == Xema.new(minimum: 2)
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -108,11 +108,11 @@ defmodule Xema.AnyTest do
 
   describe "any-schema with keyword multiple_of:" do
     setup do
-      %{schema: Xema.new(:any, multiple_of: 2)}
+      %{schema: Xema.new({:any, multiple_of: 2})}
     end
 
     test "equal shortcut", %{schema: schema} do
-      assert schema == Xema.new(:multiple_of, 2)
+      assert schema == Xema.new(multiple_of: 2)
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -131,7 +131,7 @@ defmodule Xema.AnyTest do
 
   describe "any-schema with keyword additional_items:" do
     setup do
-      %{schema: Xema.new(:any, additional_items: false)}
+      %{schema: Xema.new({:any, additional_items: false})}
     end
 
     test "validate/2 with a list", %{schema: schema} do
@@ -147,13 +147,13 @@ defmodule Xema.AnyTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :any,
             dependencies: %{
               foo: true,
               bar: false
             }
-          )
+          })
       }
     end
 

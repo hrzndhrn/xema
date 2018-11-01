@@ -5,7 +5,7 @@ defmodule Draft7.NotTest do
 
   describe "not" do
     setup do
-      %{schema: Xema.new(:not, :integer)}
+      %{schema: Xema.new(not: :integer)}
     end
 
     test "allowed", %{schema: schema} do
@@ -21,7 +21,7 @@ defmodule Draft7.NotTest do
 
   describe "not multiple types" do
     setup do
-      %{schema: Xema.new(:not, [:integer, :boolean])}
+      %{schema: Xema.new(not: [:integer, :boolean])}
     end
 
     test "valid", %{schema: schema} do
@@ -42,7 +42,7 @@ defmodule Draft7.NotTest do
 
   describe "not more complex schema" do
     setup do
-      %{schema: Xema.new(:not, {:map, [properties: %{foo: :string}]})}
+      %{schema: Xema.new(not: {:map, [properties: %{foo: :string}]})}
     end
 
     test "match", %{schema: schema} do
@@ -63,7 +63,7 @@ defmodule Draft7.NotTest do
 
   describe "forbidden property" do
     setup do
-      %{schema: Xema.new(:properties, %{foo: {:not, :any}})}
+      %{schema: Xema.new(properties: %{foo: [not: :any]})}
     end
 
     test "property present", %{schema: schema} do
@@ -79,7 +79,7 @@ defmodule Draft7.NotTest do
 
   describe "not with boolean schema true" do
     setup do
-      %{schema: Xema.new(:not, true)}
+      %{schema: Xema.new(not: true)}
     end
 
     test "any value is invalid", %{schema: schema} do
@@ -90,7 +90,7 @@ defmodule Draft7.NotTest do
 
   describe "not with boolean schema false" do
     setup do
-      %{schema: Xema.new(:not, false)}
+      %{schema: Xema.new(not: false)}
     end
 
     test "any value is valid", %{schema: schema} do

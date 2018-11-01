@@ -5,8 +5,8 @@ defmodule Xema.Ref do
 
   alias Xema.Mapz
   alias Xema.Ref
+  alias Xema.RefError
   alias Xema.Schema
-  alias Xema.SchemaError
   alias Xema.Utils
 
   require Logger
@@ -50,8 +50,7 @@ defmodule Xema.Ref do
         validate(ref, value, opts)
 
       {:error, :not_found} ->
-        raise SchemaError,
-          message: "Reference '#{ref.pointer}' not found."
+        raise RefError, {:not_found, ref.pointer}
     end
   end
 
@@ -142,7 +141,17 @@ defmodule Xema.Ref do
     |> String.replace("~0", "~")
     |> String.replace("~1", "/")
     |> URI.decode()
-  rescue
-    _ -> str
+  end
+end
+
+defimpl Inspect, for: Xema.Ref do
+  def inspect(schema, opts) do
+    map =
+      schema
+      |> Map.from_struct()
+      |> Enum.filter(fn {_, val} -> !is_nil(val) end)
+      |> Enum.into(%{})
+
+    Inspect.Map.inspect(map, "Xema.Ref", opts)
   end
 end

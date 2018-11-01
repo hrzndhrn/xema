@@ -31,13 +31,13 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             properties: %{
               foo: :number,
               bar: :string
             }
-          )
+          })
       }
     end
 
@@ -69,13 +69,13 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             properties: %{
               "foo" => :number,
               "bar" => :string
             }
-          )
+          })
       }
     end
 
@@ -96,7 +96,7 @@ defmodule Xema.KeywordTest do
 
   describe "keyword schema with min/max properties" do
     setup do
-      %{schema: Xema.new(:keyword, min_properties: 2, max_properties: 3)}
+      %{schema: Xema.new({:keyword, min_properties: 2, max_properties: 3})}
     end
 
     test "validate/2 with too less properties", %{schema: schema} do
@@ -117,11 +117,10 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
-            properties: %{foo: :number},
-            additional_properties: false
-          )
+            properties: %{foo: :number}, additional_properties: false
+          })
       }
     end
 
@@ -155,11 +154,11 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             properties: %{foo: {:string, min_length: 3}},
             additional_properties: :integer
-          )
+          })
       }
     end
 
@@ -193,7 +192,7 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(:keyword, properties: %{foo: :number}, required: [:foo])
+          Xema.new({:keyword, properties: %{foo: :number}, required: [:foo]})
       }
     end
 
@@ -214,11 +213,11 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             properties: %{a: :number, b: :number, c: :number},
             required: [:a, :b, :c]
-          )
+          })
       }
     end
 
@@ -235,14 +234,14 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             pattern_properties: %{
               ~r/^s_/ => :string,
               ~r/^i_/ => :number
             },
             additional_properties: false
-          )
+          })
       }
     end
 
@@ -265,14 +264,14 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             pattern_properties: %{
               "^s_" => :string,
               "^i_" => :number
             },
             additional_properties: false
-          )
+          })
       }
     end
 
@@ -295,14 +294,14 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             pattern_properties: %{
               "^s_": :string,
               "^i_": :number
             },
             additional_properties: false
-          )
+          })
       }
     end
 
@@ -325,14 +324,14 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             properties: %{
               map: :number,
               items: :number,
               properties: :number
             }
-          )
+          })
       }
     end
 
@@ -345,7 +344,7 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             properties: %{
               a: :number,
@@ -355,7 +354,7 @@ defmodule Xema.KeywordTest do
             dependencies: %{
               b: :c
             }
-          )
+          })
       }
     end
 
@@ -382,7 +381,7 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             properties: %{
               a: :number,
@@ -392,7 +391,7 @@ defmodule Xema.KeywordTest do
             dependencies: %{
               b: [:c]
             }
-          )
+          })
       }
     end
 
@@ -417,7 +416,7 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             properties: %{
               a: :number,
@@ -432,7 +431,7 @@ defmodule Xema.KeywordTest do
                 required: [:c]
               }
             }
-          )
+          })
       }
     end
 
@@ -455,12 +454,12 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             dependencies: %{
               penny: [:pound]
             }
-          )
+          })
       }
     end
 
@@ -486,10 +485,10 @@ defmodule Xema.KeywordTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :keyword,
             property_names: [min_length: 3]
-          )
+          })
       }
     end
 

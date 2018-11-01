@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.EmailTest do
 
   describe "validation of e-mail addresses" do
     setup do
-      %{schema: Xema.new(:format, :email)}
+      %{schema: Xema.new(format: :email)}
     end
 
     test "a valid e-mail address", %{schema: schema} do

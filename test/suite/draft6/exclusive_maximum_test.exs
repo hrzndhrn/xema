@@ -5,7 +5,7 @@ defmodule Draft6.ExclusiveMaximumTest do
 
   describe "exclusiveMaximum validation" do
     setup do
-      %{schema: Xema.new(:exclusive_maximum, 3.0)}
+      %{schema: Xema.new(exclusive_maximum: 3.0)}
     end
 
     test "below the exclusiveMaximum is valid", %{schema: schema} do

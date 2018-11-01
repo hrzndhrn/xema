@@ -5,7 +5,7 @@ defmodule Draft6.MinPropertiesTest do
 
   describe "minProperties validation" do
     setup do
-      %{schema: Xema.new(:min_properties, 1)}
+      %{schema: Xema.new(min_properties: 1)}
     end
 
     test "longer is valid", %{schema: schema} do

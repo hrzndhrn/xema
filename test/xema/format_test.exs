@@ -5,7 +5,7 @@ defmodule FormatTest do
 
   describe "validation of date-time strings" do
     setup do
-      %{schema: Xema.new(:format, :date_time)}
+      %{schema: Xema.new(format: :date_time)}
     end
 
     test "with an invalid day in date-time string", %{schema: schema} do
@@ -19,7 +19,7 @@ defmodule FormatTest do
 
   describe "validation of regex strings" do
     setup do
-      %{schema: Xema.new(:format, :regex)}
+      %{schema: Xema.new(format: :regex)}
     end
 
     test "with a valid string", %{schema: schema} do

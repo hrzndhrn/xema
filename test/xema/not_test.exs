@@ -5,7 +5,7 @@ defmodule Xema.NotTest do
 
   describe "keyword not:" do
     setup do
-      %{schema: Xema.new(:any, not: :integer)}
+      %{schema: Xema.new({:any, not: :integer})}
     end
 
     test "type", %{schema: schema} do
@@ -18,20 +18,6 @@ defmodule Xema.NotTest do
 
     test "validate/2 with an invalid value", %{schema: schema} do
       assert validate(schema, 1) == {:error, %{not: :ok, value: 1}}
-    end
-  end
-
-  describe "shortcut for keyword not" do
-    setup do
-      %{
-        short: Xema.new(:not, :integer),
-        key: Xema.new(not: :integer)
-      }
-    end
-
-    test "equal to the long version", %{short: short, key: key} do
-      assert short == Xema.new(:any, not: :integer)
-      assert key == Xema.new(:any, not: :integer)
     end
   end
 
@@ -63,12 +49,12 @@ defmodule Xema.NotTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               foo: {:any, not: {:string, min_length: 3}}
             }
-          )
+          })
       }
     end
 
@@ -86,23 +72,23 @@ defmodule Xema.NotTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
-              foo: {:not, {:string, min_length: 3}}
+              foo: [not: {:string, min_length: 3}]
             }
-          )
+          })
       }
     end
 
     test "equal long version", %{schema: schema} do
       assert schema ==
-               Xema.new(
+               Xema.new({
                  :map,
                  properties: %{
                    foo: {:any, not: {:string, min_length: 3}}
                  }
-               )
+               })
     end
   end
 end

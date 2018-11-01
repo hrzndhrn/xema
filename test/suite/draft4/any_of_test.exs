@@ -5,7 +5,7 @@ defmodule Draft4.AnyOfTest do
 
   describe "anyOf" do
     setup do
-      %{schema: Xema.new(:any_of, [:integer, {:minimum, 2}])}
+      %{schema: Xema.new(any_of: [:integer, [minimum: 2]])}
     end
 
     test "first anyOf valid", %{schema: schema} do
@@ -31,7 +31,10 @@ defmodule Draft4.AnyOfTest do
 
   describe "anyOf with base schema" do
     setup do
-      %{schema: Xema.new(:string, any_of: [max_length: 2, min_length: 4])}
+      %{
+        schema:
+          Xema.new({:string, [any_of: [[max_length: 2], [min_length: 4]]]})
+      }
     end
 
     test "mismatch base schema", %{schema: schema} do
@@ -54,9 +57,11 @@ defmodule Draft4.AnyOfTest do
     setup do
       %{
         schema:
-          Xema.new(:any_of,
-            any: [properties: %{bar: :integer}, required: ["bar"]],
-            any: [properties: %{foo: :string}, required: ["foo"]]
+          Xema.new(
+            any_of: [
+              [properties: %{bar: :integer}, required: ["bar"]],
+              [properties: %{foo: :string}, required: ["foo"]]
+            ]
           )
       }
     end

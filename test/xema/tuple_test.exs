@@ -33,7 +33,7 @@ defmodule Xema.TupleTest do
 
   describe "tuple schema with size" do
     setup do
-      %{schema: Xema.new(:tuple, min_items: 2, max_items: 3)}
+      %{schema: Xema.new({:tuple, min_items: 2, max_items: 3})}
     end
 
     test "validate/2 with too short tuple", %{schema: schema} do
@@ -53,8 +53,8 @@ defmodule Xema.TupleTest do
   describe "tuple schema with typed items" do
     setup do
       %{
-        integers: Xema.new(:tuple, items: :integer),
-        strings: Xema.new(:tuple, items: :string)
+        integers: Xema.new({:tuple, items: :integer}),
+        strings: Xema.new({:tuple, items: :string})
       }
     end
 
@@ -104,8 +104,8 @@ defmodule Xema.TupleTest do
   describe "tuple schema with bool schema for items: " do
     setup do
       %{
-        true_schema: Xema.new(:tuple, items: true),
-        false_schema: Xema.new(:tuple, items: false)
+        true_schema: Xema.new({:tuple, items: true}),
+        false_schema: Xema.new({:tuple, items: false})
       }
     end
 
@@ -128,7 +128,7 @@ defmodule Xema.TupleTest do
 
   describe "tuple schema with unique items" do
     setup do
-      %{schema: Xema.new(:tuple, unique_items: true)}
+      %{schema: Xema.new({:tuple, unique_items: true})}
     end
 
     test "validate/2 with tuple of unique items", %{schema: schema} do
@@ -145,13 +145,13 @@ defmodule Xema.TupleTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :tuple,
             items: [
               {:string, min_length: 3},
               {:number, minimum: 10}
             ]
-          )
+          })
       }
     end
 
@@ -185,14 +185,14 @@ defmodule Xema.TupleTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :tuple,
             additional_items: false,
             items: [
               {:string, min_length: 3},
               {:number, minimum: 10}
             ]
-          )
+          })
       }
     end
 
@@ -206,13 +206,13 @@ defmodule Xema.TupleTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :tuple,
             additional_items: :string,
             items: [
               {:number, minimum: 10}
             ]
-          )
+          })
       }
     end
 
@@ -230,10 +230,10 @@ defmodule Xema.TupleTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :tuple,
             contains: [minimum: 4]
-          )
+          })
       }
     end
 
@@ -254,10 +254,10 @@ defmodule Xema.TupleTest do
 
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :tuple,
             contains: minimum
-          )
+          })
       }
     end
 

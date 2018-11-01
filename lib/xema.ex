@@ -3,48 +3,40 @@ defmodule Xema do
   A schema validator inspired by [JSON Schema](http://json-schema.org)
   """
 
-  use Xema.Base
+  use Xema.Behaviour
 
+  alias Xema.Mapz
+  alias Xema.Ref
   alias Xema.Schema
-  alias Xema.SchemaError
+  alias Xema.SchemaValidator
 
-  @keywords %Schema{} |> Map.keys() |> MapSet.new() |> MapSet.delete(:data)
+  @keywords MapSet.new(Schema.keywords())
+  @types Schema.types()
 
   @doc """
-  This function defines the schemas.
-
-  The first argument sets the `type` of the schema. The second arguments
-  contains the 'keywords' of the schema.
-
-  ## Parameters
-
-    - type: type of the schema.
-    - opts: keywords of the schema.
+  This function defines the schema.
 
   ## Examples
 
-      iex> Xema.new :string, min_length: 3, max_length: 12
-      %Xema{
-        content: %Xema.Schema{
-          max_length: 12,
-          min_length: 3,
-          type: :string
-        }
-      }
+  Simple schema:
 
-  For nested schemas you can use `{:type, opts: ...}` like here.
+      iex> schema = Xema.new :string
+      iex> Xema.valid? schema, "hello"
+      true
+      iex> Xema.valid? schema, 42
+      false
 
-  ## Examples
-      iex> schema = Xema.new :list, items: {:number, minimum: 2}
-      %Xema{
-        content: %Xema.Schema{
-          type: :list,
-          items: %Xema.Schema{
-            type: :number,
-            minimum: 2
-          }
-        }
-      }
+  Schema:
+
+      iex> schema = Xema.new {:string, min_length: 3, max_length: 12}
+      iex> Xema.valid? schema, "hello"
+      true
+      iex> Xema.valid? schema, "hi"
+      false
+
+  Nested schemas:
+
+      iex> schema = Xema.new {:list, items: {:number, minimum: 2}}
       iex> Xema.validate(schema, [2, 3, 4])
       :ok
       iex> Xema.valid?(schema, [2, 3, 4])
@@ -52,38 +44,33 @@ defmodule Xema do
       iex> Xema.validate(schema, [2, 3, 1])
       {:error, %{items: [{2, %{value: 1, minimum: 2}}]}}
 
+  More examples can be found on page
+  [Usage](https://hexdocs.pm/xema/usage.html#content).
   """
-  @spec new(Schema.t() | Schema.type() | tuple, keyword) :: Xema.t()
-  def new(type, keywords)
+  @spec new(Schema.t() | Schema.type() | tuple | atom | keyword) :: Xema.t()
+  def new(data)
 
-  defp init({type}, []), do: init(type, [])
+  @impl true
+  @doc false
+  @spec init(atom | keyword | {atom, keyword}) :: Schema.t()
+  def init(val) when is_atom(val) do
+    init({val, []})
+  end
 
-  defp init(list, []) when is_list(list) do
-    case Keyword.keyword?(list) do
-      true -> init(:any, list)
-      false -> schema({list, []}, [])
+  def init(val) when is_list(val) do
+    case Keyword.keyword?(val) do
+      true -> init({:any, val})
+      false -> init({val, []})
     end
   end
 
-  defp init(list, keywords) when is_list(list),
-    do: schema({list, keywords}, [])
+  def init({:ref, pointer}) do
+    init({:any, ref: pointer})
+  end
 
-  defp init({type, keywords}, []),
-    do: init(type, keywords)
-
-  defp init(tuple, keywords) when is_tuple(tuple),
-    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
-
-  defp init(bool, []) when is_boolean(bool),
-    do: Schema.new(type: bool)
-
-  defp init(map, []) when is_map(map), do: init(:any, Map.to_list(map))
-
-  defp init(value, keywords) do
-    case value in Schema.types() do
-      true -> schema({value, keywords}, [])
-      false -> init(:any, [{value, keywords}])
-    end
+  def init(data) do
+    SchemaValidator.validate!(data)
+    schema(data)
   end
 
   #
@@ -91,6 +78,8 @@ defmodule Xema do
   #
   @spec schema(any, keyword) :: Schema.t()
   defp schema(type, keywords \\ [])
+
+  defp schema({bool, _}, _) when is_boolean(bool), do: Schema.new(type: bool)
 
   defp schema(%{__struct__: _, content: schema}, _), do: schema
 
@@ -115,22 +104,9 @@ defmodule Xema do
       |> update()
       |> Schema.new()
 
-  defp schema({bool, _}, _)
-       when is_boolean(bool),
-       do: Schema.new(type: bool)
-
   defp schema({value, keywords}, _) do
     case value in Schema.types() do
       true ->
-        unless Keyword.keyword?(keywords) do
-          raise(SchemaError,
-            message:
-              "Wrong argument for #{inspect(value)}. Argument: #{
-                inspect(keywords)
-              }"
-          )
-        end
-
         keywords
         |> Keyword.put(:type, value)
         |> update()
@@ -173,17 +149,29 @@ defmodule Xema do
 
   @spec properties(map) :: map
   defp properties(map),
-    do: Enum.into(map, %{}, fn {key, prop} -> {key, schema(prop)} end)
+    do: Mapz.map_values(map, &schema/1)
 
   @spec dependencies(map) :: map
   defp dependencies(map),
     do:
       Enum.into(map, %{}, fn
-        {key, dep} when is_list(dep) -> {key, dep}
-        {key, dep} when is_boolean(dep) -> {key, schema(dep)}
-        {key, dep} when is_atom(dep) -> {key, [dep]}
-        {key, dep} when is_binary(dep) -> {key, [dep]}
-        {key, dep} -> {key, schema(dep)}
+        {key, dep} when is_list(dep) ->
+          case Keyword.keyword?(dep) do
+            true -> {key, schema(dep)}
+            false -> {key, dep}
+          end
+
+        {key, dep} when is_boolean(dep) ->
+          {key, schema(dep)}
+
+        {key, dep} when is_atom(dep) ->
+          {key, [dep]}
+
+        {key, dep} when is_binary(dep) ->
+          {key, [dep]}
+
+        {key, dep} ->
+          {key, schema(dep)}
       end)
 
   @spec bool_or_schema(boolean | atom) :: boolean | Schema.t()
@@ -195,9 +183,27 @@ defmodule Xema do
   defp items(schema) when is_atom(schema) or is_tuple(schema),
     do: schema(schema)
 
-  defp items(schemas) when is_list(schemas), do: schemas(schemas)
+  defp items(value) when is_list(value) do
+    case Keyword.keyword?(value) do
+      true ->
+        case schemas?(value) do
+          true -> schemas(value)
+          false -> schema(value)
+        end
+
+      false ->
+        schemas(value)
+    end
+  end
 
   defp items(items), do: items
+
+  @spec schemas?(keyword) :: boolean
+  defp schemas?(value),
+    do:
+      value
+      |> Keyword.keys()
+      |> Enum.all?(fn type -> type in [:ref | @types] end)
 
   defp update_allow(keywords) do
     case Keyword.pop(keywords, :allow, :undefined) do
@@ -267,7 +273,7 @@ defmodule Xema do
   defp maybe_schema(%{__struct__: _} = struct), do: struct
 
   defp maybe_schema(map) when is_map(map),
-    do: Enum.into(map, %{}, fn {k, v} -> {k, maybe_schema(v)} end)
+    do: Mapz.map_values(map, &maybe_schema/1)
 
   defp maybe_schema(value), do: value
 
@@ -288,114 +294,70 @@ defmodule Xema do
       |> Kernel.not()
 
   #
-  # to_string
+  #  source/1
   #
-  @spec to_string(Xema.t(), keyword) :: String.t()
-  def to_string(%Xema{} = xema, opts \\ []) do
-    opts
-    |> Keyword.get(:format, :call)
-    |> do_to_string(xema.content)
-  end
 
-  @spec do_to_string(atom, Schema.t()) :: String.t()
-  defp do_to_string(:call, schema),
-    do: "Xema.new(#{schema_to_string(schema, true)})"
+  @doc """
+  Returns the source.
 
-  defp do_to_string(:data, schema), do: "{#{schema_to_string(schema, true)}}"
+  ## Examples
 
-  @spec schema_to_string(Schema.t() | atom, atom) :: String.t()
-  defp schema_to_string(schema, root \\ false)
+      iex> {:integer, minimum: 1} |> Xema.new() |> Xema.source()
+      {:integer, minimum: 1}
+  """
+  @spec source(Xema.t()) :: atom | keyword | {atom, keyword}
+  def source(%Xema{} = xema), do: source(xema.content)
 
-  defp schema_to_string(%Schema{type: type} = schema, root),
-    do:
-      do_schema_to_string(
-        type,
-        schema |> Schema.to_map() |> Map.delete(:type),
-        root
-      )
+  def source(%Schema{} = schema) do
+    type = schema.type
+    data = Map.get(schema, :data) || %{}
 
-  defp schema_to_string(schema, _root),
-    do:
+    keywords =
       schema
-      |> Enum.sort()
-      |> schema_to_string_data()
-      |> Enum.map(&key_value_to_string/1)
-      |> Enum.join(", ")
+      |> Schema.to_map()
+      |> Map.delete(:type)
+      |> Map.delete(:data)
+      |> Map.merge(data)
+      |> Enum.map(fn {key, val} -> {key, nested_source(val)} end)
+      |> map_ref()
 
-  defp schema_to_string_data(schema) do
-    case Keyword.fetch(schema, :data) do
-      {:ok, data} ->
-        schema
-        |> Keyword.delete(:data)
-        |> Keyword.merge(Map.to_list(data))
-
-      :error ->
-        schema
+    case {type, keywords} do
+      {type, []} -> type
+      {:any, keywords} -> keywords
+      tuple -> tuple
     end
   end
 
-  defp do_schema_to_string(type, schema, _root) when schema == %{},
-    do: inspect(type)
+  defp map_ref(keywords) do
+    case Keyword.has_key?(keywords, :ref) do
+      true ->
+        if length(keywords) == 1 do
+          keywords[:ref]
+        else
+          {_, pointer} = keywords[:ref]
+          Keyword.put(keywords, :ref, pointer)
+        end
 
-  defp do_schema_to_string(:any, schema, true) do
-    case Map.to_list(schema) do
-      [{:ref, ref}] -> ~s(:ref, "#{ref.pointer}")
-      [{key, value}] -> "#{inspect(key)}, #{value_to_string(value)}"
-      _ -> ":any, #{schema_to_string(schema)}"
+      false ->
+        keywords
     end
   end
 
-  defp do_schema_to_string(type, schema, true),
-    do: "#{inspect(type)}, #{schema_to_string(schema)}"
+  defp nested_source(%Schema{} = val), do: source(val)
 
-  defp do_schema_to_string(type, schema, false),
-    do: "{#{do_schema_to_string(type, schema, true)}}"
+  defp nested_source(%Ref{} = val), do: {:ref, val.pointer}
 
-  @spec value_to_string(term) :: String.t()
-  defp value_to_string(%Schema{} = schema), do: schema_to_string(schema)
+  defp nested_source(%{__struct__: MapSet} = val), do: MapSet.to_list(val)
 
-  defp value_to_string(%{__struct__: Regex} = regex),
-    do: ~s("#{Regex.source(regex)}")
+  defp nested_source(%{__struct__: _} = val), do: val
 
-  defp value_to_string(%{__struct__: MapSet} = map_set),
-    do: value_to_string(map_set |> MapSet.new() |> MapSet.to_list())
+  defp nested_source(val)
+       when is_map(val),
+       do: Mapz.map_values(val, &nested_source/1)
 
-  defp value_to_string(list) when is_list(list),
-    do:
-      list
-      |> Enum.map(&value_to_string/1)
-      |> Enum.join(", ")
-      |> wrap("[", "]")
+  defp nested_source(val)
+       when is_list(val),
+       do: Enum.map(val, &nested_source/1)
 
-  defp value_to_string(map) when is_map(map),
-    do:
-      map
-      |> Enum.map(&key_value_to_string/1)
-      |> Enum.join(", ")
-      |> wrap("%{", "}")
-
-  defp value_to_string(:__nil__), do: "nil"
-
-  defp value_to_string(value), do: inspect(value)
-
-  @spec key_value_to_string({atom | String.t(), any}) :: String.t()
-  defp key_value_to_string({:ref, %{__struct__: Xema.Ref} = ref}),
-    do: ~s(ref: "#{ref.pointer}")
-
-  defp key_value_to_string({key, value}) when is_atom(key),
-    do: "#{key}: #{value_to_string(value)}"
-
-  defp key_value_to_string({%{__struct__: Regex} = regex, value}),
-    do: key_value_to_string({Regex.source(regex), value})
-
-  defp key_value_to_string({key, value}),
-    do: ~s("#{key}" => #{value_to_string(value)})
-
-  @spec wrap(String.t(), String.t(), String.t()) :: String.t()
-  defp wrap(str, trailing, pending), do: "#{trailing}#{str}#{pending}"
-end
-
-defimpl String.Chars, for: Xema do
-  @spec to_string(Xema.t()) :: String.t()
-  def to_string(xema), do: Xema.to_string(xema)
+  defp nested_source(val), do: val
 end

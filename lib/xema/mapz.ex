@@ -80,4 +80,9 @@ defmodule Xema.Mapz do
         into: %{},
         do: {key, Map.get(b, key)}
       )
+
+  @spec map_values(map(), function()) :: map()
+  def map_values(map, fun)
+      when is_map(map) and is_function(fun),
+      do: Enum.into(map, %{}, fn {key, val} -> {key, fun.(val)} end)
 end

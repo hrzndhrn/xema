@@ -4,7 +4,7 @@ defmodule Xema.RefTest do
   doctest Xema.Ref
 
   alias Xema.Ref
-  alias Xema.SchemaError
+  alias Xema.RefError
 
   import Xema, only: [validate: 2]
 
@@ -12,13 +12,13 @@ defmodule Xema.RefTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :any,
             properties: %{
               foo: {:ref, "#"}
             },
             additional_properties: false
-          )
+          })
       }
     end
 
@@ -56,10 +56,12 @@ defmodule Xema.RefTest do
     setup do
       %{
         schema:
-          Xema.new(:properties, %{
-            foo: :integer,
-            bar: {:ref, "#/properties/foo"}
-          })
+          Xema.new(
+            properties: %{
+              foo: :integer,
+              bar: {:ref, "#/properties/foo"}
+            }
+          )
       }
     end
 
@@ -84,6 +86,37 @@ defmodule Xema.RefTest do
                     foo: %{type: :integer, value: "21"}
                   }
                 }}
+    end
+  end
+
+  describe "ref ignores any sibling" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            definitions: %{
+              reffed: :list
+            },
+            properties: %{
+              foo: [
+                max_items: 2,
+                ref: "#/definitions/reffed"
+              ]
+            }
+          )
+      }
+    end
+
+    test "with valid value", %{schema: schema} do
+      assert Xema.valid?(schema, %{foo: []})
+    end
+
+    test "with invalid value", %{schema: schema} do
+      refute Xema.valid?(schema, %{foo: 1})
+    end
+
+    test "with valid value ignoring max items", %{schema: schema} do
+      assert Xema.valid?(schema, [1, 2, 3, 4])
     end
   end
 
@@ -257,7 +290,7 @@ defmodule Xema.RefTest do
     test "validate/2 an invalid ref", %{schema: schema} do
       expected = "Reference '#/items/11' not found."
 
-      assert_raise SchemaError, expected, fn ->
+      assert_raise RefError, expected, fn ->
         validate(schema, [1, 2, 3, 4]) == {:error, [{3, {:ref, "#/items/11"}}]}
       end
     end
@@ -301,8 +334,7 @@ defmodule Xema.RefTest do
               tilda_1: {:ref, "#/definitions/tilda~field"},
               tilda_2: {:ref, "#/definitions/tilda~0field"},
               tilda_3: {:ref, "#/definitions/tilda%7Efield"},
-              percent_1: {:ref, "#/definitions/percent%field"},
-              percent_2: {:ref, "#/definitions/percent%25field"},
+              percent: {:ref, "#/definitions/percent%25field"},
               slash_1: {:ref, "#/definitions/slash~1field"},
               slash_2: {:ref, "#/definitions/slash%2Ffield"}
             }
@@ -328,12 +360,8 @@ defmodule Xema.RefTest do
       assert validate(schema, %{tilda_3: 1}) == :ok
     end
 
-    test "validate/2 percent_1 with valid value", %{schema: schema} do
-      assert validate(schema, %{percent_1: 1}) == :ok
-    end
-
-    test "validate/2 percent_2 with valid value", %{schema: schema} do
-      assert validate(schema, %{percent_2: 1}) == :ok
+    test "validate/2 percent with valid value", %{schema: schema} do
+      assert validate(schema, %{percent: 1}) == :ok
     end
 
     test "validate/2 slash_1 with valid value", %{schema: schema} do
@@ -351,14 +379,12 @@ defmodule Xema.RefTest do
                tilda_3: "1",
                slash_1: "1",
                slash_2: "1",
-               percent_1: "1",
-               percent_2: "1"
+               percent: "1"
              }) ==
                {:error,
                 %{
                   properties: %{
-                    percent_1: %{type: :integer, value: "1"},
-                    percent_2: %{type: :integer, value: "1"},
+                    percent: %{type: :integer, value: "1"},
                     slash_1: %{type: :integer, value: "1"},
                     slash_2: %{type: :integer, value: "1"},
                     tilda_1: %{type: :integer, value: "1"},
@@ -373,7 +399,7 @@ defmodule Xema.RefTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             id: "http://localhost",
             definitions: %{
@@ -385,7 +411,7 @@ defmodule Xema.RefTest do
               invalid: {:ref, "invalid"},
               baz: {:ref, "foobar"}
             }
-          )
+          })
       }
     end
 
@@ -396,7 +422,7 @@ defmodule Xema.RefTest do
     test "validate/2 with invalid ref", %{schema: schema} do
       expected = "Reference 'invalid' not found."
 
-      assert_raise SchemaError, expected, fn ->
+      assert_raise RefError, expected, fn ->
         validate(schema, %{invalid: 1})
       end
     end
@@ -404,7 +430,7 @@ defmodule Xema.RefTest do
     test "validate/2 with invalid id", %{schema: schema} do
       expected = "Reference 'foobar' not found."
 
-      assert_raise SchemaError, expected, fn ->
+      assert_raise RefError, expected, fn ->
         validate(schema, %{baz: 1})
       end
     end
@@ -414,7 +440,7 @@ defmodule Xema.RefTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             id: "http://localhost:1234/tree",
             description: "tree of nodes",
@@ -434,7 +460,7 @@ defmodule Xema.RefTest do
                  },
                  required: ["value"]}
             }
-          )
+          })
       }
     end
 
@@ -550,13 +576,13 @@ defmodule Xema.RefTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :any,
             definitions: %{
               foo: {:integer, id: "#num"}
             },
             ref: "#num"
-          )
+          })
       }
     end
 

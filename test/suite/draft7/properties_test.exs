@@ -5,7 +5,7 @@ defmodule Draft7.PropertiesTest do
 
   describe "object properties validation" do
     setup do
-      %{schema: Xema.new(:properties, %{bar: :string, foo: :integer})}
+      %{schema: Xema.new(properties: %{bar: :string, foo: :integer})}
     end
 
     test "both properties present and valid is valid", %{schema: schema} do
@@ -43,9 +43,9 @@ defmodule Draft7.PropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
             additional_properties: :integer,
-            pattern_properties: %{"f.o": {:min_items, 2}},
+            pattern_properties: %{"f.o" => [min_items: 2]},
             properties: %{bar: :list, foo: {:list, [max_items: 3]}}
           )
       }
@@ -94,7 +94,7 @@ defmodule Draft7.PropertiesTest do
 
   describe "properties with boolean schema" do
     setup do
-      %{schema: Xema.new(:properties, %{bar: false, foo: true})}
+      %{schema: Xema.new(properties: %{bar: false, foo: true})}
     end
 
     test "no property present is valid", %{schema: schema} do

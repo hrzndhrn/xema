@@ -7,10 +7,10 @@ defmodule Xema.AllOfTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :any,
             all_of: [:integer, {:integer, minimum: 0}]
-          )
+          })
       }
     end
 
@@ -27,16 +27,16 @@ defmodule Xema.AllOfTest do
   describe "keyword all_of (shortcut):" do
     setup do
       %{
-        schema: Xema.new(:all_of, [:integer, {:integer, minimum: 0}])
+        schema: Xema.new(all_of: [:integer, {:integer, minimum: 0}])
       }
     end
 
     test "equal long version", %{schema: schema} do
       assert schema ==
-               Xema.new(
+               Xema.new({
                  :any,
                  all_of: [:integer, {:integer, minimum: 0}]
-               )
+               })
     end
   end
 end

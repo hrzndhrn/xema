@@ -5,7 +5,7 @@ defmodule Draft7.MaximumTest do
 
   describe "maximum validation" do
     setup do
-      %{schema: Xema.new(:maximum, 3.0)}
+      %{schema: Xema.new(maximum: 3.0)}
     end
 
     test "below the maximum is valid", %{schema: schema} do

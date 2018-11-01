@@ -5,7 +5,7 @@ defmodule Draft7.MaxPropertiesTest do
 
   describe "maxProperties validation" do
     setup do
-      %{schema: Xema.new(:max_properties, 2)}
+      %{schema: Xema.new(max_properties: 2)}
     end
 
     test "shorter is valid", %{schema: schema} do

@@ -35,7 +35,7 @@ defmodule Xema.StructTest do
 
   describe "struct schema with keyword module" do
     setup do
-      %{schema: Xema.new(:struct, module: Foo)}
+      %{schema: Xema.new({:struct, module: Foo})}
     end
 
     test "validate/2 with valid value", %{schema: schema} do
@@ -53,7 +53,7 @@ defmodule Xema.StructTest do
 
   describe "sturct schema for regex" do
     setup do
-      %{schema: Xema.new(:struct, module: Regex)}
+      %{schema: Xema.new({:struct, module: Regex})}
     end
 
     test "validate/2 with valid value", %{schema: schema} do

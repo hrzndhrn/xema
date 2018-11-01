@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.RegexTest do
 
   describe "validation of regular expressions" do
     setup do
-      %{schema: Xema.new(:format, :regex)}
+      %{schema: Xema.new(format: :regex)}
     end
 
     test "a valid regular expression", %{schema: schema} do

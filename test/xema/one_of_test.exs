@@ -7,10 +7,10 @@ defmodule Xema.OneOfTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :any,
             one_of: [{:integer, multiple_of: 3}, {:integer, multiple_of: 5}]
-          )
+          })
       }
     end
 
@@ -38,25 +38,25 @@ defmodule Xema.OneOfTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :integer,
             one_of: [
-              {:multiple_of, 3},
-              {:multiple_of, 5}
+              [multiple_of: 3],
+              [multiple_of: 5]
             ]
-          )
+          })
       }
     end
 
     test "alternative notation", %{schema: schema} do
       alternative =
-        Xema.new(
+        Xema.new({
           :integer,
           one_of: [
             [multiple_of: 3],
             [multiple_of: 5]
           ]
-        )
+        })
 
       assert schema == alternative
     end
@@ -85,22 +85,24 @@ defmodule Xema.OneOfTest do
     setup do
       %{
         schema:
-          Xema.new(:one_of, [
-            {:integer, multiple_of: 3},
-            {:integer, multiple_of: 5}
-          ])
+          Xema.new(
+            one_of: [
+              {:integer, multiple_of: 3},
+              {:integer, multiple_of: 5}
+            ]
+          )
       }
     end
 
     test "type", %{schema: schema} do
       assert schema ==
-               Xema.new(
+               Xema.new({
                  :any,
                  one_of: [
                    {:integer, multiple_of: 3},
                    {:integer, multiple_of: 5}
                  ]
-               )
+               })
     end
   end
 end

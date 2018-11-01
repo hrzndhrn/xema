@@ -5,7 +5,7 @@ defmodule Draft7.MinimumTest do
 
   describe "minimum validation" do
     setup do
-      %{schema: Xema.new(:minimum, 1.1)}
+      %{schema: Xema.new(minimum: 1.1)}
     end
 
     test "above the minimum is valid", %{schema: schema} do

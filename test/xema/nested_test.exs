@@ -7,7 +7,7 @@ defmodule Xema.NestedTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               id: {:number, minimum: 1},
@@ -22,7 +22,7 @@ defmodule Xema.NestedTest do
                 }
               }
             }
-          )
+          })
       }
     end
 
@@ -64,23 +64,23 @@ defmodule Xema.NestedTest do
   describe "list of objects in two schemas" do
     setup do
       item =
-        Xema.new(
+        Xema.new({
           :map,
           properties: %{
             num: {:number, minimum: 0},
             desc: :string
           }
-        )
+        })
 
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :map,
             properties: %{
               id: {:number, minimum: 1},
               items: {:list, items: item}
             }
-          )
+          })
       }
     end
 

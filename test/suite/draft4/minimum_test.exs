@@ -5,7 +5,7 @@ defmodule Draft4.MinimumTest do
 
   describe "minimum validation" do
     setup do
-      %{schema: Xema.new(:minimum, 1.1)}
+      %{schema: Xema.new(minimum: 1.1)}
     end
 
     test "above the minimum is valid", %{schema: schema} do
@@ -31,7 +31,7 @@ defmodule Draft4.MinimumTest do
 
   describe "minimum validation (explicit false exclusivity)" do
     setup do
-      %{schema: Xema.new(:any, exclusive_minimum: false, minimum: 1.1)}
+      %{schema: Xema.new(exclusive_minimum: false, minimum: 1.1)}
     end
 
     test "above the minimum is valid", %{schema: schema} do
@@ -57,7 +57,7 @@ defmodule Draft4.MinimumTest do
 
   describe "exclusiveMinimum validation" do
     setup do
-      %{schema: Xema.new(:any, exclusive_minimum: true, minimum: 1.1)}
+      %{schema: Xema.new(exclusive_minimum: true, minimum: 1.1)}
     end
 
     test "above the minimum is still valid", %{schema: schema} do

@@ -5,7 +5,7 @@ defmodule Draft4.OneOfTest do
 
   describe "oneOf" do
     setup do
-      %{schema: Xema.new(:one_of, [:integer, {:minimum, 2}])}
+      %{schema: Xema.new(one_of: [:integer, [minimum: 2]])}
     end
 
     test "first oneOf valid", %{schema: schema} do
@@ -31,7 +31,10 @@ defmodule Draft4.OneOfTest do
 
   describe "oneOf with base schema" do
     setup do
-      %{schema: Xema.new(:string, one_of: [min_length: 2, max_length: 4])}
+      %{
+        schema:
+          Xema.new({:string, [one_of: [[min_length: 2], [max_length: 4]]]})
+      }
     end
 
     test "mismatch base schema", %{schema: schema} do
@@ -54,9 +57,11 @@ defmodule Draft4.OneOfTest do
     setup do
       %{
         schema:
-          Xema.new(:one_of,
-            any: [properties: %{bar: :integer}, required: ["bar"]],
-            any: [properties: %{foo: :string}, required: ["foo"]]
+          Xema.new(
+            one_of: [
+              [properties: %{bar: :integer}, required: ["bar"]],
+              [properties: %{foo: :string}, required: ["foo"]]
+            ]
           )
       }
     end

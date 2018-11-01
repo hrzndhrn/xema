@@ -5,7 +5,7 @@ defmodule Draft7.PatternPropertiesTest do
 
   describe "patternProperties validates properties matching a regex" do
     setup do
-      %{schema: Xema.new(:pattern_properties, %{"f.*o": :integer})}
+      %{schema: Xema.new(pattern_properties: %{"f.*o" => :integer})}
     end
 
     test "a single valid match is valid", %{schema: schema} do
@@ -48,10 +48,9 @@ defmodule Draft7.PatternPropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(:pattern_properties, %{
-            "a*": :integer,
-            "aaa*": {:maximum, 20}
-          })
+          Xema.new(
+            pattern_properties: %{"a*" => :integer, "aaa*" => [maximum: 20]}
+          )
       }
     end
 
@@ -90,7 +89,9 @@ defmodule Draft7.PatternPropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(:pattern_properties, %{X_: :string, "[0-9]{2,}": :boolean})
+          Xema.new(
+            pattern_properties: %{"X_" => :string, "[0-9]{2,}" => :boolean}
+          )
       }
     end
 
@@ -117,7 +118,7 @@ defmodule Draft7.PatternPropertiesTest do
 
   describe "patternProperties with boolean schemas" do
     setup do
-      %{schema: Xema.new(:pattern_properties, %{"b.*": false, "f.*": true})}
+      %{schema: Xema.new(pattern_properties: %{"b.*" => false, "f.*" => true})}
     end
 
     test "object with property matching schema true is valid", %{schema: schema} do

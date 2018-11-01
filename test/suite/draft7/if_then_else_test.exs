@@ -5,7 +5,7 @@ defmodule Draft7.IfThenElseTest do
 
   describe "ignore if without then or else" do
     setup do
-      %{schema: Xema.new(:if, {:const, 0})}
+      %{schema: Xema.new(if: [const: 0])}
     end
 
     test "valid when valid against lone if", %{schema: schema} do
@@ -21,7 +21,7 @@ defmodule Draft7.IfThenElseTest do
 
   describe "ignore then without if" do
     setup do
-      %{schema: Xema.new(:then, {:const, 0})}
+      %{schema: Xema.new(then: [const: 0])}
     end
 
     test "valid when valid against lone then", %{schema: schema} do
@@ -37,7 +37,7 @@ defmodule Draft7.IfThenElseTest do
 
   describe "ignore else without if" do
     setup do
-      %{schema: Xema.new(:else, {:const, 0})}
+      %{schema: Xema.new(else: [const: 0])}
     end
 
     test "valid when valid against lone else", %{schema: schema} do
@@ -53,10 +53,7 @@ defmodule Draft7.IfThenElseTest do
 
   describe "if and then without else" do
     setup do
-      %{
-        schema:
-          Xema.new(:any, if: {:exclusive_maximum, 0}, then: {:minimum, -10})
-      }
+      %{schema: Xema.new(if: [exclusive_maximum: 0], then: [minimum: -10])}
     end
 
     test "valid through then", %{schema: schema} do
@@ -77,10 +74,7 @@ defmodule Draft7.IfThenElseTest do
 
   describe "if and else without then" do
     setup do
-      %{
-        schema:
-          Xema.new(:any, else: {:multiple_of, 2}, if: {:exclusive_maximum, 0})
-      }
+      %{schema: Xema.new(else: [multiple_of: 2], if: [exclusive_maximum: 0])}
     end
 
     test "valid when if test passes", %{schema: schema} do
@@ -103,10 +97,10 @@ defmodule Draft7.IfThenElseTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
-            else: {:multiple_of, 2},
-            if: {:exclusive_maximum, 0},
-            then: {:minimum, -10}
+          Xema.new(
+            else: [multiple_of: 2],
+            if: [exclusive_maximum: 0],
+            then: [minimum: -10]
           )
       }
     end
@@ -136,10 +130,12 @@ defmodule Draft7.IfThenElseTest do
     setup do
       %{
         schema:
-          Xema.new(:all_of,
-            if: {:exclusive_maximum, 0},
-            then: {:minimum, -10},
-            else: {:multiple_of, 2}
+          Xema.new(
+            all_of: [
+              [if: [exclusive_maximum: 0]],
+              [then: [minimum: -10]],
+              [else: [multiple_of: 2]]
+            ]
           )
       }
     end

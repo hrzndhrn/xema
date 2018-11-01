@@ -7,10 +7,10 @@ defmodule Xema.AnyOfTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :any,
             any_of: [nil, {:integer, minimum: 1}]
-          )
+          })
       }
     end
 
@@ -41,16 +41,16 @@ defmodule Xema.AnyOfTest do
   describe "keyword any_of (shortcut):" do
     setup do
       %{
-        schema: Xema.new(:any_of, [nil, {:integer, minimum: 1}])
+        schema: Xema.new(any_of: [nil, {:integer, minimum: 1}])
       }
     end
 
     test "equal long version", %{schema: schema} do
       assert schema ==
-               Xema.new(
+               Xema.new({
                  :any,
                  any_of: [nil, {:integer, minimum: 1}]
-               )
+               })
     end
   end
 end

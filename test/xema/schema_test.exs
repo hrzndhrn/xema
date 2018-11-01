@@ -8,12 +8,14 @@ defmodule Xema.SchemaTest do
 
   describe "new/1" do
     test "raises an error for an invalid keyword" do
-      assert_raise(SchemaError, ":foo is not a valid keyword.", fn ->
+      message = "key :foo not found in: %Xema.Schema{}"
+
+      assert_raise(KeyError, message, fn ->
         Schema.new(type: :any, foo: :foo)
       end)
     end
 
-    test "raises an error for if type is missing" do
+    test "raises an error if type is missing" do
       assert_raise(SchemaError, "Missing type.", fn ->
         Schema.new([])
       end)
@@ -25,10 +27,46 @@ defmodule Xema.SchemaTest do
       end)
     end
 
-    test "raises an error for for invalid types" do
+    test "raises an error for invalid types" do
       assert_raise(SchemaError, "Invalid types [:foo, :bar].", fn ->
         Schema.new(type: [:foo, :string, :bar])
       end)
     end
+  end
+
+  describe "inspect/1" do
+    test "list schema" do
+      xema = Xema.new({:list, items: [:integer]})
+
+      assert inspect(xema) ==
+               "%Xema{content: " <>
+                 "%Xema.Schema{items: " <>
+                 "[%Xema.Schema{type: :integer}], " <>
+                 "type: :list}, refs: %{}}"
+    end
+
+    test "any schema" do
+      xema = Xema.new(items: [:integer])
+
+      assert inspect(xema) ==
+               "%Xema{content: " <>
+                 "%Xema.Schema{items: " <>
+                 "[%Xema.Schema{type: :integer}]}, refs: %{}}"
+    end
+
+    test "schema with ref" do
+      xema = Xema.new({:map, properties: %{num: {:ref, "#/num"}}})
+
+      assert inspect(xema) ==
+               "%Xema{content: " <>
+                 "%Xema.Schema{properties: " <>
+                 "%{num: %Xema.Schema{ref: " <>
+                 "%Xema.Ref{pointer: \"#/num\"}}}, " <>
+                 "type: :map}, refs: %{}}"
+    end
+  end
+
+  test "keywords/0" do
+    assert Schema.keywords() == %Schema{} |> Map.keys() |> List.delete(:data)
   end
 end

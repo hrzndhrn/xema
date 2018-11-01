@@ -57,7 +57,7 @@ defmodule Xema.BooleanSchemaTest do
 
   describe "all_of with boolean schemas, all true:" do
     setup do
-      %{schema: Xema.new(:all_of, [true, true])}
+      %{schema: Xema.new(all_of: [true, true])}
     end
 
     test "valid?/2 returns always true", %{schema: schema} do

@@ -30,11 +30,50 @@ defmodule Xema.IntegerTest do
     end
   end
 
-  describe "'integer' schema with range" do
+  describe "integer schema with minimum" do
     setup do
-      %{schema: Xema.new(:integer, minimum: 2, maximum: 4)}
+      %{schema: Xema.new(minimum: 2)}
     end
 
+    test "with a valid value", %{schema: schema} do
+      assert validate(schema, 4) == :ok
+    end
+
+    test "with an invalid value", %{schema: schema} do
+      assert validate(schema, 1) == {:error, %{minimum: 2, value: 1}}
+    end
+  end
+
+  describe "integer schema with range" do
+    setup do
+      %{schema: Xema.new({:integer, minimum: 2, maximum: 4})}
+    end
+
+    test "validate/2 with a integer in range", %{schema: schema} do
+      assert validate(schema, 2) == :ok
+      assert validate(schema, 3) == :ok
+      assert validate(schema, 4) == :ok
+    end
+
+    test "validate/2 with a too small integer", %{schema: schema} do
+      expected = {:error, %{value: 1, minimum: 2}}
+
+      assert validate(schema, 1) == expected
+    end
+
+    test "validate/2 with a too big integer", %{schema: schema} do
+      expected = {:error, %{value: 5, maximum: 4}}
+
+      assert validate(schema, 5) == expected
+    end
+  end
+
+  describe "schema with range" do
+    setup do
+      %{schema: Xema.new(minimum: 2, maximum: 4)}
+    end
+
+    @tag :only
     test "validate/2 with a integer in range", %{schema: schema} do
       assert validate(schema, 2) == :ok
       assert validate(schema, 3) == :ok
@@ -58,13 +97,13 @@ defmodule Xema.IntegerTest do
     setup do
       %{
         schema:
-          Xema.new(
+          Xema.new({
             :integer,
             minimum: 2,
             maximum: 4,
             exclusive_minimum: true,
             exclusive_maximum: true
-          )
+          })
       }
     end
 
@@ -99,7 +138,7 @@ defmodule Xema.IntegerTest do
 
   describe "'integer' schema with multiple-of" do
     setup do
-      %{schema: Xema.new(:integer, multiple_of: 2)}
+      %{schema: Xema.new({:integer, multiple_of: 2})}
     end
 
     test "validate/2 with a valid integer", %{schema: schema} do
@@ -114,7 +153,7 @@ defmodule Xema.IntegerTest do
 
   describe "'integer' schema with enum" do
     setup do
-      %{schema: Xema.new(:integer, enum: [1, 3])}
+      %{schema: Xema.new({:integer, enum: [1, 3]})}
     end
 
     test "with a value from the enum", %{schema: schema} do

@@ -89,7 +89,9 @@ defmodule Xema.Validator do
              do: :ok
 
       %{type: :atom} ->
-        type(schema, value)
+        with :ok <- type(schema, value),
+             :ok <- validate_by(:default, schema, value, opts),
+             do: :ok
 
       %{type: type} when is_atom(type) ->
         validate_by(type, schema, value, opts)

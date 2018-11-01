@@ -5,7 +5,7 @@ defmodule Draft6.PropertyNamesTest do
 
   describe "propertyNames validation" do
     setup do
-      %{schema: Xema.new(:property_names, {:max_length, 3})}
+      %{schema: Xema.new(property_names: [max_length: 3])}
     end
 
     test "all property names valid", %{schema: schema} do
@@ -41,7 +41,7 @@ defmodule Draft6.PropertyNamesTest do
 
   describe "propertyNames with boolean schema true" do
     setup do
-      %{schema: Xema.new(:property_names, true)}
+      %{schema: Xema.new(property_names: true)}
     end
 
     test "object with any properties is valid", %{schema: schema} do
@@ -57,7 +57,7 @@ defmodule Draft6.PropertyNamesTest do
 
   describe "propertyNames with boolean schema false" do
     setup do
-      %{schema: Xema.new(:property_names, false)}
+      %{schema: Xema.new(property_names: false)}
     end
 
     test "object with any properties is invalid", %{schema: schema} do

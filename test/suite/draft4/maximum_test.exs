@@ -5,7 +5,7 @@ defmodule Draft4.MaximumTest do
 
   describe "maximum validation" do
     setup do
-      %{schema: Xema.new(:maximum, 3.0)}
+      %{schema: Xema.new(maximum: 3.0)}
     end
 
     test "below the maximum is valid", %{schema: schema} do
@@ -31,7 +31,7 @@ defmodule Draft4.MaximumTest do
 
   describe "maximum validation (explicit false exclusivity)" do
     setup do
-      %{schema: Xema.new(:any, exclusive_maximum: false, maximum: 3.0)}
+      %{schema: Xema.new(exclusive_maximum: false, maximum: 3.0)}
     end
 
     test "below the maximum is valid", %{schema: schema} do
@@ -57,7 +57,7 @@ defmodule Draft4.MaximumTest do
 
   describe "exclusiveMaximum validation" do
     setup do
-      %{schema: Xema.new(:any, exclusive_maximum: true, maximum: 3.0)}
+      %{schema: Xema.new(exclusive_maximum: true, maximum: 3.0)}
     end
 
     test "below the maximum is still valid", %{schema: schema} do

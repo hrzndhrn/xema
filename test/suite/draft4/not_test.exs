@@ -5,7 +5,7 @@ defmodule Draft4.NotTest do
 
   describe "not" do
     setup do
-      %{schema: Xema.new(:not, :integer)}
+      %{schema: Xema.new(not: :integer)}
     end
 
     test "allowed", %{schema: schema} do
@@ -21,7 +21,7 @@ defmodule Draft4.NotTest do
 
   describe "not multiple types" do
     setup do
-      %{schema: Xema.new(:not, [:integer, :boolean])}
+      %{schema: Xema.new(not: [:integer, :boolean])}
     end
 
     test "valid", %{schema: schema} do
@@ -42,7 +42,7 @@ defmodule Draft4.NotTest do
 
   describe "not more complex schema" do
     setup do
-      %{schema: Xema.new(:not, {:map, [properties: %{foo: :string}]})}
+      %{schema: Xema.new(not: {:map, [properties: %{foo: :string}]})}
     end
 
     test "match", %{schema: schema} do
@@ -63,7 +63,7 @@ defmodule Draft4.NotTest do
 
   describe "forbidden property" do
     setup do
-      %{schema: Xema.new(:properties, %{foo: {:not, :any}})}
+      %{schema: Xema.new(properties: %{foo: [not: :any]})}
     end
 
     test "property present", %{schema: schema} do

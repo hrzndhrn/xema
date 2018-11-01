@@ -5,7 +5,7 @@ defmodule Draft7.AdditionalItemsTest do
 
   describe "additionalItems as schema" do
     setup do
-      %{schema: Xema.new(:any, additional_items: :integer, items: [:any])}
+      %{schema: Xema.new(additional_items: :integer, items: [:any])}
     end
 
     test "additional items match schema", %{schema: schema} do
@@ -21,7 +21,7 @@ defmodule Draft7.AdditionalItemsTest do
 
   describe "items is schema, no additionalItems" do
     setup do
-      %{schema: Xema.new(:any, additional_items: false, items: :any)}
+      %{schema: Xema.new(additional_items: false, items: :any)}
     end
 
     test "all items match schema", %{schema: schema} do
@@ -32,10 +32,7 @@ defmodule Draft7.AdditionalItemsTest do
 
   describe "array of items with no additionalItems" do
     setup do
-      %{
-        schema:
-          Xema.new(:any, additional_items: false, items: [:any, :any, :any])
-      }
+      %{schema: Xema.new(additional_items: false, items: [:any, :any, :any])}
     end
 
     test "fewer number of items present", %{schema: schema} do
@@ -56,7 +53,7 @@ defmodule Draft7.AdditionalItemsTest do
 
   describe "additionalItems as false without items" do
     setup do
-      %{schema: Xema.new(:additional_items, false)}
+      %{schema: Xema.new(additional_items: false)}
     end
 
     test "items defaults to empty schema so everything is valid", %{
@@ -74,7 +71,7 @@ defmodule Draft7.AdditionalItemsTest do
 
   describe "additionalItems are allowed by default" do
     setup do
-      %{schema: Xema.new(:items, [:integer])}
+      %{schema: Xema.new(items: [:integer])}
     end
 
     test "only the first item is validated", %{schema: schema} do

@@ -85,7 +85,7 @@ defmodule Xema.Schema do
           content_encoding: String.t() | nil,
           content_media_type: String.t() | nil,
           contains: Xema.t() | Schema.t(),
-          data: any,
+          data: map,
           default: any,
           definitions: map,
           dependencies: list | map | nil,
@@ -171,8 +171,8 @@ defmodule Xema.Schema do
     :schema,
     :then,
     :title,
-    :type,
-    :unique_items
+    :unique_items,
+    type: :any
   ]
 
   @type type ::
@@ -211,16 +211,7 @@ defmodule Xema.Schema do
   ]
 
   @spec new(keyword) :: Schema.t()
-  def new(opts) do
-    struct!(Schema, opts |> validate_type!() |> update())
-  rescue
-    e in KeyError ->
-      reraise(
-        SchemaError,
-        [message: "#{inspect(e.key)} is not a valid keyword."],
-        __STACKTRACE__
-      )
-  end
+  def new(opts), do: struct!(Schema, opts |> validate_type!() |> update())
 
   @spec to_map(Schema.t()) :: map
   def to_map(schema),
@@ -232,6 +223,10 @@ defmodule Xema.Schema do
   @spec types :: [type]
   def types, do: @types
 
+  @spec keywords :: [atom]
+  def keywords,
+    do: %Schema{} |> Map.keys() |> List.delete(:data)
+
   @spec validate_type!(keyword) :: keyword
   defp validate_type!(opts) when is_list(opts) do
     with {:ok, type} <- fetch_type(opts),
@@ -239,13 +234,13 @@ defmodule Xema.Schema do
       opts
     else
       {:error, :not_exist} ->
-        raise(SchemaError, message: "Missing type.")
+        raise SchemaError, :missing_type
 
       {:error, types} when is_list(types) ->
-        raise(SchemaError, message: "Invalid types #{inspect(types)}.")
+        raise SchemaError, {:invalid_types, types}
 
       {:error, type} ->
-        raise(SchemaError, message: "Invalid type #{inspect(type)}.")
+        raise SchemaError, {:invalid_type, type}
     end
   end
 
@@ -296,8 +291,6 @@ defmodule Xema.Schema do
   @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
   defp pattern(string) when is_binary(string), do: Regex.compile!(string)
 
-  defp pattern(atom) when is_atom(atom), do: pattern(Atom.to_string(atom))
-
   defp pattern(regex), do: regex
 
   @spec pattern_properties(map) :: map
@@ -320,4 +313,23 @@ defmodule Xema.Schema do
   @spec delete_nils(map) :: map
   defp delete_nils(schema),
     do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
+end
+
+defimpl Inspect, for: Xema.Schema do
+  def inspect(schema, opts) do
+    map =
+      schema
+      |> Map.from_struct()
+      |> Map.update!(
+        :type,
+        fn
+          :any -> nil
+          val -> val
+        end
+      )
+      |> Enum.filter(fn {_, val} -> !is_nil(val) end)
+      |> Enum.into(%{})
+
+    Inspect.Map.inspect(map, "Xema.Schema", opts)
+  end
 end

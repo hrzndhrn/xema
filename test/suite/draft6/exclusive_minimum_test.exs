@@ -5,7 +5,7 @@ defmodule Draft6.ExclusiveMinimumTest do
 
   describe "exclusiveMinimum validation" do
     setup do
-      %{schema: Xema.new(:exclusive_minimum, 1.1)}
+      %{schema: Xema.new(exclusive_minimum: 1.1)}
     end
 
     test "above the exclusiveMinimum is valid", %{schema: schema} do

@@ -5,7 +5,7 @@ defmodule Draft7.RefRemoteTest do
 
   describe "remote ref" do
     setup do
-      %{schema: Xema.new(:ref, "http://localhost:1234/integer.exon")}
+      %{schema: Xema.new({:ref, "http://localhost:1234/integer.exon"})}
     end
 
     test "remote ref valid", %{schema: schema} do
@@ -22,7 +22,8 @@ defmodule Draft7.RefRemoteTest do
   describe "fragment within remote ref" do
     setup do
       %{
-        schema: Xema.new(:ref, "http://localhost:1234/subSchemas.exon#/integer")
+        schema:
+          Xema.new({:ref, "http://localhost:1234/subSchemas.exon#/integer"})
       }
     end
 
@@ -41,7 +42,9 @@ defmodule Draft7.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(:ref, "http://localhost:1234/subSchemas.exon#/refToInteger")
+          Xema.new(
+            {:ref, "http://localhost:1234/subSchemas.exon#/refToInteger"}
+          )
       }
     end
 
@@ -60,9 +63,9 @@ defmodule Draft7.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
             id: "http://localhost:1234/",
-            items: {:any, [id: "folder/", items: {:ref, "folderInteger.exon"}]}
+            items: [id: "folder/", items: {:ref, "folderInteger.exon"}]
           )
       }
     end
@@ -82,12 +85,16 @@ defmodule Draft7.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(:map,
-            definitions: %{
-              baz: {:list, [id: "folder/", items: {:ref, "folderInteger.exon"}]}
-            },
-            id: "http://localhost:1234/scope_change_defs1.exon",
-            properties: %{list: {:ref, "#/definitions/baz"}}
+          Xema.new(
+            {:map,
+             [
+               definitions: %{
+                 baz:
+                   {:list, [id: "folder/", items: {:ref, "folderInteger.exon"}]}
+               },
+               id: "http://localhost:1234/scope_change_defs1.exon",
+               properties: %{list: {:ref, "#/definitions/baz"}}
+             ]}
           )
       }
     end
@@ -107,19 +114,20 @@ defmodule Draft7.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(:map,
-            definitions: %{
-              baz:
-                {:any,
-                 [
+          Xema.new(
+            {:map,
+             [
+               definitions: %{
+                 baz: [
                    definitions: %{
                      bar: {:list, [items: {:ref, "folderInteger.exon"}]}
                    },
                    id: "folder/"
-                 ]}
-            },
-            id: "http://localhost:1234/scope_change_defs2.exon",
-            properties: %{list: {:ref, "#/definitions/baz/definitions/bar"}}
+                 ]
+               },
+               id: "http://localhost:1234/scope_change_defs2.exon",
+               properties: %{list: {:ref, "#/definitions/baz/definitions/bar"}}
+             ]}
           )
       }
     end
@@ -139,9 +147,12 @@ defmodule Draft7.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(:map,
-            id: "http://localhost:1234/object",
-            properties: %{name: {:ref, "name.exon#/definitions/orNull"}}
+          Xema.new(
+            {:map,
+             [
+               id: "http://localhost:1234/object",
+               properties: %{name: {:ref, "name.exon#/definitions/orNull"}}
+             ]}
           )
       }
     end

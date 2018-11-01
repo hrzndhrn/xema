@@ -5,7 +5,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "validation of date-time strings" do
     setup do
-      %{schema: Xema.new(:format, :date_time)}
+      %{schema: Xema.new(format: :date_time)}
     end
 
     test "a valid date-time string", %{schema: schema} do
@@ -61,7 +61,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "validation of URIs" do
     setup do
-      %{schema: Xema.new(:format, :uri)}
+      %{schema: Xema.new(format: :uri)}
     end
 
     test "a valid URL with anchor tag", %{schema: schema} do
@@ -162,7 +162,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "validation of URI References" do
     setup do
-      %{schema: Xema.new(:format, :uri_reference)}
+      %{schema: Xema.new(format: :uri_reference)}
     end
 
     test "a valid URI", %{schema: schema} do
@@ -203,7 +203,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "format: uri-template" do
     setup do
-      %{schema: Xema.new(:format, :uri_template)}
+      %{schema: Xema.new(format: :uri_template)}
     end
 
     test "a valid uri-template", %{schema: schema} do
@@ -229,7 +229,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "validation of e-mail addresses" do
     setup do
-      %{schema: Xema.new(:format, :email)}
+      %{schema: Xema.new(format: :email)}
     end
 
     test "a valid e-mail address", %{schema: schema} do
@@ -245,7 +245,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "validation of IP addresses" do
     setup do
-      %{schema: Xema.new(:format, :ipv4)}
+      %{schema: Xema.new(format: :ipv4)}
     end
 
     test "a valid IP address", %{schema: schema} do
@@ -276,7 +276,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "validation of IPv6 addresses" do
     setup do
-      %{schema: Xema.new(:format, :ipv6)}
+      %{schema: Xema.new(format: :ipv6)}
     end
 
     test "a valid IPv6 address", %{schema: schema} do
@@ -302,7 +302,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "validation of host names" do
     setup do
-      %{schema: Xema.new(:format, :hostname)}
+      %{schema: Xema.new(format: :hostname)}
     end
 
     test "a valid host name", %{schema: schema} do
@@ -330,7 +330,7 @@ defmodule Draft6.Optional.FormatTest do
 
   describe "validation of JSON-pointers (JSON String Representation)" do
     setup do
-      %{schema: Xema.new(:format, :json_pointer)}
+      %{schema: Xema.new(format: :json_pointer)}
     end
 
     test "a valid JSON-pointer", %{schema: schema} do
