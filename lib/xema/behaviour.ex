@@ -31,9 +31,6 @@ defmodule Xema.Behaviour do
       defstruct content: %Schema{},
                 refs: %{}
 
-      @doc """
-      TODO
-      """
       def new(%Schema{} = content) do
         content = Behaviour.map_refs(content)
         ids = Behaviour.get_ids(content)
@@ -53,8 +50,18 @@ defmodule Xema.Behaviour do
           |> new()
 
       @doc """
-      Returns true if the value is a valid value against the given schema;
+      Returns true if the `value` is a valid value against the given `schema`;
       otherwise returns false.
+
+      ## Examples
+
+          iex> schema = Xema.new({:integer, minimum: 1})
+          iex> Xema.valid?(schema, 2)
+          true
+          iex> Xema.valid?(schema, 1)
+          true
+          iex> Xema.valid?(schema, 0)
+          false
       """
       @spec valid?(__MODULE__.t(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok

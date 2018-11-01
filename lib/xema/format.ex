@@ -139,7 +139,7 @@ defmodule Xema.Format do
   #
 
   @doc """
-  Checks if the value is a valid email.
+  Checks if the `string` is a valid email.
 
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 5322](https://tools.ietf.org/html/rfc5322), `false` otherwise.

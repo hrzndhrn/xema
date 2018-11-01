@@ -46,6 +46,7 @@ defmodule Xema.Mixfile do
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.9", only: :test},
+      {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
       {:httpoison, "~> 1.2", only: :test}
     ]
   end
