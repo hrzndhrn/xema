@@ -13,3 +13,12 @@
   + `contentMediaType`contentMediaType
 + Add new `format` checks.
 + Add validatiors for `atom`, `keyword`, `tuple` and `struct`
++ Add schema validator to validate data give to `Xema.new/1`.
++ `Xema.new/2` becomes `Xema.new/1`.
+  Migrate to 0.5.0:
+  ```Elixir
+  # < 0.5.0
+  Xema.new(:integer, minimum: 0)
+  # >= 0.5.0
+  Xema.new({:integer, minimum: 0})
+  ```
