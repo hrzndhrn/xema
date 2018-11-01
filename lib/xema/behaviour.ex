@@ -1,4 +1,4 @@
-defmodule Xema.Base do
+defmodule Xema.Behaviour do
   @moduledoc false
 
   alias Xema.NoResolver
@@ -8,9 +8,16 @@ defmodule Xema.Base do
   alias Xema.Utils
   alias Xema.Validator
 
+  @doc """
+  This callback initialize the schema. The function gets the data given to
+  `Xema.new/1` and returns a `Xema.Schema`.
+  """
+  @callback init(any) :: Schema.t()
+
   defmacro __using__(_opts) do
     quote do
-      import Xema.Base
+      @behaviour Xema.Behaviour
+      import Xema.Behaviour
 
       @enforce_keys [:content]
 

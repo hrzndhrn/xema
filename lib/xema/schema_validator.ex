@@ -2,8 +2,8 @@ defmodule Xema.SchemaValidator do
   @moduledoc false
 
   alias Xema.Ref
-  alias Xema.SchemaError
   alias Xema.Schema
+  alias Xema.SchemaError
 
   @schema %Xema{
     content: %Schema{

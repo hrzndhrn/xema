@@ -3,7 +3,7 @@ defmodule Xema do
   A schema validator inspired by [JSON Schema](http://json-schema.org)
   """
 
-  use Xema.Base
+  use Xema.Behaviour
 
   alias Xema.Mapz
   alias Xema.Ref
@@ -27,7 +27,7 @@ defmodule Xema do
 
   ## Examples
 
-      iex> Xema.new :string, min_length: 3, max_length: 12
+      iex> Xema.new {:string, min_length: 3, max_length: 12}
       %Xema{
         content: %Xema.Schema{
           max_length: 12,
@@ -39,16 +39,7 @@ defmodule Xema do
   For nested schemas you can use `{:type, opts: ...}` like here.
 
   ## Examples
-      iex> schema = Xema.new :list, items: {:number, minimum: 2}
-      %Xema{
-        content: %Xema.Schema{
-          type: :list,
-          items: %Xema.Schema{
-            type: :number,
-            minimum: 2
-          }
-        }
-      }
+      iex> schema = Xema.new {:list, items: {:number, minimum: 2}}
       iex> Xema.validate(schema, [2, 3, 4])
       :ok
       iex> Xema.valid?(schema, [2, 3, 4])
@@ -59,23 +50,24 @@ defmodule Xema do
   """
   @spec new(Schema.t() | Schema.type() | tuple | atom | keyword) :: Xema.t()
 
+  @impl true
   @spec init(atom | keyword | {atom, keyword}) :: Schema.t()
-  defp init(val) when is_atom(val) do
+  def init(val) when is_atom(val) do
     init({val, []})
   end
 
-  defp init(val) when is_list(val) do
+  def init(val) when is_list(val) do
     case Keyword.keyword?(val) do
       true -> init({:any, val})
       false -> init({val, []})
     end
   end
 
-  defp init({:ref, pointer}) do
+  def init({:ref, pointer}) do
     init({:any, ref: pointer})
   end
 
-  defp init(data) do
+  def init(data) do
     SchemaValidator.validate!(data)
     schema(data)
   end

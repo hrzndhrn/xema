@@ -5,8 +5,8 @@ defmodule Xema.Ref do
 
   alias Xema.Mapz
   alias Xema.Ref
-  alias Xema.Schema
   alias Xema.RefError
+  alias Xema.Schema
   alias Xema.Utils
 
   require Logger
