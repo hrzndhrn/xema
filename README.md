@@ -28,15 +28,6 @@ Then, update your dependencies:
 $ mix deps.get
 ```
 
-## Changelog
-
-Version 0.5.0 coming soon.
-
-Since version 0.5.0 a [changelog](CHANGELOG.md) is available.
-
-To update to version 0.5.0 some migrations steps are required, see
-[changelog](CHANGELOG.md).
-
 ## Docs
 
 The docs contains a [Usage](https://hexdocs.pm/xema/usage.html) page with a

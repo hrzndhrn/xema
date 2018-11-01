@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0
+## 0.5.0 - not released
 
 + The function `Xema.is_valid?/2` is deprecated. Use `Xema.valid?/2` instead.
 + Add keyword `const`.
