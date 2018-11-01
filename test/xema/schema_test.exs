@@ -33,4 +33,41 @@ defmodule Xema.SchemaTest do
       end)
     end
   end
+
+  describe "inspect/1" do
+    test "list schema" do
+      xema = Xema.new({:list, items: [:integer]})
+
+      assert inspect(xema) ==
+               "%Xema{content: " <>
+                 "%Xema.Schema{items: " <>
+                 "[%Xema.Schema{type: :integer}], " <>
+                 "type: :list}, refs: %{}}"
+    end
+
+    test "any schema" do
+      xema = Xema.new(items: [:integer])
+
+      assert inspect(xema) ==
+               "%Xema{content: " <>
+                 "%Xema.Schema{items: " <>
+                 "[%Xema.Schema{type: :integer}]}, refs: %{}}"
+    end
+
+    test "schema with ref" do
+      xema = Xema.new({:map, properties: %{num: {:ref, "#/num"}}})
+
+      assert inspect(xema) ==
+               "%Xema{content: " <>
+                 "%Xema.Schema{properties: " <>
+                 "%{num: %Xema.Schema{ref: " <>
+                 "%Xema.Ref{pointer: \"#/num\"}}}, " <>
+                 "type: :map}, refs: %{}}"
+    end
+  end
+
+  test "keywords/0" do
+    assert Schema.keywords() ==
+             %Schema{} |> Map.keys() |> MapSet.new() |> MapSet.delete(:data)
+  end
 end

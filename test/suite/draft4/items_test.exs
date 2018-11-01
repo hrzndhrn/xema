@@ -5,7 +5,7 @@ defmodule Draft4.ItemsTest do
 
   describe "a schema given for items" do
     setup do
-      %{schema: Xema.new(:items, :integer)}
+      %{schema: Xema.new(items: :integer)}
     end
 
     test "valid items", %{schema: schema} do
@@ -31,7 +31,7 @@ defmodule Draft4.ItemsTest do
 
   describe "an array of schemas for items" do
     setup do
-      %{schema: Xema.new(:items, [:integer, :string])}
+      %{schema: Xema.new(items: [:integer, :string])}
     end
 
     test "correct types", %{schema: schema} do

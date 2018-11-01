@@ -11,7 +11,8 @@ defmodule Xema do
   alias Xema.SchemaError
   alias Xema.SchemaValidator
 
-  @keywords %Schema{} |> Map.keys() |> MapSet.new() |> MapSet.delete(:data)
+  @keywords Schema.keywords()
+  @types Schema.types()
 
   @doc """
   TODO: update docs
@@ -87,13 +88,6 @@ defmodule Xema do
       true -> init(:any, val)
       false -> xyz_init(val, [])
     end
-  end
-
-  # TODO: refactor
-  defp xyz_init(type, keywords) do
-    # IO.inspect({type, keywords})
-    # SchemaValidator.validate!({type, keywords})
-    do_init(type, keywords)
   end
 
   defp do_init({type}, []), do: do_init(type, [])
@@ -219,11 +213,23 @@ defmodule Xema do
   defp dependencies(map),
     do:
       Enum.into(map, %{}, fn
-        {key, dep} when is_list(dep) -> {key, dep}
-        {key, dep} when is_boolean(dep) -> {key, schema(dep)}
-        {key, dep} when is_atom(dep) -> {key, [dep]}
-        {key, dep} when is_binary(dep) -> {key, [dep]}
-        {key, dep} -> {key, schema(dep)}
+        {key, dep} when is_list(dep) ->
+          case Keyword.keyword?(dep) do
+            true -> {key, schema(dep)}
+            false -> {key, dep}
+          end
+
+        {key, dep} when is_boolean(dep) ->
+          {key, schema(dep)}
+
+        {key, dep} when is_atom(dep) ->
+          {key, [dep]}
+
+        {key, dep} when is_binary(dep) ->
+          {key, [dep]}
+
+        {key, dep} ->
+          {key, schema(dep)}
       end)
 
   @spec bool_or_schema(boolean | atom) :: boolean | Schema.t()
@@ -235,9 +241,27 @@ defmodule Xema do
   defp items(schema) when is_atom(schema) or is_tuple(schema),
     do: schema(schema)
 
-  defp items(schemas) when is_list(schemas), do: schemas(schemas)
+  defp items(value) when is_list(value) do
+    case Keyword.keyword?(value) do
+      true ->
+        case schemas?(value) do
+          true -> schemas(value)
+          false -> schema(value)
+        end
+
+      false ->
+        schemas(value)
+    end
+  end
 
   defp items(items), do: items
+
+  @spec schemas?(keyword) :: boolean
+  defp schemas?(value),
+    do:
+      value
+      |> Keyword.keys()
+      |> Enum.all?(fn type -> type in [:ref | @types] end)
 
   defp update_allow(keywords) do
     case Keyword.pop(keywords, :allow, :undefined) do
@@ -340,17 +364,12 @@ defmodule Xema do
 
     keywords =
       schema
-      |> Map.from_struct()
+      |> Schema.to_map()
       |> Map.delete(:type)
       |> Map.delete(:data)
       |> Map.merge(data)
-      |> Enum.filter(fn
-        {_, nil} -> false
-        _ -> true
-      end)
-      |> Enum.map(fn {key, val} ->
-        {key, nested_source(val)}
-      end)
+      |> Enum.map(fn {key, val} -> {key, nested_source(val)} end)
+      |> map_ref()
 
     case {type, keywords} do
       {type, []} -> type
@@ -360,9 +379,26 @@ defmodule Xema do
     end
   end
 
+  defp map_ref(keywords) do
+    case Keyword.has_key?(keywords, :ref) do
+      true ->
+        if length(keywords) == 1 do
+          keywords[:ref]
+        else
+          {_, pointer} = keywords[:ref]
+          Keyword.put(keywords, :ref, pointer)
+        end
+
+      false ->
+        keywords
+    end
+  end
+
   defp nested_source(%Schema{} = val), do: source(val)
 
   defp nested_source(%Ref{} = val), do: {:ref, val.pointer}
+
+  defp nested_source(%{__struct__: MapSet} = val), do: MapSet.to_list(val)
 
   defp nested_source(%{__struct__: _} = val), do: val
 

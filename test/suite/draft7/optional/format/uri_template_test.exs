@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.UriTemplateTest do
 
   describe "format: uri-template" do
     setup do
-      %{schema: Xema.new(:format, :uri_template)}
+      %{schema: Xema.new(format: :uri_template)}
     end
 
     test "a valid uri-template", %{schema: schema} do

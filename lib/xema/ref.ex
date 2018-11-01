@@ -104,6 +104,7 @@ defmodule Xema.Ref do
   defp fetch_by_path(schema, [key | keys]) do
     key = decode(key)
 
+    # TODO: what happens here
     schema
     |> Mapz.get(key)
     |> case do
@@ -141,8 +142,6 @@ defmodule Xema.Ref do
     |> String.replace("~0", "~")
     |> String.replace("~1", "/")
     |> URI.decode()
-  rescue
-    _ -> str
   end
 end
 

@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.UriTest do
 
   describe "validation of URIs" do
     setup do
-      %{schema: Xema.new(:format, :uri)}
+      %{schema: Xema.new(format: :uri)}
     end
 
     test "a valid URL with anchor tag", %{schema: schema} do

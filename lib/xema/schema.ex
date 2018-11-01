@@ -223,6 +223,10 @@ defmodule Xema.Schema do
   @spec types :: [type]
   def types, do: @types
 
+  @spec keywords :: [atom]
+  def keywords,
+    do: %Schema{} |> Map.keys() |> MapSet.new() |> MapSet.delete(:data)
+
   @spec validate_type!(keyword) :: keyword
   defp validate_type!(opts) when is_list(opts) do
     with {:ok, type} <- fetch_type(opts),
@@ -286,8 +290,6 @@ defmodule Xema.Schema do
 
   @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
   defp pattern(string) when is_binary(string), do: Regex.compile!(string)
-
-  defp pattern(atom) when is_atom(atom), do: pattern(Atom.to_string(atom))
 
   defp pattern(regex), do: regex
 

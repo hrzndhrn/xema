@@ -5,7 +5,7 @@ defmodule Draft4.DefaultTest do
 
   describe "invalid type for default" do
     setup do
-      %{schema: Xema.new(:properties, %{foo: {:integer, [default: []]}})}
+      %{schema: Xema.new(properties: %{foo: {:integer, [default: []]}})}
     end
 
     test "valid when property is specified", %{schema: schema} do
@@ -23,9 +23,9 @@ defmodule Draft4.DefaultTest do
     setup do
       %{
         schema:
-          Xema.new(:properties, %{
-            bar: {:string, [default: "bad", min_length: 4]}
-          })
+          Xema.new(
+            properties: %{bar: {:string, [default: "bad", min_length: 4]}}
+          )
       }
     end
 

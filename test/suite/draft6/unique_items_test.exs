@@ -5,7 +5,7 @@ defmodule Draft6.UniqueItemsTest do
 
   describe "uniqueItems validation" do
     setup do
-      %{schema: Xema.new(:unique_items, true)}
+      %{schema: Xema.new(unique_items: true)}
     end
 
     test "unique array of integers is valid", %{schema: schema} do

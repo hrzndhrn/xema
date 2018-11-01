@@ -5,7 +5,7 @@ defmodule Draft4.EnumTest do
 
   describe "simple enum validation" do
     setup do
-      %{schema: Xema.new(:enum, [1, 2, 3])}
+      %{schema: Xema.new(enum: [1, 2, 3])}
     end
 
     test "one of the enum is valid", %{schema: schema} do
@@ -21,7 +21,7 @@ defmodule Draft4.EnumTest do
 
   describe "heterogeneous enum validation" do
     setup do
-      %{schema: Xema.new(:enum, [6, "foo", [], true, %{foo: 12}])}
+      %{schema: Xema.new(enum: [6, "foo", [], true, %{foo: 12}])}
     end
 
     test "one of the enum is valid", %{schema: schema} do
@@ -44,9 +44,12 @@ defmodule Draft4.EnumTest do
     setup do
       %{
         schema:
-          Xema.new(:map,
-            properties: %{bar: {:enum, ["bar"]}, foo: {:enum, ["foo"]}},
-            required: ["bar"]
+          Xema.new(
+            {:map,
+             [
+               properties: %{bar: [enum: ["bar"]], foo: [enum: ["foo"]]},
+               required: ["bar"]
+             ]}
           )
       }
     end

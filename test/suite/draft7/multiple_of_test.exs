@@ -5,7 +5,7 @@ defmodule Draft7.MultipleOfTest do
 
   describe "by int" do
     setup do
-      %{schema: Xema.new(:multiple_of, 2)}
+      %{schema: Xema.new(multiple_of: 2)}
     end
 
     test "int by int", %{schema: schema} do
@@ -26,7 +26,7 @@ defmodule Draft7.MultipleOfTest do
 
   describe "by number" do
     setup do
-      %{schema: Xema.new(:multiple_of, 1.5)}
+      %{schema: Xema.new(multiple_of: 1.5)}
     end
 
     test "zero is multiple of anything", %{schema: schema} do
@@ -47,7 +47,7 @@ defmodule Draft7.MultipleOfTest do
 
   describe "by small number" do
     setup do
-      %{schema: Xema.new(:multiple_of, 0.0001)}
+      %{schema: Xema.new(multiple_of: 0.0001)}
     end
 
     test "0.0075 is multiple of 0.0001", %{schema: schema} do

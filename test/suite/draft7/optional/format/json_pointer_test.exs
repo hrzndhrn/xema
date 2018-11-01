@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.JsonPointerTest do
 
   describe "validation of JSON-pointers (JSON String Representation)" do
     setup do
-      %{schema: Xema.new(:format, :json_pointer)}
+      %{schema: Xema.new(format: :json_pointer)}
     end
 
     test "a valid JSON-pointer", %{schema: schema} do

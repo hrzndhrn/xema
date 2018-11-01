@@ -5,7 +5,7 @@ defmodule Draft6.DependenciesTest do
 
   describe "dependencies" do
     setup do
-      %{schema: Xema.new(:dependencies, %{bar: ["foo"]})}
+      %{schema: Xema.new(dependencies: %{bar: ["foo"]})}
     end
 
     test "neither", %{schema: schema} do
@@ -46,7 +46,7 @@ defmodule Draft6.DependenciesTest do
 
   describe "dependencies with empty array" do
     setup do
-      %{schema: Xema.new(:dependencies, %{bar: []})}
+      %{schema: Xema.new(dependencies: %{bar: []})}
     end
 
     test "empty object", %{schema: schema} do
@@ -62,7 +62,7 @@ defmodule Draft6.DependenciesTest do
 
   describe "multiple dependencies" do
     setup do
-      %{schema: Xema.new(:dependencies, %{quux: ["foo", "bar"]})}
+      %{schema: Xema.new(dependencies: %{quux: ["foo", "bar"]})}
     end
 
     test "neither", %{schema: schema} do
@@ -100,9 +100,9 @@ defmodule Draft6.DependenciesTest do
     setup do
       %{
         schema:
-          Xema.new(:dependencies, %{
-            bar: {:properties, %{bar: :integer, foo: :integer}}
-          })
+          Xema.new(
+            dependencies: %{bar: [properties: %{bar: :integer, foo: :integer}]}
+          )
       }
     end
 
@@ -134,7 +134,7 @@ defmodule Draft6.DependenciesTest do
 
   describe "dependencies with boolean subschemas" do
     setup do
-      %{schema: Xema.new(:dependencies, %{bar: false, foo: true})}
+      %{schema: Xema.new(dependencies: %{bar: false, foo: true})}
     end
 
     test "object with property having schema true is valid", %{schema: schema} do

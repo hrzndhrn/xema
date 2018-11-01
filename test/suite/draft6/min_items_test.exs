@@ -5,7 +5,7 @@ defmodule Draft6.MinItemsTest do
 
   describe "minItems validation" do
     setup do
-      %{schema: Xema.new(:min_items, 1)}
+      %{schema: Xema.new(min_items: 1)}
     end
 
     test "longer is valid", %{schema: schema} do

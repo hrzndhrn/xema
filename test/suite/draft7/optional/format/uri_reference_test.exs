@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.UriReferenceTest do
 
   describe "validation of URI References" do
     setup do
-      %{schema: Xema.new(:format, :uri_reference)}
+      %{schema: Xema.new(format: :uri_reference)}
     end
 
     test "a valid URI", %{schema: schema} do

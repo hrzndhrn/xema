@@ -5,7 +5,7 @@ defmodule Draft6.PatternTest do
 
   describe "pattern validation" do
     setup do
-      %{schema: Xema.new(:pattern, "^a*$")}
+      %{schema: Xema.new(pattern: ~r/^a*$/)}
     end
 
     test "a matching pattern is valid", %{schema: schema} do
@@ -26,7 +26,7 @@ defmodule Draft6.PatternTest do
 
   describe "pattern is not anchored" do
     setup do
-      %{schema: Xema.new(:pattern, "a+")}
+      %{schema: Xema.new(pattern: ~r/a+/)}
     end
 
     test "matches a substring", %{schema: schema} do

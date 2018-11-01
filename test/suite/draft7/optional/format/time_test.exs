@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.TimeTest do
 
   describe "validation of time strings" do
     setup do
-      %{schema: Xema.new(:format, :time)}
+      %{schema: Xema.new(format: :time)}
     end
 
     test "a valid time string", %{schema: schema} do

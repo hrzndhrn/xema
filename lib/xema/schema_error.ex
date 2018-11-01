@@ -31,8 +31,11 @@ defmodule Xema.SchemaError do
   def exception(%{__struct__: CompileError} = error), do: error
 
   def exception(reason) do
-    message = "Can't build schema! reason: #{inspect(reason)}"
-    IO.inspect(reason)
+    message =
+      "Can't build schema! Reason:\n#{
+        reason |> inspect() |> Code.format_string!()
+      }"
+
     %SchemaError{message: message, reason: reason}
   end
 end

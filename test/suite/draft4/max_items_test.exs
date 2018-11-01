@@ -5,7 +5,7 @@ defmodule Draft4.MaxItemsTest do
 
   describe "maxItems validation" do
     setup do
-      %{schema: Xema.new(:max_items, 2)}
+      %{schema: Xema.new(max_items: 2)}
     end
 
     test "shorter is valid", %{schema: schema} do

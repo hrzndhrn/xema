@@ -5,7 +5,7 @@ defmodule Draft4.DependenciesTest do
 
   describe "dependencies" do
     setup do
-      %{schema: Xema.new(:dependencies, %{bar: ["foo"]})}
+      %{schema: Xema.new(dependencies: %{bar: ["foo"]})}
     end
 
     test "neither", %{schema: schema} do
@@ -46,7 +46,7 @@ defmodule Draft4.DependenciesTest do
 
   describe "multiple dependencies" do
     setup do
-      %{schema: Xema.new(:dependencies, %{quux: ["foo", "bar"]})}
+      %{schema: Xema.new(dependencies: %{quux: ["foo", "bar"]})}
     end
 
     test "neither", %{schema: schema} do
@@ -84,9 +84,9 @@ defmodule Draft4.DependenciesTest do
     setup do
       %{
         schema:
-          Xema.new(:dependencies, %{
-            bar: {:properties, %{bar: :integer, foo: :integer}}
-          })
+          Xema.new(
+            dependencies: %{bar: [properties: %{bar: :integer, foo: :integer}]}
+          )
       }
     end
 

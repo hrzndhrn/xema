@@ -5,7 +5,7 @@ defmodule Draft4.Optional.FormatTest do
 
   describe "validation of date-time strings" do
     setup do
-      %{schema: Xema.new(:format, :date_time)}
+      %{schema: Xema.new(format: :date_time)}
     end
 
     test "a valid date-time string", %{schema: schema} do
@@ -56,7 +56,7 @@ defmodule Draft4.Optional.FormatTest do
 
   describe "validation of URIs" do
     setup do
-      %{schema: Xema.new(:format, :uri)}
+      %{schema: Xema.new(format: :uri)}
     end
 
     test "a valid URL with anchor tag", %{schema: schema} do
@@ -157,7 +157,7 @@ defmodule Draft4.Optional.FormatTest do
 
   describe "validation of e-mail addresses" do
     setup do
-      %{schema: Xema.new(:format, :email)}
+      %{schema: Xema.new(format: :email)}
     end
 
     test "a valid e-mail address", %{schema: schema} do
@@ -173,7 +173,7 @@ defmodule Draft4.Optional.FormatTest do
 
   describe "validation of IP addresses" do
     setup do
-      %{schema: Xema.new(:format, :ipv4)}
+      %{schema: Xema.new(format: :ipv4)}
     end
 
     test "a valid IP address", %{schema: schema} do
@@ -204,7 +204,7 @@ defmodule Draft4.Optional.FormatTest do
 
   describe "validation of IPv6 addresses" do
     setup do
-      %{schema: Xema.new(:format, :ipv6)}
+      %{schema: Xema.new(format: :ipv6)}
     end
 
     test "a valid IPv6 address", %{schema: schema} do
@@ -230,7 +230,7 @@ defmodule Draft4.Optional.FormatTest do
 
   describe "validation of host names" do
     setup do
-      %{schema: Xema.new(:format, :hostname)}
+      %{schema: Xema.new(format: :hostname)}
     end
 
     test "a valid host name", %{schema: schema} do

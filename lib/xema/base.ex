@@ -87,6 +87,7 @@ defmodule Xema.Base do
           %Schema{ref: ref} = schema, id when not is_nil(ref) ->
             %{schema | ref: Ref.new(ref, id)}
 
+          # TODO: do we need this
           %Schema{} = schema, id ->
             schema
 

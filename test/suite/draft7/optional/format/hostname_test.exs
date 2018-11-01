@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.HostnameTest do
 
   describe "validation of host names" do
     setup do
-      %{schema: Xema.new(:format, :hostname)}
+      %{schema: Xema.new(format: :hostname)}
     end
 
     test "a valid host name", %{schema: schema} do

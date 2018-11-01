@@ -7,9 +7,9 @@ defmodule Draft6.AdditionalPropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
             additional_properties: false,
-            pattern_properties: %{"^v": :any},
+            pattern_properties: %{"^v" => :any},
             properties: %{bar: :any, foo: :any}
           )
       }
@@ -50,9 +50,9 @@ defmodule Draft6.AdditionalPropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
             additional_properties: false,
-            pattern_properties: %{"^á": :any}
+            pattern_properties: %{"^á" => :any}
           )
       }
     end
@@ -72,7 +72,7 @@ defmodule Draft6.AdditionalPropertiesTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
             additional_properties: :boolean,
             properties: %{bar: :any, foo: :any}
           )
@@ -97,7 +97,7 @@ defmodule Draft6.AdditionalPropertiesTest do
 
   describe "additionalProperties can exist by itself" do
     setup do
-      %{schema: Xema.new(:additional_properties, :boolean)}
+      %{schema: Xema.new(additional_properties: :boolean)}
     end
 
     test "an additional valid property is valid", %{schema: schema} do
@@ -113,7 +113,7 @@ defmodule Draft6.AdditionalPropertiesTest do
 
   describe "additionalProperties are allowed by default" do
     setup do
-      %{schema: Xema.new(:properties, %{bar: :any, foo: :any})}
+      %{schema: Xema.new(properties: %{bar: :any, foo: :any})}
     end
 
     test "additional properties are allowed", %{schema: schema} do

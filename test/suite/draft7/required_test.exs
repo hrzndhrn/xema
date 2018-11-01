@@ -6,8 +6,7 @@ defmodule Draft7.RequiredTest do
   describe "required validation" do
     setup do
       %{
-        schema:
-          Xema.new(:any, properties: %{bar: :any, foo: :any}, required: ["foo"])
+        schema: Xema.new(properties: %{bar: :any, foo: :any}, required: ["foo"])
       }
     end
 
@@ -39,7 +38,7 @@ defmodule Draft7.RequiredTest do
 
   describe "required default validation" do
     setup do
-      %{schema: Xema.new(:properties, %{foo: :any})}
+      %{schema: Xema.new(properties: %{foo: :any})}
     end
 
     test "not required by default", %{schema: schema} do
@@ -50,7 +49,7 @@ defmodule Draft7.RequiredTest do
 
   describe "required with empty array" do
     setup do
-      %{schema: Xema.new(:any, properties: %{foo: :any}, required: [])}
+      %{schema: Xema.new(properties: %{foo: :any}, required: [])}
     end
 
     test "property not required", %{schema: schema} do

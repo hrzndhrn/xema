@@ -5,7 +5,7 @@ defmodule Draft7.Optional.Format.Ipv4Test do
 
   describe "validation of IP addresses" do
     setup do
-      %{schema: Xema.new(:format, :ipv4)}
+      %{schema: Xema.new(format: :ipv4)}
     end
 
     test "a valid IP address", %{schema: schema} do

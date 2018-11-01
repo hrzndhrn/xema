@@ -5,7 +5,7 @@ defmodule Draft4.MaxLengthTest do
 
   describe "maxLength validation" do
     setup do
-      %{schema: Xema.new(:max_length, 2)}
+      %{schema: Xema.new(max_length: 2)}
     end
 
     test "shorter is valid", %{schema: schema} do

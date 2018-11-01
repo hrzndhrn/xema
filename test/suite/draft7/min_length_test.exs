@@ -5,7 +5,7 @@ defmodule Draft7.MinLengthTest do
 
   describe "minLength validation" do
     setup do
-      %{schema: Xema.new(:min_length, 2)}
+      %{schema: Xema.new(min_length: 2)}
     end
 
     test "longer is valid", %{schema: schema} do

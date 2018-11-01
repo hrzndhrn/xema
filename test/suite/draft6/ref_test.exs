@@ -7,7 +7,7 @@ defmodule Draft6.RefTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
             additional_properties: false,
             properties: %{foo: {:ref, "#"}}
           )
@@ -39,10 +39,9 @@ defmodule Draft6.RefTest do
     setup do
       %{
         schema:
-          Xema.new(:properties, %{
-            bar: {:ref, "#/properties/foo"},
-            foo: :integer
-          })
+          Xema.new(
+            properties: %{bar: {:ref, "#/properties/foo"}, foo: :integer}
+          )
       }
     end
 
@@ -59,7 +58,7 @@ defmodule Draft6.RefTest do
 
   describe "relative pointer ref to array" do
     setup do
-      %{schema: Xema.new(:items, [:integer, {:ref, "#/items/0"}])}
+      %{schema: Xema.new(items: [:integer, {:ref, "#/items/0"}])}
     end
 
     test "match array", %{schema: schema} do
@@ -77,13 +76,13 @@ defmodule Draft6.RefTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
+            "percent%field": :integer,
             properties: %{
               percent: {:ref, "#/percent%25field"},
               slash: {:ref, "#/slash~1field"},
               tilda: {:ref, "#/tilda~0field"}
             },
-            "percent%field": :integer,
             "slash/field": :integer,
             "tilda~field": :integer
           )
@@ -125,13 +124,13 @@ defmodule Draft6.RefTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
+            ref: "#/definitions/c",
             definitions: %{
               a: :integer,
               b: {:ref, "#/definitions/a"},
               c: {:ref, "#/definitions/b"}
-            },
-            ref: "#/definitions/c"
+            }
           )
       }
     end
@@ -151,11 +150,9 @@ defmodule Draft6.RefTest do
     setup do
       %{
         schema:
-          Xema.new(:any,
+          Xema.new(
             definitions: %{reffed: :list},
-            properties: %{
-              foo: {:any, [max_items: 2, ref: "#/definitions/reffed"]}
-            }
+            properties: %{foo: [ref: "#/definitions/reffed", max_items: 2]}
           )
       }
     end
@@ -178,7 +175,7 @@ defmodule Draft6.RefTest do
 
   describe "property named $ref that is not a reference" do
     setup do
-      %{schema: Xema.new(:properties, %{"$ref": :string})}
+      %{schema: Xema.new(properties: %{"$ref": :string})}
     end
 
     test "property named $ref valid", %{schema: schema} do
@@ -194,10 +191,7 @@ defmodule Draft6.RefTest do
 
   describe "$ref to boolean schema true" do
     setup do
-      %{
-        schema:
-          Xema.new(:any, definitions: %{bool: true}, ref: "#/definitions/bool")
-      }
+      %{schema: Xema.new(ref: "#/definitions/bool", definitions: %{bool: true})}
     end
 
     test "any value is valid", %{schema: schema} do
@@ -209,8 +203,7 @@ defmodule Draft6.RefTest do
   describe "$ref to boolean schema false" do
     setup do
       %{
-        schema:
-          Xema.new(:any, definitions: %{bool: false}, ref: "#/definitions/bool")
+        schema: Xema.new(ref: "#/definitions/bool", definitions: %{bool: false})
       }
     end
 
@@ -224,24 +217,27 @@ defmodule Draft6.RefTest do
     setup do
       %{
         schema:
-          Xema.new(:map,
-            definitions: %{
-              node:
-                {:map,
-                 [
-                   description: "node",
-                   id: "http://localhost:1234/node",
-                   properties: %{subtree: {:ref, "tree"}, value: :number},
-                   required: ["value"]
-                 ]}
-            },
-            description: "tree of nodes",
-            id: "http://localhost:1234/tree",
-            properties: %{
-              meta: :string,
-              nodes: {:list, [items: {:ref, "node"}]}
-            },
-            required: ["meta", "nodes"]
+          Xema.new(
+            {:map,
+             [
+               definitions: %{
+                 node:
+                   {:map,
+                    [
+                      description: "node",
+                      id: "http://localhost:1234/node",
+                      properties: %{subtree: {:ref, "tree"}, value: :number},
+                      required: ["value"]
+                    ]}
+               },
+               description: "tree of nodes",
+               id: "http://localhost:1234/tree",
+               properties: %{
+                 meta: :string,
+                 nodes: {:list, [items: {:ref, "node"}]}
+               },
+               required: ["meta", "nodes"]
+             ]}
           )
       }
     end

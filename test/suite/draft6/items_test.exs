@@ -5,7 +5,7 @@ defmodule Draft6.ItemsTest do
 
   describe "a schema given for items" do
     setup do
-      %{schema: Xema.new(:items, :integer)}
+      %{schema: Xema.new(items: :integer)}
     end
 
     test "valid items", %{schema: schema} do
@@ -31,7 +31,7 @@ defmodule Draft6.ItemsTest do
 
   describe "an array of schemas for items" do
     setup do
-      %{schema: Xema.new(:items, [:integer, :string])}
+      %{schema: Xema.new(items: [:integer, :string])}
     end
 
     test "correct types", %{schema: schema} do
@@ -67,7 +67,7 @@ defmodule Draft6.ItemsTest do
 
   describe "items with boolean schema (true)" do
     setup do
-      %{schema: Xema.new(:items, true)}
+      %{schema: Xema.new(items: true)}
     end
 
     test "any array is valid", %{schema: schema} do
@@ -83,7 +83,7 @@ defmodule Draft6.ItemsTest do
 
   describe "items with boolean schema (false)" do
     setup do
-      %{schema: Xema.new(:items, false)}
+      %{schema: Xema.new(items: false)}
     end
 
     test "any non-empty array is invalid", %{schema: schema} do
@@ -99,7 +99,7 @@ defmodule Draft6.ItemsTest do
 
   describe "items with boolean schemas" do
     setup do
-      %{schema: Xema.new(:items, [true, false])}
+      %{schema: Xema.new(items: [true, false])}
     end
 
     test "array with one item is valid", %{schema: schema} do

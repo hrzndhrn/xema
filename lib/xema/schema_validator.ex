@@ -211,8 +211,7 @@ defmodule Xema.SchemaValidator do
       max_items: 2,
       min_items: 2,
       type: :tuple
-    },
-    refs: %{}
+    }
   }
 
   def validate!(val) do

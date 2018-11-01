@@ -89,6 +89,37 @@ defmodule Xema.RefTest do
     end
   end
 
+  describe "ref ignores any sibling" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            definitions: %{
+              reffed: :list
+            },
+            properties: %{
+              foo: [
+                max_items: 2,
+                ref: "#/definitions/reffed"
+              ]
+            }
+          )
+      }
+    end
+
+    test "with valid value", %{schema: schema} do
+      assert Xema.valid?(schema, %{foo: []})
+    end
+
+    test "with invalid value", %{schema: schema} do
+      refute Xema.valid?(schema, %{foo: 1})
+    end
+
+    test "with valid value ignoring max items", %{schema: schema} do
+      assert Xema.valid?(schema, [1, 2, 3, 4])
+    end
+  end
+
   describe "schema with ref and definitions" do
     setup do
       %{

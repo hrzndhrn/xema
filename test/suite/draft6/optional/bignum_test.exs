@@ -70,7 +70,7 @@ defmodule Draft6.Optional.BignumTest do
 
   describe "integer comparison (1)" do
     setup do
-      %{schema: Xema.new(:maximum, 18_446_744_073_709_551_615)}
+      %{schema: Xema.new(maximum: 18_446_744_073_709_551_615)}
     end
 
     test "comparison works for high numbers", %{schema: schema} do
@@ -81,7 +81,7 @@ defmodule Draft6.Optional.BignumTest do
 
   describe "float comparison with high precision" do
     setup do
-      %{schema: Xema.new(:exclusive_maximum, 9.727837981879871e26)}
+      %{schema: Xema.new(exclusive_maximum: 9.727837981879871e26)}
     end
 
     test "comparison works for high numbers", %{schema: schema} do
@@ -92,7 +92,7 @@ defmodule Draft6.Optional.BignumTest do
 
   describe "integer comparison (2)" do
     setup do
-      %{schema: Xema.new(:minimum, -18_446_744_073_709_551_615)}
+      %{schema: Xema.new(minimum: -18_446_744_073_709_551_615)}
     end
 
     test "comparison works for very negative numbers", %{schema: schema} do
@@ -103,7 +103,7 @@ defmodule Draft6.Optional.BignumTest do
 
   describe "float comparison with high precision on negative numbers" do
     setup do
-      %{schema: Xema.new(:exclusive_minimum, -9.727837981879871e26)}
+      %{schema: Xema.new(exclusive_minimum: -9.727837981879871e26)}
     end
 
     test "comparison works for very negative numbers", %{schema: schema} do
