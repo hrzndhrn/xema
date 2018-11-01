@@ -1,11 +1,16 @@
 defmodule Xema.Mapz do
   @moduledoc false
-  # A set of functions for working with maps.
-  #
-  # This functions are working a little bit different as the function of the
-  # coure `Map` module.
+  _ = """
+  A set of functions for working with maps.
+
+  This functions are working a little bit different as the function of the
+  coure `Map` module.
+  """
 
   import Xema.Utils, only: [to_existing_atom: 1]
+
+  @type key :: any
+  @type value :: any
 
   @doc """
   Gets the value for a specific `key` in `map`. The function will toggle the
@@ -22,14 +27,22 @@ defmodule Xema.Mapz do
       2
       iex> Xema.Mapz.get(map, "b")
       2
+      iex> Xema.Mapz.get(map, :c)
+      nil
   """
-  @spec get(map, String.t() | atom) :: any
+  @spec get(map, key) :: value
   def get(map, key) do
     map
     |> fetch(key)
     |> case do
-      {:ok, val} -> val
-      _ -> nil
+      {:ok, val} ->
+        val
+
+      {:error, :mixed_map} ->
+        raise "Map contains same key as string and atom (key: #{inspect(key)})."
+
+      _ ->
+        nil
     end
   end
 

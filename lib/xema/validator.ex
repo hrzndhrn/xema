@@ -735,9 +735,8 @@ defmodule Xema.Validator do
   @spec properties(Xema.Schema.t(), map, keyword) :: result
   defp properties(%{properties: nil}, map, _opts), do: {:ok, map}
 
-  defp properties(%{properties: props}, map, opts) do
-    do_properties(Map.to_list(props), map, %{}, opts)
-  end
+  defp properties(%{properties: props}, map, opts),
+    do: do_properties(Map.to_list(props), map, %{}, opts)
 
   @spec do_properties(list, map, map, keyword) :: result
   defp do_properties([], map, errors, _opts) when errors == %{}, do: {:ok, map}
@@ -748,14 +747,20 @@ defmodule Xema.Validator do
   defp do_properties([{prop, schema} | props], map, errors, opts) do
     with {:ok, value} <- Mapz.fetch(map, prop),
          :ok <- do_validate(schema, value, opts) do
-      case has_key?(props, prop) do
-        true -> do_properties(props, map, errors, opts)
-        false -> do_properties(props, Mapz.delete(map, prop), errors, opts)
-      end
+      # The list `props` can contain multiple schemas for the same value.
+      # The value will be just deleted if on more schemas are available.
+      # Multiple schemas are coming from `pattern_properties`.
+      map =
+        case has_key?(props, prop) do
+          true -> map
+          false -> Mapz.delete(map, prop)
+        end
+
+      do_properties(props, map, errors, opts)
     else
       # The property is not in the map.
       :error ->
-        do_properties(props, Mapz.delete(map, prop), errors, opts)
+        do_properties(props, map, errors, opts)
 
       {:error, reason} ->
         do_properties(
