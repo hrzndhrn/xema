@@ -8,7 +8,6 @@ defmodule Xema do
   alias Xema.Mapz
   alias Xema.Ref
   alias Xema.Schema
-  alias Xema.SchemaError
   alias Xema.SchemaValidator
 
   @keywords Schema.keywords()
@@ -59,6 +58,8 @@ defmodule Xema do
 
   """
   @spec new(Schema.t() | Schema.type() | tuple | atom | keyword) :: Xema.t()
+
+  @spec init(atom | keyword | {atom, keyword}) :: Schema.t()
   defp init(val) when is_atom(val) do
     init({val, []})
   end
@@ -74,50 +75,9 @@ defmodule Xema do
     init({:any, ref: pointer})
   end
 
-  defp init({type, keywords} = data) do
+  defp init(data) do
     SchemaValidator.validate!(data)
-    do_init(type, keywords)
-  end
-
-  defp init(type, keywords) when is_atom(type) or is_nil(type) do
-    xyz_init(type, keywords)
-  end
-
-  defp init(val, []) when is_list(val) do
-    case Keyword.keyword?(val) do
-      true -> init(:any, val)
-      false -> xyz_init(val, [])
-    end
-  end
-
-  defp do_init({type}, []), do: do_init(type, [])
-
-  defp do_init(list, []) when is_list(list) do
-    case Keyword.keyword?(list) do
-      true -> do_init(:any, list)
-      false -> schema({list, []}, [])
-    end
-  end
-
-  defp do_init(list, keywords) when is_list(list),
-    do: schema({list, keywords}, [])
-
-  defp do_init({type, keywords}, []),
-    do: do_init(type, keywords)
-
-  defp do_init(tuple, keywords) when is_tuple(tuple),
-    do: raise(ArgumentError, message: "Invalid argument #{inspect(keywords)}.")
-
-  defp do_init(bool, []) when is_boolean(bool),
-    do: Schema.new(type: bool)
-
-  defp do_init(map, []) when is_map(map), do: do_init(:any, Map.to_list(map))
-
-  defp do_init(value, keywords) do
-    case value in Schema.types() do
-      true -> schema({value, keywords}, [])
-      false -> do_init(:any, [{value, keywords}])
-    end
+    schema(data)
   end
 
   #
@@ -125,6 +85,8 @@ defmodule Xema do
   #
   @spec schema(any, keyword) :: Schema.t()
   defp schema(type, keywords \\ [])
+
+  defp schema({bool, _}, _) when is_boolean(bool), do: Schema.new(type: bool)
 
   defp schema(%{__struct__: _, content: schema}, _), do: schema
 
@@ -149,22 +111,9 @@ defmodule Xema do
       |> update()
       |> Schema.new()
 
-  defp schema({bool, _}, _)
-       when is_boolean(bool),
-       do: Schema.new(type: bool)
-
   defp schema({value, keywords}, _) do
     case value in Schema.types() do
       true ->
-        unless Keyword.keyword?(keywords) do
-          raise(SchemaError,
-            message:
-              "Wrong argument for #{inspect(value)}. Argument: #{
-                inspect(keywords)
-              }"
-          )
-        end
-
         keywords
         |> Keyword.put(:type, value)
         |> update()
@@ -373,7 +322,6 @@ defmodule Xema do
 
     case {type, keywords} do
       {type, []} -> type
-      {:any, [ref: ref]} -> ref
       {:any, keywords} -> keywords
       tuple -> tuple
     end
