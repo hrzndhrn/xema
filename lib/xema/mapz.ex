@@ -1,5 +1,6 @@
 defmodule Xema.Mapz do
-  @moduledoc """
+  @moduledoc false
+  _ = """
   A set of functions for working with maps.
 
   This functions are working a little bit different as the function of the
