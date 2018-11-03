@@ -1,5 +1,8 @@
 defmodule Xema.Utils do
   @moduledoc false
+  _ = """
+  Some utilities for Xema.
+  """
 
   alias Xema.Mapz
 
