@@ -124,7 +124,7 @@ defmodule Xema.Behaviour do
         put_ref(acc, ref)
 
       %Schema{id: id}, acc, _path when not is_nil(id) ->
-        Utils.update_id(acc, id)
+        update_id(acc, id)
 
       _schema, acc, _path ->
         acc
@@ -134,6 +134,9 @@ defmodule Xema.Behaviour do
       refs -> Map.delete(refs, :id)
     end
   end
+
+  defp update_id(%{id: a} = map, b),
+    do: Map.put(map, :id, Utils.update_uri(a, b))
 
   defp put_ref(map, %Ref{uri: uri}) when not is_nil(uri) do
     case get_schema(uri) do
