@@ -43,15 +43,11 @@ defmodule Xema.Behaviour do
         )
       end
 
-      def new(data),
-        do:
-          data
-          |> init()
-          |> new()
+      def new(data), do: data |> init() |> new()
 
       @doc """
-      Returns true if the `value` is a valid value against the given `schema`;
-      otherwise returns false.
+      Returns `true` if the `value` is a valid value against the given `schema`;
+      otherwise returns `false`.
 
       ## Examples
 
@@ -67,8 +63,8 @@ defmodule Xema.Behaviour do
       def valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
-      Returns true if the value is a valid value against the given schema;
-      otherwise returns false.
+      Returns `true` if the `value` is a valid value against the given `schema`;
+      otherwise returns `false`.
       """
       @deprecated "Use valid? instead"
       @spec is_valid?(__MODULE__.t(), any) :: boolean
@@ -206,13 +202,12 @@ defmodule Xema.Behaviour do
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 
-  @doc """
-  TODO
-  """
+  # Returns a schema tree where each schema is the result of invoking `fun` on
+  # each schema. The function gets also the current `ìd` for the schema. The
+  # `id` could be `nil` or a `%URI{}` struct.
+  @doc false
   @spec map(Schema.t(), function) :: Schema.t() | Ref.t()
-  def map(schema, fun) do
-    map(schema, fun, nil)
-  end
+  def map(schema, fun), do: map(schema, fun, nil)
 
   defp map(%Schema{} = schema, fun, id) do
     id = Utils.update_uri(id, schema.id)
@@ -229,15 +224,10 @@ defmodule Xema.Behaviour do
   defp map(%{__struct__: _} = struct, _fun, _id), do: struct
 
   defp map(map, fun, id) when is_map(map),
-    do:
-      map
-      |> Map.to_list()
-      |> Enum.into(%{}, fn {k, v} -> {k, map(v, fun, id)} end)
+    do: Enum.into(map, %{}, fn {k, v} -> {k, map(v, fun, id)} end)
 
   defp map(list, fun, id) when is_list(list),
-    do:
-      list
-      |> Enum.map(fn v -> map(v, fun, id) end)
+    do: Enum.map(list, fn v -> map(v, fun, id) end)
 
   defp map(value, _fun, _id), do: value
 end
