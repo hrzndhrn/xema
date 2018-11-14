@@ -151,7 +151,6 @@ defmodule Xema.Format do
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 5322](https://tools.ietf.org/html/rfc5322), `false` otherwise.
 
-
   The BNF rules from RFC 5322 transformed to PCRE by Nikita Popov and described
   in the post [The true power of regular expressions
   ](http://nikic.github.io/2012/06/15/The-true-power-of-regular-expressions.html).
