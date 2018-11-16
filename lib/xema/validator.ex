@@ -339,7 +339,6 @@ defmodule Xema.Validator do
     end
   end
 
-
   @spec any_of(Xema.Schema.t(), any, keyword) :: result
   defp any_of(%{any_of: nil}, _value, _opts), do: :ok
 
@@ -356,8 +355,7 @@ defmodule Xema.Validator do
   @spec do_any_of(list, any, keyword, [map]) :: :ok | {:error, list(map)}
   defp do_any_of(schemas, value, opts, errors \\ [])
 
-  defp do_any_of([], _value, _opts, errors), do:
-    {:error, errors}
+  defp do_any_of([], _value, _opts, errors), do: {:error, errors}
 
   defp do_any_of([schema | schemas], value, opts, errors) do
     with {:error, error} <- do_validate(schema, value, opts) do
@@ -370,7 +368,7 @@ defmodule Xema.Validator do
 
   defp all_of(%{all_of: schemas}, value, opts) do
     with {:error, errors} <- do_all_of(schemas, value, opts) do
-        {:error, %{all_of: errors, value: value}}
+      {:error, %{all_of: errors, value: value}}
     end
   end
 

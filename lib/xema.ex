@@ -222,13 +222,13 @@ defmodule Xema do
   defp update_data(keywords) do
     {data, keywords} = do_update_data(keywords)
 
-    cond do
-      map_size(data) == 0 ->
-        Keyword.put(keywords, :data, nil)
+    data =
+      case Enum.empty?(data) do
+        true -> nil
+        false -> data
+      end
 
-      true ->
-        Keyword.put(keywords, :data, data)
-    end
+    Keyword.put(keywords, :data, data)
   end
 
   @spec do_update_data(keyword) :: {map, keyword}
