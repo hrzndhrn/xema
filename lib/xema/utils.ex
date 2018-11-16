@@ -62,7 +62,8 @@ defmodule Xema.Utils do
   Parses a URI when the other URI is `nil`.
   Merges URIs if both are nor nil.
   """
-  @spec update_uri(URI.t() | nil, URI.t() | nil) :: URI.t() | nil
+  @spec update_uri(URI.t() | String.t() | nil, URI.t() | String.t() | nil) ::
+          URI.t() | nil
   def update_uri(nil, nil), do: nil
 
   def update_uri(uri_1, nil), do: URI.parse(uri_1)

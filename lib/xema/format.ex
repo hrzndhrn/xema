@@ -137,7 +137,7 @@ defmodule Xema.Format do
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 3339](https://tools.ietf.org/html/rfc3339), `false` otherwise.
   """
-  @spec time?(String.t()) :: boolean
+  @spec date?(String.t()) :: boolean
   def date?(string) when is_binary(string),
     do: date_time?("#{string}T00:00:00.0Z")
 

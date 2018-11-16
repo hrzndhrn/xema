@@ -265,28 +265,6 @@ defmodule Xema.Validator do
   defp const(%{const: const}, value),
     do: {:error, %{const: const, value: value}}
 
-  @spec contains(Xema.t() | Schema.t(), list) :: result
-  defp contains(%{contains: nil}, _list), do: :ok
-
-  defp contains(%{contains: schema}, list) when is_list(list) do
-    list
-    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
-    |> case do
-      true -> :ok
-      false -> {:error, %{value: list, contains: schema}}
-    end
-  end
-
-  defp contains(%{contains: schema}, tuple) when is_tuple(tuple) do
-    tuple
-    |> Tuple.to_list()
-    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
-    |> case do
-      true -> :ok
-      false -> {:error, %{value: tuple, contains: schema}}
-    end
-  end
-
   @spec if_then_else(Xema.t() | Schema.t(), any) :: result
   defp if_then_else(%{if: nil}, _value), do: :ok
   defp if_then_else(%{then: nil, else: nil}, _value), do: :ok
@@ -361,13 +339,38 @@ defmodule Xema.Validator do
     end
   end
 
+
+  @spec any_of(Xema.Schema.t(), any, keyword) :: result
+  defp any_of(%{any_of: nil}, _value, _opts), do: :ok
+
+  defp any_of(%{any_of: schemas}, value, opts) do
+    case do_any_of(schemas, value, opts) do
+      :ok ->
+        :ok
+
+      {:error, errors} ->
+        {:error, %{any_of: Enum.reverse(errors), value: value}}
+    end
+  end
+
+  @spec do_any_of(list, any, keyword, [map]) :: :ok | {:error, list(map)}
+  defp do_any_of(schemas, value, opts, errors \\ [])
+
+  defp do_any_of([], _value, _opts, errors), do:
+    {:error, errors}
+
+  defp do_any_of([schema | schemas], value, opts, errors) do
+    with {:error, error} <- do_validate(schema, value, opts) do
+      do_any_of(schemas, value, opts, [error | errors])
+    end
+  end
+
   @spec all_of(Xema.Schema.t(), any, keyword) :: result
   defp all_of(%{all_of: nil}, _value, _opts), do: :ok
 
   defp all_of(%{all_of: schemas}, value, opts) do
-    case do_all_of(schemas, value, opts) do
-      :ok -> :ok
-      {:error, errors} -> {:error, %{all_of: errors, value: value}}
+    with {:error, errors} <- do_all_of(schemas, value, opts) do
+        {:error, %{all_of: errors, value: value}}
     end
   end
 
@@ -386,36 +389,6 @@ defmodule Xema.Validator do
 
       {:error, error} ->
         do_all_of(schemas, value, opts, [error | errors])
-    end
-  end
-
-  @spec any_of(Xema.Schema.t(), any, keyword) :: result
-  defp any_of(%{any_of: nil}, _value, _opts), do: :ok
-
-  defp any_of(%{any_of: schemas}, value, opts) do
-    case do_any_of(schemas, value, opts) do
-      :ok ->
-        :ok
-
-      {:error, errors} ->
-        {:error, %{any_of: Enum.reverse(errors), value: value}}
-    end
-  end
-
-  @spec do_any_of(list, any, keyword, [map]) :: :ok | {:error, list(map)}
-  defp do_any_of(schemas, value, opts, errors \\ [])
-
-  defp do_any_of([], _value, _opts, errors) do
-    {:error, errors}
-  end
-
-  defp do_any_of([schema | schemas], value, opts, errors) do
-    case do_validate(schema, value, opts) do
-      :ok ->
-        :ok
-
-      {:error, error} ->
-        do_any_of(schemas, value, opts, [error | errors])
     end
   end
 
@@ -606,7 +579,29 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec items(Xema.Schema.t(), list, keyword) :: result
+  @spec contains(Schema.t(), any) :: result
+  defp contains(%{contains: nil}, _), do: :ok
+
+  defp contains(%{contains: schema}, tuple) when is_tuple(tuple) do
+    tuple
+    |> Tuple.to_list()
+    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
+    |> case do
+      true -> :ok
+      false -> {:error, %{value: tuple, contains: schema}}
+    end
+  end
+
+  defp contains(%{contains: schema}, list) when is_list(list) do
+    list
+    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
+    |> case do
+      true -> :ok
+      false -> {:error, %{value: list, contains: schema}}
+    end
+  end
+
+  @spec items(Schema.t(), list | tuple, keyword) :: result
   defp items(%{items: nil}, _list, _opts), do: :ok
 
   defp items(schema, tuple, opts) when is_tuple(tuple),
@@ -732,7 +727,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec properties(Xema.Schema.t(), map, keyword) :: result
+  @spec properties(Xema.Schema.t(), map, keyword) :: {:ok, map} | {:error, map}
   defp properties(%{properties: nil}, map, _opts), do: {:ok, map}
 
   defp properties(%{properties: props}, map, opts),
@@ -806,7 +801,7 @@ defmodule Xema.Validator do
 
   defp do_size(_len, _min, _max), do: :ok
 
-  @spec patterns(Xema.Schema.t(), map, keyword) :: result
+  @spec patterns(Xema.Schema.t(), map, keyword) :: {:ok, map} | {:error, map}
   defp patterns(%{pattern_properties: nil}, map, _opts), do: {:ok, map}
 
   defp patterns(%{pattern_properties: patterns}, map, opts) do

@@ -84,7 +84,7 @@ defmodule Xema.Schema do
           const: any,
           content_encoding: String.t() | nil,
           content_media_type: String.t() | nil,
-          contains: Xema.t() | Schema.t(),
+          contains: Xema.t() | Schema.t() | nil,
           data: map,
           default: any,
           definitions: map,
@@ -229,11 +229,11 @@ defmodule Xema.Schema do
 
   @spec validate_type!(keyword) :: keyword
   defp validate_type!(opts) when is_list(opts) do
-    with {:ok, type} <- fetch_type(opts),
+    with {:ok, type} <- Keyword.fetch(opts, :type),
          :ok <- validate_type(type) do
       opts
     else
-      {:error, :not_exist} ->
+      :error ->
         raise SchemaError, :missing_type
 
       {:error, types} when is_list(types) ->
@@ -241,16 +241,6 @@ defmodule Xema.Schema do
 
       {:error, type} ->
         raise SchemaError, {:invalid_type, type}
-    end
-  end
-
-  # This function exist just to make the dialyzer happy.
-  # See: https://github.com/elixir-lang/elixir/issues/7177
-  @spec fetch_type(keyword) :: {:ok, any} | {:error, :not_exist}
-  defp fetch_type(opts) do
-    case Keyword.fetch(opts, :type) do
-      :error -> {:error, :not_exist}
-      result -> result
     end
   end
 
@@ -280,8 +270,6 @@ defmodule Xema.Schema do
       |> Keyword.update(:const, nil, &mark_nil/1)
       |> Keyword.update(:pattern, nil, &pattern/1)
       |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
-
-  # |> Keyword.update(:ref, nil, &ref/1)
 
   @spec mark_nil(any) :: any | :__nil__
   defp mark_nil(nil), do: :__nil__

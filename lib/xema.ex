@@ -10,7 +10,7 @@ defmodule Xema do
   alias Xema.Schema
   alias Xema.SchemaValidator
 
-  @keywords MapSet.new(Schema.keywords())
+  @keywords Schema.keywords()
   @types Schema.types()
 
   @doc """
@@ -52,21 +52,22 @@ defmodule Xema do
 
   @impl true
   @doc false
-  @spec init(atom | keyword | {atom, keyword}) :: Schema.t()
-  def init(val) when is_atom(val) do
-    init({val, []})
-  end
+  @spec init(atom | keyword | {atom | [atom], keyword}) :: Schema.t()
+  def init(type) when is_atom(type), do: init({type, []})
 
   def init(val) when is_list(val) do
     case Keyword.keyword?(val) do
-      true -> init({:any, val})
-      false -> init({val, []})
+      true ->
+        # init without a given type
+        init({:any, val})
+
+      false ->
+        # init with multiple types
+        init({val, []})
     end
   end
 
-  def init({:ref, pointer}) do
-    init({:any, ref: pointer})
-  end
+  def init({:ref, pointer}), do: init({:any, ref: pointer})
 
   def init(data) do
     SchemaValidator.validate!(data)
@@ -121,28 +122,28 @@ defmodule Xema do
   # function: update/1
   #
   @spec update(keyword) :: keyword
-  defp update(keywords) do
-    keywords
-    |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
-    |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
-    |> Keyword.update(:all_of, nil, &schemas/1)
-    |> Keyword.update(:any_of, nil, &schemas/1)
-    |> Keyword.update(:contains, nil, &schema/1)
-    |> Keyword.update(:dependencies, nil, &dependencies/1)
-    |> Keyword.update(:else, nil, &schema/1)
-    |> Keyword.update(:if, nil, &schema/1)
-    |> Keyword.update(:items, nil, &items/1)
-    |> Keyword.update(:not, nil, &schema/1)
-    |> Keyword.update(:one_of, nil, &schemas/1)
-    |> Keyword.update(:pattern_properties, nil, &properties/1)
-    |> Keyword.update(:properties, nil, &properties/1)
-    |> Keyword.update(:property_names, nil, &schema/1)
-    |> Keyword.update(:definitions, nil, &properties/1)
-    |> Keyword.update(:required, nil, &MapSet.new/1)
-    |> Keyword.update(:then, nil, &schema/1)
-    |> update_allow()
-    |> update_data()
-  end
+  defp update(keywords),
+    do:
+      keywords
+      |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
+      |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
+      |> Keyword.update(:all_of, nil, &schemas/1)
+      |> Keyword.update(:any_of, nil, &schemas/1)
+      |> Keyword.update(:contains, nil, &schema/1)
+      |> Keyword.update(:dependencies, nil, &dependencies/1)
+      |> Keyword.update(:else, nil, &schema/1)
+      |> Keyword.update(:if, nil, &schema/1)
+      |> Keyword.update(:items, nil, &items/1)
+      |> Keyword.update(:not, nil, &schema/1)
+      |> Keyword.update(:one_of, nil, &schemas/1)
+      |> Keyword.update(:pattern_properties, nil, &properties/1)
+      |> Keyword.update(:properties, nil, &properties/1)
+      |> Keyword.update(:property_names, nil, &schema/1)
+      |> Keyword.update(:definitions, nil, &properties/1)
+      |> Keyword.update(:required, nil, &MapSet.new/1)
+      |> Keyword.update(:then, nil, &schema/1)
+      |> update_allow()
+      |> update_data()
 
   @spec schemas(list) :: list
   defp schemas(list), do: Enum.map(list, fn schema -> schema(schema) end)
@@ -221,15 +222,16 @@ defmodule Xema do
   defp update_data(keywords) do
     {data, keywords} = do_update_data(keywords)
 
-    case data do
-      data when map_size(data) == 0 ->
+    cond do
+      map_size(data) == 0 ->
         Keyword.put(keywords, :data, nil)
 
-      data ->
+      true ->
         Keyword.put(keywords, :data, data)
     end
   end
 
+  @spec do_update_data(keyword) :: {map, keyword}
   defp do_update_data(keywords),
     do:
       keywords
@@ -282,7 +284,7 @@ defmodule Xema do
       list
       |> Keyword.keys()
       |> MapSet.new()
-      |> MapSet.difference(@keywords)
+      |> MapSet.difference(MapSet.new(@keywords))
       |> MapSet.to_list()
 
   defp has_keyword?(list),
@@ -290,7 +292,7 @@ defmodule Xema do
       list
       |> Keyword.keys()
       |> MapSet.new()
-      |> MapSet.disjoint?(@keywords)
+      |> MapSet.disjoint?(MapSet.new(@keywords))
       |> Kernel.not()
 
   #
@@ -305,7 +307,7 @@ defmodule Xema do
       iex> {:integer, minimum: 1} |> Xema.new() |> Xema.source()
       {:integer, minimum: 1}
   """
-  @spec source(Xema.t()) :: atom | keyword | {atom, keyword}
+  @spec source(Xema.t() | Schema.t()) :: atom | keyword | {atom, keyword}
   def source(%Xema{} = xema), do: source(xema.content)
 
   def source(%Schema{} = schema) do
@@ -347,7 +349,7 @@ defmodule Xema do
 
   defp nested_source(%Ref{} = val), do: {:ref, val.pointer}
 
-  defp nested_source(%{__struct__: MapSet} = val), do: MapSet.to_list(val)
+  defp nested_source(%MapSet{} = val), do: Map.keys(val.map)
 
   defp nested_source(%{__struct__: _} = val), do: val
 

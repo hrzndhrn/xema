@@ -1,6 +1,7 @@
 defmodule Xema.Ref do
   @moduledoc """
-  This module contains a struct and function to represent and handle references.
+  This module contains a struct and functions to represent and handle
+  references.
   """
 
   alias Xema.Mapz
