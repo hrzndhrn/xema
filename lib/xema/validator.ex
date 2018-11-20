@@ -550,7 +550,7 @@ defmodule Xema.Validator do
   defp unique(%{unique_items: nil}, _list), do: :ok
 
   defp unique(%{unique_items: true}, list) when is_list(list) do
-    case is_unique?(list) do
+    case unique?(list) do
       true -> :ok
       false -> {:error, %{value: list, unique_items: true}}
     end
@@ -559,21 +559,21 @@ defmodule Xema.Validator do
   defp unique(%{unique_items: true}, tuple) when is_tuple(tuple) do
     tuple
     |> Tuple.to_list()
-    |> is_unique?()
+    |> unique?()
     |> case do
       true -> :ok
       false -> {:error, %{value: tuple, unique_items: true}}
     end
   end
 
-  @spec is_unique?(list, map) :: boolean
-  def is_unique?(list, set \\ %{})
-  def is_unique?([], _), do: true
+  @spec unique?(list, map) :: boolean
+  defp unique?(list, set \\ %{})
+  defp unique?([], _), do: true
 
-  def is_unique?([h | t], set) do
+  defp unique?([h | t], set) do
     case set do
       %{^h => true} -> false
-      _ -> is_unique?(t, Map.put(set, h, true))
+      _ -> unique?(t, Map.put(set, h, true))
     end
   end
 
