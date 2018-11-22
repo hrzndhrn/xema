@@ -1,6 +1,6 @@
 defmodule Xema.Behaviour do
   @moduledoc """
-  TODO
+  A behaviour module for implementing a schema validator.
   """
 
   alias Xema.NoResolver
@@ -71,13 +71,13 @@ defmodule Xema.Behaviour do
       def is_valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
-      Returns `:ok` if the value is a valid value against the given schema;
+      Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise returns an error tuple.
       """
       @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
       def validate(xema, value, opts \\ [])
 
-      def validate(%{__struct__: _, content: _} = xema, value, opts),
+      def validate(%__MODULE__{} = xema, value, opts),
         do: do_validate(xema, value, opts)
 
       @spec validate(Schema.t(), any, keyword) :: Validator.result()
@@ -85,15 +85,13 @@ defmodule Xema.Behaviour do
         do: do_validate(schema, value, opts)
 
       defp do_validate(schema, value, opts) do
-        case Validator.validate(schema, value, opts) do
-          :ok ->
-            :ok
-
-          {:error, error} ->
+        with {:error, error} <- Validator.validate(schema, value, opts) do
             {:error, on_error(error)}
         end
       end
 
+      # This function can be overwritten to transform the reason map of an
+      # error tuple.
       defp on_error(error), do: error
       defoverridable on_error: 1
     end
@@ -175,7 +173,7 @@ defmodule Xema.Behaviour do
   end
 
   @spec reduce(Schema.t(), any, function) :: any
-  def reduce(schema, acc, fun) do
+  defp reduce(schema, acc, fun) do
     reduce(schema, acc, "#", fun)
   end
 

@@ -14,7 +14,7 @@ defmodule Xema do
   @types Schema.types()
 
   @doc """
-  This function defines the schema.
+  This function creates the schema from the given `data`.
 
   ## Examples
 
@@ -300,7 +300,7 @@ defmodule Xema do
   #
 
   @doc """
-  Returns the source.
+  Returns the source for a given `xema`.
 
   ## Examples
 
