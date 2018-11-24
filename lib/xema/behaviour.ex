@@ -85,9 +85,8 @@ defmodule Xema.Behaviour do
         do: do_validate(schema, value, opts)
 
       defp do_validate(schema, value, opts) do
-        with {:error, error} <- Validator.validate(schema, value, opts) do
-            {:error, on_error(error)}
-        end
+        with {:error, error} <- Validator.validate(schema, value, opts),
+             do: {:error, on_error(error)}
       end
 
       # This function can be overwritten to transform the reason map of an
