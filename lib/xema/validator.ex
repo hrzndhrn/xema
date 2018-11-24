@@ -28,6 +28,9 @@ defmodule Xema.Validator do
     :tuple
   ]
 
+  @doc """
+  Validates `data` against the given `schema`.
+  """
   @spec validate(Xema.t(), any, keyword) :: result
   def validate(%Xema{content: schema} = xema, value, opts),
     do: do_validate(schema, value, Keyword.put_new(opts, :root, xema))
@@ -102,7 +105,7 @@ defmodule Xema.Validator do
 
   defp validate_by(:default, schema, value, opts) do
     with :ok <- enum(schema, value),
-         :ok <- _not(schema, value, opts),
+         :ok <- not_(schema, value, opts),
          :ok <- all_of(schema, value, opts),
          :ok <- any_of(schema, value, opts),
          :ok <- one_of(schema, value, opts),
@@ -331,10 +334,10 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec _not(Xema.Schema.t(), any, keyword) :: result
-  defp _not(%{not: nil}, _value, _opts), do: :ok
+  @spec not_(Xema.Schema.t(), any, keyword) :: result
+  defp not_(%{not: nil}, _value, _opts), do: :ok
 
-  defp _not(%{not: schema}, value, opts) do
+  defp not_(%{not: schema}, value, opts) do
     case do_validate(schema, value, opts) do
       :ok -> {:error, %{not: :ok, value: value}}
       _ -> :ok

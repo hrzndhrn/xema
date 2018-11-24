@@ -33,8 +33,8 @@ defmodule Xema.Behaviour do
 
       def new(%Schema{} = content) do
         content = Behaviour.map_refs(content)
-        ids = Behaviour.get_ids(content)
         refs = Behaviour.get_refs(content)
+        ids = Behaviour.get_ids(content)
 
         struct!(
           __MODULE__,
@@ -128,6 +128,18 @@ defmodule Xema.Behaviour do
     end
   end
 
+  @doc false
+  @spec get_ids(Schema.t()) :: map | nil
+  def get_ids(%Schema{} = schema) do
+    reduce(schema, %{}, fn
+      %Schema{id: id}, acc, path when not is_nil(id) ->
+        Map.put(acc, id, Ref.new(path))
+
+      _xema, acc, _path ->
+        acc
+    end)
+  end
+
   defp update_id(%{id: a} = map, b),
     do: Map.put(map, :id, Utils.update_uri(a, b))
 
@@ -158,18 +170,6 @@ defmodule Xema.Behaviour do
 
   defp resolve(uri),
     do: Application.get_env(:xema, :resolver, NoResolver).fetch(uri)
-
-  @doc false
-  @spec get_ids(Schema.t()) :: map | nil
-  def get_ids(%Schema{} = schema) do
-    reduce(schema, %{}, fn
-      %Schema{id: id}, acc, path when not is_nil(id) ->
-        Map.put(acc, id, Ref.new(path))
-
-      _xema, acc, _path ->
-        acc
-    end)
-  end
 
   @spec reduce(Schema.t(), any, function) :: any
   defp reduce(schema, acc, fun) do
@@ -204,7 +204,7 @@ defmodule Xema.Behaviour do
   # `id` could be `nil` or a `%URI{}` struct.
   @doc false
   @spec map(Schema.t(), function) :: Schema.t() | Ref.t()
-  def map(schema, fun), do: map(schema, fun, nil)
+  defp map(schema, fun), do: map(schema, fun, nil)
 
   defp map(%Schema{} = schema, fun, id) do
     id = Utils.update_uri(id, schema.id)

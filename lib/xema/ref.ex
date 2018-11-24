@@ -26,6 +26,9 @@ defmodule Xema.Ref do
   @spec new(String.t()) :: Ref.t()
   def new(pointer), do: %Ref{pointer: pointer}
 
+  @doc """
+  Creates a new reference from the given `pointer` and `uri`.
+  """
   @spec new(String.t(), URI.t() | nil) :: Ref.t()
   def new("#" <> _ = pointer, _uri), do: new(pointer)
 
