@@ -50,6 +50,9 @@ defmodule Xema do
   @spec new(Schema.t() | Schema.type() | tuple | atom | keyword) :: Xema.t()
   def new(data)
 
+  # The implementation of `init`.
+  #
+  # This function prepares the given keyword list for the function schema.
   @impl true
   @doc false
   @spec init(atom | keyword | {atom | [atom], keyword}) :: Schema.t()
@@ -74,53 +77,51 @@ defmodule Xema do
     schema(data)
   end
 
-  #
-  # function: schema
-  #
-  @spec schema(any, keyword) :: Schema.t()
-  defp schema(type, keywords \\ [])
+  # This function creates a schema from the given data.
+  defp schema(type, opts \\ [])
 
-  defp schema({bool, _}, _) when is_boolean(bool), do: Schema.new(type: bool)
+  # Extracts the schema form a `%Xema{}` struct.
+  # This function will be just called for nested schemas.
+  @spec schema(Xema.t(), keyword) :: Schema.t()
+  defp schema(%Xema{content: schema}, _), do: schema
 
-  defp schema(%{__struct__: _, content: schema}, _), do: schema
-
-  defp schema(list, keywords) when is_list(list) do
+  # Creates a schema from a list. Expected a list of types or a keyword list
+  # for an any schema.
+  # This function will be just called for nested schemas.
+  @spec schema([Schema.type()] | keyword, keyword) :: Schema.t()
+  defp schema(list, opts) when is_list(list) do
     case Keyword.keyword?(list) do
       true ->
-        schema({:any, list}, keywords)
+        schema({:any, list}, opts)
 
       false ->
-        schema({list, []}, keywords)
+        schema({list, []}, opts)
     end
   end
 
-  defp schema(value, keywords)
-       when not is_tuple(value),
-       do: schema({value, []}, keywords)
+  # Creates a schema from an atom.
+  # This function will be just called for nested schemas.
+  @spec schema(Schema.type(), keyword) :: Schema.t()
+  defp schema(value, opts)
+       when is_atom(value),
+       do: schema({value, []}, opts)
 
-  defp schema({list, keywords}, _) when is_list(list),
+  # Creates a bool schema. Keywords and opts will be ignored.
+  @spec schema({Schema.type() | [Schema.type()], keyword}, keyword) ::
+          Schema.t()
+  defp schema({bool, _}, _) when is_boolean(bool), do: Schema.new(type: bool)
+
+  # Creates a schema for a reference.
+  defp schema({:ref, keywords}, _), do: schema({:any, [{:ref, keywords}]})
+
+  defp schema({type, keywords}, _),
     do:
       keywords
-      |> Keyword.put(:type, list)
+      |> Keyword.put(:type, type)
       |> update()
       |> Schema.new()
 
-  defp schema({value, keywords}, _) do
-    case value in Schema.types() do
-      true ->
-        keywords
-        |> Keyword.put(:type, value)
-        |> update()
-        |> Schema.new()
-
-      false ->
-        schema({:any, [{value, keywords}]})
-    end
-  end
-
-  #
-  # function: update/1
-  #
+  # This function creates the schema tree.
   @spec update(keyword) :: keyword
   defp update(keywords),
     do:
@@ -136,20 +137,21 @@ defmodule Xema do
       |> Keyword.update(:items, nil, &items/1)
       |> Keyword.update(:not, nil, &schema/1)
       |> Keyword.update(:one_of, nil, &schemas/1)
-      |> Keyword.update(:pattern_properties, nil, &properties/1)
-      |> Keyword.update(:properties, nil, &properties/1)
+      |> Keyword.update(:pattern_properties, nil, &schemas/1)
+      |> Keyword.update(:properties, nil, &schemas/1)
       |> Keyword.update(:property_names, nil, &schema/1)
-      |> Keyword.update(:definitions, nil, &properties/1)
+      |> Keyword.update(:definitions, nil, &schemas/1)
       |> Keyword.update(:required, nil, &MapSet.new/1)
       |> Keyword.update(:then, nil, &schema/1)
       |> update_allow()
       |> update_data()
 
   @spec schemas(list) :: list
-  defp schemas(list), do: Enum.map(list, fn schema -> schema(schema) end)
+  defp schemas(list) when is_list(list),
+    do: Enum.map(list, fn schema -> schema(schema) end)
 
-  @spec properties(map) :: map
-  defp properties(map),
+  @spec schemas(map) :: map
+  defp schemas(map) when is_map(map),
     do: Mapz.map_values(map, &schema/1)
 
   @spec dependencies(map) :: map
@@ -294,10 +296,6 @@ defmodule Xema do
       |> MapSet.new()
       |> MapSet.disjoint?(MapSet.new(@keywords))
       |> Kernel.not()
-
-  #
-  #  source/1
-  #
 
   @doc """
   Returns the source for a given `xema`.
