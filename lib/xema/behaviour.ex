@@ -97,7 +97,7 @@ defmodule Xema.Behaviour do
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise raises a `Xema.ValidationError`.
       """
-      @spec validate!(Schema.t(), any) :: :ok
+      @spec validate!(Xema.t() | Schema.t(), any) :: :ok
       def validate!(xema, value) do
         with {:error, reason} <- validate(xema, value),
              do: raise(ValidationError, reason)
