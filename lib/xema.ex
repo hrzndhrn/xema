@@ -83,7 +83,7 @@ defmodule Xema do
   # Extracts the schema form a `%Xema{}` struct.
   # This function will be just called for nested schemas.
   @spec schema(Xema.t(), keyword) :: Schema.t()
-  defp schema(%Xema{content: schema}, _), do: schema
+  defp schema(%Xema{schema: schema}, _), do: schema
 
   # Creates a schema from a list. Expected a list of types or a keyword list
   # for an any schema.
@@ -306,7 +306,7 @@ defmodule Xema do
       {:integer, minimum: 1}
   """
   @spec source(Xema.t() | Schema.t()) :: atom | keyword | {atom, keyword}
-  def source(%Xema{} = xema), do: source(xema.content)
+  def source(%Xema{} = xema), do: source(xema.schema)
 
   def source(%Schema{} = schema) do
     type = schema.type

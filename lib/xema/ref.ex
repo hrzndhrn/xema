@@ -78,13 +78,13 @@ defmodule Xema.Ref do
 
   defp fetch_by_fragment(xema, %URI{fragment: nil}), do: {:ok, xema}
 
-  defp fetch_by_fragment(%Xema{content: schema}, %URI{fragment: fragment}),
+  defp fetch_by_fragment(%Xema{schema: schema}, %URI{fragment: fragment}),
     do: fetch_by_path(schema, to_path(fragment))
 
-  defp fetch_by_pointer(%Xema{content: schema}, "#"),
+  defp fetch_by_pointer(%Xema{schema: schema}, "#"),
     do: fetch_by_path(schema, [])
 
-  defp fetch_by_pointer(%Xema{content: schema}, "#/" <> _ = pointer),
+  defp fetch_by_pointer(%Xema{schema: schema}, "#/" <> _ = pointer),
     do: fetch_by_path(schema, to_path(pointer))
 
   defp fetch_by_pointer(%Xema{refs: refs}, pointer) do

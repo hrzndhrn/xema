@@ -244,7 +244,7 @@ defmodule Xema.ListTest do
     test "no element of minimum 4", %{schema: schema} do
       assert validate(schema, [1, 2, 3]) ==
                {:error,
-                %{value: [1, 2, 3], contains: Xema.new(minimum: 4).content}}
+                %{value: [1, 2, 3], contains: Xema.new(minimum: 4).schema}}
     end
   end
 
@@ -268,7 +268,7 @@ defmodule Xema.ListTest do
     test "no element of minimum 4", %{schema: schema} do
       assert validate(schema, [1, 2, 3]) ==
                {:error,
-                %{value: [1, 2, 3], contains: Xema.new(minimum: 4).content}}
+                %{value: [1, 2, 3], contains: Xema.new(minimum: 4).schema}}
     end
   end
 end

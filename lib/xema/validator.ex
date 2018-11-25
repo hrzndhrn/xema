@@ -32,14 +32,14 @@ defmodule Xema.Validator do
   Validates `data` against the given `schema`.
   """
   @spec validate(Xema.t(), any, keyword) :: result
-  def validate(%Xema{content: schema} = xema, value, opts),
+  def validate(%Xema{schema: schema} = xema, value, opts),
     do: do_validate(schema, value, Keyword.put_new(opts, :root, xema))
 
   def validate(%Schema{} = schema, value, opts),
     do: do_validate(schema, value, opts)
 
   @spec do_validate(Xema.t() | Xema.Schema.t(), any, keyword) :: result
-  defp do_validate(%Xema{content: schema}, value, opts),
+  defp do_validate(%Xema{schema: schema}, value, opts),
     do: do_validate(schema, value, opts)
 
   defp do_validate(%Schema{type: true}, _, _), do: :ok

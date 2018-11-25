@@ -26,14 +26,14 @@ defmodule Xema.AnnotationsTest do
         content_encoding: content_encoding
       })
 
-    assert xema.content.id == id
-    assert xema.content.schema == schema
-    assert xema.content.title == title
-    assert xema.content.description == description
-    assert xema.content.examples == examples
-    assert xema.content.default == default
-    assert xema.content.comment == comment
-    assert xema.content.content_media_type == content_media_type
-    assert xema.content.content_encoding == content_encoding
+    assert xema.schema.id == id
+    assert xema.schema.schema == schema
+    assert xema.schema.title == title
+    assert xema.schema.description == description
+    assert xema.schema.examples == examples
+    assert xema.schema.default == default
+    assert xema.schema.comment == comment
+    assert xema.schema.content_media_type == content_media_type
+    assert xema.schema.content_encoding == content_encoding
   end
 end

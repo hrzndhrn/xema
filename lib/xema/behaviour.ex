@@ -21,24 +21,24 @@ defmodule Xema.Behaviour do
       @behaviour Xema.Behaviour
       alias Xema.Behaviour
 
-      @enforce_keys [:content]
+      @enforce_keys [:schema]
 
       @type t :: %__MODULE__{
-              content: Schema.t(),
+              schema: Schema.t(),
               refs: map
             }
 
-      defstruct content: %Schema{},
+      defstruct schema: %Schema{},
                 refs: %{}
 
-      def new(%Schema{} = content) do
-        content = Behaviour.map_refs(content)
-        refs = Behaviour.get_refs(content)
-        ids = Behaviour.get_ids(content)
+      def new(%Schema{} = schema) do
+        schema = Behaviour.map_refs(schema)
+        refs = Behaviour.get_refs(schema)
+        ids = Behaviour.get_ids(schema)
 
         struct!(
           __MODULE__,
-          content: content,
+          schema: schema,
           refs: Map.merge(ids, refs)
         )
       end

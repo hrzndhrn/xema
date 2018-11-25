@@ -634,7 +634,7 @@ defmodule Xema.MapTest do
                {:error,
                 %{
                   value: [:a, :b],
-                  property_names: Xema.new(min_length: 3).content
+                  property_names: Xema.new(min_length: 3).schema
                 }}
     end
 
@@ -649,7 +649,7 @@ defmodule Xema.MapTest do
                {:error,
                 %{
                   value: ["a", "b"],
-                  property_names: Xema.new(min_length: 3).content
+                  property_names: Xema.new(min_length: 3).schema
                 }}
     end
   end

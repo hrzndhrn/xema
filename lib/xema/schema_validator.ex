@@ -6,7 +6,7 @@ defmodule Xema.SchemaValidator do
   alias Xema.SchemaError
 
   @schema %Xema{
-    content: %Schema{
+    schema: %Schema{
       definitions: %{
         keywords: %Schema{
           properties: %{
