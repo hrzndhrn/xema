@@ -439,7 +439,6 @@ defmodule Xema.KeywordTest do
       assert validate(schema, a: 1) == :ok
     end
 
-    @tag :only
     test "validate/2 with dependency", %{schema: schema} do
       assert validate(schema, a: 1, b: 2, c: 3) == :ok
     end

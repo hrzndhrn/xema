@@ -16,7 +16,6 @@ defmodule Xema.ErrorHandlingTest do
     end
   end
 
-  @tag :only
   test "test" do
     Xema.new({
       :map,

@@ -229,7 +229,6 @@ defmodule Xema.SchemaValidationTest do
   end
 
   describe "ref" do
-    @tag :only
     test "in properties", %{schema: schema} do
       xema =
         {:map,

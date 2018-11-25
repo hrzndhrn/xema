@@ -24,7 +24,6 @@ defmodule Xema.RefRemoteTest do
       end
     end
 
-    @tag :only
     test "syntax error" do
       expected =
         "http://localhost:1234/syntax-error.exon:2: " <>
