@@ -41,8 +41,7 @@ defmodule Xema.SchemaTest do
       assert inspect(xema) ==
                "%Xema{refs: %{}, schema: " <>
                  "%Xema.Schema{items: " <>
-                 "[%Xema.Schema{type: :integer}], " <>
-                 "type: :list}}"
+                 "[%Xema.Schema{type: :integer}], " <> "type: :list}}"
     end
 
     test "any schema" do
@@ -50,8 +49,7 @@ defmodule Xema.SchemaTest do
 
       assert inspect(xema) ==
                "%Xema{refs: %{}, schema: " <>
-                 "%Xema.Schema{items: " <>
-                 "[%Xema.Schema{type: :integer}]}}"
+                 "%Xema.Schema{items: " <> "[%Xema.Schema{type: :integer}]}}"
     end
 
     test "schema with ref" do
@@ -61,8 +59,7 @@ defmodule Xema.SchemaTest do
                "%Xema{refs: %{}, schema: " <>
                  "%Xema.Schema{properties: " <>
                  "%{num: %Xema.Schema{ref: " <>
-                 "%Xema.Ref{pointer: \"#/num\"}}}, " <>
-                 "type: :map}}"
+                 "%Xema.Ref{pointer: \"#/num\"}}}, " <> "type: :map}}"
     end
   end
 

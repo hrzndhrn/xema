@@ -216,6 +216,7 @@ defmodule Xema.TupleTest do
       }
     end
 
+    @tag :only
     test "validate/2 with valid additional item", %{schema: schema} do
       assert validate(schema, {11, "twelve", "thirteen"}) == :ok
     end
@@ -237,10 +238,12 @@ defmodule Xema.TupleTest do
       }
     end
 
+    @tag :only
     test "an element has a value of minium 4", %{schema: schema} do
       assert validate(schema, {2, 3, 4}) == :ok
     end
 
+    @tag :only
     test "no element of minimum 4", %{schema: schema} do
       assert validate(schema, {1, 2, 3}) ==
                {:error,

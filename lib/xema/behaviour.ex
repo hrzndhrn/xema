@@ -6,9 +6,11 @@ defmodule Xema.Behaviour do
   alias Xema.NoResolver
   alias Xema.Ref
   alias Xema.Schema
-  alias Xema.SchemaError
   alias Xema.Utils
   alias Xema.Validator
+
+  alias Xema.SchemaError
+  alias Xema.ValidationError
 
   @doc """
   This callback initialize the schema. The function gets the data given to
@@ -59,7 +61,7 @@ defmodule Xema.Behaviour do
           iex> Xema.valid?(schema, 0)
           false
       """
-      @spec valid?(__MODULE__.t(), any) :: boolean
+      @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
@@ -67,18 +69,20 @@ defmodule Xema.Behaviour do
       otherwise returns `false`.
       """
       @deprecated "Use valid? instead"
-      @spec is_valid?(__MODULE__.t(), any) :: boolean
+      @spec is_valid?(__MODULE__.t() | Schema.t(), any) :: boolean
       def is_valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise returns an error tuple.
       """
-      @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
-      def validate(xema, value, opts \\ [])
+      @spec validate(__MODULE__.t() | Schema.t(), any) :: Validator.result()
+      def validate(schema, value), do: validate(schema, value, [])
 
-      def validate(%__MODULE__{} = xema, value, opts),
-        do: do_validate(xema, value, opts)
+      @doc false
+      @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
+      def validate(%__MODULE__{} = schema, value, opts),
+        do: do_validate(schema, value, opts)
 
       @spec validate(Schema.t(), any, keyword) :: Validator.result()
       def validate(%Schema{} = schema, value, opts),
@@ -87,6 +91,16 @@ defmodule Xema.Behaviour do
       defp do_validate(schema, value, opts) do
         with {:error, error} <- Validator.validate(schema, value, opts),
              do: {:error, on_error(error)}
+      end
+
+      @doc """
+      Returns `:ok` if the `value` is a valid value against the given `schema`;
+      otherwise raises a `Xema.ValidationError`.
+      """
+      @spec validate!(Schema.t(), any) :: :ok
+      def validate!(xema, value) do
+        with {:error, reason} <- validate(xema, value),
+             do: raise(ValidationError, reason)
       end
 
       # This function can be overwritten to transform the reason map of an
