@@ -11,6 +11,11 @@ defmodule Xema.Validator do
   alias Xema.Ref
   alias Xema.Schema
 
+  @type xema :: %{
+          schema: Schema.t(),
+          refs: map
+        }
+
   @type result :: :ok | {:error, map}
 
   @types [
@@ -31,22 +36,19 @@ defmodule Xema.Validator do
   @doc """
   Validates `data` against the given `schema`.
   """
-  @spec validate(Xema.t(), any, keyword) :: result
-  def validate(%Xema{schema: schema} = xema, value, opts),
-    do: do_validate(schema, value, Keyword.put_new(opts, :root, xema))
-
+  @spec validate(xema | Schema.t(), any, keyword) :: result
   def validate(%Schema{} = schema, value, opts),
     do: do_validate(schema, value, opts)
 
-  @spec do_validate(Xema.t() | Xema.Schema.t(), any, keyword) :: result
-  defp do_validate(%Xema{schema: schema}, value, opts),
-    do: do_validate(schema, value, opts)
+  def validate(%{schema: schema} = xema, value, opts),
+    do: do_validate(schema, value, Keyword.put_new(opts, :root, xema))
 
+  @spec do_validate(xema | Xema.Schema.t(), any, keyword) :: result
   defp do_validate(%Schema{type: true}, _, _), do: :ok
 
   defp do_validate(%Schema{type: false}, _, _), do: {:error, %{type: false}}
 
-  defp do_validate(schema, value, opts) do
+  defp do_validate(%Schema{} = schema, value, opts) do
     case schema do
       %{type: list} when is_list(list) ->
         with {:ok, type} <- types(schema, value),
@@ -102,6 +104,9 @@ defmodule Xema.Validator do
         validate_by(type, schema, value, opts)
     end
   end
+
+  defp do_validate(%{schema: schema}, value, opts),
+    do: do_validate(schema, value, opts)
 
   defp validate_by(:default, schema, value, opts) do
     with :ok <- enum(schema, value),
