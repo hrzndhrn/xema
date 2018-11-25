@@ -49,17 +49,27 @@ defmodule Xema.Format do
   end
 
   @doc """
-  This function returns `true` for a valid format type, `false` otherwise.
-  This function can be used in guards.
+  Returns `true` for a valid format type, `false` otherwise.  This macro can be
+  used in guards.
   """
   defguard supports(format) when format in @formats
 
   @doc """
-  Checks if the value matches the given type.
+  Checks if the value matches the given type. The function expected a available
+  `format` and a `string` to check. Returns `true` for a valid `string`, `false`
+  otherwise.
+
+  ## Examples
+
+      iex> Format.is?(:email, "foo@bar.net")
+      iex> true
+      iex> Format.is?(:email, "foo.bar.net")
+      iex> false
+
   """
-  @spec is?(format, any) :: boolean
+  @spec is?(format, String.t()) :: boolean
   for fmt <- @formats do
-    def is?(unquote(fmt), string) do
+    def is?(unquote(fmt), string) when is_binary(string) do
       unquote(:"#{Atom.to_string(fmt)}?")(string)
     end
   end
@@ -69,20 +79,19 @@ defmodule Xema.Format do
   #
 
   @doc """
-  Checks if the value is a valid date time.
+  Checks if the `string` is a valid date time representation.
 
-  This function returns `true` if the value is a string and is formatted as
+  This function returns `true` if the value is a `string` and is formatted as
   defined by [RFC 3339](https://tools.ietf.org/html/rfc3339), `false` otherwise.
   """
-  @spec date_time?(any) :: boolean
-  def date_time?(string) when is_binary(string) do
-    regex = ~r/^
+  @date_time ~r/^
       (\d{4})-([01]\d)-([0-3]\d)T
       ([0-2]\d):([0-5]\d):([0-6]\d)(?:\.(\d+))?
       (?:Z|[-+](?:[01]\d|2[0-3]):(?:[0-5]\d|60))
     $/xi
-
-    case Regex.run(regex, string) do
+  @spec date_time?(String.t()) :: boolean
+  def date_time?(string) when is_binary(string) do
+    case Regex.run(@date_time, string) do
       nil ->
         false
 
@@ -92,8 +101,6 @@ defmodule Xema.Format do
         |> date_time_valid?()
     end
   end
-
-  def date_time?(_), do: false
 
   @spec date_time_valid?([integer]) :: boolean
   defp date_time_valid?([year, month, day, hour, min, sec]),
@@ -111,12 +118,12 @@ defmodule Xema.Format do
   #
 
   @doc """
-  Checks if the value is a valid time.
+  Checks if the `string` is a valid time representation.
 
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 3339](https://tools.ietf.org/html/rfc3339), `false` otherwise.
   """
-  @spec time?(any) :: boolean
+  @spec time?(String.t()) :: boolean
   def time?(string) when is_binary(string),
     do: date_time?("2000-01-01T#{string}")
 
@@ -125,12 +132,12 @@ defmodule Xema.Format do
   #
 
   @doc """
-  Checks if the value is a valid date.
+  Checks if the `string` is a valid date representation.
 
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 3339](https://tools.ietf.org/html/rfc3339), `false` otherwise.
   """
-  @spec time?(any) :: boolean
+  @spec date?(String.t()) :: boolean
   def date?(string) when is_binary(string),
     do: date_time?("#{string}T00:00:00.0Z")
 
@@ -139,18 +146,17 @@ defmodule Xema.Format do
   #
 
   @doc """
-  Checks if the value is a valid email.
+  Checks if the `string` is a valid email representation.
 
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 5322](https://tools.ietf.org/html/rfc5322), `false` otherwise.
+
+  The BNF rules from RFC 5322 transformed to PCRE by Nikita Popov and described
+  in the post [The true power of regular expressions
+  ](http://nikic.github.io/2012/06/15/The-true-power-of-regular-expressions.html).
   """
-  @spec email?(any) :: boolean
-  def email?(string) when is_binary(string) do
-    # The BNF rules from RFC 5322 transformed to PCRE by Nikita Popov and
-    # described in the post
-    # http://nikic.github.io/2012/06/15/The-true-power-of-regular-expressions.html.
-    # credo:disable-for-previous-line
-    regex = ~r/
+  # credo:disable-for-previous-line
+  @email ~r/
       (?(DEFINE)
         (?<addr_spec> (?&local_part) @ (?&domain) )
         (?<local_part> (?&dot_atom) | (?&quoted_string) | (?&obs_local_part) )
@@ -189,73 +195,58 @@ defmodule Xema.Format do
       )
       ^(?&addr_spec)$
     /x
-
-    Regex.match?(regex, string)
-  end
+  @spec email?(String.t()) :: boolean
+  def email?(string) when is_binary(string), do: Regex.match?(@email, string)
 
   @doc """
-  Checks if the value is a valid host.
+  Checks if the `string` is a valid host representation.
 
   This function returns `true` if the value is a valid IPv4 address, IPv6
   address, or a valid hostname, `false` otherwise.
   """
-  @spec host?(any) :: boolean
-  def host?(string) when is_binary(string) do
-    ipv4?(string) || ipv6?(string) || hostname?(string)
-  end
-
-  def host?(_), do: false
+  @spec host?(String.t()) :: boolean
+  def host?(string) when is_binary(string),
+    do: ipv4?(string) || ipv6?(string) || hostname?(string)
 
   @doc """
-  Checks if the value is a valid hostname.
+  Checks if the `string` is a valid hostname representation.
 
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 1034](https://tools.ietf.org/html/rfc1034), `false` otherwise.
   """
-  @spec hostname?(any) :: boolean
-  def hostname?(string) when is_binary(string) do
-    regex = ~r/
+  @hostname ~r/
       (?(DEFINE)
         (?<sub_domain> (?:[a-z][-a-z\d]{0,62}) )
       )
       ^(?&sub_domain)(?:\.(?&sub_domain))*$
     /xi
-
-    Regex.match?(regex, string)
-  end
-
-  def hostname?(_), do: false
+  @spec hostname?(String.t()) :: boolean
+  def hostname?(string) when is_binary(string),
+    do: Regex.match?(@hostname, string)
 
   @doc """
-  Checks if the value is a valid IPv4 address.
+  Checks if the `string` is a valid IPv4 address representation.
 
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 2673](https://tools.ietf.org/html/rfc2673), `false` otherwise.
   """
-  @spec ipv4?(any) :: boolean
-  def ipv4?(string) when is_binary(string) do
-    regex = ~r/
+  @ipv4 ~r/
       (?(DEFINE)
         (?<dec_octet> (?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2}) )
         (?<ipv4> (?:(?&dec_octet)(?:\.(?&dec_octet)){3}) )
       )
       ^(?&ipv4)$
     /x
-
-    Regex.match?(regex, string)
-  end
-
-  def ipv4?(_), do: true
+  @spec ipv4?(String.t()) :: boolean
+  def ipv4?(string) when is_binary(string), do: Regex.match?(@ipv4, string)
 
   @doc """
-  Checks if the value is a valid IPv6 address.
+  Checks if the `string` is a valid IPv6 address representation.
 
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 2373](https://tools.ietf.org/html/rfc2373), `false` otherwise.
   """
-  @spec ipv6?(any) :: boolean
-  def ipv6?(string) when is_binary(string) do
-    regex = ~r/
+  @ipv6 ~r/
       (?(DEFINE)
         (?<h16>(?:[[:xdigit:]]{1,4}) )
         (?<dec_octet> (?:25[0-5]|2[0-4]\d|[0-1]?\d{1,2}) )
@@ -274,16 +265,12 @@ defmodule Xema.Format do
         |(?:(?:(?:(?&h16):){0,6}(?&h16))?::                        )
       )$
     /x
+  @spec ipv6?(String.t()) :: boolean
+  def ipv6?(string) when is_binary(string), do: Regex.match?(@ipv6, string)
 
-    Regex.match?(regex, string)
-  end
-
-  def ipv6?(_), do: true
-
-  #
-  # JSON Pointer
-  #
-
+  @doc """
+  Checks if the `string` is a valid JSON pointer representation.
+  """
   @json_pointer ~r/
       (?(DEFINE)
         (?<json_pointer> (?: \/ (?&reference_token))*      )
@@ -293,24 +280,14 @@ defmodule Xema.Format do
       )
       ^(?&json_pointer)$
     /x
-
-  @doc """
-  Checks if the value is a valid JSON poiner.
-  """
-  @spec json_pointer?(any) :: boolean
+  @spec json_pointer?(String.t()) :: boolean
   def json_pointer?(string) when is_binary(string),
     do: Regex.match?(@json_pointer, string)
 
-  def json_pointer?(_), do: false
-
-  #
-  # Relative JSON Pointer
-  #
-
   @doc """
-  Checks if the value is a valid JSON poiner.
+  Checks if the `string` is a valid JSON pointer representation.
   """
-  @spec relative_json_pointer?(any) :: boolean
+  @spec relative_json_pointer?(String.t()) :: boolean
   def relative_json_pointer?(string) when is_binary(string) do
     with false <- Regex.match?(~r/^\d#$/, string),
          false <- Regex.match?(~r/^\d$/, string),
@@ -319,9 +296,7 @@ defmodule Xema.Format do
     end
   end
 
-  def relative_json_pointer?(_), do: false
-
-  def do_relative_json_pointer?(string) do
+  defp do_relative_json_pointer?(string) do
     case String.split(string, "/", parts: 2) do
       [pre, pointer] ->
         Regex.match?(~r/^\d+$/, pre) && json_pointer?("/#{pointer}")
@@ -336,7 +311,7 @@ defmodule Xema.Format do
   #
 
   @doc """
-  Checks if the value is a valid uri.
+  Checks if the `string` is a valid URI representation.
 
   This function returns `true` if the value is a string and is formatted as
   defined by [RFC 3986](https://tools.ietf.org/html/rfc3986), `false` otherwise.
@@ -361,17 +336,17 @@ defmodule Xema.Format do
   ```
   Wikipedia: [Uniform Resource Identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
   """
-  @spec uri?(any) :: boolean
+  @spec uri?(String.t()) :: boolean
   def uri?(string), do: do_uri?(string, :uri)
 
   @doc """
-  Checks if the value is a valid uri reference.
+  Checks if the `string` is a valid URI reference representation.
   """
-  @spec uri_reference?(any) :: boolean
+  @spec uri_reference?(String.t()) :: boolean
   def uri_reference?(string), do: do_uri?(string, :uri_reference)
 
   @doc """
-  Checks if the value is a valid uri template.
+  Checks if the `string` is a valid URI template representation.
   """
   def uri_template?(string), do: do_uri?(string, :uri_template)
 
@@ -406,33 +381,27 @@ defmodule Xema.Format do
   defp do_uri?(_, _), do: false
 
   @doc """
-  Checks if the value is a valid uri user info.
+  Checks if the `string` is a valid URI user info.
 
   See also `Xema.Format.uri?/1`.
   """
-  @spec uri_userinfo?(any) :: boolean
-  def uri_userinfo?(string) when is_binary(string) do
-    regex = ~r/
+  @uri_userinfo ~r/
       (?(DEFINE)
         (?<pct_encoded> %[[:xdigit:]][[:xdigit:]] )
         (?<chars>  [-._~[:alnum:]!$&'()*+,;=:] )
       )
       ^(?:(?&chars)|(?&pct_encoded))*$
     /x
-
-    Regex.match?(regex, string)
-  end
-
-  def uri_userinfo?(_), do: false
+  @spec uri_userinfo?(String.t()) :: boolean
+  def uri_userinfo?(string) when is_binary(string),
+    do: Regex.match?(@uri_userinfo, string)
 
   @doc """
-  Checks if the value is a valid uri path.
+  Checks if the `string` is a valid URI path representation.
 
   See also `Xema.Format.uri?/1`.
   """
-  @spec uri_path?(any) :: boolean
-  def uri_path?(string) when is_binary(string) do
-    regex = ~r/
+  @uri_path ~r/
       (?(DEFINE)
         (?<unreserved>  [-._~[:alnum:]] )
         (?<sub_delims>  [!$&'()*+,;=] )
@@ -448,18 +417,14 @@ defmodule Xema.Format do
       )
       ^(?:(?&rootless)|(?&noscheme)|(?&absolute)|(?&abempty))$
     /x
-
-    Regex.match?(regex, string)
-  end
-
-  def uri_path?(_), do: false
+  @spec uri_path?(String.t()) :: boolean
+  def uri_path?(string) when is_binary(string),
+    do: Regex.match?(@uri_path, string)
 
   @doc """
-  Checks if the value is a valid uri path.
+  Checks if the `string` is a valid URI template path representation.
   """
-  @spec uri_template_path?(any) :: boolean
-  def uri_template_path?(string) when is_binary(string) do
-    regex = ~r/
+  @uri_template_path ~r/
       (?(DEFINE)
         (?<unreserved>  [-._~[:alnum:]] )
         (?<sub_delims>  [!$&'()*+,;=] )
@@ -483,20 +448,14 @@ defmodule Xema.Format do
       )
       ^(?:(?&rootless)|(?&noscheme)|(?&absolute)|(?&abempty))$
     /x
-
-    Regex.match?(regex, string)
-  end
-
-  def uri_template_path?(_), do: false
+  @spec uri_template_path?(String.t()) :: boolean
+  def uri_template_path?(string) when is_binary(string),
+    do: Regex.match?(@uri_template_path, string)
 
   @doc """
-  Checks if the value is a valid uri qurey.
-
-  See also `Xema.Format.uri?/1`.
+  Checks if the `string` is a valid URI query representation.
   """
-  @spec uri_query?(any) :: boolean
-  def uri_query?(string) when is_binary(string) do
-    regex = ~r/
+  @uri_query ~r/
       (?(DEFINE)
         (?<pct_encoded> %[[:xdigit:]][[:xdigit:]] )
         (?<chars>  [-._~[:alnum:]!$&'()*+,;=:@] )
@@ -504,19 +463,13 @@ defmodule Xema.Format do
       )
       ^(?:(?&pchar)|[\/?])*$
     /x
-
-    Regex.match?(regex, string)
-  end
-
-  def uri_query?(_), do: false
+  @spec uri_query?(String.t()) :: boolean
+  def uri_query?(string) when is_binary(string),
+    do: Regex.match?(@uri_query, string)
 
   @doc """
-  Checks if the value is a valid uri fragment.
-
-  See also `Xema.Format.uri?/1`.
+  Checks if the `string` is a valid URI fragment representation.
   """
-  @spec uri_fragment?(any) :: boolean
+  @spec uri_fragment?(String.t()) :: boolean
   def uri_fragment?(string) when is_binary(string), do: uri_query?(string)
-
-  def uri_fragment?(_), do: false
 end

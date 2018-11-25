@@ -1,1 +1,1 @@
-import Xema, only: [validate: 2, is_valid?: 2]
+import Xema, only: [validate: 2, valid?: 2]

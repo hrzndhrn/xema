@@ -18,7 +18,7 @@ First, add Xema to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
-  [{:xema, "~> 0.4"}]
+  [{:xema, "~> 0.5"}]
 end
 ```
 
@@ -27,6 +27,15 @@ Then, update your dependencies:
 ```Shell
 $ mix deps.get
 ```
+
+## Changelog
+
+Version 0.5.0 coming soon.
+
+Since version 0.5.0 a [changelog](CHANGELOG.md) is available.
+
+To update to version 0.5.0 some migrations steps are required, see
+[changelog](CHANGELOG.md).
 
 ## Docs
 

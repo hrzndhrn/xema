@@ -22,3 +22,4 @@
   # >= 0.5.0
   Xema.new({:integer, minimum: 0})
   ```
++ Add Xema.validate!/2

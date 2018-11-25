@@ -6,9 +6,8 @@ defmodule Xema.Schema do
 
   ## Examples
 
-      iex> schema = Xema.new :any
-      %Xema{content: %Xema.Schema{type: :any}}
-      iex> schema.content == %Xema.Schema{type: :any}
+      iex> xema = Xema.new :any
+      iex> xema.schema == %Xema.Schema{type: :any}
       true
   """
 
@@ -84,7 +83,7 @@ defmodule Xema.Schema do
           const: any,
           content_encoding: String.t() | nil,
           content_media_type: String.t() | nil,
-          contains: Xema.t() | Schema.t(),
+          contains: Xema.t() | Schema.t() | nil,
           data: map,
           default: any,
           definitions: map,
@@ -175,6 +174,9 @@ defmodule Xema.Schema do
     type: :any
   ]
 
+  @typedoc """
+  The `type` for the schema.
+  """
   @type type ::
           :any
           | :atom
@@ -210,9 +212,21 @@ defmodule Xema.Schema do
     :tuple
   ]
 
+  @doc """
+  Returns a `%Schema{}` for the given `keywords` in the keyword list.
+  """
   @spec new(keyword) :: Schema.t()
-  def new(opts), do: struct!(Schema, opts |> validate_type!() |> update())
+  def new(keywords),
+    do:
+      struct!(
+        Schema,
+        keywords |> validate_type!() |> update()
+      )
 
+  @doc """
+  Returns the `%Schema{}` as a map. Items which a `nil` value are not in the
+  map.
+  """
   @spec to_map(Schema.t()) :: map
   def to_map(schema),
     do:
@@ -220,20 +234,33 @@ defmodule Xema.Schema do
       |> Map.from_struct()
       |> delete_nils()
 
+  @doc """
+  Returns all available `type`s in a list.
+  """
   @spec types :: [type]
   def types, do: @types
 
+  @doc """
+  Returns all keywords in a list.
+
+  The key `:data` is not a regular keyword and is not in the list.
+  """
   @spec keywords :: [atom]
   def keywords,
-    do: %Schema{} |> Map.keys() |> List.delete(:data)
+    do:
+      %Schema{}
+      |> Map.keys()
+      |> List.delete(:data)
 
+  # Validates the type/types in the given keywords.
+  # The key `:type` can contain a type or a list of types.
   @spec validate_type!(keyword) :: keyword
   defp validate_type!(opts) when is_list(opts) do
-    with {:ok, type} <- fetch_type(opts),
+    with {:ok, type} <- Keyword.fetch(opts, :type),
          :ok <- validate_type(type) do
       opts
     else
-      {:error, :not_exist} ->
+      :error ->
         raise SchemaError, :missing_type
 
       {:error, types} when is_list(types) ->
@@ -244,19 +271,8 @@ defmodule Xema.Schema do
     end
   end
 
-  # This function exist just to make the dialyzer happy.
-  # See: https://github.com/elixir-lang/elixir/issues/7177
-  @spec fetch_type(keyword) :: {:ok, any} | {:error, :not_exist}
-  defp fetch_type(opts) do
-    case Keyword.fetch(opts, :type) do
-      :error -> {:error, :not_exist}
-      result -> result
-    end
-  end
-
-  @spec validate_type(atom) :: :ok | {:error, atom}
-  defp validate_type(type) when type in @types, do: :ok
-
+  # Validates a list of types. Returns a list of invalid types in an error tuple
+  # or :ok.
   @spec validate_type([atom]) :: :ok | {:error, [atom]}
   defp validate_type(types) when is_list(types) do
     types
@@ -271,17 +287,25 @@ defmodule Xema.Schema do
     end
   end
 
+  # Validates a type.
+  @spec validate_type(atom) :: :ok | {:error, atom}
+  defp validate_type(type) when type in @types, do: :ok
+
   defp validate_type(type), do: {:error, type}
 
+  # This function updates some values in the `keywords`.
+  #
+  # * const: a `nil` will be updated to `:__nil__` to distinguish an unset value
+  #          from `nil`.
+  # * pattern: setups a regex for this key.
+  # * pattern_properties: setups regexs for this key.
   @spec update(keyword) :: keyword
-  defp update(opts),
+  defp update(keywords),
     do:
-      opts
+      keywords
       |> Keyword.update(:const, nil, &mark_nil/1)
       |> Keyword.update(:pattern, nil, &pattern/1)
       |> Keyword.update(:pattern_properties, nil, &pattern_properties/1)
-
-  # |> Keyword.update(:ref, nil, &ref/1)
 
   @spec mark_nil(any) :: any | :__nil__
   defp mark_nil(nil), do: :__nil__
@@ -293,20 +317,17 @@ defmodule Xema.Schema do
 
   defp pattern(regex), do: regex
 
-  @spec pattern_properties(map) :: map
+  @spec pattern_properties(map | nil) :: map | nil
   defp pattern_properties(nil), do: nil
 
-  defp pattern_properties(map) do
-    for key_value <- map, into: %{}, do: pattern_property(key_value)
-  end
+  defp pattern_properties(map),
+    do: for(key_value <- map, into: %{}, do: pattern_property(key_value))
 
-  defp pattern_property({pattern, property}) when is_binary(pattern) do
-    {Regex.compile!(pattern), property}
-  end
+  defp pattern_property({pattern, property}) when is_binary(pattern),
+    do: {Regex.compile!(pattern), property}
 
-  defp pattern_property({pattern, property}) when is_atom(pattern) do
-    pattern_property({Atom.to_string(pattern), property})
-  end
+  defp pattern_property({pattern, property}) when is_atom(pattern),
+    do: pattern_property({Atom.to_string(pattern), property})
 
   defp pattern_property(key_value), do: key_value
 

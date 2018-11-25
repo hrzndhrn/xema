@@ -9,7 +9,7 @@ defmodule Xema.BooleanTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.content.type == :boolean
+      assert schema.schema.type == :boolean
     end
 
     test "valid?/2 with value true", %{schema: schema} do

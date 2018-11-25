@@ -4,7 +4,7 @@ defmodule Xema.Dependencies do
   test "dependencies with boolean subschemas" do
     schema = Xema.new(dependencies: %{bar: true, foo: false})
 
-    assert schema.content.dependencies.bar == %Xema.Schema{type: true}
-    assert schema.content.dependencies.foo == %Xema.Schema{type: false}
+    assert schema.schema.dependencies.bar == %Xema.Schema{type: true}
+    assert schema.schema.dependencies.foo == %Xema.Schema{type: false}
   end
 end

@@ -1,4 +1,8 @@
 defmodule Xema.RefError do
+  @moduledoc """
+  Raised when a reference can't be handled.
+  """
+
   alias Xema.RefError
 
   defexception [:message, :reason]

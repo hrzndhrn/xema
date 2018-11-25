@@ -15,7 +15,7 @@ defmodule Xema.AnyOfTest do
     end
 
     test "type", %{schema: schema} do
-      assert schema.content.type == :any
+      assert schema.schema.type == :any
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
