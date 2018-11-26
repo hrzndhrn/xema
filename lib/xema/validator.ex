@@ -11,11 +11,6 @@ defmodule Xema.Validator do
   alias Xema.Ref
   alias Xema.Schema
 
-  @type xema :: %{
-          schema: Schema.t(),
-          refs: map
-        }
-
   @type result :: :ok | {:error, map}
 
   @types [
@@ -36,14 +31,14 @@ defmodule Xema.Validator do
   @doc """
   Validates `data` against the given `schema`.
   """
-  @spec validate(xema | Schema.t(), any, keyword) :: result
+  @spec validate(Xema.t() | Schema.t(), any, keyword) :: result
   def validate(%Schema{} = schema, value, opts),
     do: do_validate(schema, value, opts)
 
   def validate(%{schema: schema} = xema, value, opts),
     do: do_validate(schema, value, Keyword.put_new(opts, :root, xema))
 
-  @spec do_validate(xema | Xema.Schema.t(), any, keyword) :: result
+  @spec do_validate(Xema.t() | Xema.Schema.t(), any, keyword) :: result
   defp do_validate(%Schema{type: true}, _, _), do: :ok
 
   defp do_validate(%Schema{type: false}, _, _), do: {:error, %{type: false}}

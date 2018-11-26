@@ -912,15 +912,9 @@ defmodule Test.Resolver do
 
   @behaviour Xema.Resolver
 
-  @spec get(binary) :: {:ok, map} | {:error, any}
+  @spec fetch(binary) :: {:ok, map} | {:error, any}
   def fetch(uri) do
-    case remote?(uri) do
-      true ->
-        with {:ok, response} <- get(uri), do: eval(response, uri)
-
-      false ->
-        {:ok, nil}
-    end
+    with {:ok, response} <- get(uri), do: eval(response, uri)
   end
 
   defp get(uri) do
@@ -938,10 +932,6 @@ defmodule Test.Resolver do
         {:error, reason}
     end
   end
-
-  defp remote?(%URI{path: nil}), do: false
-
-  defp remote?(%URI{path: path}), do: String.ends_with?(path, ".exon")
 
   defp eval(str, uri) do
     {data, _} = Code.eval_string(str)

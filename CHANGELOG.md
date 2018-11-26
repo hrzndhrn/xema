@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.5.0 - not released
+## 0.5.1 - not released
+
++ Fixed and updated some specs.
++ Remote check for references is moved to the `behaviour`.
+
+## 0.5.0
 
 + The function `Xema.is_valid?/2` is deprecated. Use `Xema.valid?/2` instead.
 + Add keyword `const`.

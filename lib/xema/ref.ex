@@ -41,17 +41,18 @@ defmodule Xema.Ref do
   @doc """
   Validates the given value with the referenced schema.
   """
-  @spec validate(Ref.t(), any, keyword) :: :ok | {:error, map}
+  @spec validate(Ref.t() | Schema.t() | Xema.t(), any, keyword) ::
+          :ok | {:error, map}
   def validate(ref, value, opts) do
     case get(ref, opts) do
-      {:ok, %Xema{} = xema, opts} ->
-        Xema.validate(xema, value, opts)
-
       {:ok, %Schema{} = schema, opts} ->
         Xema.validate(schema, value, opts)
 
       {:ok, %Ref{} = ref, opts} ->
         validate(ref, value, opts)
+
+      {:ok, %{} = xema, opts} ->
+        Xema.validate(xema, value, opts)
 
       {:error, :not_found} ->
         raise RefError, {:not_found, ref.pointer}
@@ -78,16 +79,16 @@ defmodule Xema.Ref do
 
   defp fetch_by_fragment(xema, %URI{fragment: nil}), do: {:ok, xema}
 
-  defp fetch_by_fragment(%Xema{schema: schema}, %URI{fragment: fragment}),
+  defp fetch_by_fragment(%{schema: schema}, %URI{fragment: fragment}),
     do: fetch_by_path(schema, to_path(fragment))
 
-  defp fetch_by_pointer(%Xema{schema: schema}, "#"),
+  defp fetch_by_pointer(%{schema: schema}, "#"),
     do: fetch_by_path(schema, [])
 
-  defp fetch_by_pointer(%Xema{schema: schema}, "#/" <> _ = pointer),
+  defp fetch_by_pointer(%{schema: schema}, "#/" <> _ = pointer),
     do: fetch_by_path(schema, to_path(pointer))
 
-  defp fetch_by_pointer(%Xema{refs: refs}, pointer) do
+  defp fetch_by_pointer(%{refs: refs}, pointer) do
     case Map.get(refs, pointer) do
       nil -> {:error, :not_found}
       val -> {:ok, val}
@@ -123,9 +124,9 @@ defmodule Xema.Ref do
     |> fetch_by_path(keys)
   end
 
-  defp fetch_by_id(_uri, %Xema{refs: nil}), do: {:error, :not_found}
+  defp fetch_by_id(_uri, %{refs: nil}), do: {:error, :not_found}
 
-  defp fetch_by_id(uri, %Xema{refs: refs}) do
+  defp fetch_by_id(uri, %{refs: refs}) do
     case Map.get(refs, URI.to_string(uri)) do
       nil -> {:error, :not_found}
       val -> {:ok, val}

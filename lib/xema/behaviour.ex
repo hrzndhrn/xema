@@ -25,7 +25,7 @@ defmodule Xema.Behaviour do
 
       @enforce_keys [:schema]
 
-      @type t :: %__MODULE__{
+      @type t :: %{
               schema: Schema.t(),
               refs: map
             }
@@ -35,7 +35,7 @@ defmodule Xema.Behaviour do
 
       def new(%Schema{} = schema) do
         schema = Behaviour.map_refs(schema)
-        refs = Behaviour.get_refs(schema)
+        refs = Behaviour.get_refs(schema, __MODULE__)
         ids = Behaviour.get_ids(schema)
 
         struct!(
@@ -61,7 +61,7 @@ defmodule Xema.Behaviour do
           iex> Xema.valid?(schema, 0)
           false
       """
-      @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
+      @spec valid?(Xema.t() | Schema.t(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
@@ -69,23 +69,23 @@ defmodule Xema.Behaviour do
       otherwise returns `false`.
       """
       @deprecated "Use valid? instead"
-      @spec is_valid?(__MODULE__.t() | Schema.t(), any) :: boolean
+      @spec is_valid?(Xema.t() | Schema.t(), any) :: boolean
       def is_valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise returns an error tuple.
       """
-      @spec validate(__MODULE__.t() | Schema.t(), any) :: Validator.result()
+      @spec validate(Xema.t() | Schema.t(), any) :: Validator.result()
       def validate(schema, value), do: validate(schema, value, [])
 
       @doc false
-      @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
-      def validate(%__MODULE__{} = schema, value, opts),
-        do: do_validate(schema, value, opts)
-
       @spec validate(Schema.t(), any, keyword) :: Validator.result()
       def validate(%Schema{} = schema, value, opts),
+        do: do_validate(schema, value, opts)
+
+      @spec validate(Xema.t(), any, keyword) :: Validator.result()
+      def validate(%{} = schema, value, opts),
         do: do_validate(schema, value, opts)
 
       defp do_validate(schema, value, opts) do
@@ -123,12 +123,12 @@ defmodule Xema.Behaviour do
   end
 
   @doc false
-  @spec get_refs(Schema.t()) :: %{required(String.t()) => Ref.t()}
-  def get_refs(%Schema{} = schema) do
+  @spec get_refs(Schema.t(), atom) :: %{required(String.t()) => Ref.t()}
+  def get_refs(%Schema{} = schema, module) do
     schema
     |> reduce(%{id: nil}, fn
       %Ref{} = ref, acc, _path ->
-        put_ref(acc, ref)
+        put_ref(acc, ref, module)
 
       %Schema{id: id}, acc, _path when not is_nil(id) ->
         update_id(acc, id)
@@ -157,8 +157,8 @@ defmodule Xema.Behaviour do
   defp update_id(%{id: a} = map, b),
     do: Map.put(map, :id, Utils.update_uri(a, b))
 
-  defp put_ref(map, %Ref{uri: uri}) when not is_nil(uri) do
-    case get_schema(uri) do
+  defp put_ref(map, %Ref{uri: uri}, module) when not is_nil(uri) do
+    case get_schema(uri, module) do
       nil ->
         map
 
@@ -167,23 +167,33 @@ defmodule Xema.Behaviour do
     end
   end
 
-  defp put_ref(map, _), do: map
+  defp put_ref(map, _, _), do: map
 
-  defp get_schema(uri) do
-    case resolve(uri) do
-      {:ok, nil} ->
+  defp get_schema(uri, module) do
+    case remote?(uri) do
+      false ->
         nil
 
-      {:ok, data} ->
-        Xema.new(data)
+      true ->
+        case resolve(uri) do
+          {:ok, nil} ->
+            nil
 
-      {:error, reason} ->
-        raise SchemaError, reason
+          {:ok, data} ->
+            module.new(data)
+
+          {:error, reason} ->
+            raise SchemaError, reason
+        end
     end
   end
 
   defp resolve(uri),
     do: Application.get_env(:xema, :resolver, NoResolver).fetch(uri)
+
+  defp remote?(%URI{path: nil}), do: false
+
+  defp remote?(%URI{path: path}), do: Regex.match?(~r/(\.[a-zA-Z]+)|\#$/, path)
 
   @spec reduce(Schema.t(), any, function) :: any
   defp reduce(schema, acc, fun) do
