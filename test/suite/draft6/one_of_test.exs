@@ -103,8 +103,8 @@ defmodule Draft6.OneOfTest do
         schema:
           Xema.new(
             one_of: [
-              [properties: %{bar: :integer}, required: ["bar"]],
-              [properties: %{foo: :string}, required: ["foo"]]
+              [properties: %{bar: :integer}, required: [:bar]],
+              [properties: %{foo: :string}, required: [:foo]]
             ]
           )
       }

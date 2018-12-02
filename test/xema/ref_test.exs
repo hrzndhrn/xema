@@ -60,7 +60,8 @@ defmodule Xema.RefTest do
             properties: %{
               foo: :integer,
               bar: {:ref, "#/properties/foo"}
-            }
+            },
+            additional_properties: false
           )
       }
     end
@@ -84,6 +85,46 @@ defmodule Xema.RefTest do
                   properties: %{
                     bar: %{type: :integer, value: "42"},
                     foo: %{type: :integer, value: "21"}
+                  }
+                }}
+    end
+  end
+
+  describe "schema with a ref to property (string key)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            properties: %{
+              "foo" => :integer,
+              "bar" => {:ref, "#/properties/foo"}
+            },
+            additional_properties: false
+          )
+      }
+    end
+
+    test "validate/2 with valid data", %{schema: schema} do
+      assert validate(schema, %{"foo" => 42}) == :ok
+      assert validate(schema, %{"bar" => 42}) == :ok
+      assert validate(schema, %{"foo" => 21, "bar" => 42}) == :ok
+    end
+
+    test "validate/2 with invalid data", %{schema: schema} do
+      assert validate(schema, %{"foo" => "42"}) ==
+               {:error,
+                %{properties: %{"foo" => %{type: :integer, value: "42"}}}}
+
+      assert validate(schema, %{"bar" => "42"}) ==
+               {:error,
+                %{properties: %{"bar" => %{type: :integer, value: "42"}}}}
+
+      assert validate(schema, %{"foo" => "21", "bar" => "42"}) ==
+               {:error,
+                %{
+                  properties: %{
+                    "bar" => %{type: :integer, value: "42"},
+                    "foo" => %{type: :integer, value: "21"}
                   }
                 }}
     end
@@ -448,7 +489,7 @@ defmodule Xema.RefTest do
               meta: :string,
               nodes: {:list, items: {:ref, "node"}}
             },
-            required: ["meta", "nodes"],
+            required: [:meta, :nodes],
             definitions: %{
               node:
                 {:map,
@@ -458,7 +499,7 @@ defmodule Xema.RefTest do
                    value: :number,
                    subtree: {:ref, "tree"}
                  },
-                 required: ["value"]}
+                 required: [:value]}
             }
           })
       }
@@ -556,7 +597,7 @@ defmodule Xema.RefTest do
                                      {1,
                                       %{
                                         properties: %{
-                                          subtree: %{required: ["nodes"]}
+                                          subtree: %{required: [:nodes]}
                                         }
                                       }}
                                    ]

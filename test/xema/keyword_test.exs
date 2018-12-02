@@ -27,7 +27,7 @@ defmodule Xema.KeywordTest do
     end
   end
 
-  describe "keyword schema with properties (atom keys)" do
+  describe "keyword schema with properties" do
     setup do
       %{
         schema:
@@ -60,35 +60,6 @@ defmodule Xema.KeywordTest do
                   properties: %{
                     foo: %{type: :number, value: "foo"},
                     bar: %{type: :string, value: 2}
-                  }
-                }}
-    end
-  end
-
-  describe "keyword schema with properties (string keys)" do
-    setup do
-      %{
-        schema:
-          Xema.new({
-            :keyword,
-            properties: %{
-              "foo" => :number,
-              "bar" => :string
-            }
-          })
-      }
-    end
-
-    test "validate/2 with valid values", %{schema: schema} do
-      assert validate(schema, foo: 2, bar: "bar") == :ok
-    end
-
-    test "validate/2 with invalid values", %{schema: schema} do
-      assert validate(schema, foo: "foo", bar: "bar") ==
-               {:error,
-                %{
-                  properties: %{
-                    foo: %{type: :number, value: "foo"}
                   }
                 }}
     end

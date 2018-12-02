@@ -4,8 +4,6 @@ defmodule Xema.Utils do
   Some utilities for Xema.
   """
 
-  alias Xema.Mapz
-
   @doc """
   Returns `b` if `a` is `nil`, otherwise `a`
 
@@ -48,7 +46,7 @@ defmodule Xema.Utils do
   @spec has_key?(map | keyword | [{String.t(), any}], any) :: boolean
   def has_key?([], _), do: false
 
-  def has_key?(value, key) when is_map(value), do: Mapz.has_key?(value, key)
+  def has_key?(value, key) when is_map(value), do: Map.has_key?(value, key)
 
   def has_key?(value, key) when is_list(value) do
     case Keyword.keyword?(value) do

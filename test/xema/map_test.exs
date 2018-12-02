@@ -43,10 +43,15 @@ defmodule Xema.MapTest do
 
     test "validate/2 with valid values", %{schema: schema} do
       assert validate(schema, %{foo: 2, bar: "bar"}) == :ok
+
+      # The following test are ok because the string keys are not part of the
+      # schema.
       assert validate(schema, %{"foo" => 2, "bar" => "bar"}) == :ok
+      assert validate(schema, %{"foo" => "bar", "bar" => 2}) == :ok
+      assert validate(schema, %{"foo" => 1, foo: 2}) == :ok
     end
 
-    test "validate/2 with invalid values (atom keys)", %{schema: schema} do
+    test "validate/2 with invalid values", %{schema: schema} do
       assert validate(schema, %{foo: "foo", bar: "bar"}) ==
                {:error,
                 %{
@@ -63,21 +68,6 @@ defmodule Xema.MapTest do
                     bar: %{type: :string, value: 2}
                   }
                 }}
-    end
-
-    test "validate/2 with invalid values (string keys)", %{schema: schema} do
-      assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) ==
-               {:error,
-                %{
-                  properties: %{
-                    "foo" => %{type: :number, value: "foo"}
-                  }
-                }}
-    end
-
-    test "validate/2 with mixed map", %{schema: schema} do
-      assert validate(schema, %{"foo" => 1, foo: 2}) ==
-               {:error, %{properties: %{foo: :mixed_map}}}
     end
   end
 
@@ -96,21 +86,16 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with valid values", %{schema: schema} do
-      assert validate(schema, %{foo: 2, bar: "bar"}) == :ok
       assert validate(schema, %{"foo" => 2, "bar" => "bar"}) == :ok
+
+      # The following test are ok because the string keys are not part of the
+      # schema.
+      assert validate(schema, %{foo: 2, bar: "bar"}) == :ok
+      assert validate(schema, %{foo: "2", bar: 2}) == :ok
+      assert validate(schema, %{"foo" => 1, foo: 2}) == :ok
     end
 
-    test "validate/2 with invalid values (atom keys)", %{schema: schema} do
-      assert validate(schema, %{foo: "foo", bar: "bar"}) ==
-               {:error,
-                %{
-                  properties: %{
-                    foo: %{type: :number, value: "foo"}
-                  }
-                }}
-    end
-
-    test "validate/2 with invalid values (string keys)", %{schema: schema} do
+    test "validate/2 with invalid values", %{schema: schema} do
       assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) ==
                {:error,
                 %{
@@ -118,11 +103,6 @@ defmodule Xema.MapTest do
                     "foo" => %{type: :number, value: "foo"}
                   }
                 }}
-    end
-
-    test "validate/2 with mixed map", %{schema: schema} do
-      assert validate(schema, %{"foo" => 1, foo: 2}) ==
-               {:error, %{properties: %{"foo" => :mixed_map}}}
     end
   end
 
@@ -134,8 +114,8 @@ defmodule Xema.MapTest do
             :map,
             keys: :atoms,
             properties: %{
-              "foo" => :number,
-              "bar" => :string
+              foo: :number,
+              bar: :string
             }
           })
       }
@@ -206,7 +186,16 @@ defmodule Xema.MapTest do
 
     test "validate/2 with valid map", %{schema: schema} do
       assert validate(schema, %{foo: 44}) == :ok
-      assert validate(schema, %{"foo" => 44}) == :ok
+    end
+
+    test "validate/2 with invalid key type", %{schema: schema} do
+      assert validate(schema, %{"foo" => 44}) ==
+               {:error,
+                %{
+                  properties: %{
+                    "foo" => %{additional_properties: false}
+                  }
+                }}
     end
 
     test "validate/2 with additional property", %{schema: schema} do
@@ -244,7 +233,16 @@ defmodule Xema.MapTest do
 
     test "validate/2 with valid map", %{schema: schema} do
       assert validate(schema, %{"foo" => 44}) == :ok
-      assert validate(schema, %{foo: 44}) == :ok
+    end
+
+    test "validate/2 with invalid key type", %{schema: schema} do
+      assert validate(schema, %{foo: 44}) ==
+               {:error,
+                %{
+                  properties: %{
+                    foo: %{additional_properties: false}
+                  }
+                }}
     end
   end
 
@@ -291,12 +289,16 @@ defmodule Xema.MapTest do
       %{schema: Xema.new({:map, properties: %{foo: :number}, required: [:foo]})}
     end
 
-    test "validate/2 with required property (atom key)", %{schema: schema} do
+    test "validate/2 with required property", %{schema: schema} do
       assert validate(schema, %{foo: 44}) == :ok
     end
 
-    test "validate/2 with required property (string key)", %{schema: schema} do
-      assert validate(schema, %{"foo" => 44}) == :ok
+    test "validate/2 with invalid key type", %{schema: schema} do
+      assert validate(schema, %{"foo" => 44}) ==
+               {:error,
+                %{
+                  required: [:foo]
+                }}
     end
 
     test "validate/2 with missing key", %{schema: schema} do
@@ -320,6 +322,14 @@ defmodule Xema.MapTest do
       }
     end
 
+    test "validate/2 with invalid key type", %{schema: schema} do
+      assert validate(schema, %{"a" => 1, "b" => 2, "c" => 3}) ==
+               {:error,
+                %{
+                  required: [:a, :b, :c]
+                }}
+    end
+
     test "validate/2 without required properties", %{schema: schema} do
       assert validate(schema, %{b: 3, d: 8}) ==
                {:error,
@@ -332,7 +342,8 @@ defmodule Xema.MapTest do
   describe "map schema with required property (string keys)" do
     setup do
       %{
-        schema: Xema.new({:map, properties: %{foo: :number}, required: ["foo"]})
+        schema:
+          Xema.new({:map, properties: %{"foo" => :number}, required: ["foo"]})
       }
     end
 
@@ -340,8 +351,12 @@ defmodule Xema.MapTest do
       assert validate(schema, %{"foo" => 44}) == :ok
     end
 
-    test "validate/2 with required property (atom key)", %{schema: schema} do
-      assert validate(schema, %{foo: 44}) == :ok
+    test "validate/2 with invalid key type", %{schema: schema} do
+      assert validate(schema, %{foo: 44}) ==
+               {:error,
+                %{
+                  required: ["foo"]
+                }}
     end
 
     test "validate/2 with missing key", %{schema: schema} do

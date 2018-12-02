@@ -5,7 +5,6 @@ defmodule Xema do
 
   use Xema.Behaviour
 
-  alias Xema.Mapz
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaValidator
@@ -152,7 +151,7 @@ defmodule Xema do
 
   @spec schemas(map) :: map
   defp schemas(map) when is_map(map),
-    do: Mapz.map_values(map, &schema/1)
+    do: map_values(map, &schema/1)
 
   @spec dependencies(map) :: map
   defp dependencies(map),
@@ -277,7 +276,7 @@ defmodule Xema do
   defp maybe_schema(%{__struct__: _} = struct), do: struct
 
   defp maybe_schema(map) when is_map(map),
-    do: Mapz.map_values(map, &maybe_schema/1)
+    do: map_values(map, &maybe_schema/1)
 
   defp maybe_schema(value), do: value
 
@@ -296,6 +295,13 @@ defmodule Xema do
       |> MapSet.new()
       |> MapSet.disjoint?(MapSet.new(@keywords))
       |> Kernel.not()
+
+  # Returns a map where each value is the result of invoking `fun` on each
+  # value of the given `map`.
+  @spec map_values(map, (any -> any)) :: map
+  defp map_values(map, fun)
+       when is_map(map) and is_function(fun),
+       do: Enum.into(map, %{}, fn {key, val} -> {key, fun.(val)} end)
 
   @doc """
   Returns the source for a given `xema`.
@@ -353,7 +359,7 @@ defmodule Xema do
 
   defp nested_source(val)
        when is_map(val),
-       do: Mapz.map_values(val, &nested_source/1)
+       do: map_values(val, &nested_source/1)
 
   defp nested_source(val)
        when is_list(val),

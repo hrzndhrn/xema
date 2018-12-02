@@ -4,7 +4,6 @@ defmodule Xema.Ref do
   references.
   """
 
-  alias Xema.Mapz
   alias Xema.Ref
   alias Xema.RefError
   alias Xema.Schema
@@ -110,12 +109,12 @@ defmodule Xema.Ref do
     key = decode(key)
 
     schema
-    |> Mapz.get(key)
+    |> get_value(key)
     |> case do
       nil ->
         case Map.get(schema, :data) do
           nil -> nil
-          val -> Mapz.get(val, key)
+          val -> get_value(val, key)
         end
 
       val ->
@@ -146,6 +145,15 @@ defmodule Xema.Ref do
     |> String.replace("~0", "~")
     |> String.replace("~1", "/")
     |> URI.decode()
+  end
+
+  @spec get_value(map, String.t()) :: any
+  defp get_value(map, key) when is_binary(key) do
+    case {Map.get(map, key), Map.get(map, Utils.to_existing_atom(key))} do
+      {nil, nil} -> nil
+      {value, nil} -> value
+      {nil, value} -> value
+    end
   end
 end
 

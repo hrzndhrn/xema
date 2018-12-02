@@ -48,7 +48,7 @@ defmodule Draft4.EnumTest do
             {:map,
              [
                properties: %{bar: [enum: ["bar"]], foo: [enum: ["foo"]]},
-               required: ["bar"]
+               required: [:bar]
              ]}
           )
       }

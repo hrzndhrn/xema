@@ -7,7 +7,6 @@ defmodule Xema.Validator do
 
   import Xema.Utils
 
-  alias Xema.Mapz
   alias Xema.Ref
   alias Xema.Schema
 
@@ -155,7 +154,7 @@ defmodule Xema.Validator do
          :ok <- dependencies(schema, value, opts),
          {:ok, patts_rest} <- patterns(schema, value, opts),
          {:ok, props_rest} <- properties(schema, value, opts),
-         value <- Mapz.intersection(props_rest, patts_rest),
+         value <- intersection(props_rest, patts_rest),
          :ok <- additionals(schema, value, opts),
          do: :ok
   end
@@ -169,7 +168,7 @@ defmodule Xema.Validator do
          :ok <- property_names(schema, value),
          {:ok, patts_rest} <- patterns(schema, value, opts),
          {:ok, props_rest} <- properties(schema, value, opts),
-         value <- Mapz.intersection(props_rest, patts_rest),
+         value <- intersection(props_rest, patts_rest),
          :ok <- additionals(schema, value, opts),
          do: :ok
   end
@@ -743,15 +742,15 @@ defmodule Xema.Validator do
     do: {:error, %{properties: errors}}
 
   defp do_properties([{prop, schema} | props], map, errors, opts) do
-    with {:ok, value} <- Mapz.fetch(map, prop),
+    with {:ok, value} <- Map.fetch(map, prop),
          :ok <- do_validate(schema, value, opts) do
       # The list `props` can contain multiple schemas for the same value.
-      # The value will be just deleted if on more schemas are available.
+      # The value will be just deleted if one schema is available.
       # Multiple schemas are coming from `pattern_properties`.
       map =
         case has_key?(props, prop) do
           true -> map
-          false -> Mapz.delete(map, prop)
+          false -> Map.delete(map, prop)
         end
 
       do_properties(props, map, errors, opts)
@@ -764,7 +763,7 @@ defmodule Xema.Validator do
         do_properties(
           props,
           Map.delete(map, prop),
-          Map.put(errors, Mapz.get_key(map, prop), reason),
+          Map.put(errors, prop, reason),
           opts
         )
     end
@@ -774,7 +773,7 @@ defmodule Xema.Validator do
   defp required(%{required: nil}, _map), do: :ok
 
   defp required(%{required: required}, map) do
-    case Enum.filter(required, fn key -> !Mapz.has_key?(map, key) end) do
+    case Enum.filter(required, fn key -> !Map.has_key?(map, key) end) do
       [] ->
         :ok
 
@@ -926,4 +925,16 @@ defmodule Xema.Validator do
   end
 
   defp format(_, _str), do: {:error, "Unexpected format error."}
+
+  # Returns a map containing only keys that `map_1` and `map_2` have in common.
+  # Values for the returned map are taken from `map_2`.
+  @spec intersection(map, map) :: map
+  defp intersection(map_1, map_2) when is_map(map_1) and is_map(map_2),
+    do:
+      for(
+        key <- Map.keys(map_1),
+        true == Map.has_key?(map_2, key),
+        into: %{},
+        do: {key, Map.get(map_2, key)}
+      )
 end

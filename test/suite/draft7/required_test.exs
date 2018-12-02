@@ -5,9 +5,7 @@ defmodule Draft7.RequiredTest do
 
   describe "required validation" do
     setup do
-      %{
-        schema: Xema.new(properties: %{bar: :any, foo: :any}, required: ["foo"])
-      }
+      %{schema: Xema.new(properties: %{bar: :any, foo: :any}, required: [:foo])}
     end
 
     test "present required property is valid", %{schema: schema} do

@@ -59,8 +59,8 @@ defmodule Draft4.AnyOfTest do
         schema:
           Xema.new(
             any_of: [
-              [properties: %{bar: :integer}, required: ["bar"]],
-              [properties: %{foo: :string}, required: ["foo"]]
+              [properties: %{bar: :integer}, required: [:bar]],
+              [properties: %{foo: :string}, required: [:foo]]
             ]
           )
       }

@@ -227,7 +227,7 @@ defmodule Draft6.RefTest do
                       description: "node",
                       id: "http://localhost:1234/node",
                       properties: %{subtree: {:ref, "tree"}, value: :number},
-                      required: ["value"]
+                      required: [:value]
                     ]}
                },
                description: "tree of nodes",
@@ -236,7 +236,7 @@ defmodule Draft6.RefTest do
                  meta: :string,
                  nodes: {:list, [items: {:ref, "node"}]}
                },
-               required: ["meta", "nodes"]
+               required: [:meta, :nodes]
              ]}
           )
       }

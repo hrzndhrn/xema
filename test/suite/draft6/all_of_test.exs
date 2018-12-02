@@ -9,8 +9,8 @@ defmodule Draft6.AllOfTest do
         schema:
           Xema.new(
             all_of: [
-              [properties: %{bar: :integer}, required: ["bar"]],
-              [properties: %{foo: :string}, required: ["foo"]]
+              [properties: %{bar: :integer}, required: [:bar]],
+              [properties: %{foo: :string}, required: [:foo]]
             ]
           )
       }
@@ -43,11 +43,11 @@ defmodule Draft6.AllOfTest do
         schema:
           Xema.new(
             all_of: [
-              [properties: %{foo: :string}, required: ["foo"]],
-              [properties: %{baz: nil}, required: ["baz"]]
+              [properties: %{foo: :string}, required: [:foo]],
+              [properties: %{baz: nil}, required: [:baz]]
             ],
             properties: %{bar: :integer},
-            required: ["bar"]
+            required: [:bar]
           )
       }
     end
