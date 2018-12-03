@@ -643,7 +643,7 @@ iex> Xema.valid? schema, %{}
 false
 ```
 
-### <a id="module"</a> Module
+### <a id="module"></a> Module
 
 The `module` keyword allows specifing which struct is expected.
 
