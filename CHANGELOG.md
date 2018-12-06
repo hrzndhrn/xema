@@ -1,9 +1,11 @@
 # Changelog
 
-## 0.5.1 - not released
+## 0.6.0 - not released
 
 + Fixed and updated some specs.
 + Remote check for references is moved to the `behaviour`.
++ Key types in the schema are now matters for validation. See
+  [Usage - Key types](https://hexdocs.pm/xema/usage.html#key_types)
 
 ## 0.5.0
 

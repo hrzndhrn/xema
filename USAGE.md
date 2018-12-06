@@ -24,6 +24,7 @@
   * [Additional Properties](#additional_properties)
   * [Pattern Properties](#pattern_properties)
   * [Size](#map_size)
+  * [Key types](#key_types)
 * [Type struct](#struct)
 * [Multiples Types](#multi_types)
 * [Allow Additional Types](#allow)
@@ -602,6 +603,21 @@ iex> Xema.validate schema, %{}
 {:error, %{min_properties: 2}}
 iex> Xema.validate schema, %{a: 1, b: 2, c: 3, d: 4}
 {:error, %{max_properties: 3}}
+```
+
+### <a id="key_types"></a> Size
+
+The type of a key in the schema also matters in validation.
+
+```Elixir
+iex> schema = Xema.new {:map,
+...>   properties: %{foo: :integer},
+...>   additional_properties: false
+...> }
+iex> Xema.valid? schema, %{foo: 1}
+true
+iex> Xema.validate schema, %{"foo" => 1}
+{:error, %{properties: %{"foo" => %{additional_properties: false}}}}
 ```
 
 ### <a id="dependencies"></a> Dependencies
