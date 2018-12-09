@@ -72,54 +72,6 @@ defmodule Draft6.RefTest do
     end
   end
 
-  describe "escaped pointer ref" do
-    setup do
-      %{
-        schema:
-          Xema.new(
-            "percent%field": :integer,
-            properties: %{
-              percent: {:ref, "#/percent%25field"},
-              slash: {:ref, "#/slash~1field"},
-              tilda: {:ref, "#/tilda~0field"}
-            },
-            "slash/field": :integer,
-            "tilda~field": :integer
-          )
-      }
-    end
-
-    test "slash invalid", %{schema: schema} do
-      data = %{slash: "aoeu"}
-      refute valid?(schema, data)
-    end
-
-    test "tilda invalid", %{schema: schema} do
-      data = %{tilda: "aoeu"}
-      refute valid?(schema, data)
-    end
-
-    test "percent invalid", %{schema: schema} do
-      data = %{percent: "aoeu"}
-      refute valid?(schema, data)
-    end
-
-    test "slash valid", %{schema: schema} do
-      data = %{slash: 123}
-      assert valid?(schema, data)
-    end
-
-    test "tilda valid", %{schema: schema} do
-      data = %{tilda: 123}
-      assert valid?(schema, data)
-    end
-
-    test "percent valid", %{schema: schema} do
-      data = %{percent: 123}
-      assert valid?(schema, data)
-    end
-  end
-
   describe "nested refs" do
     setup do
       %{

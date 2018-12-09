@@ -6,7 +6,7 @@ defmodule Xema.RefTest do
   alias Xema.Ref
   alias Xema.RefError
 
-  import Xema, only: [validate: 2]
+  import Xema, only: [valid?: 2, validate: 2]
 
   describe "schema with ref root pointer" do
     setup do
@@ -630,6 +630,55 @@ defmodule Xema.RefTest do
     @tag :new_ref
     test "with valid data", %{schema: schema} do
       assert validate(schema, 1) == :ok
+    end
+  end
+
+  describe "escaped pointer ref" do
+    setup do
+      %{
+        schema:
+          Xema.new([
+            {:properties,
+             %{
+               percent: {:ref, "#/percent%25field"},
+               slash: {:ref, "#/slash~1field"},
+               tilda: {:ref, "#/tilda~0field"}
+             }},
+            "percent%field": :integer,
+            "slash/field": :integer,
+            "tilda~field": :integer
+          ])
+      }
+    end
+
+    test "slash invalid", %{schema: schema} do
+      data = %{slash: "aoeu"}
+      refute valid?(schema, data)
+    end
+
+    test "tilda invalid", %{schema: schema} do
+      data = %{tilda: "aoeu"}
+      refute valid?(schema, data)
+    end
+
+    test "percent invalid", %{schema: schema} do
+      data = %{percent: "aoeu"}
+      refute valid?(schema, data)
+    end
+
+    test "slash valid", %{schema: schema} do
+      data = %{slash: 123}
+      assert valid?(schema, data)
+    end
+
+    test "tilda valid", %{schema: schema} do
+      data = %{tilda: 123}
+      assert valid?(schema, data)
+    end
+
+    test "percent valid", %{schema: schema} do
+      data = %{percent: 123}
+      assert valid?(schema, data)
     end
   end
 end
