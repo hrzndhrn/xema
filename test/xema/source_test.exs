@@ -33,6 +33,19 @@ defmodule Xema.SourceTest do
       assert source |> Xema.new() |> Xema.source() == source
     end
 
+    test "of a schema with additional data" do
+      source = {
+        :map,
+        bar: 17,
+        foo: 42,
+        properties: %{
+          foo: :integer
+        }
+      }
+
+      assert source |> Xema.new() |> Xema.source() == source
+    end
+
     test "of a schema with nested schema" do
       source = {
         :map,
