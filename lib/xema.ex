@@ -46,7 +46,7 @@ defmodule Xema do
   More examples can be found on page
   [Usage](https://hexdocs.pm/xema/usage.html#content).
   """
-  @spec new(Schema.t() | Schema.type() | tuple | atom | keyword) :: %Xema{}
+  @spec new(Schema.t() | Schema.type() | tuple | atom | keyword) :: Xema.t()
   def new(data)
 
   # The implementation of `init`.

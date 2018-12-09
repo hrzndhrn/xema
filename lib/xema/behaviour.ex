@@ -25,9 +25,9 @@ defmodule Xema.Behaviour do
 
       @enforce_keys [:schema]
 
-      @type t :: %{
-              schema: Schema.t(),
-              refs: map
+      @type t :: %__MODULE__{
+              schema: any,
+              refs: any
             }
 
       defstruct schema: %Schema{},
@@ -61,7 +61,7 @@ defmodule Xema.Behaviour do
           iex> Xema.valid?(schema, 0)
           false
       """
-      @spec valid?(Xema.t() | Schema.t(), any) :: boolean
+      @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
@@ -69,14 +69,14 @@ defmodule Xema.Behaviour do
       otherwise returns `false`.
       """
       @deprecated "Use valid? instead"
-      @spec is_valid?(Xema.t() | Schema.t(), any) :: boolean
+      @spec is_valid?(__MODULE__.t() | Schema.t(), any) :: boolean
       def is_valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise returns an error tuple.
       """
-      @spec validate(Xema.t() | Schema.t(), any) :: Validator.result()
+      @spec validate(__MODULE__.t() | Schema.t(), any) :: Validator.result()
       def validate(schema, value), do: validate(schema, value, [])
 
       @doc false
@@ -84,7 +84,7 @@ defmodule Xema.Behaviour do
       def validate(%Schema{} = schema, value, opts),
         do: do_validate(schema, value, opts)
 
-      @spec validate(Xema.t(), any, keyword) :: Validator.result()
+      @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
       def validate(%{} = schema, value, opts),
         do: do_validate(schema, value, opts)
 
@@ -97,7 +97,7 @@ defmodule Xema.Behaviour do
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise raises a `Xema.ValidationError`.
       """
-      @spec validate!(Xema.t() | Schema.t(), any) :: :ok
+      @spec validate!(__MODULE__.t() | Schema.t(), any) :: :ok
       def validate!(xema, value) do
         with {:error, reason} <- validate(xema, value),
              do: raise(ValidationError, reason)
