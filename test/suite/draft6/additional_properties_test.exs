@@ -121,4 +121,21 @@ defmodule Draft6.AdditionalPropertiesTest do
       assert valid?(schema, data)
     end
   end
+
+  describe "additionalProperties should not look in applicators" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            additional_properties: :boolean,
+            all_of: [[properties: %{foo: :any}]]
+          )
+      }
+    end
+
+    test "properties defined in allOf are not allowed", %{schema: schema} do
+      data = %{bar: true, foo: 1}
+      refute valid?(schema, data)
+    end
+  end
 end
