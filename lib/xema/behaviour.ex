@@ -157,8 +157,8 @@ defmodule Xema.Behaviour do
   defp update_id(%{id: a} = map, b),
     do: Map.put(map, :id, Utils.update_uri(a, b))
 
-  defp put_ref(map, %Ref{uri: uri}, module) when not is_nil(uri) do
-    case get_schema(uri, module) do
+  defp put_ref(map, %Ref{uri: uri} = ref, module) when not is_nil(uri) do
+    case get_schema(ref, module) do
       nil ->
         map
 
@@ -169,13 +169,13 @@ defmodule Xema.Behaviour do
 
   defp put_ref(map, _, _), do: map
 
-  defp get_schema(uri, module) do
-    case remote?(uri) do
+  defp get_schema(ref, module) do
+    case remote?(ref) do
       false ->
         nil
 
       true ->
-        case resolve(uri) do
+        case resolve(ref.uri) do
           {:ok, nil} ->
             nil
 
@@ -191,9 +191,12 @@ defmodule Xema.Behaviour do
   defp resolve(uri),
     do: Application.get_env(:xema, :resolver, NoResolver).fetch(uri)
 
-  defp remote?(%URI{path: nil}), do: false
+  defp remote?(%Ref{uri: %URI{path: nil}}), do: false
 
-  defp remote?(%URI{path: path}), do: Regex.match?(~r/(\.[a-zA-Z]+)|\#$/, path)
+  defp remote?(%Ref{uri: %URI{path: path}, pointer: pointer}),
+    do:
+      Regex.match?(~r/(\.[a-zA-Z]+)|\#$/, path) or
+        String.ends_with?(pointer, "#")
 
   @spec reduce(Schema.t(), any, function) :: any
   defp reduce(schema, acc, fun) do
