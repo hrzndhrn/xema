@@ -50,16 +50,6 @@ defmodule Xema.Behaviour do
       @doc """
       Returns `true` if the `value` is a valid value against the given `schema`;
       otherwise returns `false`.
-
-      ## Examples
-
-          iex> schema = Xema.new({:integer, minimum: 1})
-          iex> Xema.valid?(schema, 2)
-          true
-          iex> Xema.valid?(schema, 1)
-          true
-          iex> Xema.valid?(schema, 0)
-          false
       """
       @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok
