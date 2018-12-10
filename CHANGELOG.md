@@ -23,7 +23,7 @@
 + Added schema validator to validate data give to `Xema.new/1`.
 + `Xema.new/2` becomes `Xema.new/1`.
   Migrate to 0.5.0:
-  ```Elixir
+  ```elixir
   # < 0.5.0
   Xema.new(:integer, minimum: 0)
   # >= 0.5.0
