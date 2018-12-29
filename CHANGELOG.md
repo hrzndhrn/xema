@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 - not released
+## 0.6.0
 
 + Fixed and updated some specs.
 + Remote check for references is moved to the `behaviour`.
