@@ -69,9 +69,10 @@ defmodule Xema.Mixfile do
         "mix.exs",
         "README*",
         "LICENSE*",
-        "XEMA_README.md",
-        "USAGE.md",
-        "UNSUPPORTED_FEATURES.md"
+        "docs/readme.md",
+        "docs/usage.md",
+        "docs/resolver.md",
+        "docs/unsupported.md"
       ]
     ]
   end
