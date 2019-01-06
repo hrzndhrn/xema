@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.1
+
+Update docs.
+
 ## 0.6.0
 
 + Fixed and updated some specs.
