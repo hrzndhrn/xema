@@ -10,6 +10,7 @@ elixir:
 otp_release:
   - 21.0
   - 21.1
+  - 21.2
 
 env:
   global:
