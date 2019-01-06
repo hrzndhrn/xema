@@ -1,3 +1,3 @@
 defmodule UnsupportedFeatures do
-  @moduledoc File.read!("UNSUPPORTED_FEATURES.md")
+  @moduledoc File.read!("docs/unsupported.md")
 end

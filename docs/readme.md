@@ -1,7 +1,7 @@
 # Xema
 
 Xema is a schema validator inspired by [JSON Schema](http://json-schema.org).
-For now, Xema supports the features documented in draft 04 of the JSON-Schema
+Xema supports the features documented in draft 04, 06, and 07 of the JSON-Schema
 specification.
 
 Xema allows you to annotate and validate elixir data structures.

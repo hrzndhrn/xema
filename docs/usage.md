@@ -37,7 +37,6 @@
   * [`definitions` and `ref`](#def-ref)
   * [without `definitions` and `ref`](#without-def-ref)
   * [in multiple files](#multiple-files)
-* [Configure a resolver](#resolver)
 
 
 ## <a id="any"></a> Type any
@@ -859,7 +858,7 @@ iex> positive = Xema.new {:integer, minimum: 1}
 ### <a id="multiple-files"></a> In multiple files
 
 To structure schemas in multiple files you have to configure a resolver to laod
-the files. The section "[Configure a resolver](#resolver)" described the
+the files. The section "[Configure a resolver](resolver.html)" described the
 configuration and implementation of an resolver.
 
 Let's assume you have the following file available at
@@ -910,63 +909,3 @@ iex> Xema.validate schema, %{name: 66}
   }
 }
 ```
-
-
-## <a id="resolver"></a> Configure a resolver
-
-A resolver will be configured like this.
-
-```elixir
-config :xema, resolver: My.Resolver
-```
-
-`My.Resolver` is a module which use the behaviour `Xema.Resolver`.
-
-```elixir
-defmodule Test.Resolver do
-  @moduledoc false
-
-  @behaviour Xema.Resolver
-
-  @spec fetch(binary) :: {:ok, map} | {:error, any}
-  def fetch(uri) do
-    with {:ok, response} <- get(uri), do: eval(response, uri)
-  end
-
-  defp get(uri) do
-    case HTTPoison.get(uri) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        {:ok, body}
-
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        {:error, "Remote schema '#{uri}' not found."}
-
-      {:ok, %HTTPoison.Response{status_code: code}} ->
-        {:error, "code: #{code}"}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
-  defp eval(str, uri) do
-    {data, _} = Code.eval_string(str)
-    {:ok, data}
-  rescue
-    error -> {:error, %{error | file: URI.to_string(uri)}}
-  end
-end
-```
-
-The function `get/1` will be called by `Xema` and expects a `binary`. In the
-example in the section
-"[Structuring schemas in multiple files](#multiple-files)" `get/1` gets the
-`binary` `"http://localhost:1234/xema_name.exon"`.
-
-**Note!** This resolver use `Code.eval_string/1` and eval is always evil.
-
-> **Warning:** string can be any Elixir code and will be executed with the same
-> privileges as the Erlang VM: this means that such code could compromise the
-> machine (for example by executing system commands). Don’t use `eval_string/3`
-> with untrusted input (such as strings coming from the network).
-> -- Elixir API

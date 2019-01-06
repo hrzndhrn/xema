@@ -22,8 +22,13 @@ defmodule Xema.Mixfile do
         "coveralls.html": :test
       ],
       docs: [
-        extras: ["XEMA_README.md", "USAGE.md", "UNSUPPORTED_FEATURES.md"],
-        main: "xema_readme"
+        extras: [
+          "docs/readme.md",
+          "docs/usage.md",
+          "docs/resolver.md",
+          "docs/unsupported.md"
+        ],
+        main: "readme"
       ],
       dialyzer: [
         ignore_warnings: "dialyzer.ignore-warnings"

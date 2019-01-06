@@ -1,6 +1,7 @@
 defmodule Xema.NoResolver do
   @moduledoc """
-  The default resolver.
+  The default resolver. For the resolver configuration see
+  "[Configure a resolver](resolver.html)".
   """
 
   @behaviour Xema.Resolver

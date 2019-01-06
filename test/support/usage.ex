@@ -1,3 +1,3 @@
 defmodule Usage do
-  @moduledoc File.read!("USAGE.md")
+  @moduledoc File.read!("docs/usage.md")
 end
