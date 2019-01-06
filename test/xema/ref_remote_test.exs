@@ -60,6 +60,20 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
+  describe "file ref" do
+    setup do
+      %{schema: Xema.new({:ref, "integer.exon"})}
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, 1) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+    end
+  end
+
   describe "schema with invalid ref" do
     setup do
       schema =
