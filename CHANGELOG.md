@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.2
+
++ Change regex for email validation (~7x faster).
+
 ## 0.6.1
 
 Update docs.
@@ -14,17 +18,17 @@ Update docs.
 ## 0.5.0
 
 + The function `Xema.is_valid?/2` is deprecated. Use `Xema.valid?/2` instead.
-+ Added keyword `const`.
-+ Added keywords `if`, `then`, `else`.
-+ Added handling for none-keyword data.
-+ Added annotation keywords
++ Add keyword `const`.
++ Add keywords `if`, `then`, `else`.
++ Add handling for none-keyword data.
++ Add annotation keywords
   + `examples`
   + `comment`
   + `contentEncoding`
   + `contentMediaType`contentMediaType
-+ Added new `format` checks.
-+ Added validatiors for `atom`, `keyword`, `tuple` and `struct`
-+ Added schema validator to validate data give to `Xema.new/1`.
++ Add new `format` checks.
++ Add validatiors for `atom`, `keyword`, `tuple` and `struct`
++ Add schema validator to validate data give to `Xema.new/1`.
 + `Xema.new/2` becomes `Xema.new/1`.
   Migrate to 0.5.0:
   ```elixir
@@ -33,4 +37,4 @@ Update docs.
   # >= 0.5.0
   Xema.new({:integer, minimum: 0})
   ```
-+ Added Xema.validate!/2
++ Add Xema.validate!/2
