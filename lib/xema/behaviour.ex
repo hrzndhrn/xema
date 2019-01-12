@@ -33,7 +33,9 @@ defmodule Xema.Behaviour do
       defstruct schema: %Schema{},
                 refs: %{}
 
-      def new(%Schema{} = schema) do
+      def new(data, opts \\ [])
+
+      def new(%Schema{} = schema, opts) do
         schema = Behaviour.map_refs(schema)
         refs = Behaviour.get_refs(schema, __MODULE__)
         ids = Behaviour.get_ids(schema)
@@ -45,7 +47,7 @@ defmodule Xema.Behaviour do
         )
       end
 
-      def new(data), do: data |> init() |> new()
+      def new(data, opts), do: data |> init() |> new(opts)
 
       @doc """
       Returns `true` if the `value` is a valid value against the given `schema`;
