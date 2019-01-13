@@ -62,7 +62,7 @@ defmodule Xema.RefRemoteTest do
 
   describe "file ref" do
     setup do
-      %{schema: Xema.new({:ref, "integer.exon"})}
+      %{schema: Xema.new({:ref, "integer.exon"}, resolver: Test.FileResolver)}
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
