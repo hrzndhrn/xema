@@ -1,3 +1,3 @@
 use Mix.Config
 
-config :xema, resolver: Test.Resolver
+config :xema, resolver: Test.RemoteResolver

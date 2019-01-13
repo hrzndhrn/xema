@@ -114,12 +114,10 @@ defmodule Xema.Validator do
   end
 
   defp validate_by(:string, schema, value, _opts) do
-    with length <- String.length(value),
-         :ok <- min_length(schema, length, value),
-         :ok <- max_length(schema, length, value),
+    with :ok <- min_length(schema, value),
+         :ok <- max_length(schema, value),
          :ok <- pattern(schema, value),
          :ok <- format(schema, value),
-         :ok <- enum(schema, value),
          do: :ok
   end
 
@@ -506,19 +504,29 @@ defmodule Xema.Validator do
 
   defp multiple_of(_, _), do: :ok
 
-  @spec min_length(Xema.Schema.t(), integer, String.t()) :: result
-  defp min_length(%{min_length: nil}, _, _), do: :ok
-  defp min_length(%{min_length: min}, len, _) when len >= min, do: :ok
+  @spec min_length(Xema.Schema.t(), String.t()) :: result
+  defp min_length(%{min_length: nil}, _), do: :ok
 
-  defp min_length(%{min_length: min}, _, value),
-    do: {:error, %{value: value, min_length: min}}
+  defp min_length(%{min_length: min}, value) do
+    len = String.length(value)
 
-  @spec max_length(Xema.Schema.t(), integer, String.t()) :: result
-  defp max_length(%{max_length: nil}, _, _), do: :ok
-  defp max_length(%{max_length: max}, len, _) when len <= max, do: :ok
+    case len >= min do
+      true -> :ok
+      false -> {:error, %{value: value, min_length: min}}
+    end
+  end
 
-  defp max_length(%{max_length: max}, _, value),
-    do: {:error, %{value: value, max_length: max}}
+  @spec max_length(Xema.Schema.t(), String.t()) :: result
+  defp max_length(%{max_length: nil}, _), do: :ok
+
+  defp max_length(%{max_length: max}, value) do
+    len = String.length(value)
+
+    case len <= max do
+      true -> :ok
+      false -> {:error, %{value: value, max_length: max}}
+    end
+  end
 
   @spec pattern(Xema.Schema.t(), String.t()) :: result
   defp pattern(%{pattern: nil}, _string), do: :ok

@@ -3,6 +3,7 @@
 ## 0.6.2
 
 + Change regex for email validation (~7x faster).
++ Add `:resolver` option to `Xema.new`.
 
 ## 0.6.1
 
