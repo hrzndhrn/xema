@@ -15,6 +15,12 @@ defmodule Xema do
   @doc """
   This function creates the schema from the given `data`.
 
+  Possible options:
+  + `:resolver` - a resolver for remote schemas. This option will overwrite the
+                  resolver from the config. See
+                  [Configure a resolver](resolver.html) to how to define a
+                  resolver.
+
   ## Examples
 
   Simple schema:
