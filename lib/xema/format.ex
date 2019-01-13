@@ -55,6 +55,11 @@ defmodule Xema.Format do
   defguard supports(format) when format in @formats
 
   @doc """
+  Returns all available formats.
+  """
+  def formats, do: @formats
+
+  @doc """
   Checks if the value matches the given type. The function expected a available
   `format` and a `string` to check. Returns `true` for a valid `string`, `false`
   otherwise.
