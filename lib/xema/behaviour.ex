@@ -37,7 +37,7 @@ defmodule Xema.Behaviour do
 
       def new(%Schema{} = schema, opts) do
         schema = Behaviour.map_refs(schema)
-        refs = Behaviour.get_refs(schema, __MODULE__)
+        refs = Behaviour.get_refs(schema, __MODULE__, opts[:resolver])
         ids = Behaviour.get_ids(schema)
 
         struct!(
@@ -115,12 +115,12 @@ defmodule Xema.Behaviour do
   end
 
   @doc false
-  @spec get_refs(Schema.t(), atom) :: %{required(String.t()) => Ref.t()}
-  def get_refs(%Schema{} = schema, module) do
+  @spec get_refs(Schema.t(), atom, atom) :: %{required(String.t()) => Ref.t()}
+  def get_refs(%Schema{} = schema, module, resolver) do
     schema
     |> reduce(%{id: nil}, fn
       %Ref{} = ref, acc, _path ->
-        put_ref(acc, ref, module)
+        put_ref(acc, ref, module, resolver)
 
       %Schema{id: id}, acc, _path when not is_nil(id) ->
         update_id(acc, id)
@@ -149,8 +149,9 @@ defmodule Xema.Behaviour do
   defp update_id(%{id: a} = map, b),
     do: Map.put(map, :id, Utils.update_uri(a, b))
 
-  defp put_ref(map, %Ref{uri: uri} = ref, module) when not is_nil(uri) do
-    case get_schema(ref, module) do
+  defp put_ref(map, %Ref{uri: uri} = ref, module, resolver)
+       when not is_nil(uri) do
+    case get_schema(ref, module, resolver) do
       nil ->
         map
 
@@ -159,15 +160,15 @@ defmodule Xema.Behaviour do
     end
   end
 
-  defp put_ref(map, _, _), do: map
+  defp put_ref(map, _, _, _), do: map
 
-  defp get_schema(ref, module) do
+  defp get_schema(ref, module, resolver) do
     case remote?(ref) do
       false ->
         nil
 
       true ->
-        case resolve(ref.uri) do
+        case resolve(ref.uri, resolver) do
           {:ok, nil} ->
             nil
 
@@ -180,8 +181,10 @@ defmodule Xema.Behaviour do
     end
   end
 
-  defp resolve(uri),
+  defp resolve(uri, nil),
     do: Application.get_env(:xema, :resolver, NoResolver).fetch(uri)
+
+  defp resolve(uri, resolver), do: resolver.fetch(uri)
 
   defp remote?(%Ref{uri: %URI{path: nil}}), do: false
 
