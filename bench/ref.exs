@@ -22,6 +22,7 @@ defmodule Bench do
     Benchee.run(
       %{"ref" => fun},
       parallel: 4,
+      save:  [path: "bench/tmp/ref.benchee", tag: "master"],
       print: [fast_warning: false],
       formatters: [
         # &Benchee.Formatters.HTML.output/1,
