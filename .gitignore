@@ -55,6 +55,7 @@ Temporary Items
 ### benchfella ###
 /bench/snapshots
 /bench/graphs
+/bench/tmp
 
 ### etc ###
 
