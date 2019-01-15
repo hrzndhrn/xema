@@ -17,6 +17,16 @@ defmodule FormatTest do
     end
   end
 
+  describe "validation of unknown format" do
+    setup do
+      %{schema: Xema.new(format: :whatever)}
+    end
+
+    test "with a string", %{schema: schema} do
+      assert validate(schema, "whatever floats your boat") == :ok
+    end
+  end
+
   describe "validation of regex strings" do
     setup do
       %{schema: Xema.new(format: :regex)}
