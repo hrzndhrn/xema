@@ -932,7 +932,7 @@ defmodule Xema.Validator do
     end
   end
 
-  defp format(_, _str), do: {:error, "Unexpected format error."}
+  defp format(_, _str), do: :ok
 
   # Returns a map containing only keys that `map_1` and `map_2` have in common.
   # Values for the returned map are taken from `map_2`.

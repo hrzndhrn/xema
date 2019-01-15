@@ -128,25 +128,6 @@ defmodule Xema.SchemaValidator do
                   ]
                 },
                 format: %Schema{
-                  enum: [
-                    :date,
-                    :date_time,
-                    :email,
-                    :hostname,
-                    :ipv4,
-                    :ipv6,
-                    :json_pointer,
-                    :regex,
-                    :relative_json_pointer,
-                    :time,
-                    :uri,
-                    :uri_fragment,
-                    :uri_path,
-                    :uri_query,
-                    :uri_reference,
-                    :uri_template,
-                    :uri_userinfo
-                  ],
                   type: :atom
                 }
               },
