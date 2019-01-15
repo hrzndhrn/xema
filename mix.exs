@@ -46,6 +46,9 @@ defmodule Xema.Mixfile do
 
   defp deps do
     [
+      {:benchee, "~> 0.13", only: :dev},
+      {:benchee_json, "~> 0.5", only: :dev},
+      {:benchee_html, "~> 0.5", only: :dev},
       {:cowboy, "~> 2.4", only: :test},
       {:credo, "~> 1.0", only: [:dev, :test]},
       {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
