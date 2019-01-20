@@ -3,9 +3,6 @@ defmodule Xema.RefTest do
 
   doctest Xema.Ref
 
-  alias Xema.Ref
-  alias Xema.RefError
-
   import Xema, only: [valid?: 2, validate: 2]
 
   describe "schema with ref root pointer" do
@@ -308,8 +305,7 @@ defmodule Xema.RefTest do
             items: [
               :integer,
               {:ref, "#/items/0"},
-              {:ref, "#/items/1"},
-              {:ref, "#/items/11"}
+              {:ref, "#/items/1"}
             ]
           )
       }
@@ -317,23 +313,11 @@ defmodule Xema.RefTest do
 
     test "validate/2 with valid value", %{schema: schema} do
       assert validate(schema, [1, 2]) == :ok
-      assert validate(schema, [1, 2, 3]) == :ok
     end
 
     test "validate/2 with invalid value", %{schema: schema} do
       assert validate(schema, [1, "2"]) ==
                {:error, %{items: [{1, %{type: :integer, value: "2"}}]}}
-
-      assert validate(schema, [1, 2, "3"]) ==
-               {:error, %{items: [{2, %{type: :integer, value: "3"}}]}}
-    end
-
-    test "validate/2 an invalid ref", %{schema: schema} do
-      expected = "Reference '#/items/11' not found."
-
-      assert_raise RefError, expected, fn ->
-        validate(schema, [1, 2, 3, 4]) == {:error, [{3, {:ref, "#/items/11"}}]}
-      end
     end
   end
 
@@ -436,47 +420,6 @@ defmodule Xema.RefTest do
     end
   end
 
-  describe "schema with invalid ref" do
-    setup do
-      %{
-        schema:
-          Xema.new({
-            :map,
-            id: "http://localhost",
-            definitions: %{
-              int: {:integer, id: "http://localhost/int"},
-              foobar: {:integer, id: "foobar"}
-            },
-            properties: %{
-              num: {:ref, "int"},
-              invalid: {:ref, "invalid"},
-              baz: {:ref, "foobar"}
-            }
-          })
-      }
-    end
-
-    test "validate/2 with valid ref", %{schema: schema} do
-      assert validate(schema, %{num: 1}) == :ok
-    end
-
-    test "validate/2 with invalid ref", %{schema: schema} do
-      expected = "Reference 'invalid' not found."
-
-      assert_raise RefError, expected, fn ->
-        validate(schema, %{invalid: 1})
-      end
-    end
-
-    test "validate/2 with invalid id", %{schema: schema} do
-      expected = "Reference 'foobar' not found."
-
-      assert_raise RefError, expected, fn ->
-        validate(schema, %{baz: 1})
-      end
-    end
-  end
-
   describe "schema with recursive refs" do
     setup do
       %{
@@ -516,14 +459,31 @@ defmodule Xema.RefTest do
 
     test "refs", %{schema: schema} do
       assert schema.refs == %{
-               "http://localhost:1234/node" => %Ref{
-                 uri: nil,
-                 pointer: "#/definitions/node"
+               "http://localhost:1234/node" => %Xema.Schema{
+                 description: "node",
+                 id: "http://localhost:1234/node",
+                 properties: %{
+                   subtree: %Xema.Schema{
+                     ref: %Xema.Ref{
+                       pointer: "tree",
+                       uri: %URI{
+                         authority: "localhost:1234",
+                         fragment: nil,
+                         host: "localhost",
+                         path: "/tree",
+                         port: 1234,
+                         query: nil,
+                         scheme: "http",
+                         userinfo: nil
+                       }
+                     }
+                   },
+                   value: %Xema.Schema{type: :number}
+                 },
+                 required: MapSet.new([:value]),
+                 type: :map
                },
-               "http://localhost:1234/tree" => %Ref{
-                 uri: nil,
-                 pointer: "#"
-               }
+               "http://localhost:1234/tree" => :root
              }
     end
 
@@ -627,7 +587,6 @@ defmodule Xema.RefTest do
       }
     end
 
-    @tag :new_ref
     test "with valid data", %{schema: schema} do
       assert validate(schema, 1) == :ok
     end

@@ -42,20 +42,23 @@ defmodule Xema.Ref do
   """
   @spec validate(Ref.t() | Schema.t() | Xema.t(), any, keyword) ::
           :ok | {:error, map}
-  def validate(ref, value, opts) do
-    case get(ref, opts) do
-      {:ok, %Schema{} = schema, opts} ->
-        Xema.validate(schema, value, opts)
+  def validate(%Ref{pointer: "#", uri: nil}, value, opts),
+    do: Xema.validate(opts[:root], value, opts)
 
-      {:ok, %Ref{} = ref, opts} ->
-        validate(ref, value, opts)
+  def validate(%Ref{pointer: pointer, uri: nil}, value, opts),
+    do: validate(pointer, value, opts)
 
-      {:ok, %{} = xema, opts} ->
-        Xema.validate(xema, value, opts)
+  def validate(%Ref{uri: uri}, value, opts),
+    do: validate(URI.to_string(uri), value, opts)
 
-      {:error, :not_found} ->
-        raise RefError, {:not_found, ref.pointer}
+  def validate(pointer, value, opts) do
+    opts[:root].refs
+    |> Map.get(pointer)
+    |> case do
+      :root -> opts[:root]
+      schema -> schema
     end
+    |> Xema.validate(value, opts)
   end
 
   defp get(%Ref{pointer: pointer, uri: nil}, opts) do

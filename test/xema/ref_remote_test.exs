@@ -65,7 +65,6 @@ defmodule Xema.RefRemoteTest do
       %{schema: Xema.new({:ref, "integer.exon"}, resolver: Test.FileResolver)}
     end
 
-    @tag :only
     test "validate/2 with a valid value", %{schema: schema} do
       assert validate(schema, 1) == :ok
     end
