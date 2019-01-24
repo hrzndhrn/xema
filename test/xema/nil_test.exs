@@ -8,6 +8,10 @@ defmodule Xema.NilTest do
       %{schema: Xema.new(nil)}
     end
 
+    test "check schema", %{schema: schema} do
+      assert schema == %Xema{refs: %{}, schema: %Xema.Schema{type: nil}}
+    end
+
     test "validate/2 with nil value", %{schema: schema} do
       assert validate(schema, nil) == :ok
     end

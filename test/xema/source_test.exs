@@ -94,7 +94,8 @@ defmodule Xema.SourceTest do
 
     test "for definitions and ref" do
       {_, keywords} =
-        source = {:any, definitions: %{foo: :integer}, foo: {:ref, "#/go"}}
+        source =
+        {:any, bar: {:ref, "#/definitions/foo"}, definitions: %{foo: :integer}}
 
       assert source |> Xema.new() |> Xema.source() == keywords
     end

@@ -254,14 +254,18 @@ defmodule Xema.Schema do
       |> List.delete(:data)
 
   @doc """
-  Returns a subschema from the `schema` by the given `pointer`.
+  Fetches a subschema from the `schema` by the given `pointer`.
+
+  If `schema` contains the given pointer with a subschema, then `{:ok, schema}`
+  is returned otherwise `:error`.
   """
   @spec fetch(Schema.t(), Ref.t() | String.t()) :: {:ok, Schema.t()} | :error
-  def fetch(schema, %Ref{pointer: pointer}), do: fetch(schema, pointer)
+  def fetch(%Schema{} = schema, %Ref{pointer: pointer}),
+    do: fetch(schema, pointer)
 
-  def fetch(schema, "#/" <> pointer), do: fetch(schema, pointer)
+  def fetch(%Schema{} = schema, "#/" <> pointer), do: fetch(schema, pointer)
 
-  def fetch(schema, pointer) do
+  def fetch(%Schema{} = schema, pointer) do
     keys = pointer |> String.trim("/") |> String.split("/")
 
     case do_fetch(schema, keys) do
@@ -269,6 +273,8 @@ defmodule Xema.Schema do
       schema -> schema
     end
   end
+
+  defp do_fetch(nil, _), do: :error
 
   defp do_fetch(:error, _), do: :error
 
@@ -297,6 +303,20 @@ defmodule Xema.Schema do
       end
 
     do_fetch(schema, keys)
+  end
+
+  @doc """
+  Fetches a subschema from the `schema` by the given `pointer`.
+
+  If `schema` contains the given pointer with a subschema, then `{:ok, schema}`
+  is returned otherwise a `SchemaError` is raised.
+  """
+  @spec fetch!(Schema.t(), Ref.t() | String.t()) :: Schema.t()
+  def fetch!(%Schema{} = schema, pointer) do
+    case fetch(schema, pointer) do
+      {:ok, schema} -> schema
+      :error -> raise SchemaError, {:ref_not_found, pointer}
+    end
   end
 
   # Validates the type/types in the given keywords.

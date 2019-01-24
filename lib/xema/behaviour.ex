@@ -147,13 +147,7 @@ defmodule Xema.Behaviour do
       %Schema{id: id}, acc, path when not is_nil(id) ->
         case path == "#" do
           false ->
-            case Schema.fetch(schema, path) do
-              {:ok, schema} ->
-                Map.put(acc, id, schema)
-
-              :error ->
-                raise SchemaError, "Ref '#{path}' not found"
-            end
+            Map.put(acc, id, Schema.fetch!(schema, path))
 
           true ->
             Map.put(acc, id, :root)
@@ -169,41 +163,60 @@ defmodule Xema.Behaviour do
 
   defp put_ref(map, %Ref{uri: uri} = ref, _schema, module, resolver)
        when not is_nil(uri) do
-    case get_remote_schema(ref, module, resolver) do
-      nil ->
+    case remote?(ref) do
+      false ->
         map
 
-      schema ->
-        Map.put(map, URI.to_string(uri), schema)
+      true ->
+        key = uri |> Map.put(:fragment, nil) |> URI.to_string()
+
+        xema =
+          case Map.fetch(map, key) do
+            {:ok, schema} -> schema
+            :error -> get_remote_schema(ref, module, resolver)
+          end
+
+        xema =
+          case uri.fragment do
+            nil ->
+              xema
+
+            fragment ->
+              update_refs(xema, "##{fragment}")
+          end
+
+        Map.put(map, key, xema)
     end
   end
 
   defp put_ref(map, ref, schema, _module, _resolver) do
-    case Schema.fetch(schema, ref) do
-      {:ok, schema} ->
-        Map.put(map, ref.pointer, schema)
+    case Map.has_key?(map, ref.pointer) do
+      false ->
+        Map.put(map, ref.pointer, Schema.fetch!(schema, ref))
 
-      :error ->
-        raise SchemaError, "TODO: message"
+      true ->
+        map
     end
   end
 
+  defp update_refs(xema, pointer) do
+    schema = Schema.fetch!(xema.schema, pointer)
+
+    Map.update!(xema, :refs, fn refs ->
+      Map.put(refs, pointer, schema)
+    end)
+  end
+
   defp get_remote_schema(ref, module, resolver) do
-    case remote?(ref) do
-      false ->
+    case resolve(ref.uri, resolver) do
+      {:ok, nil} ->
         nil
 
-      true ->
-        case resolve(ref.uri, resolver) do
-          {:ok, nil} ->
-            nil
+      {:ok, data} ->
+        module.new(data)
 
-          {:ok, data} ->
-            module.new(data)
-
-          {:error, reason} ->
-            raise SchemaError, reason
-        end
+      {:error, reason} ->
+        raise SchemaError, reason
     end
   end
 

@@ -79,7 +79,7 @@ defmodule Xema do
   def init({:ref, pointer}), do: init({:any, ref: pointer})
 
   def init(data) do
-    # SchemaValidator.validate!(data)
+    SchemaValidator.validate!(data)
     schema(data)
   end
 

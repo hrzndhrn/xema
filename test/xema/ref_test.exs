@@ -5,6 +5,9 @@ defmodule Xema.RefTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.Ref
+  alias Xema.SchemaError
+
   describe "schema with ref root pointer" do
     setup do
       %{
@@ -49,6 +52,26 @@ defmodule Xema.RefTest do
     end
   end
 
+  describe "schema with ref root-id pointer" do
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :any,
+            id: "http://foo.com",
+            properties: %{
+              foo: {:ref, "http://foo.com"}
+            },
+            additional_properties: false
+          })
+      }
+    end
+
+    test "validate/2 with valid data", %{schema: schema} do
+      assert validate(schema, %{foo: 1}) == :ok
+    end
+  end
+
   describe "schema with a ref to property" do
     setup do
       %{
@@ -56,7 +79,8 @@ defmodule Xema.RefTest do
           Xema.new(
             properties: %{
               foo: :integer,
-              bar: {:ref, "#/properties/foo"}
+              bar: {:ref, "#/properties/foo"},
+              baz: {:ref, "#/properties/foo"}
             },
             additional_properties: false
           )
@@ -639,5 +663,21 @@ defmodule Xema.RefTest do
       data = %{percent: 123}
       assert valid?(schema, data)
     end
+  end
+
+  describe "build schema" do
+    test "with invalid ref" do
+      msg = "Ref #/foo not found."
+
+      assert_raise SchemaError, msg, fn ->
+        Xema.new({:ref, "#/foo"})
+      end
+    end
+  end
+
+  test "Ref.to_string/1" do
+    uri = URI.parse("http://foo.com")
+
+    assert "bar" |> Ref.new(uri) |> Ref.to_string() == "http://foo.com/bar"
   end
 end
