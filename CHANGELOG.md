@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.4
+
++ Increase ref performance.
+
 ## 0.6.3
 
 + Ignore unknown formatters.
