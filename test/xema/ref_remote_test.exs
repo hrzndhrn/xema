@@ -3,7 +3,6 @@ defmodule Xema.RefRemoteTest do
 
   import Xema, only: [validate: 2]
 
-  alias Xema.RefError
   alias Xema.SchemaError
 
   test "http server" do
@@ -65,32 +64,12 @@ defmodule Xema.RefRemoteTest do
       %{schema: Xema.new({:ref, "integer.exon"}, resolver: Test.FileResolver)}
     end
 
-    @tag :only
     test "validate/2 with a valid value", %{schema: schema} do
       assert validate(schema, 1) == :ok
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
       assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
-    end
-  end
-
-  describe "schema with invalid ref" do
-    setup do
-      schema =
-        {:ref, "http://localhost:1234/integer.exon"}
-        |> Xema.new()
-        |> Map.put(:refs, nil)
-
-      %{schema: schema}
-    end
-
-    test "validate/2 with a valid value", %{schema: schema} do
-      expected = "Reference 'http://localhost:1234/integer.exon' not found."
-
-      assert_raise RefError, expected, fn ->
-        validate(schema, 1)
-      end
     end
   end
 
@@ -111,6 +90,20 @@ defmodule Xema.RefRemoteTest do
 
     test "validate/2 with an invalid value", %{schema: schema} do
       assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+    end
+  end
+
+  describe "invalid fragment in remote ref" do
+    @tag :only
+    test "Xema.new/1 raise error" do
+      msg = "Ref #/definitions/invalid not found."
+
+      assert_raise SchemaError, msg, fn ->
+        Xema.new({
+          :ref,
+          "http://localhost:1234/sub_schemas.exon#/definitions/invalid"
+        })
+      end
     end
   end
 
@@ -214,6 +207,30 @@ defmodule Xema.RefRemoteTest do
             }
           })
       }
+    end
+
+    test "check schema", %{schema: schema} do
+      assert schema.refs["http://localhost:1234/xema_name.exon"] == %Xema{
+               refs: %{
+                 "#/definitions/or_nil" => %Xema.Schema{
+                   any_of: [
+                     %Xema.Schema{type: nil},
+                     %Xema.Schema{ref: %Xema.Ref{pointer: "#"}}
+                   ]
+                 }
+               },
+               schema: %Xema.Schema{
+                 definitions: %{
+                   or_nil: %Xema.Schema{
+                     any_of: [
+                       %Xema.Schema{type: nil},
+                       %Xema.Schema{ref: %Xema.Ref{pointer: "#"}}
+                     ]
+                   }
+                 },
+                 type: :string
+               }
+             }
     end
 
     test "validate/2 with a valid value", %{schema: schema} do

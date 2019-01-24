@@ -52,14 +52,15 @@ defmodule Xema.SchemaTest do
                  "%Xema.Schema{items: " <> "[%Xema.Schema{type: :integer}]}}"
     end
 
+    @tag :only
     test "schema with ref" do
-      xema = Xema.new({:map, properties: %{num: {:ref, "#/num"}}})
+      xema = Xema.new({:map, properties: %{num: {:ref, "#"}}})
 
       assert inspect(xema) ==
                "%Xema{refs: %{}, schema: " <>
                  "%Xema.Schema{properties: " <>
                  "%{num: %Xema.Schema{ref: " <>
-                 "%Xema.Ref{pointer: \"#/num\"}}}, " <> "type: :map}}"
+                 "%Xema.Ref{pointer: \"#\"}}}, " <> "type: :map}}"
     end
   end
 

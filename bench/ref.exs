@@ -1,5 +1,5 @@
 defmodule Bench do
-  defp fun do
+  def fun do
     schema =
       Xema.new(
         {:map,
@@ -15,15 +15,19 @@ defmodule Bench do
 
     data = %{neg: -5, pos: 6}
 
+    IO.puts("===")
+    IO.inspect(schema, limit: :infinity)
+
     fn -> true = Xema.valid?(schema, data) end
   end
 
   def run do
     Benchee.run(
-      %{"ref" => fun},
+      %{"ref" => fun()},
       parallel: 4,
       save:  [path: "bench/tmp/ref.benchee", tag: "master"],
       print: [fast_warning: false],
+      load: "bench/tmp/ref.benchee",
       formatters: [
         # &Benchee.Formatters.HTML.output/1,
         &Benchee.Formatters.Console.output/1

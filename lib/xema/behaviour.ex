@@ -119,8 +119,14 @@ defmodule Xema.Behaviour do
   def get_refs(%Schema{} = schema, module, resolver) do
     schema
     |> reduce(%{id: nil}, fn
+      %Ref{pointer: pointer, uri: nil} = ref, acc, _path ->
+        case pointer do
+          "#/" <> _ -> put_ref(acc, ref, schema, module, resolver)
+          _ -> acc
+        end
+
       %Ref{} = ref, acc, _path ->
-        put_ref(acc, ref, module, resolver)
+        put_ref(acc, ref, schema, module, resolver)
 
       %Schema{id: id}, acc, _path when not is_nil(id) ->
         update_id(acc, id)
@@ -139,7 +145,13 @@ defmodule Xema.Behaviour do
   def get_ids(%Schema{} = schema) do
     reduce(schema, %{}, fn
       %Schema{id: id}, acc, path when not is_nil(id) ->
-        Map.put(acc, id, Ref.new(path))
+        case path == "#" do
+          false ->
+            Map.put(acc, id, Schema.fetch!(schema, path))
+
+          true ->
+            Map.put(acc, id, :root)
+        end
 
       _xema, acc, _path ->
         acc
@@ -149,35 +161,62 @@ defmodule Xema.Behaviour do
   defp update_id(%{id: a} = map, b),
     do: Map.put(map, :id, Utils.update_uri(a, b))
 
-  defp put_ref(map, %Ref{uri: uri} = ref, module, resolver)
+  defp put_ref(map, %Ref{uri: uri} = ref, _schema, module, resolver)
        when not is_nil(uri) do
-    case get_schema(ref, module, resolver) do
-      nil ->
+    case remote?(ref) do
+      false ->
         map
 
-      schema ->
-        Map.put(map, URI.to_string(uri), schema)
+      true ->
+        key = uri |> Map.put(:fragment, nil) |> URI.to_string()
+
+        xema =
+          case Map.fetch(map, key) do
+            {:ok, schema} -> schema
+            :error -> get_remote_schema(ref, module, resolver)
+          end
+
+        xema =
+          case uri.fragment do
+            nil ->
+              xema
+
+            fragment ->
+              update_refs(xema, "##{fragment}")
+          end
+
+        Map.put(map, key, xema)
     end
   end
 
-  defp put_ref(map, _, _, _), do: map
-
-  defp get_schema(ref, module, resolver) do
-    case remote?(ref) do
+  defp put_ref(map, ref, schema, _module, _resolver) do
+    case Map.has_key?(map, ref.pointer) do
       false ->
-        nil
+        Map.put(map, ref.pointer, Schema.fetch!(schema, ref))
 
       true ->
-        case resolve(ref.uri, resolver) do
-          {:ok, nil} ->
-            nil
+        map
+    end
+  end
 
-          {:ok, data} ->
-            module.new(data)
+  defp update_refs(xema, pointer) do
+    schema = Schema.fetch!(xema.schema, pointer)
 
-          {:error, reason} ->
-            raise SchemaError, reason
-        end
+    Map.update!(xema, :refs, fn refs ->
+      Map.put(refs, pointer, schema)
+    end)
+  end
+
+  defp get_remote_schema(ref, module, resolver) do
+    case resolve(ref.uri, resolver) do
+      {:ok, nil} ->
+        nil
+
+      {:ok, data} ->
+        module.new(data)
+
+      {:error, reason} ->
+        raise SchemaError, reason
     end
   end
 
@@ -193,6 +232,7 @@ defmodule Xema.Behaviour do
       Regex.match?(~r/(\.[a-zA-Z]+)|\#$/, path) or
         String.ends_with?(pointer, "#")
 
+  # Invokes `fun` for each element in the schema tree with the accumulator.
   @spec reduce(Schema.t(), any, function) :: any
   defp reduce(schema, acc, fun) do
     reduce(schema, acc, "#", fun)
@@ -218,6 +258,12 @@ defmodule Xema.Behaviour do
         reduce(value, acc, Path.join(path, to_string(key)), fun)
     end)
   end
+
+  defp reduce(list, acc, path, fun) when is_list(list),
+    do:
+      Enum.reduce(list, acc, fn value, acc ->
+        reduce(value, acc, path, fun)
+      end)
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 

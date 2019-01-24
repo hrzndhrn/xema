@@ -14,6 +14,7 @@ defmodule Xema.Schema do
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaError
+  alias Xema.Utils
 
   @typedoc """
   The struct contains the keywords for a schema.
@@ -252,6 +253,72 @@ defmodule Xema.Schema do
       |> Map.keys()
       |> List.delete(:data)
 
+  @doc """
+  Fetches a subschema from the `schema` by the given `pointer`.
+
+  If `schema` contains the given pointer with a subschema, then `{:ok, schema}`
+  is returned otherwise `:error`.
+  """
+  @spec fetch(Schema.t(), Ref.t() | String.t()) :: {:ok, Schema.t()} | :error
+  def fetch(%Schema{} = schema, %Ref{pointer: pointer}),
+    do: fetch(schema, pointer)
+
+  def fetch(%Schema{} = schema, "#/" <> pointer), do: fetch(schema, pointer)
+
+  def fetch(%Schema{} = schema, pointer) do
+    keys = pointer |> String.trim("/") |> String.split("/")
+
+    case do_fetch(schema, keys) do
+      :error -> schema |> Map.get(:data, :error) |> do_fetch(keys)
+      schema -> schema
+    end
+  end
+
+  defp do_fetch(nil, _), do: :error
+
+  defp do_fetch(:error, _), do: :error
+
+  defp do_fetch(schema, []), do: {:ok, schema}
+
+  defp do_fetch(schema, [key | keys]) when is_list(schema) do
+    case Integer.parse(key) do
+      {index, ""} ->
+        with {:ok, schema} <- Enum.fetch(schema, index),
+             do: do_fetch(schema, keys)
+
+      _ ->
+        :error
+    end
+  end
+
+  defp do_fetch(schema, [key | keys]) do
+    key = decode(key)
+    atom_key = Utils.to_existing_atom(key)
+
+    schema =
+      case {Map.get(schema, key), Map.get(schema, atom_key)} do
+        {nil, nil} -> :error
+        {value, nil} -> value
+        {nil, value} -> value
+      end
+
+    do_fetch(schema, keys)
+  end
+
+  @doc """
+  Fetches a subschema from the `schema` by the given `pointer`.
+
+  If `schema` contains the given pointer with a subschema, then `{:ok, schema}`
+  is returned otherwise a `SchemaError` is raised.
+  """
+  @spec fetch!(Schema.t(), Ref.t() | String.t()) :: Schema.t()
+  def fetch!(%Schema{} = schema, pointer) do
+    case fetch(schema, pointer) do
+      {:ok, schema} -> schema
+      :error -> raise SchemaError, {:ref_not_found, pointer}
+    end
+  end
+
   # Validates the type/types in the given keywords.
   # The key `:type` can contain a type or a list of types.
   @spec validate_type!(keyword) :: keyword
@@ -334,6 +401,14 @@ defmodule Xema.Schema do
   @spec delete_nils(map) :: map
   defp delete_nils(schema),
     do: for({k, v} <- schema, not is_nil(v), into: %{}, do: {k, v})
+
+  @spec decode(String.t()) :: String.t()
+  defp decode(str) do
+    str
+    |> String.replace("~0", "~")
+    |> String.replace("~1", "/")
+    |> URI.decode()
+  end
 end
 
 defimpl Inspect, for: Xema.Schema do
