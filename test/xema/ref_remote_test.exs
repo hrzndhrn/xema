@@ -254,4 +254,20 @@ defmodule Xema.RefRemoteTest do
                 }}
     end
   end
+
+  describe "remote ref in remote ref" do
+    setup do
+      %{schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"})}
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      IO.inspect(schema)
+      assert validate(schema, %{int: 1}) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, %{int: "1"}) ==
+               {:error, %{properties: %{int: %{type: :integer, value: "1"}}}}
+    end
+  end
 end
