@@ -25,7 +25,7 @@ defmodule Bench do
     Benchee.run(
       %{"ref" => fun()},
       parallel: 4,
-      save:  [path: "bench/tmp/ref.benchee", tag: "master"],
+      save: [path: "bench/tmp/ref.benchee", tag: "master"],
       print: [fast_warning: false],
       load: "bench/tmp/ref.benchee",
       formatters: [
