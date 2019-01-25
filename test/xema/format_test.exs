@@ -39,7 +39,7 @@ defmodule FormatTest do
     test "with an invalid string", %{schema: schema} do
       assert validate(schema, "a(.*b") ==
                {:error,
-                %{format: :regex, reason: {'missing )', 5}, value: "a(.*b"}}
+                %{format: :regex, value: "a(.*b"}}
     end
   end
 end

@@ -922,15 +922,6 @@ defmodule Xema.Validator do
     end
   end
 
-  defp format(%{format: :regex}, str) do
-    case Regex.compile(str) do
-      {:ok, _} ->
-        :ok
-
-      {:error, reason} ->
-        {:error, %{format: :regex, value: str, reason: reason}}
-    end
-  end
 
   defp format(_, _str), do: :ok
 
