@@ -11,6 +11,7 @@ defmodule Xema.Format do
     :ipv4,
     :ipv6,
     :json_pointer,
+    :regex,
     :relative_json_pointer,
     :time,
     :uri,
@@ -31,6 +32,7 @@ defmodule Xema.Format do
           | :ipv4
           | :ipv6
           | :json_pointer
+          | :regex
           | :relative_json_pointer
           | :time
           | :uri
@@ -273,6 +275,14 @@ defmodule Xema.Format do
 
       _ ->
         false
+    end
+  end
+
+  @spec regex?(String.t()) :: boolean
+  def regex?(string) do
+    case Regex.compile(string) do
+      {:ok, _} -> true
+      {:error, _} -> false
     end
   end
 
