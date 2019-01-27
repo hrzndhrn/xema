@@ -296,8 +296,39 @@ defmodule Xema.RefRemoteTest do
                ]
     end
 
-    test "valid/2 with valid data", %{schema: schema} do
+    @tag :only
+    test "valid?/2 with valid data", %{schema: schema} do
       assert valid?(schema, %{ints: [1, 2, 3]})
+    end
+
+    @tag :only
+    test "valid?/2 with invalid data", %{schema: schema} do
+      refute valid?(schema, %{ints: [1, "2", 3]})
+    end
+  end
+
+  describe "circular remote ref" do
+    setup do
+      %{schema: Xema.new({:ref, "http://localhost:1234/b_in_a.exon"})}
+    end
+
+    @tag :only
+    test "check schema", %{schema: schema} do
+      assert Map.keys(schema.refs) ==
+               [
+                 "http://localhost:1234/a_in_b.exon",
+                 "http://localhost:1234/b_in_a.exon"
+               ]
+    end
+
+    @tag :only
+    test "valid?/2 with valid data", %{schema: schema} do
+      assert valid?(schema, %{a: %{b: 7}})
+    end
+
+    @tag :only
+    test "valid?/2 with invalid data", %{schema: schema} do
+      refute valid?(schema, %{a: %{b: "7"}})
     end
   end
 end
