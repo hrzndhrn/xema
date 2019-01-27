@@ -37,28 +37,18 @@ defmodule Xema.Behaviour do
 
       def new(%Schema{} = schema, opts) do
         schema = Behaviour.map_refs(schema)
+        remotes = Behaviour.get_remote_refs(schema, __MODULE__, opts)
+
+        xema =
+          struct!(
+            __MODULE__,
+            schema: schema,
+            refs: remotes
+          )
 
         case opts[:remotes] do
-          nil ->
-            remotes = Behaviour.get_remote_refs(schema, __MODULE__, opts)
-
-            xema =
-              struct!(
-                __MODULE__,
-                schema: schema,
-                refs: remotes
-              )
-
-            Behaviour.update_remote_refs(xema)
-
-          _ ->
-            remotes = Behaviour.get_remote_refs(schema, __MODULE__, opts)
-
-            struct!(
-              __MODULE__,
-              schema: schema,
-              refs: remotes
-            )
+          nil -> Behaviour.update_remote_refs(xema)
+          _remotes -> xema
         end
       end
 
