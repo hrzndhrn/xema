@@ -15,9 +15,6 @@ defmodule Bench do
 
     data = %{neg: -5, pos: 6}
 
-    IO.puts("===")
-    IO.inspect(schema, limit: :infinity)
-
     fn -> true = Xema.valid?(schema, data) end
   end
 

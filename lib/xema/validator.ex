@@ -35,7 +35,14 @@ defmodule Xema.Validator do
     do: do_validate(schema, value, opts)
 
   def validate(%{schema: schema} = xema, value, opts),
-    do: do_validate(schema, value, Keyword.put_new(opts, :root, xema))
+    do:
+      do_validate(
+        schema,
+        value,
+        opts
+        |> Keyword.put_new(:root, xema)
+        |> Keyword.put_new(:master, xema)
+      )
 
   @spec do_validate(Xema.t() | Xema.Schema.t(), any, keyword) :: result
   defp do_validate(%Schema{type: true}, _, _), do: :ok
