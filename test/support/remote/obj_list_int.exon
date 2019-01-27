@@ -1,0 +1,6 @@
+{
+  :map,
+  properties: %{
+    ints: {:ref, "http://localhost:1234/list_int.exon"}
+  }
+}
