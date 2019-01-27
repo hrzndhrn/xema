@@ -252,21 +252,28 @@ defmodule Xema.Behaviour do
       true ->
         key = uri |> Map.put(:fragment, nil) |> URI.to_string()
         remote_set = opts[:remotes] || MapSet.new()
-        remote_set = MapSet.put(remote_set, key)
 
-        schema =
-          get_remote_schema(
-            ref,
-            module,
-            Keyword.put(opts, :remotes, remote_set)
-          )
+        case MapSet.member?(remote_set, key) do
+          true ->
+            map
 
-        remotes = schema.refs
-        schema = Map.put(schema, :refs, %{})
+          false ->
+            remote_set = MapSet.put(remote_set, key)
 
-        map
-        |> Map.put(key, schema)
-        |> Map.merge(remotes)
+            schema =
+              get_remote_schema(
+                ref,
+                module,
+                Keyword.put(opts, :remotes, remote_set)
+              )
+
+            remotes = schema.refs
+            schema = Map.put(schema, :refs, %{})
+
+            map
+            |> Map.put(key, schema)
+            |> Map.merge(remotes)
+        end
     end
   end
 
