@@ -236,7 +236,6 @@ defmodule Xema.Behaviour do
     end)
   end
 
-
   @doc false
   @spec get_ids(Schema.t()) :: map | nil
   defp get_ids(%Schema{} = schema) do
@@ -275,7 +274,8 @@ defmodule Xema.Behaviour do
         remotes = schema.refs
         schema = Map.put(schema, :refs, %{})
 
-        Map.put(map, key, schema)
+        map
+        |> Map.put(key, schema)
         |> Map.merge(remotes)
     end
   end
