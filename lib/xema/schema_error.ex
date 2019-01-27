@@ -3,7 +3,6 @@ defmodule Xema.SchemaError do
   Raised when a schema can't be build.
   """
 
-  alias Xema.Ref
   alias Xema.SchemaError
 
   defexception [:message, :reason]
@@ -21,12 +20,6 @@ defmodule Xema.SchemaError do
   def exception({:invalid_types, types} = reason),
     do: %SchemaError{
       message: "Invalid types #{inspect(types)}.",
-      reason: reason
-    }
-
-  def exception({:ref_not_found, %Ref{} = ref} = reason),
-    do: %SchemaError{
-      message: "Ref #{Ref.to_string(ref)} not found.",
       reason: reason
     }
 

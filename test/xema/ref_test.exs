@@ -5,7 +5,6 @@ defmodule Xema.RefTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
-  alias Xema.Ref
   alias Xema.SchemaError
 
   describe "schema with ref root pointer" do
@@ -673,11 +672,5 @@ defmodule Xema.RefTest do
         Xema.new({:ref, "#/foo"})
       end
     end
-  end
-
-  test "Ref.to_string/1" do
-    uri = URI.parse("http://foo.com")
-
-    assert "bar" |> Ref.new(uri) |> Ref.to_string() == "http://foo.com/bar"
   end
 end

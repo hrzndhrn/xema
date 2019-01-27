@@ -80,13 +80,6 @@ defmodule Xema.Ref do
   end
 
   defp master?(key, opts), do: Map.has_key?(opts[:master].refs, key)
-
-  @doc """
-  Returns the string representation of a `%Ref{}`.
-  """
-  def to_string(%Ref{pointer: pointer, uri: nil}), do: pointer
-
-  def to_string(%Ref{uri: uri}), do: URI.to_string(uri)
 end
 
 defimpl Inspect, for: Xema.Ref do
