@@ -47,7 +47,7 @@ defmodule Xema.Behaviour do
           )
 
         case opts[:remotes] do
-          nil -> Behaviour.update_remote_refs(xema)
+          nil -> Behaviour.update_refs(xema)
           _remotes -> xema
         end
       end
@@ -120,9 +120,8 @@ defmodule Xema.Behaviour do
   end
 
   @doc false
-  # @spec update_remote_refs(%{required(String.t()) => __MODULE__.t()}) ::
-  # %{required(String.t()) => __MODULE__.t()}
-  def update_remote_refs(xema) do
+  @spec update_refs(struct) :: struct
+  def update_refs(xema) do
     refs_map =
       xema.refs
       |> Map.keys()
@@ -135,42 +134,58 @@ defmodule Xema.Behaviour do
       end)
 
     xema
-    |> do_update_refs(Map.fetch!(refs_map, :master))
-    |> do_update_refs_refs(refs_map)
-    |> do_update_refs_ids()
-    |> do_update_refs_refs_ids()
+    |> update_master_refs(Map.fetch!(refs_map, :master))
+    |> update_remote_refs(refs_map)
+    |> update_master_ids()
+    |> update_remote_ids()
   end
 
-  defp do_update_refs_ids(%{schema: schema} = xema)
+  defp update_master_ids(%{schema: schema} = xema)
        when not is_nil(schema),
        do:
          Map.update!(xema, :refs, fn value ->
            Map.merge(value, get_ids(schema))
          end)
 
-  defp do_update_refs_ids(value), do: value
+  defp update_master_ids(value), do: value
 
-  defp do_update_refs_refs_ids(%{refs: refs} = xema) do
+  defp get_ids(%Schema{} = schema) do
+    reduce(schema, %{}, fn
+      %Schema{id: id}, acc, path when not is_nil(id) ->
+        case path == "#" do
+          false ->
+            Map.put(acc, id, Schema.fetch!(schema, path))
+
+          true ->
+            Map.put(acc, id, :root)
+        end
+
+      _xema, acc, _path ->
+        acc
+    end)
+  end
+
+  defp update_remote_ids(%{refs: refs} = xema) do
     refs =
-      Enum.into(refs, %{}, fn {key, ref} -> {key, do_update_refs_ids(ref)} end)
+      Enum.into(refs, %{}, fn {key, ref} -> {key, update_master_ids(ref)} end)
 
     Map.update!(xema, :refs, fn value ->
       Map.merge(value, refs)
     end)
   end
 
-  defp do_update_refs(%{schema: schema} = xema, refs),
+  defp update_master_refs(%{schema: schema} = xema, refs),
     do:
       Map.update!(xema, :refs, fn value ->
         Map.merge(value, get_schema_refs(schema, refs))
       end)
 
-  defp do_update_refs_refs(%{refs: refs} = xema, refs_map) do
+  defp update_remote_refs(%{refs: refs} = xema, refs_map) do
     refs =
       Enum.into(refs, %{}, fn {key, ref} ->
         case Map.has_key?(refs_map, key) do
           true ->
-            {key, do_update_refs(ref, Map.get(refs_map, key))}
+            {key, update_master_refs(ref, Map.get(refs_map, key))}
 
           false ->
             {key, ref}
@@ -188,8 +203,7 @@ defmodule Xema.Behaviour do
         {key, Schema.fetch!(schema, key)}
       end)
 
-  @doc false
-  def get_refs_map(refs, key, %{schema: schema}) do
+  defp get_refs_map(refs, key, %{schema: schema}) do
     reduce(schema, refs, fn
       %Ref{pointer: pointer, uri: nil}, acc, _path ->
         case pointer do
@@ -213,33 +227,14 @@ defmodule Xema.Behaviour do
   end
 
   @doc false
-  @spec get_remote_refs(Schema.t(), atom, keyword) :: %{
-          required(String.t()) => Ref.t()
-        }
+  @spec get_remote_refs(Schema.t(), atom, keyword) ::
+          %{required(String.t()) => struct}
   def get_remote_refs(%Schema{} = schema, module, opts) do
     reduce(schema, %{}, fn
       %Ref{} = ref, acc, _path ->
         put_remote_ref(acc, ref, module, opts)
 
       _, acc, _path ->
-        acc
-    end)
-  end
-
-  @doc false
-  @spec get_ids(Schema.t()) :: map | nil
-  defp get_ids(%Schema{} = schema) do
-    reduce(schema, %{}, fn
-      %Schema{id: id}, acc, path when not is_nil(id) ->
-        case path == "#" do
-          false ->
-            Map.put(acc, id, Schema.fetch!(schema, path))
-
-          true ->
-            Map.put(acc, id, :root)
-        end
-
-      _xema, acc, _path ->
         acc
     end)
   end
@@ -260,18 +255,18 @@ defmodule Xema.Behaviour do
           false ->
             remote_set = MapSet.put(remote_set, key)
 
-            schema =
+            xema =
               get_remote_schema(
                 ref,
                 module,
                 Keyword.put(opts, :remotes, remote_set)
               )
 
-            remotes = schema.refs
-            schema = Map.put(schema, :refs, %{})
+            remotes = xema.refs
+            xema = Map.put(xema, :refs, %{})
 
             map
-            |> Map.put(key, schema)
+            |> Map.put(key, xema)
             |> Map.merge(remotes)
         end
     end
@@ -342,7 +337,6 @@ defmodule Xema.Behaviour do
   # Returns a schema tree where each schema is the result of invoking `fun` on
   # each schema. The function gets also the current `ìd` for the schema. The
   # `id` could be `nil` or a `%URI{}` struct.
-  @doc false
   @spec map(Schema.t(), function) :: Schema.t() | Ref.t()
   defp map(schema, fun), do: map(schema, fun, nil)
 
