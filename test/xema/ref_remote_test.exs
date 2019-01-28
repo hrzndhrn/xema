@@ -1,7 +1,7 @@
 defmodule Xema.RefRemoteTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [validate: 2]
+  import Xema, only: [valid?: 2, validate: 2]
 
   alias Xema.SchemaError
 
@@ -94,7 +94,6 @@ defmodule Xema.RefRemoteTest do
   end
 
   describe "invalid fragment in remote ref" do
-    @tag :only
     test "Xema.new/1 raise error" do
       msg = "Ref #/definitions/invalid not found."
 
@@ -252,6 +251,84 @@ defmodule Xema.RefRemoteTest do
                     }
                   }
                 }}
+    end
+  end
+
+  describe "remote ref in remote ref" do
+    setup do
+      %{schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"})}
+    end
+
+    test "check schema", %{schema: schema} do
+      assert Map.keys(schema.refs) == [
+               "http://localhost:1234/integer.exon",
+               "http://localhost:1234/obj_int.exon"
+             ]
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, %{int: 1}) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, %{int: "1"}) ==
+               {:error, %{properties: %{int: %{type: :integer, value: "1"}}}}
+    end
+  end
+
+  describe "remote ref in remote ref in remote ref" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:ref, "http://localhost:1234/obj_list_int.exon"},
+            resolver: Test.FileResolver
+          )
+      }
+    end
+
+    test "check schema", %{schema: schema} do
+      assert Map.keys(schema.refs) ==
+               [
+                 "http://localhost:1234/integer.exon",
+                 "http://localhost:1234/list_int.exon",
+                 "http://localhost:1234/obj_list_int.exon"
+               ]
+    end
+
+    @tag :only
+    test "valid?/2 with valid data", %{schema: schema} do
+      assert valid?(schema, %{ints: [1, 2, 3]})
+    end
+
+    @tag :only
+    test "valid?/2 with invalid data", %{schema: schema} do
+      refute valid?(schema, %{ints: [1, "2", 3]})
+    end
+  end
+
+  describe "circular remote ref" do
+    setup do
+      %{schema: Xema.new({:ref, "http://localhost:1234/b_in_a.exon"})}
+    end
+
+    @tag :only
+    test "check schema", %{schema: schema} do
+      assert Map.keys(schema.refs) ==
+               [
+                 "http://localhost:1234/a_in_b.exon",
+                 "http://localhost:1234/b_in_a.exon"
+               ]
+    end
+
+    @tag :only
+    test "valid?/2 with valid data", %{schema: schema} do
+      assert valid?(schema, %{a: %{b: 7}})
+    end
+
+    @tag :only
+    test "valid?/2 with invalid data", %{schema: schema} do
+      refute valid?(schema, %{a: %{b: "7"}})
     end
   end
 end

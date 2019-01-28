@@ -1,0 +1,10 @@
+{
+  :map,
+  properties: %{
+    a: {:ref, "http://localhost:1234/a_in_b.exon#/definitions/a"}
+  },
+  additional_properties: false,
+  definitions: %{
+    b: :integer
+  }
+}

@@ -1,0 +1,4 @@
+{
+  :list,
+  items: {:ref, "http://localhost:1234/integer.exon"}
+}

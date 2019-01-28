@@ -2,7 +2,9 @@
 
 ## 0.6.4
 
-+ Increase ref performance.
++ Increase `ref` performance.
++ Fix option `:resolver` in `Xema.new/2`.
++ Refactor `ref` handling,
 
 ## 0.6.3
 

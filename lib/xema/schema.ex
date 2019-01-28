@@ -260,9 +260,6 @@ defmodule Xema.Schema do
   is returned otherwise `:error`.
   """
   @spec fetch(Schema.t(), Ref.t() | String.t()) :: {:ok, Schema.t()} | :error
-  def fetch(%Schema{} = schema, %Ref{pointer: pointer}),
-    do: fetch(schema, pointer)
-
   def fetch(%Schema{} = schema, "#/" <> pointer), do: fetch(schema, pointer)
 
   def fetch(%Schema{} = schema, pointer) do

@@ -1,0 +1,12 @@
+{
+  :any,
+  definitions: %{
+    a: {
+      :map,
+      properties: %{
+        b: {:ref, "http://localhost:1234/b_in_a.exon#/definitions/b"}
+      },
+      additional_properties: false
+    }
+  }
+}

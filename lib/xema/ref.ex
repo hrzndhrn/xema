@@ -45,12 +45,21 @@ defmodule Xema.Ref do
     do: Xema.validate(opts[:root], value, opts)
 
   def validate(%Ref{pointer: pointer, uri: nil}, value, opts),
-    do: validate(pointer, value, opts)
+    do:
+      opts[:root].refs
+      |> Map.fetch!(pointer)
+      |> Xema.validate(value, opts)
 
   def validate(%Ref{uri: uri}, value, opts) do
     key = uri |> Map.put(:fragment, nil) |> URI.to_string()
 
-    case Map.fetch!(opts[:root].refs, key) do
+    source =
+      case master?(key, opts) do
+        true -> :master
+        false -> :root
+      end
+
+    case Map.fetch!(opts[source].refs, key) do
       %Schema{} = schema ->
         Xema.validate(schema, value, opts)
 
@@ -70,18 +79,7 @@ defmodule Xema.Ref do
     end
   end
 
-  def validate(pointer, value, opts),
-    do:
-      opts[:root].refs
-      |> Map.fetch!(pointer)
-      |> Xema.validate(value, opts)
-
-  @doc """
-  Returns the string representation of a `%Ref{}`.
-  """
-  def to_string(%Ref{pointer: pointer, uri: nil}), do: pointer
-
-  def to_string(%Ref{uri: uri}), do: URI.to_string(uri)
+  defp master?(key, opts), do: Map.has_key?(opts[:master].refs, key)
 end
 
 defimpl Inspect, for: Xema.Ref do
