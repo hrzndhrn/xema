@@ -25,7 +25,7 @@ defmodule Xema.Mixfile do
         extras: [
           "docs/readme.md",
           "docs/usage.md",
-          "docs/resolver.md",
+          "docs/loader.md",
           "docs/unsupported.md"
         ],
         main: "readme"
@@ -74,7 +74,7 @@ defmodule Xema.Mixfile do
         "LICENSE*",
         "docs/readme.md",
         "docs/usage.md",
-        "docs/resolver.md",
+        "docs/loader.md",
         "docs/unsupported.md"
       ]
     ]

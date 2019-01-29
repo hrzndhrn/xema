@@ -1,7 +1,7 @@
-defmodule Test.FileResolver do
+defmodule Test.FileLoader do
   @moduledoc false
 
-  @behaviour Xema.Resolver
+  @behaviour Xema.Loader
 
   @spec fetch(binary) :: {:ok, map} | {:error, any}
   def fetch(uri),

@@ -3,7 +3,7 @@ defmodule Xema.Behaviour do
   A behaviour module for implementing a schema validator.
   """
 
-  alias Xema.NoResolver
+  alias Xema.NoLoader
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.Utils
@@ -60,14 +60,6 @@ defmodule Xema.Behaviour do
       """
       @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok
-
-      @doc """
-      Returns `true` if the `value` is a valid value against the given `schema`;
-      otherwise returns `false`.
-      """
-      @deprecated "Use valid? instead"
-      @spec is_valid?(__MODULE__.t() | Schema.t(), any) :: boolean
-      def is_valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
@@ -273,7 +265,7 @@ defmodule Xema.Behaviour do
   end
 
   defp get_remote_schema(ref, module, opts) do
-    case resolve(ref.uri, opts[:resolver]) do
+    case resolve(ref.uri, opts[:loader]) do
       {:ok, nil} ->
         nil
 
@@ -286,9 +278,9 @@ defmodule Xema.Behaviour do
   end
 
   defp resolve(uri, nil),
-    do: Application.get_env(:xema, :resolver, NoResolver).fetch(uri)
+    do: Application.get_env(:xema, :loader, NoLoader).fetch(uri)
 
-  defp resolve(uri, resolver), do: resolver.fetch(uri)
+  defp resolve(uri, loader), do: loader.fetch(uri)
 
   defp remote?(%Ref{uri: nil}), do: false
 

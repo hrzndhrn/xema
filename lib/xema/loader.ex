@@ -1,6 +1,6 @@
-defmodule Xema.Resolver do
+defmodule Xema.Loader do
   @moduledoc """
-  The behaviour for resolvers.
+  The behaviour for loaders.
   """
 
   @doc """
