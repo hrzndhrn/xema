@@ -16,10 +16,9 @@ defmodule Xema do
   This function creates the schema from the given `data`.
 
   Possible options:
-  + `:resolver` - a resolver for remote schemas. This option will overwrite the
-                  resolver from the config. See
-                  [Configure a resolver](resolver.html) to how to define a
-                  resolver.
+  + `:loader` - a loader for remote schemas. This option will overwrite the
+                loader from the config.
+                See [Configure a loader](loader.html) to how to define a loader.
 
   ## Examples
 

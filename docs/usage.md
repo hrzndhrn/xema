@@ -857,12 +857,12 @@ iex> positive = Xema.new {:integer, minimum: 1}
 
 ### <a id="multiple-files"></a> In multiple files
 
-To structure schemas in multiple files you have to configure a resolver to laod
-the files. The section "[Configure a resolver](resolver.html)" described the
-configuration and implementation of an resolver.
+To structure schemas in multiple files you have to configure a loader to laod
+the files. The section "[Configure a loader](loader.html)" described the
+configuration and implementation of an loader.
 
 Let's assume you have the following file available at
-https://localhost:1234/positive.exon.
+`https://localhost:1234/positive.exon`.
 
 ```elixir
 {
@@ -874,7 +874,7 @@ https://localhost:1234/positive.exon.
 ```
 
 I admit this example is a little absurd.
-But the URL could be also any other URL and with another resolver, the file
+But the URL could be also any other URL and with another loader, the file
 could be on your hard disk.
 
 You can use the schema above as follow.

@@ -1,10 +1,12 @@
 # Changelog
 
-## 0.6.4
+## 0.7.0
 
 + Increase `ref` performance.
 + Fix option `:resolver` in `Xema.new/2`.
 + Refactor `ref` handling,
++ Rename `resolver` to `loader`.
++ Remove deprecated function `Xema.is_valid/2`.
 
 ## 0.6.3
 
