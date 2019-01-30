@@ -1,7 +1,6 @@
 defmodule Xema.Validator do
-  @moduledoc """
-  This module contains all validators to check data against a schema.
-  """
+  @moduledoc false
+  # This module contains all validators to check data against a schema.
 
   use Xema.Format
 

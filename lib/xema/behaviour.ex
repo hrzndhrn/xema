@@ -1,7 +1,8 @@
 defmodule Xema.Behaviour do
-  @moduledoc """
-  A behaviour module for implementing a schema validator.
-  """
+  @moduledoc false
+
+  # A behaviour module for implementing a schema validator. This behaviour is
+  # just for `Xema` and `JsonXema`.
 
   alias Xema.NoLoader
   alias Xema.Ref
@@ -26,8 +27,8 @@ defmodule Xema.Behaviour do
       @enforce_keys [:schema]
 
       @type t :: %__MODULE__{
-              schema: any,
-              refs: any
+              schema: Schema.t,
+              refs: map
             }
 
       defstruct schema: %Schema{},

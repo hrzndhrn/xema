@@ -1,15 +1,6 @@
 defmodule Xema.Schema do
-  @moduledoc """
-  This module contains the struct for the keywords of a schema.
-
-  Usually this struct will be just used by `xema`.
-
-  ## Examples
-
-      iex> xema = Xema.new :any
-      iex> xema.schema == %Xema.Schema{type: :any}
-      true
-  """
+  @moduledoc false
+  # This module contains the struct for the keywords of a schema.
 
   alias Xema.Ref
   alias Xema.Schema

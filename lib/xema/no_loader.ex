@@ -1,7 +1,8 @@
 defmodule Xema.NoLoader do
   @moduledoc """
-  The default loader. For the loader configuration see
-  "[Configure a loader](loader.html)".
+  The default loader.
+
+  For the loader configuration see "[Configure a loader](loader.html)".
   """
 
   @behaviour Xema.Loader

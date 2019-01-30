@@ -1,7 +1,6 @@
 defmodule Xema.Format do
-  @moduledoc """
-  This module contains semantic validators for strings.
-  """
+  @moduledoc false
+  # This module contains semantic validators for strings.
 
   @formats [
     :date,
