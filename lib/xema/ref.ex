@@ -71,6 +71,7 @@ defmodule Xema.Ref do
         schema =
           case uri.fragment do
             nil -> xema
+            "" -> xema
             fragment -> Map.fetch!(xema.refs, "##{fragment}")
           end
 
