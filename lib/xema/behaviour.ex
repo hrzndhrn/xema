@@ -27,7 +27,7 @@ defmodule Xema.Behaviour do
       @enforce_keys [:schema]
 
       @type t :: %__MODULE__{
-              schema: Schema.t,
+              schema: Schema.t(),
               refs: map
             }
 
