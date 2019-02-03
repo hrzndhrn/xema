@@ -47,7 +47,7 @@ defmodule Xema.RefRemoteTest do
 
   describe "remote ref" do
     setup do
-      %{schema: Xema.new({:ref, "http://localhost:1234/integer.exon"})}
+      %{schema: Xema.new({:ref, "http://localhost:1234/integer.exon#"})}
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
