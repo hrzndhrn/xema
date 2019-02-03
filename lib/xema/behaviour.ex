@@ -209,6 +209,9 @@ defmodule Xema.Behaviour do
           nil ->
             acc
 
+          "" ->
+            acc
+
           fragment ->
             key = uri |> Map.put(:fragment, nil) |> URI.to_string()
             Map.update!(acc, key, fn list -> ["##{fragment}" | list] end)
