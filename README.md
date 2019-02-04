@@ -10,6 +10,9 @@ JSON-Schema specification.
 
 Xema allows you to annotate and validate elixir data structures.
 
+If you search for a real JSON Schema validator give
+[JsonXema](https://github.com/hrzndhrn/json_xema) a try.
+
 Xema is in early beta. If you try it and has an issue, report them.
 
 ## Installation
@@ -18,7 +21,7 @@ First, add Xema to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
-  [{:xema, "~> 0.6"}]
+  [{:xema, "~> 0.7"}]
 end
 ```
 
@@ -27,15 +30,6 @@ Then, update your dependencies:
 ```Shell
 $ mix deps.get
 ```
-
-## Changelog
-
-Version 0.5.0 coming soon.
-
-Since version 0.5.0 a [changelog](CHANGELOG.md) is available.
-
-To update to version 0.5.0 some migrations steps are required, see
-[changelog](CHANGELOG.md).
 
 ## Docs
 
@@ -47,6 +41,16 @@ Documentation can be generated with
 generated docs can be found at
 [https://hexdocs.pm/xema](https://hexdocs.pm/xema).
 
+## Changelog
+
+Version 0.5.0 coming soon.
+
+Since version 0.5.0 a [changelog](CHANGELOG.md) is available.
+
+To update to version 0.5.0 some migrations steps are required, see
+[changelog](CHANGELOG.md).
+
+In version 0.7.0 the behaviour `Xema.Resolver` was renamed to `Xema.Loader`.
 
 ## Tests
 
