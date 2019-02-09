@@ -12,6 +12,21 @@ defmodule Xema do
   @keywords Schema.keywords()
   @types Schema.types()
 
+  defmacro __using__(_opts) do
+    quote do
+      import Xema.Builder
+
+      def valid?(schema, value),
+        do: Xema.valid?(apply(__MODULE__, schema, []), value)
+
+      def validate(schema, value),
+        do: Xema.validate(apply(__MODULE__, schema, []), value)
+
+      def validate!(schema, value),
+        do: Xema.validate!(apply(__MODULE__, schema, []), value)
+    end
+  end
+
   @doc """
   This function creates the schema from the given `data`.
 

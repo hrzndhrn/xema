@@ -11,7 +11,7 @@ defmodule Xema.BuilderTest do
     end
   end
 
- describe "map function" do
+  describe "map function" do
     test "with a simple schema" do
       schema = Xema.new(map())
 
