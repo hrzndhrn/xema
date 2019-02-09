@@ -1,6 +1,15 @@
 defmodule Xema.Builder do
   @moduledoc """
-  TODO moduledoc
+  This module contains some convenience functions to generate schemas.
+
+  ## Examples
+
+      iex> import Xema.Builder
+      ...> schema = Xema.new integer(minimum: 1)
+      ...> Xema.valid?(schema, 6)
+      true
+      ...> Xema.valid?(schema, 0)
+      false
   """
 
   @funs ~w(
@@ -24,8 +33,8 @@ defmodule Xema.Builder do
 
     ## Examples
 
-        iex> Xema.Build.#{fun}(key: 42)
-        iex> {:#{fun}, [key: 42]}
+        iex> Xema.Builder.#{fun}(key: 42)
+        {:#{fun}, [key: 42]}
     """
     @spec unquote(fun)(keyword) :: {unquote(fun), keyword}
     def unquote(fun)(keywords \\ []) when is_list(keywords) do
@@ -34,12 +43,12 @@ defmodule Xema.Builder do
   end)
 
   @doc """
-  TODO ref
+  Returns the tuple `{:ref, ref}`.
   """
   def ref(ref) when is_binary(ref), do: {:ref, ref}
 
   @doc """
-  TODO defxema
+  Create a function with the `name` that returns the given `schema`.
   """
   defmacro defxema(name, schema) do
     xema =

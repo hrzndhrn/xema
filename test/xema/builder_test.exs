@@ -1,6 +1,8 @@
 defmodule Xema.BuilderTest do
   use ExUnit.Case, async: true
 
+  doctest Xema.Builder
+
   import Xema.Builder
 
   describe "any function" do
