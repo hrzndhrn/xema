@@ -1,6 +1,61 @@
 defmodule Xema do
   @moduledoc """
-  A schema validator inspired by [JSON Schema](http://json-schema.org)
+  A schema validator inspired by [JSON Schema](http://json-schema.org).
+
+  All available keywords to construct a schema are described on page
+  [Usage](usage.html).
+
+  This module can be used to construct a schema module.
+
+  `use Xema` imports `Xema.Builder` and extends the module with the functions
+  + `__MODULE__.valid?/2`
+  + `__MODULE__.validate/2`
+  + `__MODULE__.validate!/2`
+
+  The macro `defxema/2` supports the construction of a schema. After that
+  the schema is available as a function.
+
+  ## Example
+
+  ```elixir
+  defmodule Schema do
+    use Xema
+
+    @pos integer(minimum: 0)
+    @neg integer(maximum: 0)
+
+    defxema user,
+            map(
+              properties: %{
+                name: string(min_length: 1),
+                age: @pos
+              }
+            )
+
+    defxema nums,
+            map(
+              properties: %{
+                pos: list(items: @pos),
+                neg: list(items: @neg)
+              }
+            )
+  end
+  ```
+
+  The module `Schema` can now be used like this.
+
+  ```elixir
+  true = Schema.valid?(:user, %{name: "John", age: 21})
+  false = Schema.valid?(:user, %{name: "", age: 21})
+
+  :ok = Schema.validate(:user, %{name: "John", age: 21})
+  {:error, reason} = Schema.validate(:user, %{name: "", age: 21})
+
+  true = Schema.valid?(:nums, %{pos: [1, 2, 3]})
+  false = Schema.valid?(:nums, %{neg: [1, 2, 3]})
+
+  %Xema{} = Schema.user()
+  %Xema{} = Schema.nums()
   """
 
   use Xema.Behaviour
@@ -11,6 +66,21 @@ defmodule Xema do
 
   @keywords Schema.keywords()
   @types Schema.types()
+
+  defmacro __using__(_opts) do
+    quote do
+      import Xema.Builder
+
+      def valid?(schema, value),
+        do: Xema.valid?(apply(__MODULE__, schema, []), value)
+
+      def validate(schema, value),
+        do: Xema.validate(apply(__MODULE__, schema, []), value)
+
+      def validate!(schema, value),
+        do: Xema.validate!(apply(__MODULE__, schema, []), value)
+    end
+  end
 
   @doc """
   This function creates the schema from the given `data`.
