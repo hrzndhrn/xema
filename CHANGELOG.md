@@ -8,6 +8,7 @@
 + Rename `resolver` to `loader`.
 + Remove deprecated function `Xema.is_valid/2`.
 + Reduce public API docs.
++ Add `Xema.Builder` and `use Xema`.
 
 ## 0.6.3
 
