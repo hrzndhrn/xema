@@ -17,6 +17,14 @@ defmodule Xema.UseTest do
               }
             )
 
+    defxema person,
+            keyword(
+              properties: %{
+                name: string(min_length: 1),
+                age: @pos
+              }
+            )
+
     defxema nums,
             map(
               properties: %{
@@ -32,6 +40,18 @@ defmodule Xema.UseTest do
 
   test "nums/0 returns Xema" do
     assert %Xema{} = Schema.nums()
+  end
+
+  test "person/0 returns Xema" do
+    assert %Xema{} = Schema.person()
+  end
+
+  test "valid?/2 returns true for a valid person" do
+    assert Schema.valid?(:person, [name: "John", age: 21])
+  end
+
+  test "valid?/2 returns false for an invalid person" do
+    refute Schema.valid?(:person, [name: "John", age: -21])
   end
 
   test "valid?/2 returns true for a valid user" do
