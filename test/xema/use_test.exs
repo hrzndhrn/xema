@@ -26,6 +26,14 @@ defmodule Xema.UseTest do
             )
   end
 
+  test "user/0 returns Xema" do
+    assert %Xema{} = Schema.user()
+  end
+
+  test "nums/0 returns Xema" do
+    assert %Xema{} = Schema.nums()
+  end
+
   test "valid?/2 returns true for a valid user" do
     assert Schema.valid?(:user, %{name: "John", age: 21})
   end

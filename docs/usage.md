@@ -1,45 +1,11 @@
 # Usage
 
-* [Type any](#any)
-* [Type nil](#nil)
-* [Type boolean](#boolean)
-* [Type atom](#atom)
-* [Type string](#string)
-  * [Length](#length)
-  * [Regular Expression](#regex)
-  * [Format](#fmt)
-* [Types number, integer and float](#number)
-  * [Multiples](#multi)
-  * [Range](#range)
-* [Type list](#list)
-  * [Items](#items)
-  * [Additional Items](#additional_items)
-  * [Length](#list_length)
-  * [Uniqueness](#unique)
-* [Type tuple](#tuple)
-* [Type map](#map)
-  * [Keys](#keys)
-  * [Properties](#properties)
-  * [Required Properties](#required_properties)
-  * [Additional Properties](#additional_properties)
-  * [Pattern Properties](#pattern_properties)
-  * [Size](#map_size)
-  * [Key types](#key_types)
-* [Type struct](#struct)
-* [Multiples Types](#multi_types)
-* [Allow Additional Types](#allow)
-* [Constants](#const)
-* [Enumerations](#enum)
-* [Negate Schema](#not)
-* [If-Then-Else](#if_then_else)
-* [Combine Schemas](#combine)
-* [Structuring a schema](#structuring)
-  * [`definitions` and `ref`](#def-ref)
-  * [without `definitions` and `ref`](#without-def-ref)
-  * [in multiple files](#multiple-files)
+This page describes all keywords that are available for creating a schema.
+All schemas will construct in the "raw" format. The `Xema.Builder` provides some
+convenience functions to create schemas. The recommended method to construct a
+schema is `use Xema` described in the module documentation of `Xema`.
 
-
-## <a id="any"></a> Type any
+## Type any
 
 The schema any will accept any data.
 
@@ -116,7 +82,7 @@ iex> Xema.valid? schema, 42
 false
 ```
 
-### <a id="length"></a> Length
+### Length
 
 The length of a string can be constrained using the `min_length` and `max_length`
 keywords. For both keywords, the value must be a non-negative number.
