@@ -11,7 +11,6 @@ defmodule Xema.Mixfile do
       deps: deps(),
       description: description(),
       package: package(),
-      aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
       source_url: "https://github.com/hrzndhrn/xema",
 
@@ -85,18 +84,4 @@ defmodule Xema.Mixfile do
       ]
     ]
   end
-
-  defp aliases do
-    [
-      credo: ["credo --strict"],
-      spec: &spec/1,
-      check: &check/1,
-      check_test: ["test", "credo", "spec"]
-    ]
-  end
-
-  defp spec(_), do: Mix.shell().cmd("mix dialyzer", env: [{"MIX_ENV", "test"}])
-
-  defp check(_),
-    do: Mix.shell().cmd("mix check_test", env: [{"MIX_ENV", "test"}])
 end
