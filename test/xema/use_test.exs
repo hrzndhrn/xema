@@ -47,11 +47,11 @@ defmodule Xema.UseTest do
   end
 
   test "valid?/2 returns true for a valid person" do
-    assert Schema.valid?(:person, [name: "John", age: 21])
+    assert Schema.valid?(:person, name: "John", age: 21)
   end
 
   test "valid?/2 returns false for an invalid person" do
-    refute Schema.valid?(:person, [name: "John", age: -21])
+    refute Schema.valid?(:person, name: "John", age: -21)
   end
 
   test "valid?/2 returns true for a valid user" do
