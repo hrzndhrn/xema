@@ -266,6 +266,7 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with valid value", %{schema: schema} do
+      IO.inspect(schema)
       assert validate(schema, %{foo: 42}) == :ok
     end
 
@@ -471,6 +472,7 @@ defmodule Xema.RefTest do
       }
     end
 
+    @tag :only
     test "validate/2 with a valid root", %{schema: schema} do
       tree = %{
         meta: "root",

@@ -259,6 +259,7 @@ defmodule Xema.RefRemoteTest do
       %{schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"})}
     end
 
+    @tag :only
     test "check schema", %{schema: schema} do
       assert Map.keys(schema.refs) == [
                "http://localhost:1234/integer.exon",
@@ -296,12 +297,10 @@ defmodule Xema.RefRemoteTest do
                ]
     end
 
-    @tag :only
     test "valid?/2 with valid data", %{schema: schema} do
       assert valid?(schema, %{ints: [1, 2, 3]})
     end
 
-    @tag :only
     test "valid?/2 with invalid data", %{schema: schema} do
       refute valid?(schema, %{ints: [1, "2", 3]})
     end
@@ -312,7 +311,6 @@ defmodule Xema.RefRemoteTest do
       %{schema: Xema.new({:ref, "http://localhost:1234/b_in_a.exon"})}
     end
 
-    @tag :only
     test "check schema", %{schema: schema} do
       assert Map.keys(schema.refs) ==
                [
@@ -321,12 +319,10 @@ defmodule Xema.RefRemoteTest do
                ]
     end
 
-    @tag :only
     test "valid?/2 with valid data", %{schema: schema} do
       assert valid?(schema, %{a: %{b: 7}})
     end
 
-    @tag :only
     test "valid?/2 with invalid data", %{schema: schema} do
       refute valid?(schema, %{a: %{b: "7"}})
     end

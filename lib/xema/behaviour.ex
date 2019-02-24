@@ -48,7 +48,7 @@ defmodule Xema.Behaviour do
           )
 
         case opts[:remotes] do
-          nil -> Behaviour.update_refs(xema)
+          nil -> Behaviour.update_refs(xema, opts)
           _remotes -> xema
         end
       end
@@ -113,8 +113,8 @@ defmodule Xema.Behaviour do
   end
 
   @doc false
-  @spec update_refs(struct) :: struct
-  def update_refs(xema) do
+  @spec update_refs(struct, keyword) :: struct
+  def update_refs(xema, opts) do
     refs_map =
       xema.refs
       |> Map.keys()
@@ -131,6 +131,64 @@ defmodule Xema.Behaviour do
     |> update_remote_refs(refs_map)
     |> update_master_ids()
     |> update_remote_ids()
+    |> inline(opts)
+  end
+
+  defp inline(xema, opts) do
+    case Keyword.get(opts, :inline, true) do
+      true -> inline(xema)
+      false -> xema
+    end
+  end
+
+  defp inline(xema) do
+    ref_list = Map.keys(xema.refs)
+    ref_list = Enum.filter(ref_list, fn ref -> !circular?(xema, ref) end)
+    inline_refs(xema, ref_list)
+  end
+
+  defp inline_refs(%Schema{} = schema, ref_list, refs) do
+    map(schema, fn
+      %Schema{ref: ref} = schema, _id when not is_nil(ref) ->
+        key = Ref.key(ref)
+        IO.inspect(key, label: :key)
+    IO.puts("--- 155")
+    IO.inspect ref
+
+        case Enum.member?(ref_list, key) do
+          true -> inline_refs(refs[key], ref_list, refs)
+          false -> schema
+        end
+
+      value, _id ->
+        value
+    end)
+  end
+
+  defp inline_refs(%Ref{} = ref, ref_list, refs) do
+    key = Ref.key(ref)
+
+    IO.puts("---")
+    IO.inspect ref
+
+    case Enum.member?(ref_list, key) do
+      true -> inline_refs(refs[key], ref_list, refs)
+      false -> ref
+    end
+  end
+
+  defp inline_refs(xema, ref_list) do
+    IO.puts("===")
+    IO.inspect(xema)
+    schema = inline_refs(xema.schema, ref_list, xema.refs)
+
+    refs =
+      Enum.filter(xema.refs, fn {ref, _} -> !Enum.member?(ref_list, ref) end)
+      |> Enum.into(%{})
+
+    xema
+    |> Map.put(:schema, schema)
+    |> Map.put(:refs, refs)
   end
 
   defp update_master_ids(%{schema: schema} = xema)
@@ -213,7 +271,7 @@ defmodule Xema.Behaviour do
             acc
 
           fragment ->
-            key = uri |> Map.put(:fragment, nil) |> URI.to_string()
+            key = Ref.key(uri)
             Map.update!(acc, key, fn list -> ["##{fragment}" | list] end)
         end
 
@@ -241,7 +299,7 @@ defmodule Xema.Behaviour do
         map
 
       true ->
-        key = uri |> Map.put(:fragment, nil) |> URI.to_string()
+        key = Ref.key(uri)
         remote_set = opts[:remotes] || MapSet.new()
 
         case MapSet.member?(remote_set, key) do
@@ -357,4 +415,41 @@ defmodule Xema.Behaviour do
     do: Enum.map(list, fn v -> map(v, fun, id) end)
 
   defp map(value, _fun, _id), do: value
+
+  # Returns true if the `reference` builds up a circular reference.
+  @spec circular?(__MODULE__.t(), String.t()) :: boolean
+  defp circular?(xema, reference),
+    do: circular?(xema.refs[reference], reference, xema, [])
+
+  defp circular?(%Ref{} = ref, reference, root, acc) do
+    key = Ref.key(ref)
+
+    with false <- key == reference do
+      case Enum.member?(acc, key) do
+        true -> false
+        false -> circular?(root.refs[key], reference, root, [key | acc])
+      end
+    end
+  end
+
+  defp circular?(%{__struct__: _} = struct, reference, root, acc),
+    do: struct |> Map.from_struct() |> circular?(reference, root, acc)
+
+  defp circular?(values, reference, root, acc)
+       when is_map(values),
+       do:
+         Enum.any?(values, fn {_, value} ->
+           circular?(value, reference, root, acc)
+         end)
+
+  defp circular?(values, reference, root, acc)
+       when is_list(values),
+       do:
+         Enum.any?(values, fn value ->
+           circular?(value, reference, root, acc)
+         end)
+
+  defp circular?(:root, _reference, _root, _acc), do: true
+
+  defp circular?(_ref, _reference, _root, _acc), do: false
 end

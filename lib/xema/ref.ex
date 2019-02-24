@@ -50,7 +50,7 @@ defmodule Xema.Ref do
       |> Xema.validate(value, opts)
 
   def validate(%Ref{uri: uri}, value, opts) do
-    key = uri |> Map.put(:fragment, nil) |> URI.to_string()
+    key = Ref.key(uri)
 
     source =
       case master?(key, opts) do
@@ -78,6 +78,13 @@ defmodule Xema.Ref do
         Xema.validate(schema, value, opts)
     end
   end
+
+  # TODO: docs, specs, all key calls
+  def key(%Ref{pointer: pointer, uri: nil}), do: pointer
+
+  def key(%Ref{uri: uri}), do: key(uri)
+
+  def key(%URI{} = uri), do: uri |> Map.put(:fragment, nil) |> URI.to_string()
 
   defp master?(key, opts), do: Map.has_key?(opts[:master].refs, key)
 end
