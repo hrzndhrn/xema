@@ -151,7 +151,6 @@ defmodule Xema.SchemaValidationTest do
 
   describe "type" do
     test "with valid value", %{schema: schema} do
-      # IO.inspect(schema, limit: :infinity)
       xema = {:integer, []}
 
       assert Xema.valid?(schema, xema)
