@@ -17,6 +17,8 @@ defmodule Xema.Ref do
   defstruct pointer: nil,
             uri: nil
 
+  @compile {:inline, get_from_opts: 2}
+
   @doc """
   Creates a new reference from the given `pointer`.
   """
@@ -38,19 +40,38 @@ defmodule Xema.Ref do
   @doc """
   Validates the given value with the referenced schema.
   """
-  @spec validate(Ref.t() | Schema.t() | Xema.t(), any, keyword) ::
+  @spec validate(Ref.t(), any, keyword) ::
           :ok | {:error, map}
-  def validate(%Ref{pointer: "#", uri: nil}, value, opts),
-    do: Xema.validate(opts[:root], value, opts)
+  def validate(ref, value, opts) do
+    {schema, opts} = get_from_opts(ref, opts)
+    Xema.validate(schema, value, opts)
+  end
 
-  def validate(%Ref{pointer: pointer, uri: nil}, value, opts),
-    do:
-      opts[:root].refs
-      |> Map.fetch!(pointer)
-      |> Xema.validate(value, opts)
+  @doc """
+  Returns the schema for the given `ref` and `xema`.
 
-  def validate(%Ref{uri: uri}, value, opts) do
-    key = Ref.key(uri)
+  This function returns just schema they are defined in the root schema. Inlined
+  schemas can not be found.
+  """
+  @spec get(Ref.t(), struct) :: Schema.t()
+  def get(ref, xema) do
+    with {%{} = schema, _} <- get_from_opts(ref, root: xema, master: xema) do
+      schema
+    else
+      _ -> nil
+    end
+  rescue
+    _ -> nil
+  end
+
+  defp get_from_opts(%Ref{pointer: "#", uri: nil}, opts),
+    do: {opts[:root], opts}
+
+  defp get_from_opts(%Ref{pointer: pointer, uri: nil}, opts),
+    do: {Map.fetch!(opts[:root].refs, pointer), opts}
+
+  defp get_from_opts(%Ref{uri: uri} = ref, opts) do
+    key = key(ref)
 
     source =
       case master?(key, opts) do
@@ -60,10 +81,10 @@ defmodule Xema.Ref do
 
     case Map.fetch!(opts[source].refs, key) do
       %Schema{} = schema ->
-        Xema.validate(schema, value, opts)
+        {schema, opts}
 
       :root ->
-        Xema.validate(opts[:root], value, opts)
+        {opts[:root], opts}
 
       xema ->
         opts = Keyword.put(opts, :root, xema)
@@ -75,11 +96,14 @@ defmodule Xema.Ref do
             fragment -> Map.fetch!(xema.refs, "##{fragment}")
           end
 
-        Xema.validate(schema, value, opts)
+        {schema, opts}
     end
   end
 
-  # TODO: docs, specs, all key calls
+  @doc """
+  Returns the reference key.
+  """
+  @spec key(Ref.t()) :: String.t()
   def key(%Ref{pointer: pointer, uri: nil}), do: pointer
 
   def key(%Ref{uri: uri}), do: key(uri)

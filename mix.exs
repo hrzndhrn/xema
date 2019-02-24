@@ -46,7 +46,7 @@ defmodule Xema.Mixfile do
   end
 
   def application do
-    [extra_applications: [:logger]]
+    [extra_applications: [:logger], env: [loader: Xema.NoLoader]]
   end
 
   defp deps do

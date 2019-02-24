@@ -5,6 +5,8 @@ defmodule Xema.RefTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.Ref
+  alias Xema.Schema
   alias Xema.SchemaError
 
   describe "schema with ref root pointer" do
@@ -49,6 +51,16 @@ defmodule Xema.RefTest do
                   }
                 }}
     end
+
+    test "Ref.get/2 returns schema for a valid ref", %{schema: schema} do
+      ref = Ref.new("#")
+      assert Ref.get(ref, schema) == schema
+    end
+
+    test "Ref.get/2 returns nil for an invalid ref", %{schema: schema} do
+      ref = Ref.new("#/foo")
+      assert Ref.get(ref, schema) == nil
+    end
   end
 
   describe "schema with ref root-id pointer" do
@@ -69,6 +81,16 @@ defmodule Xema.RefTest do
     test "validate/2 with valid data", %{schema: schema} do
       assert validate(schema, %{foo: 1}) == :ok
     end
+
+    test "Ref.get/2 returns schema for a valid ref", %{schema: schema} do
+      ref = Ref.new("", URI.parse("http://foo.com"))
+      assert Ref.get(ref, schema) == schema
+    end
+
+    test "Ref.get/2 returns nil for an invalid ref", %{schema: schema} do
+      ref = Ref.new("#/foo")
+      assert Ref.get(ref, schema) == nil
+    end
   end
 
   describe "schema with a ref to property" do
@@ -76,12 +98,15 @@ defmodule Xema.RefTest do
       %{
         schema:
           Xema.new(
-            properties: %{
-              foo: :integer,
-              bar: {:ref, "#/properties/foo"},
-              baz: {:ref, "#/properties/foo"}
-            },
-            additional_properties: false
+            [
+              properties: %{
+                foo: :integer,
+                bar: {:ref, "#/properties/foo"},
+                baz: {:ref, "#/properties/foo"}
+              },
+              additional_properties: false
+            ],
+            inline: false
           )
       }
     end
@@ -107,6 +132,11 @@ defmodule Xema.RefTest do
                     foo: %{type: :integer, value: "21"}
                   }
                 }}
+    end
+
+    test "Ref.get/2 returns schema for a valid ref", %{schema: schema} do
+      ref = Ref.new("#/properties/foo")
+      assert Ref.get(ref, schema) == %Schema{type: :integer}
     end
   end
 
@@ -254,13 +284,16 @@ defmodule Xema.RefTest do
       %{
         schema:
           Xema.new(
-            properties: %{
-              foo: {:ref, "#/definitions/bar"}
-            },
-            definitions: %{
-              bar: {:ref, "#/definitions/pos"},
-              pos: {:integer, minimum: 0}
-            }
+            [
+              properties: %{
+                foo: {:ref, "#/definitions/bar"}
+              },
+              definitions: %{
+                bar: {:ref, "#/definitions/pos"},
+                pos: {:integer, minimum: 0}
+              }
+            ],
+            inline: false
           )
       }
     end
@@ -273,6 +306,22 @@ defmodule Xema.RefTest do
     test "validate/2 with invalid value", %{schema: schema} do
       assert validate(schema, %{foo: -21}) ==
                {:error, %{properties: %{foo: %{minimum: 0, value: -21}}}}
+    end
+
+    @tag :only
+    test "Ref.get/2 return schema for a valid ref", %{schema: schema} do
+      ref = Ref.new("#/definitions/bar")
+
+      assert Ref.get(ref, schema) == %Schema{
+               ref: %Ref{pointer: "#/definitions/pos"}
+             }
+
+      ref = Ref.new("#/definitions/pos")
+
+      assert Ref.get(ref, schema) == %Schema{
+               type: :integer,
+               minimum: 0
+             }
     end
   end
 
