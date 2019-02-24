@@ -38,7 +38,7 @@ defmodule Xema.Ref do
   @doc """
   Validates the given value with the referenced schema.
   """
-  @spec validate(Ref.t() | Schema.t() | Xema.t(), any, keyword) ::
+  @spec validate(Ref.t(), any, keyword) ::
           :ok | {:error, map}
   def validate(%Ref{pointer: "#", uri: nil}, value, opts),
     do: Xema.validate(opts[:root], value, opts)
