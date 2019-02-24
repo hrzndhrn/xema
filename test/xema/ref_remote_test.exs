@@ -3,6 +3,8 @@ defmodule Xema.RefRemoteTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.Ref
+  alias Xema.Schema
   alias Xema.SchemaError
 
   test "http server" do
@@ -123,6 +125,15 @@ defmodule Xema.RefRemoteTest do
 
     test "validate/2 with an invalid value", %{schema: schema} do
       assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+    end
+
+    test "Ref.get/2 returns schema for a valid ref", %{schema: schema} do
+      uri = "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"
+      ref = Ref.new(uri, URI.parse(uri))
+
+      assert Ref.get(ref, schema) == %Schema{
+               ref: %Ref{pointer: "#/definitions/int"}
+             }
     end
   end
 
@@ -296,12 +307,10 @@ defmodule Xema.RefRemoteTest do
                ]
     end
 
-    @tag :only
     test "valid?/2 with valid data", %{schema: schema} do
       assert valid?(schema, %{ints: [1, 2, 3]})
     end
 
-    @tag :only
     test "valid?/2 with invalid data", %{schema: schema} do
       refute valid?(schema, %{ints: [1, "2", 3]})
     end
@@ -312,7 +321,6 @@ defmodule Xema.RefRemoteTest do
       %{schema: Xema.new({:ref, "http://localhost:1234/b_in_a.exon"})}
     end
 
-    @tag :only
     test "check schema", %{schema: schema} do
       assert Map.keys(schema.refs) ==
                [
@@ -321,12 +329,10 @@ defmodule Xema.RefRemoteTest do
                ]
     end
 
-    @tag :only
     test "valid?/2 with valid data", %{schema: schema} do
       assert valid?(schema, %{a: %{b: 7}})
     end
 
-    @tag :only
     test "valid?/2 with invalid data", %{schema: schema} do
       refute valid?(schema, %{a: %{b: "7"}})
     end

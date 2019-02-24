@@ -11,12 +11,7 @@ defmodule Xema.Validator do
 
   @compile {
     :inline,
-    get_type: 1,
-    struct?: 1,
-    struct?: 2,
-    type?: 2,
-    types: 2,
-    validate_by: 4
+    get_type: 1, struct?: 1, struct?: 2, type?: 2, types: 2, validate_by: 4
   }
 
   @type result :: :ok | {:error, map}
