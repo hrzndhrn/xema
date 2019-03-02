@@ -24,15 +24,9 @@ defmodule Bench do
       parallel: 4,
       save: [path: "bench/tmp/ref.benchee", tag: "master"],
       print: [fast_warning: false],
-      load: "bench/tmp/ref.benchee",
+      # load: "bench/tmp/ref.benchee",
       formatters: [
-        # &Benchee.Formatters.HTML.output/1,
-        &Benchee.Formatters.Console.output/1
-      ],
-      formatter_options: [
-        html: [
-          file: Path.expand("output/bench.html", __DIR__)
-        ]
+        Benchee.Formatters.Console
       ]
     )
   end
