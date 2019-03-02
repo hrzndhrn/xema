@@ -97,7 +97,7 @@ defmodule Xema.SourceTest do
         source =
         {:any, bar: {:ref, "#/definitions/foo"}, definitions: %{foo: :integer}}
 
-      assert source |> Xema.new() |> Xema.source() == keywords
+      assert source |> Xema.new(inline: false) |> Xema.source() == keywords
     end
 
     test "for definitions and ref without sibling" do
@@ -119,7 +119,7 @@ defmodule Xema.SourceTest do
         }
       ]
 
-      assert keywords |> Xema.new() |> Xema.source() == expected
+      assert keywords |> Xema.new(inline: false) |> Xema.source() == expected
     end
 
     test "for definitions and ref as tuple" do
@@ -132,7 +132,7 @@ defmodule Xema.SourceTest do
         }
       ]
 
-      assert keywords |> Xema.new() |> Xema.source() == keywords
+      assert keywords |> Xema.new(inline: false) |> Xema.source() == keywords
     end
 
     test "for definitions and ref with sibling" do
@@ -148,7 +148,7 @@ defmodule Xema.SourceTest do
         }
       ]
 
-      assert keywords |> Xema.new() |> Xema.source() == keywords
+      assert keywords |> Xema.new(inline: false) |> Xema.source() == keywords
     end
 
     test "for items" do

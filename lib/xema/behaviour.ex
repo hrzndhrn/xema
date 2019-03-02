@@ -140,23 +140,34 @@ defmodule Xema.Behaviour do
     end
   end
 
-  defp inline(xema) do
-    ref_list = Map.keys(xema.refs)
-    ref_list = Enum.filter(ref_list, fn ref -> !circular?(xema, ref) end)
-    inline_refs(xema, ref_list)
-  end
+  defp inline(xema),
+    do:
+      xema.refs
+      |> Map.keys()
+      |> Enum.filter(fn ref -> circular?(xema, ref) end)
+      |> inline_refs(xema)
 
-  defp inline_refs(%Schema{} = schema, ref_list, refs) do
+  defp inline_refs(circulars, master, root, %Schema{} = schema) do
     map(schema, fn
       %Schema{ref: ref} = schema, _id when not is_nil(ref) ->
-        key = Ref.key(ref)
-        IO.inspect(key, label: :key)
-        IO.puts("--- 155")
-        IO.inspect(ref)
+        case Enum.member?(circulars, Ref.key(ref)) do
+          true ->
+            schema
 
-        case Enum.member?(ref_list, key) do
-          true -> inline_refs(refs[key], ref_list, refs)
-          false -> schema
+          false ->
+            case Ref.fetch!(ref, master, root) do
+              {%Schema{} = ref_schema, root} ->
+                inline_refs(circulars, master, root, ref_schema)
+
+              {:root, _root} ->
+                schema
+
+              {xema, xema} ->
+                schema
+
+              {xema, _root} ->
+                inline_refs(circulars, master, xema, xema.schema)
+            end
         end
 
       value, _id ->
@@ -164,25 +175,25 @@ defmodule Xema.Behaviour do
     end)
   end
 
-  defp inline_refs(%Ref{} = ref, ref_list, refs) do
-    key = Ref.key(ref)
-
-    IO.puts("---")
-    IO.inspect(ref)
-
-    case Enum.member?(ref_list, key) do
-      true -> inline_refs(refs[key], ref_list, refs)
-      false -> ref
-    end
+  defp inline_refs(circulars, root, _master, %{schema: schema} = master) do
+    inline_refs(circulars, root, master, schema)
   end
 
-  defp inline_refs(xema, ref_list) do
-    IO.puts("===")
-    IO.inspect(xema)
-    schema = inline_refs(xema.schema, ref_list, xema.refs)
+  defp inline_refs(circulars, xema) do
+    schema = inline_refs(circulars, xema, nil, xema.schema)
 
     refs =
-      Enum.filter(xema.refs, fn {ref, _} -> !Enum.member?(ref_list, ref) end)
+      Enum.map(xema.refs, fn
+        {ref, :root} ->
+          {ref, :root}
+
+        {ref, %Schema{} = schema} ->
+          {ref, inline_refs(circulars, xema, nil, schema)}
+
+        {_ref, _xema} = ref ->
+          ref
+      end)
+      |> Enum.filter(fn {ref, _} -> Enum.member?(circulars, ref) end)
       |> Enum.into(%{})
 
     xema
@@ -399,10 +410,10 @@ defmodule Xema.Behaviour do
     struct(
       Schema,
       schema
-      |> fun.(id)
       |> Map.from_struct()
       |> Enum.map(fn {k, v} -> {k, map(v, fun, id)} end)
     )
+    |> fun.(id)
   end
 
   defp map(%{__struct__: _} = struct, _fun, _id), do: struct
@@ -423,7 +434,8 @@ defmodule Xema.Behaviour do
   defp circular?(%Ref{} = ref, reference, root, acc) do
     key = Ref.key(ref)
 
-    with false <- key == reference do
+    with false <- key == reference,
+         false <- key == "#" do
       case Enum.member?(acc, key) do
         true -> false
         false -> circular?(root.refs[key], reference, root, [key | acc])

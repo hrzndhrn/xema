@@ -17,7 +17,7 @@ defmodule Xema.Ref do
   defstruct pointer: nil,
             uri: nil
 
-  @compile {:inline, get_from_opts: 2}
+  @compile {:inline, fetch_from_opts!: 2, fetch_by_key!: 3}
 
   @doc """
   Creates a new reference from the given `pointer`.
@@ -43,60 +43,31 @@ defmodule Xema.Ref do
   @spec validate(Ref.t(), any, keyword) ::
           :ok | {:error, map}
   def validate(ref, value, opts) do
-    {schema, opts} = get_from_opts(ref, opts)
+    {schema, opts} = fetch_from_opts!(ref, opts)
     Xema.validate(schema, value, opts)
   end
 
   @doc """
   Returns the schema for the given `ref` and `xema`.
 
+  TODO: update docs
   This function returns just schema they are defined in the root schema. Inlined
   schemas can not be found.
   """
-  @spec get(Ref.t(), struct) :: Schema.t()
-  def get(ref, xema) do
-    with {%{} = schema, _} <- get_from_opts(ref, root: xema, master: xema) do
-      schema
-    else
-      _ -> nil
-    end
-  rescue
-    _ -> nil
-  end
+  @spec fetch!(Ref.t(), struct, struct) :: Schema.t()
+  def fetch!(ref, master, root) do
+    case fetch_by_key!(key(ref), master, root) do
+      {%Schema{}, _root} = schema ->
+        schema
 
-  defp get_from_opts(%Ref{pointer: "#", uri: nil}, opts),
-    do: {opts[:root], opts}
+      {xema, root} ->
+        case fragment(ref) do
+          nil ->
+            {xema, root}
 
-  defp get_from_opts(%Ref{pointer: pointer, uri: nil}, opts),
-    do: {Map.fetch!(opts[:root].refs, pointer), opts}
-
-  defp get_from_opts(%Ref{uri: uri} = ref, opts) do
-    key = key(ref)
-
-    source =
-      case master?(key, opts) do
-        true -> :master
-        false -> :root
-      end
-
-    case Map.fetch!(opts[source].refs, key) do
-      %Schema{} = schema ->
-        {schema, opts}
-
-      :root ->
-        {opts[:root], opts}
-
-      xema ->
-        opts = Keyword.put(opts, :root, xema)
-
-        schema =
-          case uri.fragment do
-            nil -> xema
-            "" -> xema
-            fragment -> Map.fetch!(xema.refs, "##{fragment}")
-          end
-
-        {schema, opts}
+          fragment ->
+            {Map.fetch!(xema.refs, fragment), xema}
+        end
     end
   end
 
@@ -110,7 +81,63 @@ defmodule Xema.Ref do
 
   def key(%URI{} = uri), do: uri |> Map.put(:fragment, nil) |> URI.to_string()
 
-  defp master?(key, opts), do: Map.has_key?(opts[:master].refs, key)
+  def fragment(%Ref{uri: nil}), do: nil
+
+  def fragment(%Ref{uri: %URI{fragment: nil}}), do: nil
+
+  def fragment(%Ref{uri: %URI{fragment: ""}}), do: nil
+
+  def fragment(%Ref{uri: %URI{fragment: fragment}}), do: "##{fragment}"
+
+  defp fetch_from_opts!(%Ref{pointer: "#", uri: nil}, opts),
+    do: {opts[:root], opts}
+
+  defp fetch_from_opts!(%Ref{pointer: pointer, uri: nil}, opts),
+    do: {Map.fetch!(opts[:root].refs, pointer), opts}
+
+  defp fetch_from_opts!(%Ref{} = ref, opts) do
+    case fetch!(ref, opts[:master], opts[:root]) do
+      {:root, root} ->
+        {root, Keyword.put(opts, :root, root)}
+
+      {schema, root} ->
+        {schema, Keyword.put(opts, :root, root)}
+
+      %Schema{} = schema ->
+        {schema, opts}
+
+      :root ->
+        {opts[:root], opts}
+
+      xema ->
+        opts = Keyword.put(opts, :root, xema)
+
+        schema =
+          case fragment(ref) do
+            nil ->
+              xema
+
+            fragment ->
+              Map.fetch!(xema.refs, fragment)
+          end
+
+        {schema, opts}
+    end
+  end
+
+  defp fetch_by_key!("#", master, nil), do: {master, master}
+
+  defp fetch_by_key!("#", _master, root), do: {root, root}
+
+  defp fetch_by_key!(key, master, nil),
+    do: {Map.fetch!(master.refs, key), master}
+
+  defp fetch_by_key!(key, master, root) do
+    case Map.get(root.refs, key) do
+      nil -> {Map.fetch!(master.refs, key), master}
+      schema -> {schema, root}
+    end
+  end
 end
 
 defimpl Inspect, for: Xema.Ref do
