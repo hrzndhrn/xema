@@ -197,14 +197,15 @@ defmodule Xema.RefTest do
       }
     end
 
-    @tag :skip
-    test ": check schema", %{schema: schema} do
-      assert schema == %Xema{
-               refs: %{},
-               schema: %Xema.Schema{
-                 properties: %{foo: %Xema.Schema{type: :list}}
+    test "schema", %{schema: schema} do
+      assert schema ==
+               %Xema{
+                 refs: %{},
+                 schema: %Xema.Schema{
+                   definitions: %{reffed: %Xema.Schema{type: :list}},
+                   properties: %{foo: %Xema.Schema{type: :list}}
+                 }
                }
-             }
     end
 
     test "with valid value", %{schema: schema} do
@@ -217,6 +218,92 @@ defmodule Xema.RefTest do
 
     test "with valid value ignoring max items", %{schema: schema} do
       assert Xema.valid?(schema, [1, 2, 3, 4])
+    end
+  end
+
+  describe "ref to list (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:list,
+             items: [
+               :integer,
+               {:ref, "#/items/0"},
+               {:ref, "#/items/1"}
+             ]},
+            inline: false
+          )
+      }
+    end
+
+    test "schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{
+                 "#/items/0" => %Xema.Schema{type: :integer},
+                 "#/items/1" => %Xema.Schema{
+                   ref: %Xema.Ref{pointer: "#/items/0"}
+                 }
+               },
+               schema: %Xema.Schema{
+                 items: [
+                   %Xema.Schema{type: :integer},
+                   %Xema.Schema{ref: %Xema.Ref{pointer: "#/items/0"}},
+                   %Xema.Schema{ref: %Xema.Ref{pointer: "#/items/1"}}
+                 ],
+                 type: :list
+               }
+             }
+    end
+
+    test "with valid value", %{schema: schema} do
+      assert Xema.valid?(schema, [1, 2, 3])
+    end
+
+    test "with invalid value", %{schema: schema} do
+      refute Xema.valid?(schema, ["1", 2, 3])
+      refute Xema.valid?(schema, [1, "2", 3])
+      refute Xema.valid?(schema, [1, 2, "3"])
+    end
+  end
+
+  describe "ref to list" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:list,
+             items: [
+               :integer,
+               {:ref, "#/items/0"},
+               {:ref, "#/items/1"}
+             ]}
+          )
+      }
+    end
+
+    test "schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{},
+               schema: %Xema.Schema{
+                 items: [
+                   %Xema.Schema{type: :integer},
+                   %Xema.Schema{type: :integer},
+                   %Xema.Schema{type: :integer}
+                 ],
+                 type: :list
+               }
+             }
+    end
+
+    test "with valid value", %{schema: schema} do
+      assert Xema.valid?(schema, [1, 2, 3])
+    end
+
+    test "with invalid value", %{schema: schema} do
+      refute Xema.valid?(schema, ["1", 2, 3])
+      refute Xema.valid?(schema, [1, "2", 3])
+      refute Xema.valid?(schema, [1, 2, "3"])
     end
   end
 
