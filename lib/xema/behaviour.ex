@@ -183,7 +183,8 @@ defmodule Xema.Behaviour do
     schema = inline_refs(circulars, xema, nil, xema.schema)
 
     refs =
-      Enum.map(xema.refs, fn
+      xema.refs
+      |> Enum.map(fn
         {ref, :root} ->
           {ref, :root}
 
@@ -407,8 +408,8 @@ defmodule Xema.Behaviour do
   defp map(%Schema{} = schema, fun, id) do
     id = Utils.update_uri(id, schema.id)
 
-    struct(
-      Schema,
+    Schema
+    |> struct(
       schema
       |> Map.from_struct()
       |> Enum.map(fn {k, v} -> {k, map(v, fun, id)} end)

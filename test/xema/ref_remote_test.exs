@@ -201,15 +201,33 @@ defmodule Xema.RefRemoteTest do
 
   describe "ref within remote ref" do
     setup do
-      # TODO: split into two groups
-      data = {
-        :ref,
-        "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"
-      }
-
       %{
-        schema: Xema.new(data),
-        non_inline: Xema.new(data, inline: false)
+        schema:
+          Xema.new(
+            {:ref,
+             "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"}
+          )
+      }
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, 1) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+    end
+  end
+
+  describe "ref within remote ref (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:ref,
+             "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"},
+            inline: false
+          )
       }
     end
 
@@ -221,8 +239,7 @@ defmodule Xema.RefRemoteTest do
       assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
     end
 
-    @tag :ref
-    test "Ref.fetch!/3 returns schema for a valid ref", %{non_inline: schema} do
+    test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
       uri = "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"
       ref = Ref.new(uri, URI.parse(uri))
 
