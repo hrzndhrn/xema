@@ -48,13 +48,9 @@ defmodule Xema.Ref do
   end
 
   @doc """
-  Returns the schema for the given `ref` and `xema`.
-
-  TODO: update docs
-  This function returns just schema they are defined in the root schema. Inlined
-  schemas can not be found.
+  Returns the schema and the root for the given `ref` and `xema`.
   """
-  @spec fetch!(Ref.t(), struct, struct) :: Schema.t()
+  @spec fetch!(Ref.t(), struct, struct) :: {Schema.t(), struct}
   def fetch!(ref, master, root) do
     case fetch_by_key!(key(ref), master, root) do
       {%Schema{}, _root} = schema ->
