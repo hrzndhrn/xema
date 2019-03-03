@@ -285,7 +285,7 @@ defmodule Xema.Behaviour do
             Map.update!(acc, key, fn list -> ["##{fragment}" | list] end)
         end
 
-      _schem, acc, _path ->
+      _value, acc, _path ->
         acc
     end)
   end
@@ -365,36 +365,36 @@ defmodule Xema.Behaviour do
 
   # Invokes `fun` for each element in the schema tree with the accumulator.
   @spec reduce(Schema.t(), any, function) :: any
-  defp reduce(schema, acc, fun) do
-    reduce(schema, acc, "#", fun)
-  end
+  defp reduce(schema, acc, fun), do: reduce(schema, acc, "#", fun)
 
-  defp reduce(%Schema{} = schema, acc, path, fun) do
-    schema
-    |> Map.from_struct()
-    |> Enum.reduce(fun.(schema, acc, path), fn {key, value}, x ->
-      reduce(value, x, Path.join(path, to_string(key)), fun)
-    end)
-  end
+  defp reduce(%Schema{} = schema, acc, path, fun),
+    do:
+      schema
+      |> Map.from_struct()
+      |> Enum.reduce(fun.(schema, acc, path), fn {key, value}, x ->
+        reduce(value, x, Path.join(path, to_string(key)), fun)
+      end)
 
   defp reduce(%{__struct__: _struct} = struct, acc, path, fun),
     do: fun.(struct, acc, path)
 
-  defp reduce(map, acc, path, fun) when is_map(map) do
-    Enum.reduce(map, fun.(map, acc, path), fn
-      {%{__struct__: _}, _value}, acc ->
-        acc
+  defp reduce(map, acc, path, fun) when is_map(map),
+    do:
+      Enum.reduce(map, fun.(map, acc, path), fn
+        {%{__struct__: key}, value}, acc ->
+          reduce(value, acc, Path.join(path, to_string(key)), fun)
 
-      {key, value}, acc ->
-        reduce(value, acc, Path.join(path, to_string(key)), fun)
-    end)
-  end
+        {key, value}, acc ->
+          reduce(value, acc, Path.join(path, to_string(key)), fun)
+      end)
 
   defp reduce(list, acc, path, fun) when is_list(list),
     do:
       Enum.reduce(list, acc, fn value, acc ->
         reduce(value, acc, path, fun)
       end)
+
+  defp reduce(nil, acc, _path, _fun), do: acc
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 

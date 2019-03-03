@@ -100,28 +100,11 @@ defmodule Xema.Ref do
       {:root, root} ->
         {root, Keyword.put(opts, :root, root)}
 
-      {schema, root} ->
+      {%Schema{} = schema, root} ->
         {schema, Keyword.put(opts, :root, root)}
 
-      %Schema{} = schema ->
-        {schema, opts}
-
-      :root ->
-        {opts[:root], opts}
-
-      xema ->
-        opts = Keyword.put(opts, :root, xema)
-
-        schema =
-          case fragment(ref) do
-            nil ->
-              xema
-
-            fragment ->
-              Map.fetch!(xema.refs, fragment)
-          end
-
-        {schema, opts}
+      {xema, _} ->
+        {xema, Keyword.put(opts, :root, xema)}
     end
   end
 

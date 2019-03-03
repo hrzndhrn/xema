@@ -878,4 +878,68 @@ defmodule Xema.RefTest do
       assert valid?(schema, %{nums: %{num: 1, next: %{num: 2}}})
     end
   end
+
+  describe "refs in pattern properties" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            definitions: %{
+              commands:
+                {:map,
+                 pattern_properties: %{
+                   ".*_cmd" => {:ref, "#/definitions/command"}
+                 }},
+              command:
+                {:map,
+                 properties: %{
+                   os: :string,
+                   cmd: :string
+                 }}
+            },
+            properties: %{
+              commands: {:ref, "#/definitions/commands"}
+            }
+          )
+      }
+    end
+
+    test "with valid data", %{schema: schema} do
+      assert valid?(schema, %{commands: %{"foo_cmd" => %{os: "mac"}}})
+    end
+  end
+
+  describe "refs in pattern properties (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            [
+              definitions: %{
+                commands:
+                  {:map,
+                   pattern_properties: %{
+                     ".*_cmd" => {:ref, "#/definitions/command"}
+                   }},
+                command:
+                  {:map,
+                   properties: %{
+                     os: :string,
+                     cmd: :string
+                   }}
+              },
+              properties: %{
+                commands: {:ref, "#/definitions/commands"}
+              }
+            ],
+            inline: false
+          )
+      }
+    end
+
+    @tag :only
+    test "with valid data", %{schema: schema} do
+      assert valid?(schema, %{commands: %{"foo_cmd" => %{os: "mac"}}})
+    end
+  end
 end

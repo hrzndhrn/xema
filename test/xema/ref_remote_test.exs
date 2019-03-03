@@ -165,8 +165,43 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
+  describe "ref inside of a remote schema" do
+    setup do
+      %{schema: Xema.new({:ref, "http://localhost:1234/inside.exon"})}
+    end
+
+    test "with valid data", %{schema: schema} do
+      assert Xema.valid?(schema, %{limit: 5})
+    end
+
+    test "with invalid data", %{schema: schema} do
+      refute Xema.valid?(schema, %{limit: -5})
+    end
+  end
+
+  describe "ref inside of a remote schema (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new({:ref, "http://localhost:1234/inside.exon"},
+            inline: false
+          )
+      }
+    end
+
+    @tag :only
+    test "with valid data", %{schema: schema} do
+      assert Xema.valid?(schema, %{limit: 5})
+    end
+
+    test "with invalid data", %{schema: schema} do
+      refute Xema.valid?(schema, %{limit: -5})
+    end
+  end
+
   describe "ref within remote ref" do
     setup do
+      # TODO: split into two groups
       data = {
         :ref,
         "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"
