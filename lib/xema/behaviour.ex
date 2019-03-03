@@ -159,9 +159,6 @@ defmodule Xema.Behaviour do
               {%Schema{} = ref_schema, root} ->
                 inline_refs(circulars, master, root, ref_schema)
 
-              {:root, _root} ->
-                schema
-
               {xema, xema} ->
                 schema
 
@@ -173,10 +170,6 @@ defmodule Xema.Behaviour do
       value, _id ->
         value
     end)
-  end
-
-  defp inline_refs(circulars, root, _master, %{schema: schema} = master) do
-    inline_refs(circulars, root, master, schema)
   end
 
   defp inline_refs(circulars, xema) do
@@ -428,7 +421,7 @@ defmodule Xema.Behaviour do
   defp map(value, _fun, _id), do: value
 
   # Returns true if the `reference` builds up a circular reference.
-  @spec circular?(__MODULE__.t(), String.t()) :: boolean
+  @spec circular?(struct(), String.t()) :: boolean
   defp circular?(xema, reference),
     do: circular?(xema.refs[reference], reference, xema, [])
 
