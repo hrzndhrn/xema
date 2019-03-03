@@ -301,7 +301,6 @@ defmodule Xema.RefTest do
                {:error, %{properties: %{foo: %{minimum: 0, value: -21}}}}
     end
 
-    @tag :only
     test "Ref.get/2 return schema for a valid ref", %{schema: schema} do
       ref = Ref.new("#/definitions/bar")
 
