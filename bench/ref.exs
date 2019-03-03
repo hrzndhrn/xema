@@ -1,18 +1,15 @@
 defmodule Bench do
-  defmodule GitStrategy do
+  defmodule GitLoadSave do
     @file_name "benchee.run"
 
-    defp app, do: to_string(Mix.Project.config()[:app])
+    def config(branch \\ "master") do
+      case load(branch) do
+        nil -> [save: save()]
+        load -> [load: load, save: save()]
+      end
+    end
 
-    defp branch,
-      do:
-        "git"
-        |> System.cmd(["rev-parse", "--abbrev-ref", "HEAD"])
-        |> trim()
-
-    defp trim({str, 0}), do: String.trim(str)
-
-    def load(branch \\ "master") do
+    defp load(branch \\ "master") do
       case branch == branch() do
         true ->
           nil
@@ -25,7 +22,7 @@ defmodule Bench do
       end
     end
 
-    def save do
+    defp save do
       tag = branch()
 
       path =
@@ -37,12 +34,15 @@ defmodule Bench do
       [path: path, tag: tag]
     end
 
-    def config do
-      case load() do
-        nil -> [save: save()]
-        load -> [load: load, save: save()]
-      end
-    end
+    defp app, do: to_string(Mix.Project.config()[:app])
+
+    defp branch,
+      do:
+        "git"
+        |> System.cmd(["rev-parse", "--abbrev-ref", "HEAD"])
+        |> trim()
+
+    defp trim({str, 0}), do: String.trim(str)
   end
 
   def fun do
@@ -72,7 +72,7 @@ defmodule Bench do
         formatters: [
           Benchee.Formatters.Console
         ]
-      ] ++ GitStrategy.config()
+      ] ++ GitLoadSave.config()
 
     Benchee.run(
       %{"ref" => fun()},
