@@ -79,10 +79,9 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new({
-            :ref,
-            "http://localhost:1234/sub_schemas.exon#/definitions/int"
-          })
+          Xema.new(
+            {:ref, "http://localhost:1234/sub_schemas.exon#/definitions/int"}
+          )
       }
     end
 
@@ -92,6 +91,64 @@ defmodule Xema.RefRemoteTest do
 
     test "validate/2 with an invalid value", %{schema: schema} do
       assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+    end
+
+    test "schema structure", %{schema: schema} do
+      assert schema == %Xema{refs: %{}, schema: %Xema.Schema{type: :integer}}
+    end
+  end
+
+  describe "fragment within remote ref (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:ref, "http://localhost:1234/sub_schemas.exon#/definitions/int"},
+            inline: false
+          )
+      }
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, 1) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+    end
+
+    test "schema structure", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{
+                 "http://localhost:1234/sub_schemas.exon" => %Xema{
+                   refs: %{"#/definitions/int" => %Schema{type: :integer}},
+                   schema: %Schema{
+                     definitions: %{
+                       int: %Schema{type: :integer},
+                       refToInt: %Schema{
+                         ref: %Ref{pointer: "#/definitions/int"}
+                       }
+                     }
+                   }
+                 }
+               },
+               schema: %Schema{
+                 ref: %Ref{
+                   pointer:
+                     "http://localhost:1234/sub_schemas.exon#/definitions/int",
+                   uri: %URI{
+                     authority: "localhost:1234",
+                     fragment: "/definitions/int",
+                     host: "localhost",
+                     path: "/sub_schemas.exon",
+                     port: 1234,
+                     query: nil,
+                     scheme: "http",
+                     userinfo: nil
+                   }
+                 }
+               }
+             }
     end
   end
 
@@ -108,14 +165,69 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
+  describe "ref inside of a remote schema" do
+    setup do
+      %{schema: Xema.new({:ref, "http://localhost:1234/inside.exon"})}
+    end
+
+    test "with valid data", %{schema: schema} do
+      assert Xema.valid?(schema, %{limit: 5})
+    end
+
+    test "with invalid data", %{schema: schema} do
+      refute Xema.valid?(schema, %{limit: -5})
+    end
+  end
+
+  describe "ref inside of a remote schema (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new({:ref, "http://localhost:1234/inside.exon"},
+            inline: false
+          )
+      }
+    end
+
+    @tag :only
+    test "with valid data", %{schema: schema} do
+      assert Xema.valid?(schema, %{limit: 5})
+    end
+
+    test "with invalid data", %{schema: schema} do
+      refute Xema.valid?(schema, %{limit: -5})
+    end
+  end
+
   describe "ref within remote ref" do
     setup do
       %{
         schema:
-          Xema.new({
-            :ref,
-            "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"
-          })
+          Xema.new(
+            {:ref,
+             "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"}
+          )
+      }
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, 1) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+    end
+  end
+
+  describe "ref within remote ref (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:ref,
+             "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"},
+            inline: false
+          )
       }
     end
 
@@ -127,30 +239,52 @@ defmodule Xema.RefRemoteTest do
       assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
     end
 
-    test "Ref.get/2 returns schema for a valid ref", %{schema: schema} do
+    test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
       uri = "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"
       ref = Ref.new(uri, URI.parse(uri))
 
-      assert Ref.get(ref, schema) == %Schema{
-               ref: %Ref{pointer: "#/definitions/int"}
+      assert {schema, root} = Ref.fetch!(ref, schema, nil)
+
+      assert schema == %Xema.Schema{
+               ref: %Xema.Ref{pointer: "#/definitions/int"}
              }
+
+      assert root ==
+               %Xema{
+                 refs: %{
+                   "#/definitions/int" => %Xema.Schema{type: :integer},
+                   "#/definitions/refToInt" => %Xema.Schema{
+                     ref: %Xema.Ref{pointer: "#/definitions/int"}
+                   }
+                 },
+                 schema: %Xema.Schema{
+                   definitions: %{
+                     int: %Xema.Schema{type: :integer},
+                     refToInt: %Xema.Schema{
+                       ref: %Xema.Ref{pointer: "#/definitions/int"}
+                     }
+                   }
+                 }
+               }
     end
   end
 
   describe "base URI change - change folder" do
     setup do
+      data = {
+        :map,
+        id: "http://localhost:1234/scope_change_defs1.exon",
+        properties: %{
+          list: {:ref, "#/definitions/baz"}
+        },
+        definitions: %{
+          baz: {:list, id: "folder/", items: {:ref, "folderInteger.exon"}}
+        }
+      }
+
       %{
-        schema:
-          Xema.new({
-            :map,
-            id: "http://localhost:1234/scope_change_defs1.exon",
-            properties: %{
-              list: {:ref, "#/definitions/baz"}
-            },
-            definitions: %{
-              baz: {:list, id: "folder/", items: {:ref, "folderInteger.exon"}}
-            }
-          })
+        schema: Xema.new(data),
+        non_inline: Xema.new(data, inline: false)
       }
     end
 
@@ -166,6 +300,21 @@ defmodule Xema.RefRemoteTest do
                     list: %{items: [{0, %{type: :integer, value: "1"}}]}
                   }
                 }}
+    end
+
+    test "inline schema structure", %{schema: schema} do
+      assert Map.keys(schema.refs) ==
+               ["http://localhost:1234/scope_change_defs1.exon"]
+    end
+
+    test "non-inline schema structure", %{non_inline: schema} do
+      assert Map.keys(schema.refs) ==
+               [
+                 "#/definitions/baz",
+                 "folder/",
+                 "http://localhost:1234/folder/folderInteger.exon",
+                 "http://localhost:1234/scope_change_defs1.exon"
+               ]
     end
   end
 
@@ -267,7 +416,31 @@ defmodule Xema.RefRemoteTest do
 
   describe "remote ref in remote ref" do
     setup do
-      %{schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"})}
+      %{
+        schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"})
+      }
+    end
+
+    test "check schema", %{schema: schema} do
+      assert Map.keys(schema.refs) == []
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, %{int: 1}) == :ok
+    end
+
+    test "validate/2 with an invalid value", %{schema: schema} do
+      assert validate(schema, %{int: "1"}) ==
+               {:error, %{properties: %{int: %{type: :integer, value: "1"}}}}
+    end
+  end
+
+  describe "remote ref in remote ref (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new({:ref, "http://localhost:1234/obj_int.exon"}, inline: false)
+      }
     end
 
     test "check schema", %{schema: schema} do
@@ -291,9 +464,43 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new(
-            {:ref, "http://localhost:1234/obj_list_int.exon"},
+          Xema.new({:ref, "http://localhost:1234/obj_list_int.exon"},
             loader: Test.FileLoader
+          )
+      }
+    end
+
+    test "check schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{},
+               schema: %Xema.Schema{
+                 properties: %{
+                   ints: %Xema.Schema{
+                     items: %Xema.Schema{type: :integer},
+                     type: :list
+                   }
+                 },
+                 type: :map
+               }
+             }
+    end
+
+    test "valid?/2 with valid data", %{schema: schema} do
+      assert valid?(schema, %{ints: [1, 2, 3]})
+    end
+
+    test "valid?/2 with invalid data", %{schema: schema} do
+      refute valid?(schema, %{ints: [1, "2", 3]})
+    end
+  end
+
+  describe "remote ref in remote ref in remote ref (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new({:ref, "http://localhost:1234/obj_list_int.exon"},
+            loader: Test.FileLoader,
+            inline: false
           )
       }
     end
