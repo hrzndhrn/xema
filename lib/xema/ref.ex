@@ -50,7 +50,7 @@ defmodule Xema.Ref do
   @doc """
   Returns the schema and the root for the given `ref` and `xema`.
   """
-  @spec fetch!(Ref.t(), struct, struct) :: {Schema.t(), struct}
+  @spec fetch!(Ref.t(), struct, struct | nil) :: {struct | atom, struct}
   def fetch!(ref, master, root) do
     case fetch_by_key!(key(ref), master, root) do
       {%Schema{}, _root} = schema ->
