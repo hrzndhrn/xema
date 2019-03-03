@@ -12,6 +12,8 @@ defmodule Xema.Behaviour do
   alias Xema.SchemaError
   alias Xema.ValidationError
 
+  @inline_default true
+
   @doc """
   This callback initialize the schema. The function gets the data given to
   `Xema.new/1` and returns a `Xema.Schema`.
@@ -134,7 +136,7 @@ defmodule Xema.Behaviour do
   end
 
   defp inline(xema, opts) do
-    case Keyword.get(opts, :inline, true) do
+    case Keyword.get(opts, :inline, @inline_default) do
       true -> inline(xema)
       false -> xema
     end
