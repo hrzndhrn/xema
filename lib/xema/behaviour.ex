@@ -12,6 +12,8 @@ defmodule Xema.Behaviour do
   alias Xema.SchemaError
   alias Xema.ValidationError
 
+  @inline_default true
+
   @doc """
   This callback initialize the schema. The function gets the data given to
   `Xema.new/1` and returns a `Xema.Schema`.
@@ -47,7 +49,7 @@ defmodule Xema.Behaviour do
           )
 
         case opts[:remotes] do
-          nil -> Behaviour.update_refs(xema)
+          nil -> Behaviour.update_refs(xema, opts)
           _remotes -> xema
         end
       end
@@ -112,8 +114,8 @@ defmodule Xema.Behaviour do
   end
 
   @doc false
-  @spec update_refs(struct) :: struct
-  def update_refs(xema) do
+  @spec update_refs(struct, keyword) :: struct
+  def update_refs(xema, opts) do
     refs_map =
       xema.refs
       |> Map.keys()
@@ -130,6 +132,69 @@ defmodule Xema.Behaviour do
     |> update_remote_refs(refs_map)
     |> update_master_ids()
     |> update_remote_ids()
+    |> inline(opts)
+  end
+
+  defp inline(xema, opts) do
+    case Keyword.get(opts, :inline, @inline_default) do
+      true -> inline(xema)
+      false -> xema
+    end
+  end
+
+  defp inline(xema),
+    do:
+      xema.refs
+      |> Map.keys()
+      |> Enum.filter(fn ref -> circular?(xema, ref) end)
+      |> inline_refs(xema)
+
+  defp inline_refs(circulars, master, root, %Schema{} = schema) do
+    map(schema, fn
+      %Schema{ref: ref} = schema, _id when not is_nil(ref) ->
+        case Enum.member?(circulars, Ref.key(ref)) do
+          true ->
+            schema
+
+          false ->
+            case Ref.fetch!(ref, master, root) do
+              {%Schema{} = ref_schema, root} ->
+                inline_refs(circulars, master, root, ref_schema)
+
+              {xema, xema} ->
+                schema
+
+              {xema, _root} ->
+                inline_refs(circulars, master, xema, xema.schema)
+            end
+        end
+
+      value, _id ->
+        value
+    end)
+  end
+
+  defp inline_refs(circulars, xema) do
+    schema = inline_refs(circulars, xema, nil, xema.schema)
+
+    refs =
+      xema.refs
+      |> Enum.map(fn
+        {ref, :root} ->
+          {ref, :root}
+
+        {ref, %Schema{} = schema} ->
+          {ref, inline_refs(circulars, xema, nil, schema)}
+
+        {_ref, _xema} = ref ->
+          ref
+      end)
+      |> Enum.filter(fn {ref, _} -> Enum.member?(circulars, ref) end)
+      |> Enum.into(%{})
+
+    xema
+    |> Map.put(:schema, schema)
+    |> Map.put(:refs, refs)
   end
 
   defp update_master_ids(%{schema: schema} = xema)
@@ -212,11 +277,11 @@ defmodule Xema.Behaviour do
             acc
 
           fragment ->
-            key = uri |> Map.put(:fragment, nil) |> URI.to_string()
+            key = Ref.key(uri)
             Map.update!(acc, key, fn list -> ["##{fragment}" | list] end)
         end
 
-      _schem, acc, _path ->
+      _value, acc, _path ->
         acc
     end)
   end
@@ -240,7 +305,7 @@ defmodule Xema.Behaviour do
         map
 
       true ->
-        key = uri |> Map.put(:fragment, nil) |> URI.to_string()
+        key = Ref.key(uri)
         remote_set = opts[:remotes] || MapSet.new()
 
         case MapSet.member?(remote_set, key) do
@@ -296,36 +361,36 @@ defmodule Xema.Behaviour do
 
   # Invokes `fun` for each element in the schema tree with the accumulator.
   @spec reduce(Schema.t(), any, function) :: any
-  defp reduce(schema, acc, fun) do
-    reduce(schema, acc, "#", fun)
-  end
+  defp reduce(schema, acc, fun), do: reduce(schema, acc, "#", fun)
 
-  defp reduce(%Schema{} = schema, acc, path, fun) do
-    schema
-    |> Map.from_struct()
-    |> Enum.reduce(fun.(schema, acc, path), fn {key, value}, x ->
-      reduce(value, x, Path.join(path, to_string(key)), fun)
-    end)
-  end
+  defp reduce(%Schema{} = schema, acc, path, fun),
+    do:
+      schema
+      |> Map.from_struct()
+      |> Enum.reduce(fun.(schema, acc, path), fn {key, value}, x ->
+        reduce(value, x, Path.join(path, to_string(key)), fun)
+      end)
 
   defp reduce(%{__struct__: _struct} = struct, acc, path, fun),
     do: fun.(struct, acc, path)
 
-  defp reduce(map, acc, path, fun) when is_map(map) do
-    Enum.reduce(map, fun.(map, acc, path), fn
-      {%{__struct__: _}, _value}, acc ->
-        acc
+  defp reduce(map, acc, path, fun) when is_map(map),
+    do:
+      Enum.reduce(map, fun.(map, acc, path), fn
+        {%{__struct__: key}, value}, acc ->
+          reduce(value, acc, Path.join(path, to_string(key)), fun)
 
-      {key, value}, acc ->
-        reduce(value, acc, Path.join(path, to_string(key)), fun)
-    end)
-  end
+        {key, value}, acc ->
+          reduce(value, acc, Path.join(path, to_string(key)), fun)
+      end)
 
   defp reduce(list, acc, path, fun) when is_list(list),
     do:
       Enum.reduce(list, acc, fn value, acc ->
         reduce(value, acc, path, fun)
       end)
+
+  defp reduce(nil, acc, _path, _fun), do: acc
 
   defp reduce(value, acc, path, fun), do: fun.(value, acc, path)
 
@@ -338,13 +403,13 @@ defmodule Xema.Behaviour do
   defp map(%Schema{} = schema, fun, id) do
     id = Utils.update_uri(id, schema.id)
 
-    struct(
-      Schema,
+    Schema
+    |> struct(
       schema
-      |> fun.(id)
       |> Map.from_struct()
       |> Enum.map(fn {k, v} -> {k, map(v, fun, id)} end)
     )
+    |> fun.(id)
   end
 
   defp map(%{__struct__: _} = struct, _fun, _id), do: struct
@@ -356,4 +421,42 @@ defmodule Xema.Behaviour do
     do: Enum.map(list, fn v -> map(v, fun, id) end)
 
   defp map(value, _fun, _id), do: value
+
+  # Returns true if the `reference` builds up a circular reference.
+  @spec circular?(struct(), String.t()) :: boolean
+  defp circular?(xema, reference),
+    do: circular?(xema.refs[reference], reference, xema, [])
+
+  defp circular?(%Ref{} = ref, reference, root, acc) do
+    key = Ref.key(ref)
+
+    with false <- key == reference,
+         false <- key == "#" do
+      case Enum.member?(acc, key) do
+        true -> false
+        false -> circular?(root.refs[key], reference, root, [key | acc])
+      end
+    end
+  end
+
+  defp circular?(%{__struct__: _} = struct, reference, root, acc),
+    do: struct |> Map.from_struct() |> circular?(reference, root, acc)
+
+  defp circular?(values, reference, root, acc)
+       when is_map(values),
+       do:
+         Enum.any?(values, fn {_, value} ->
+           circular?(value, reference, root, acc)
+         end)
+
+  defp circular?(values, reference, root, acc)
+       when is_list(values),
+       do:
+         Enum.any?(values, fn value ->
+           circular?(value, reference, root, acc)
+         end)
+
+  defp circular?(:root, _reference, _root, _acc), do: true
+
+  defp circular?(_ref, _reference, _root, _acc), do: false
 end

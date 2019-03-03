@@ -90,6 +90,8 @@ defmodule Xema do
                 loader from the config.
                 See [Configure a loader](loader.html) to how to define a loader.
 
+  + `inline` - inlined all references in the schema. Default `:true`.
+
   ## Examples
 
   Simple schema:
@@ -380,7 +382,9 @@ defmodule Xema do
        do: Enum.into(map, %{}, fn {key, val} -> {key, fun.(val)} end)
 
   @doc """
-  Returns the source for a given `xema`.
+  Returns the source for a given `xema`. The output can differ from the input
+  if the schema contains references. To get the original source the schema
+  must be created with `inline: false`.
 
   ## Examples
 

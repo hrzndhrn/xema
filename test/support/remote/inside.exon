@@ -1,0 +1,8 @@
+[
+  definitions: %{
+    non_neg: {:integer, minimum: 0}
+  },
+  properties: %{
+    limit: {:ref, "#/definitions/non_neg"}
+  }
+]

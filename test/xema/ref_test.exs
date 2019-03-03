@@ -52,14 +52,14 @@ defmodule Xema.RefTest do
                 }}
     end
 
-    test "Ref.get/2 returns schema for a valid ref", %{schema: schema} do
+    test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
       ref = Ref.new("#")
-      assert Ref.get(ref, schema) == schema
+      assert schema = Ref.fetch!(ref, schema, nil)
     end
 
-    test "Ref.get/2 returns nil for an invalid ref", %{schema: schema} do
+    test "Ref.fetch!/3 returns nil for an invalid ref", %{schema: schema} do
       ref = Ref.new("#/foo")
-      assert Ref.get(ref, schema) == nil
+      assert_raise KeyError, fn -> Ref.fetch!(ref, schema, nil) == nil end
     end
   end
 
@@ -82,29 +82,31 @@ defmodule Xema.RefTest do
       assert validate(schema, %{foo: 1}) == :ok
     end
 
-    test "Ref.get/2 returns schema for a valid ref", %{schema: schema} do
+    test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
       ref = Ref.new("", URI.parse("http://foo.com"))
-      assert Ref.get(ref, schema) == schema
+      assert schema = Ref.fetch!(ref, schema, nil)
     end
 
-    test "Ref.get/2 returns nil for an invalid ref", %{schema: schema} do
+    test "Ref.fetch!/3 returns nil for an invalid ref", %{schema: schema} do
       ref = Ref.new("#/foo")
-      assert Ref.get(ref, schema) == nil
+      assert_raise KeyError, fn -> Ref.fetch!(ref, schema, nil) == nil end
     end
   end
 
   describe "schema with a ref to property" do
     setup do
+      data = [
+        properties: %{
+          foo: :integer,
+          bar: {:ref, "#/properties/foo"},
+          baz: {:ref, "#/properties/foo"}
+        },
+        additional_properties: false
+      ]
+
       %{
-        schema:
-          Xema.new(
-            properties: %{
-              foo: :integer,
-              bar: {:ref, "#/properties/foo"},
-              baz: {:ref, "#/properties/foo"}
-            },
-            additional_properties: false
-          )
+        schema: Xema.new(data),
+        non_inline: Xema.new(data, inline: false)
       }
     end
 
@@ -131,9 +133,9 @@ defmodule Xema.RefTest do
                 }}
     end
 
-    test "Ref.get/2 returns schema for a valid ref", %{schema: schema} do
+    test "Ref.fetch!/3 returns schema for a valid ref", %{non_inline: schema} do
       ref = Ref.new("#/properties/foo")
-      assert Ref.get(ref, schema) == %Schema{type: :integer}
+      assert {%Schema{type: :integer}, ^schema} = Ref.fetch!(ref, schema, nil)
     end
   end
 
@@ -193,6 +195,152 @@ defmodule Xema.RefTest do
             }
           )
       }
+    end
+
+    test "schema", %{schema: schema} do
+      assert schema ==
+               %Xema{
+                 refs: %{},
+                 schema: %Xema.Schema{
+                   definitions: %{reffed: %Xema.Schema{type: :list}},
+                   properties: %{foo: %Xema.Schema{type: :list}}
+                 }
+               }
+    end
+
+    test "with valid value", %{schema: schema} do
+      assert Xema.valid?(schema, %{foo: []})
+    end
+
+    test "with invalid value", %{schema: schema} do
+      refute Xema.valid?(schema, %{foo: 1})
+    end
+
+    test "with valid value ignoring max items", %{schema: schema} do
+      assert Xema.valid?(schema, [1, 2, 3, 4])
+    end
+  end
+
+  describe "ref to list (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:list,
+             items: [
+               :integer,
+               {:ref, "#/items/0"},
+               {:ref, "#/items/1"}
+             ]},
+            inline: false
+          )
+      }
+    end
+
+    test "schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{
+                 "#/items/0" => %Xema.Schema{type: :integer},
+                 "#/items/1" => %Xema.Schema{
+                   ref: %Xema.Ref{pointer: "#/items/0"}
+                 }
+               },
+               schema: %Xema.Schema{
+                 items: [
+                   %Xema.Schema{type: :integer},
+                   %Xema.Schema{ref: %Xema.Ref{pointer: "#/items/0"}},
+                   %Xema.Schema{ref: %Xema.Ref{pointer: "#/items/1"}}
+                 ],
+                 type: :list
+               }
+             }
+    end
+
+    test "with valid value", %{schema: schema} do
+      assert Xema.valid?(schema, [1, 2, 3])
+    end
+
+    test "with invalid value", %{schema: schema} do
+      refute Xema.valid?(schema, ["1", 2, 3])
+      refute Xema.valid?(schema, [1, "2", 3])
+      refute Xema.valid?(schema, [1, 2, "3"])
+    end
+  end
+
+  describe "ref to list" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:list,
+             items: [
+               :integer,
+               {:ref, "#/items/0"},
+               {:ref, "#/items/1"}
+             ]}
+          )
+      }
+    end
+
+    test "schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{},
+               schema: %Xema.Schema{
+                 items: [
+                   %Xema.Schema{type: :integer},
+                   %Xema.Schema{type: :integer},
+                   %Xema.Schema{type: :integer}
+                 ],
+                 type: :list
+               }
+             }
+    end
+
+    test "with valid value", %{schema: schema} do
+      assert Xema.valid?(schema, [1, 2, 3])
+    end
+
+    test "with invalid value", %{schema: schema} do
+      refute Xema.valid?(schema, ["1", 2, 3])
+      refute Xema.valid?(schema, [1, "2", 3])
+      refute Xema.valid?(schema, [1, 2, "3"])
+    end
+  end
+
+  describe "ref ignores any sibling (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            [
+              definitions: %{
+                reffed: :list
+              },
+              properties: %{
+                foo: [
+                  max_items: 2,
+                  ref: "#/definitions/reffed"
+                ]
+              }
+            ],
+            inline: false
+          )
+      }
+    end
+
+    test ": check schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{"#/definitions/reffed" => %Xema.Schema{type: :list}},
+               schema: %Xema.Schema{
+                 definitions: %{reffed: %Xema.Schema{type: :list}},
+                 properties: %{
+                   foo: %Xema.Schema{
+                     max_items: 2,
+                     ref: %Xema.Ref{pointer: "#/definitions/reffed"}
+                   }
+                 }
+               }
+             }
     end
 
     test "with valid value", %{schema: schema} do
@@ -278,17 +426,19 @@ defmodule Xema.RefTest do
 
   describe "schema with ref chain" do
     setup do
+      data = [
+        properties: %{
+          foo: {:ref, "#/definitions/bar"}
+        },
+        definitions: %{
+          bar: {:ref, "#/definitions/pos"},
+          pos: {:integer, minimum: 0}
+        }
+      ]
+
       %{
-        schema:
-          Xema.new(
-            properties: %{
-              foo: {:ref, "#/definitions/bar"}
-            },
-            definitions: %{
-              bar: {:ref, "#/definitions/pos"},
-              pos: {:integer, minimum: 0}
-            }
-          )
+        schema: Xema.new(data),
+        non_inline: Xema.new(data, inline: false)
       }
     end
 
@@ -301,17 +451,20 @@ defmodule Xema.RefTest do
                {:error, %{properties: %{foo: %{minimum: 0, value: -21}}}}
     end
 
-    @tag :only
-    test "Ref.get/2 return schema for a valid ref", %{schema: schema} do
+    test "Ref.fetch!/3 return schema for a valid ref", %{non_inline: schema} do
       ref = Ref.new("#/definitions/bar")
 
-      assert Ref.get(ref, schema) == %Schema{
+      assert {ref_schema, ^schema} = Ref.fetch!(ref, schema, nil)
+
+      assert ref_schema == %Schema{
                ref: %Ref{pointer: "#/definitions/pos"}
              }
 
       ref = Ref.new("#/definitions/pos")
 
-      assert Ref.get(ref, schema) == %Schema{
+      assert {ref_schema, ^schema} = Ref.fetch!(ref, schema, nil)
+
+      assert ref_schema == %Schema{
                type: :integer,
                minimum: 0
              }
@@ -524,33 +677,10 @@ defmodule Xema.RefTest do
     end
 
     test "refs", %{schema: schema} do
-      assert schema.refs == %{
-               "http://localhost:1234/node" => %Xema.Schema{
-                 description: "node",
-                 id: "http://localhost:1234/node",
-                 properties: %{
-                   subtree: %Xema.Schema{
-                     ref: %Xema.Ref{
-                       pointer: "tree",
-                       uri: %URI{
-                         authority: "localhost:1234",
-                         fragment: nil,
-                         host: "localhost",
-                         path: "/tree",
-                         port: 1234,
-                         query: nil,
-                         scheme: "http",
-                         userinfo: nil
-                       }
-                     }
-                   },
-                   value: %Xema.Schema{type: :number}
-                 },
-                 required: MapSet.new([:value]),
-                 type: :map
-               },
-               "http://localhost:1234/tree" => :root
-             }
+      assert Map.keys(schema.refs) == [
+               "http://localhost:1234/node",
+               "http://localhost:1234/tree"
+             ]
     end
 
     test "validate/2 with a valid tree", %{schema: schema} do
@@ -714,6 +844,110 @@ defmodule Xema.RefTest do
       assert_raise SchemaError, msg, fn ->
         Xema.new({:ref, "#/foo"})
       end
+    end
+
+    test "(non-inline) with invalid ref" do
+      msg = "Ref #/foo not found."
+
+      assert_raise SchemaError, msg, fn ->
+        Xema.new({:ref, "#/foo"}, inline: false)
+      end
+    end
+  end
+
+  describe "non circular ref inside a circular ref" do
+    setup do
+      data = [
+        definitions: %{
+          non_neg: {:integer, minimum: 0},
+          item:
+            {:map,
+             properties: %{
+               next: {:ref, "#/definitions/item"},
+               num: {:ref, "#/definitions/non_neg"}
+             }}
+        },
+        properties: %{
+          nums: {:ref, "#/definitions/item"}
+        }
+      ]
+
+      %{
+        schema: Xema.new(data),
+        non_inline: Xema.new(data, inline: false)
+      }
+    end
+
+    test "valid?/2 with non-inline", %{non_inline: schema} do
+      assert valid?(schema, %{nums: %{num: 1, next: %{num: 2}}})
+    end
+
+    test "valid?/2 with schema", %{schema: schema} do
+      assert valid?(schema, %{nums: %{num: 1, next: %{num: 2}}})
+    end
+  end
+
+  describe "refs in pattern properties" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            definitions: %{
+              commands:
+                {:map,
+                 pattern_properties: %{
+                   ".*_cmd" => {:ref, "#/definitions/command"}
+                 }},
+              command:
+                {:map,
+                 properties: %{
+                   os: :string,
+                   cmd: :string
+                 }}
+            },
+            properties: %{
+              commands: {:ref, "#/definitions/commands"}
+            }
+          )
+      }
+    end
+
+    test "with valid data", %{schema: schema} do
+      assert valid?(schema, %{commands: %{"foo_cmd" => %{os: "mac"}}})
+    end
+  end
+
+  describe "refs in pattern properties (non-inline)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            [
+              definitions: %{
+                commands:
+                  {:map,
+                   pattern_properties: %{
+                     ".*_cmd" => {:ref, "#/definitions/command"}
+                   }},
+                command:
+                  {:map,
+                   properties: %{
+                     os: :string,
+                     cmd: :string
+                   }}
+              },
+              properties: %{
+                commands: {:ref, "#/definitions/commands"}
+              }
+            ],
+            inline: false
+          )
+      }
+    end
+
+    @tag :only
+    test "with valid data", %{schema: schema} do
+      assert valid?(schema, %{commands: %{"foo_cmd" => %{os: "mac"}}})
     end
   end
 end

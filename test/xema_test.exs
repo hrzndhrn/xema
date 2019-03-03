@@ -3,5 +3,4 @@ defmodule XemaTest do
 
   doctest Xema
   doctest Usage
-  doctest UnsupportedFeatures
 end

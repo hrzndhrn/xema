@@ -52,7 +52,6 @@ defmodule Xema.SchemaTest do
                  "%Xema.Schema{items: " <> "[%Xema.Schema{type: :integer}]}}"
     end
 
-    @tag :only
     test "schema with ref" do
       xema = Xema.new({:map, properties: %{num: {:ref, "#"}}})
 
