@@ -845,7 +845,14 @@ defmodule Xema.RefTest do
         Xema.new({:ref, "#/foo"})
       end
     end
-  end
+    test "(non-inline) with invalid ref" do
+      msg = "Ref #/foo not found."
+
+      assert_raise SchemaError, msg, fn ->
+        Xema.new({:ref, "#/foo"}, inline: false)
+      end
+    end
+    end
 
   describe "non circular ref inside a circular ref" do
     setup do
