@@ -48,23 +48,25 @@ defmodule Xema.CustomValidatorTest do
                palindrome: "rats live on no evil star"
              })
     end
+
     test "with invalid data" do
       assert Schemas.validate(:strings, %{
                short: "foobar",
                long: "foo",
                palindrome: "cats live on no evil star"
-             }) ==  {:error,
-             %{
-               properties: %{
-                 long: %{min_length: 5, value: "foo"},
-                 palindrome: %{
-                   validator: :no_palindrome,
-                   value: "cats live on no evil star"
-                 },
-                 short: %{max_length: 3, value: "foobar"}
-               }
-             }}
-      end
+             }) ==
+               {:error,
+                %{
+                  properties: %{
+                    long: %{min_length: 5, value: "foo"},
+                    palindrome: %{
+                      validator: :no_palindrome,
+                      value: "cats live on no evil star"
+                    },
+                    short: %{max_length: 3, value: "foobar"}
+                  }
+                }}
+    end
   end
 
   describe "timespan schema" do

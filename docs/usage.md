@@ -636,6 +636,23 @@ iex> Xema.valid? schema, URI.parse("")
 false
 ```
 
+### <a id="struct"></a> Map keywords for structs
+
+The validations for `map` are also available.
+
+The next example shows a schema for an URI that needs a fragment.
+
+```elixir
+iex> schema = Xema.new {
+...>   :struct, module: URI, properties: %{fragment: :string}
+...> }
+iex>
+iex> Xema.valid?(schema, URI.parse("http://example.com"))
+false
+iex> Xema.valid?(schema, URI.parse("http://example.com#frag"))
+true
+```
+
 ## <a id="multi_types"></a> Multiples Types
 
 `JSON Schema Draft: 4/6/7`

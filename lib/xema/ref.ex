@@ -73,7 +73,7 @@ defmodule Xema.Ref do
   @doc """
   Returns the reference key for a `Ref` or an `URI`.
   """
-  @spec key(ref :: Ref.t() | URI.t() ) :: String.t()
+  @spec key(ref :: Ref.t() | URI.t()) :: String.t()
   def key(%Ref{pointer: pointer, uri: nil}), do: pointer
 
   def key(%Ref{uri: uri}), do: key(uri)
