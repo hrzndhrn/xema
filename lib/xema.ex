@@ -12,7 +12,7 @@ defmodule Xema do
   + `__MODULE__.validate/2`
   + `__MODULE__.validate!/2`
 
-  The macro `defxema/2` supports the construction of a schema. After that
+  The macro `xema/2` supports the construction of a schema. After that
   the schema is available as a function.
 
   ## Example
@@ -24,21 +24,21 @@ defmodule Xema do
     @pos integer(minimum: 0)
     @neg integer(maximum: 0)
 
-    defxema user,
-            map(
-              properties: %{
-                name: string(min_length: 1),
-                age: @pos
-              }
-            )
+    xema user,
+         map(
+           properties: %{
+             name: string(min_length: 1),
+             age: @pos
+           }
+         )
 
-    defxema nums,
-            map(
-              properties: %{
-                pos: list(items: @pos),
-                neg: list(items: @neg)
-              }
-            )
+    xema nums,
+         map(
+           properties: %{
+             pos: list(items: @pos),
+             neg: list(items: @neg)
+           }
+         )
   end
   ```
 
@@ -53,9 +53,6 @@ defmodule Xema do
 
   true = Schema.valid?(:nums, %{pos: [1, 2, 3]})
   false = Schema.valid?(:nums, %{neg: [1, 2, 3]})
-
-  %Xema{} = Schema.user()
-  %Xema{} = Schema.nums()
   """
 
   use Xema.Behaviour
@@ -67,18 +64,11 @@ defmodule Xema do
   @keywords Schema.keywords()
   @types Schema.types()
 
+  @doc false
   defmacro __using__(_opts) do
     quote do
       import Xema.Builder
-
-      def valid?(schema, value),
-        do: Xema.valid?(apply(__MODULE__, schema, []), value)
-
-      def validate(schema, value),
-        do: Xema.validate(apply(__MODULE__, schema, []), value)
-
-      def validate!(schema, value),
-        do: Xema.validate!(apply(__MODULE__, schema, []), value)
+      @xemas []
     end
   end
 

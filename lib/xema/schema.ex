@@ -65,6 +65,8 @@ defmodule Xema.Schema do
   * `then` see `if`, `then`, `else`
   * `type` specifies the data type for a schema.
   * `unique_items` disallow duplicate items, if set to true.
+  * `validator` a custom validator. This can be a function or a tuple with
+    module and function name.
   """
   @type t :: %Schema{
           additional_items: Xema.t() | Schema.t() | boolean | nil,
@@ -113,7 +115,12 @@ defmodule Xema.Schema do
           then: Xema.t() | Schema.t() | nil,
           title: String.t() | nil,
           type: type | [type],
-          unique_items: boolean | nil
+          unique_items: boolean | nil,
+          validator:
+            function
+            | {module, function}
+            | {module, function, list}
+            | list
         }
 
   defstruct [
@@ -163,6 +170,7 @@ defmodule Xema.Schema do
     :then,
     :title,
     :unique_items,
+    :validator,
     type: :any
   ]
 

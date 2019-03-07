@@ -9,43 +9,32 @@ defmodule Xema.UseTest do
     @pos integer(minimum: 0)
     @neg integer(maximum: 0)
 
-    defxema user,
-            map(
-              properties: %{
-                name: string(min_length: 1),
-                age: @pos
-              }
-            )
+    xema :user,
+         map(
+           properties: %{
+             name: string(min_length: 1),
+             age: @pos
+           }
+         )
 
-    defxema person,
-            keyword(
-              properties: %{
-                name: string(min_length: 1),
-                age: @pos
-              }
-            )
+    xema :person,
+         keyword(
+           properties: %{
+             name: string(min_length: 1),
+             age: @pos
+           }
+         )
 
-    defxema nums,
-            map(
-              properties: %{
-                pos: list(items: @pos),
-                neg: list(items: @neg)
-              }
-            )
+    xema :nums,
+         map(
+           properties: %{
+             pos: list(items: @pos),
+             neg: list(items: @neg)
+           }
+         )
   end
 
-  test "user/0 returns Xema" do
-    assert %Xema{} = Schema.user()
-  end
-
-  test "nums/0 returns Xema" do
-    assert %Xema{} = Schema.nums()
-  end
-
-  test "person/0 returns Xema" do
-    assert %Xema{} = Schema.person()
-  end
-
+  @tag :only
   test "valid?/2 returns true for a valid person" do
     assert Schema.valid?(:person, name: "John", age: 21)
   end

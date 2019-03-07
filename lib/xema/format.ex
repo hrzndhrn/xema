@@ -277,6 +277,9 @@ defmodule Xema.Format do
     end
   end
 
+  @doc """
+  Return true if `string` contains a regular expression.
+  """
   @spec regex?(String.t()) :: boolean
   def regex?(string) do
     case Regex.compile(string) do

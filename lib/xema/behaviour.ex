@@ -27,6 +27,9 @@ defmodule Xema.Behaviour do
 
       @enforce_keys [:schema]
 
+      @typedoc """
+      This struct contains the schema and references of the schema.
+      """
       @type t :: %__MODULE__{
               schema: Schema.t(),
               refs: map

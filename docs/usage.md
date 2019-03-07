@@ -729,6 +729,9 @@ iex> Xema.valid?(schema, [1, 2])
 true
 ```
 
+## <a id="custom_validator"></a> Custom validator
+TODO: add docs
+
 ## <a id="combine"></a> Combine Schemas
 
 The keywords `all_of`, `any_of`, and `one_of` combines schemas.
