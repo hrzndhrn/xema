@@ -636,6 +636,23 @@ iex> Xema.valid? schema, URI.parse("")
 false
 ```
 
+### <a id="struct"></a> Map keywords for structs
+
+The validations for `map` are also available.
+
+The next example shows a schema for an URI that needs a fragment.
+
+```elixir
+iex> schema = Xema.new {
+...>   :struct, module: URI, properties: %{fragment: :string}
+...> }
+iex>
+iex> Xema.valid?(schema, URI.parse("http://example.com"))
+false
+iex> Xema.valid?(schema, URI.parse("http://example.com#frag"))
+true
+```
+
 ## <a id="multi_types"></a> Multiples Types
 
 `JSON Schema Draft: 4/6/7`
@@ -729,11 +746,49 @@ iex> Xema.valid?(schema, [1, 2])
 true
 ```
 
+## <a id="custom_validator"></a> Custom validator
+
+With the keyword `validator` a custom validator can be defined. The `validator`
+expected a function or a tuple of module and function name. The validator
+function gets the current value and return :ok on success and an error tuple
+on failure.
+
+```elixir
+iex> defmodule Palindrome do
+...>   @xema Xema.new(
+...>     properties: %{
+...>       palindrome: {:string, validator: &Palindrome.check/1}
+...>     }
+...>   )
+...>
+...>   def check(value) do
+...>     case value == String.reverse(value) do
+...>       true -> :ok
+...>       false -> {:error, :no_palindrome}
+...>     end
+...>   end
+...>
+...>   def validate(value) do
+...>     Xema.validate(@xema, value)
+...>   end
+...> end
+iex>
+iex> Palindrome.validate(%{palindrome: "abba"})
+:ok
+iex> Palindrome.validate(%{palindrome: "beatles"})
+{:error, %{
+  properties: %{
+    palindrome: %{validator: :no_palindrome, value: "beatles"}
+  }
+}}
+```
+
 ## <a id="combine"></a> Combine Schemas
 
 The keywords `all_of`, `any_of`, and `one_of` combines schemas.
 
 With `all_of` all schemas have to match.
+
 ```elixir
 iex> all = Xema.new(all_of: [
 ...>   {:integer, multiple_of: 2},

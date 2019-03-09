@@ -189,7 +189,6 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
-    @tag :only
     test "with valid data", %{schema: schema} do
       assert Xema.valid?(schema, %{limit: 5})
     end

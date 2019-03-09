@@ -23,7 +23,6 @@ defmodule Xema.Builder do
     map
     number
     string
-    struct
     tuple
   )a
 
@@ -36,8 +35,13 @@ defmodule Xema.Builder do
         iex> Xema.Builder.#{fun}(key: 42)
         {:#{fun}, [key: 42]}
     """
+    @spec unquote(fun)() :: unquote(fun)
+    def unquote(fun)() do
+      unquote(fun)
+    end
+
     @spec unquote(fun)(keyword) :: {unquote(fun), keyword}
-    def unquote(fun)(keywords \\ []) when is_list(keywords) do
+    def unquote(fun)(keywords) when is_list(keywords) do
       {unquote(fun), keywords}
     end
   end)
@@ -48,16 +52,47 @@ defmodule Xema.Builder do
   def ref(ref) when is_binary(ref), do: {:ref, ref}
 
   @doc """
+  Returns `:struct`.
+  """
+  @spec strux :: :struct
+  def strux, do: :struct
+
+  @doc """
+  Returns a tuple of `:stuct` and the given keyword list.
+  """
+  @spec strux(keyword) :: {:struct, keyword}
+  def strux(keywords) when is_list(keywords), do: {:struct, keywords}
+
+  @doc """
+  Returns the tuple `{:struct, module: module}`.
+  """
+  @spec strux(atom) :: {:struct, module: module}
+  def strux(module) when is_atom(module), do: strux(module: module)
+
+  def strux(module, keywords) when is_atom(module),
+    do: keywords |> Keyword.put(:module, module) |> strux()
+
+  @doc """
   Create a function with the `name` that returns the given `schema`.
   """
-  defmacro defxema(name, schema) do
-    xema =
-      quote do
-        Xema.new(unquote(schema))
-      end
-
+  defmacro xema(name, schema) do
     quote do
-      def unquote(name), do: unquote(xema)
+      Module.register_attribute(__MODULE__, :xemas, accumulate: true)
+
+      Module.put_attribute(
+        __MODULE__,
+        :xemas,
+        {unquote(name), Xema.new(unquote(schema))}
+      )
+
+      def valid?(unquote(name), data),
+        do: Xema.valid?(@xemas[unquote(name)], data)
+
+      def validate(unquote(name), data),
+        do: Xema.validate(@xemas[unquote(name)], data)
+
+      def validate!(unquote(name), data),
+        do: Xema.validate!(@xemas[unquote(name)], data)
     end
   end
 end

@@ -58,12 +58,14 @@ defmodule Xema.Validator do
       %{type: list} when is_list(list) ->
         with {:ok, type} <- types(schema, value),
              :ok <- do_validate(%{schema | type: type}, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :any, ref: nil} ->
         with type <- get_type(value),
              :ok <- validate_by(:default, schema, value, opts),
              :ok <- validate_by(type, schema, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :any, ref: ref} ->
@@ -73,36 +75,43 @@ defmodule Xema.Validator do
         with :ok <- type(schema, value),
              :ok <- validate_by(:default, schema, value, opts),
              :ok <- validate_by(:string, schema, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :list} ->
         with :ok <- type(schema, value),
              :ok <- validate_by(:list, schema, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :tuple} ->
         with :ok <- type(schema, value),
              :ok <- validate_by(:list, schema, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :struct} ->
         with :ok <- type(schema, value),
              :ok <- validate_by(:struct, schema, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :map} ->
         with :ok <- type(schema, value),
              :ok <- validate_by(:map, schema, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :keyword} ->
         with :ok <- type(schema, value),
              :ok <- validate_by(:keyword, schema, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :atom} ->
         with :ok <- type(schema, value),
              :ok <- validate_by(:default, schema, value, opts),
+             :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: type} when is_atom(type) ->
@@ -934,6 +943,23 @@ defmodule Xema.Validator do
   end
 
   defp format(_, _str), do: :ok
+
+  # Custom validator
+  @spec custom_validator(Schema.t(), any) :: result
+  defp custom_validator(%{validator: validator}, value)
+       when is_function(validator, 1) do
+    with {:error, reason} <- apply(validator, [value]) do
+      {:error, %{validator: reason, value: value}}
+    end
+  end
+
+  defp custom_validator(%{validator: {module, validator}}, value) do
+    with {:error, reason} <- apply(module, validator, [value]) do
+      {:error, %{validator: reason, value: value}}
+    end
+  end
+
+  defp custom_validator(_, _), do: :ok
 
   # Returns a map containing only keys that `map_1` and `map_2` have in common.
   # Values for the returned map are taken from `map_2`.

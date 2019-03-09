@@ -945,7 +945,6 @@ defmodule Xema.RefTest do
       }
     end
 
-    @tag :only
     test "with valid data", %{schema: schema} do
       assert valid?(schema, %{commands: %{"foo_cmd" => %{os: "mac"}}})
     end

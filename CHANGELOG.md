@@ -4,6 +4,9 @@
 
 + Inline references in schemas by default. Increased performance of reference
   handling by 30%.
++ Rename `defxema` to `xema` and refactor macros.
++ Add custom `validator`.
++ Add examples page.
 
 ## 0.7.0 2019/02/10
 

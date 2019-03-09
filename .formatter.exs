@@ -1,5 +1,5 @@
 locals_without_parens = [
-  defxema: 2
+  xema: 2
 ]
 
 [

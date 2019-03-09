@@ -9,6 +9,9 @@ defmodule Xema.Ref do
 
   require Logger
 
+  @typedoc """
+  A reference contains a `pointer` and an optional `uri`.
+  """
   @type t :: %Xema.Ref{
           pointer: String.t(),
           uri: URI.t() | nil
@@ -68,9 +71,9 @@ defmodule Xema.Ref do
   end
 
   @doc """
-  Returns the reference key.
+  Returns the reference key for a `Ref` or an `URI`.
   """
-  @spec key(Ref.t()) :: String.t()
+  @spec key(ref :: Ref.t() | URI.t()) :: String.t()
   def key(%Ref{pointer: pointer, uri: nil}), do: pointer
 
   def key(%Ref{uri: uri}), do: key(uri)

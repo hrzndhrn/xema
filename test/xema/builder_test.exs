@@ -13,6 +13,16 @@ defmodule Xema.BuilderTest do
     end
   end
 
+  describe "strux function" do
+    test "with a simple schema" do
+      schema = Xema.new(strux(URI, properties: %{fragment: :string}))
+
+      raw = Xema.new({:struct, module: URI, properties: %{fragment: :string}})
+
+      assert schema == raw
+    end
+  end
+
   describe "map function" do
     test "with a simple schema" do
       schema = Xema.new(map())
