@@ -18,41 +18,42 @@ defmodule Xema do
   ## Example
 
   ```elixir
-  defmodule Schema do
-    use Xema
-
-    @pos integer(minimum: 0)
-    @neg integer(maximum: 0)
-
-    xema user,
-         map(
-           properties: %{
-             name: string(min_length: 1),
-             age: @pos
-           }
-         )
-
-    xema nums,
-         map(
-           properties: %{
-             pos: list(items: @pos),
-             neg: list(items: @neg)
-           }
-         )
-  end
+  iex> defmodule Schema do
+  ...>   use Xema
+  ...>
+  ...>   @pos integer(minimum: 0)
+  ...>   @neg integer(maximum: 0)
+  ...>
+  ...>   xema :user,
+  ...>        map(
+  ...>          properties: %{
+  ...>            name: string(min_length: 1),
+  ...>            age: @pos
+  ...>          }
+  ...>        )
+  ...>
+  ...>   xema :nums,
+  ...>        map(
+  ...>          properties: %{
+  ...>            pos: list(items: @pos),
+  ...>            neg: list(items: @neg)
+  ...>          }
+  ...>        )
+  ...> end
+  iex>
+  iex> Schema.valid?(:user, %{name: "John", age: 21})
+  true
+  iex> Schema.valid?(:user, %{name: "", age: 21})
+  false
+  iex> Schema.validate(:user, %{name: "John", age: 21})
+  :ok
+  iex> Schema.validate(:user, %{name: "", age: 21})
+  {:error, %{properties: %{name: %{min_length: 1, value: ""}}}}
+  iex> Schema.valid?(:nums, %{pos: [1, 2, 3]})
+  true
+  iex> Schema.valid?(:nums, %{neg: [1, 2, 3]})
+  false
   ```
-
-  The module `Schema` can now be used like this.
-
-  ```elixir
-  true = Schema.valid?(:user, %{name: "John", age: 21})
-  false = Schema.valid?(:user, %{name: "", age: 21})
-
-  :ok = Schema.validate(:user, %{name: "John", age: 21})
-  {:error, reason} = Schema.validate(:user, %{name: "", age: 21})
-
-  true = Schema.valid?(:nums, %{pos: [1, 2, 3]})
-  false = Schema.valid?(:nums, %{neg: [1, 2, 3]})
   """
 
   use Xema.Behaviour
