@@ -747,13 +747,48 @@ true
 ```
 
 ## <a id="custom_validator"></a> Custom validator
-TODO: add docs
+
+With the keyword `validator` a custom validator can be defined. The `validator`
+expected a function or a tuple of module and function name. The validator
+function gets the current value and return :ok on success and an error tuple
+on failure.
+
+```elixir
+iex> defmodule Palindrome do
+...>   @xema Xema.new(
+...>     properties: %{
+...>       palindrome: {:string, validator: &Palindrome.check/1}
+...>     }
+...>   )
+...>
+...>   def check(value) do
+...>     case value == String.reverse(value) do
+...>       true -> :ok
+...>       false -> {:error, :no_palindrome}
+...>     end
+...>   end
+...>
+...>   def validate(value) do
+...>     Xema.validate(@xema, value)
+...>   end
+...> end
+iex>
+iex> Palindrome.validate(%{palindrome: "abba"})
+:ok
+iex> Palindrome.validate(%{palindrome: "beatles"})
+{:error, %{
+  properties: %{
+    palindrome: %{validator: :no_palindrome, value: "beatles"}
+  }
+}}
+```
 
 ## <a id="combine"></a> Combine Schemas
 
 The keywords `all_of`, `any_of`, and `one_of` combines schemas.
 
 With `all_of` all schemas have to match.
+
 ```elixir
 iex> all = Xema.new(all_of: [
 ...>   {:integer, multiple_of: 2},
