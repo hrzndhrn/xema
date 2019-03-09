@@ -34,7 +34,6 @@ defmodule Xema.UseTest do
          )
   end
 
-  @tag :only
   test "valid?/2 returns true for a valid person" do
     assert Schema.valid?(:person, name: "John", age: 21)
   end
