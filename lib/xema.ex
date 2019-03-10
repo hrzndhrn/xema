@@ -15,6 +15,11 @@ defmodule Xema do
   The macro `xema/2` supports the construction of a schema. After that
   the schema is available as a function.
 
+  A schema can also be tagged with `@default true` and then called by
+  + `__MODULE__.valid?/1`
+  + `__MODULE__.validate/1`
+  + `__MODULE__.validate!/1`
+
   ## Example
 
   ```elixir
@@ -24,6 +29,7 @@ defmodule Xema do
   ...>   @pos integer(minimum: 0)
   ...>   @neg integer(maximum: 0)
   ...>
+  ...>   @default true
   ...>   xema :user,
   ...>        map(
   ...>          properties: %{
@@ -43,11 +49,13 @@ defmodule Xema do
   iex>
   iex> Schema.valid?(:user, %{name: "John", age: 21})
   true
-  iex> Schema.valid?(:user, %{name: "", age: 21})
+  iex> Schema.valid?(%{name: "John", age: 21})
+  true
+  iex> Schema.valid?(%{name: "", age: 21})
   false
-  iex> Schema.validate(:user, %{name: "John", age: 21})
+  iex> Schema.validate(%{name: "John", age: 21})
   :ok
-  iex> Schema.validate(:user, %{name: "", age: 21})
+  iex> Schema.validate(%{name: "", age: 21})
   {:error, %{properties: %{name: %{min_length: 1, value: ""}}}}
   iex> Schema.valid?(:nums, %{pos: [1, 2, 3]})
   true
@@ -70,6 +78,7 @@ defmodule Xema do
     quote do
       import Xema.Builder
       @xemas []
+      @default false
     end
   end
 

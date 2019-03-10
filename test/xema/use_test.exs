@@ -17,6 +17,7 @@ defmodule Xema.UseTest do
            }
          )
 
+    @default true
     xema :person,
          keyword(
            properties: %{
@@ -42,6 +43,14 @@ defmodule Xema.UseTest do
     refute Schema.valid?(:person, name: "John", age: -21)
   end
 
+  test "valid?/1 returns true for a valid person" do
+    assert Schema.valid?(name: "John", age: 21)
+  end
+
+  test "valid?/1 returns false for an invalid person" do
+    refute Schema.valid?(name: "John", age: -21)
+  end
+
   test "valid?/2 returns true for a valid user" do
     assert Schema.valid?(:user, %{name: "John", age: 21})
   end
@@ -56,6 +65,15 @@ defmodule Xema.UseTest do
 
   test "valid?/2 returns false for an invalid nums map" do
     refute Schema.valid?(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
+  end
+
+  test "validate/1 returns :ok for a valid person" do
+    assert Schema.validate(name: "John", age: 21) == :ok
+  end
+
+  test "validate/1 returns an error tuple for an invalid person" do
+    assert Schema.validate(name: "John", age: -21) ==
+             {:error, %{properties: %{age: %{minimum: 0, value: -21}}}}
   end
 
   test "validate/2 returns :ok for a valid user" do
@@ -79,16 +97,23 @@ defmodule Xema.UseTest do
 
   test "validate!/2 raises a ValidationError for an invalid user" do
     assert_raise ValidationError, fn ->
-      Schema.validate!(:user, %{name: "", age: 21}) ==
-        {:error, %{properties: %{name: %{min_length: 1, value: ""}}}}
+      Schema.validate!(:user, %{name: "", age: 21})
     end
   end
 
   test "validate!/2 raises a ValidationError for an invalid nums map" do
     assert_raise ValidationError, fn ->
-      Schema.validate!(:nums, %{pos: [1, -2, 3], neg: [-5, -4]}) ==
-        {:error,
-         %{properties: %{pos: %{items: [{1, %{minimum: 0, value: -2}}]}}}}
+      Schema.validate!(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
+    end
+  end
+
+  test "validate!/1 returns :ok for a valid person" do
+    assert Schema.validate!(name: "John", age: 21) == :ok
+  end
+
+  test "validate!/1 raises a ValidationError for an invalid person" do
+    assert_raise ValidationError, fn ->
+      Schema.validate!(age: -1)
     end
   end
 end
