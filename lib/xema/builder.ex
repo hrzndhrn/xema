@@ -93,6 +93,19 @@ defmodule Xema.Builder do
 
       def validate!(unquote(name), data),
         do: Xema.validate!(@xemas[unquote(name)], data)
+
+      if Module.get_attribute(__MODULE__, :default) do
+        Module.put_attribute(__MODULE__, :default, false)
+
+        def valid?(data),
+          do: Xema.valid?(@xemas[unquote(name)], data)
+
+        def validate(data),
+          do: Xema.validate(@xemas[unquote(name)], data)
+
+        def validate!(data),
+          do: Xema.validate!(@xemas[unquote(name)], data)
+      end
     end
   end
 end

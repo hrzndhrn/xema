@@ -3,4 +3,5 @@ defmodule XemaTest do
 
   doctest Xema
   doctest Usage
+  doctest Examples
 end

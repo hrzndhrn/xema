@@ -7,6 +7,7 @@
 + Rename `defxema` to `xema` and refactor macros.
 + Add custom `validator`.
 + Add examples page.
++ Add `@default true`.
 
 ## 0.7.0 2019/02/10
 

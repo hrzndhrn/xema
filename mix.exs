@@ -29,6 +29,7 @@ defmodule Xema.Mixfile do
           "docs/readme.md",
           "docs/usage.md",
           "docs/loader.md",
+          "docs/examples.md",
           "docs/unsupported.md"
         ],
         main: "readme"
