@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.8.0 --/--/--
+## 0.8.0 2019/03/10
 
 + Inline references in schemas by default. Increased performance of reference
   handling by 30%.
