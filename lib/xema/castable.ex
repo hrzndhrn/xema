@@ -14,8 +14,6 @@ defimpl Xema.Castable, for: Map do
 
   alias Xema.Schema
 
-  def cast(map, %Schema{type: :map, keys: nil}), do: {:ok, map}
-
   def cast(map, %Schema{type: :map, keys: keys}) do
     Enum.reduce_while(map, {:ok, %{}}, fn {key, value}, {:ok, acc} ->
       case cast_key(key, keys) do
@@ -29,8 +27,6 @@ defimpl Xema.Castable, for: Map do
   end
 
   def cast(map, %Schema{type: :any}), do: {:ok, map}
-
-  def cast(map, %Schema{type: nil}), do: {:ok, map}
 
   def cast(_, %Schema{type: type}),
     do: {:error, %{to: type, cast: Map}}
@@ -60,8 +56,6 @@ defimpl Xema.Castable, for: BitString do
     end
   end
 
-  def cast(str, %Schema{type: nil}), do: {:ok, str}
-
   def cast(str, %Schema{type: :any}), do: {:ok, str}
 
   def cast(_, %Schema{type: type}),
@@ -76,8 +70,6 @@ defimpl Xema.Castable, for: Integer do
   def cast(int, %Schema{type: :string}), do: {:ok, to_string(int)}
 
   def cast(int, %Schema{type: :any}), do: {:ok, int}
-
-  def cast(int, %Schema{type: nil}), do: {:ok, int}
 
   def cast(_, %Schema{type: type}),
     do: {:error, %{to: type, cast: Integer}}
