@@ -451,18 +451,14 @@ defmodule Xema do
   @doc """
   TODO
   """
-  def cast(%Xema{schema: schema} = xema, value) do
-    with {:cast, {:ok, cast}} <- {:cast, do_cast(schema, value, [])},
-         {:validate, :ok} <- {:validate, validate(xema, cast)} do
+  def cast(%Xema{schema: schema}, value) do
+    with {:ok, cast} <- do_cast(schema, value, []) do
       {:ok, cast}
     else
-      {:cast, {:error, reason}} when is_map(reason) ->
+      {:error, %{path: _} = reason} ->
         {:error, Map.update!(reason, :path, fn path -> Enum.reverse(path) end)}
 
-      {:cast, error} ->
-        error
-
-      {:validate, error} ->
+      error ->
         error
     end
   end

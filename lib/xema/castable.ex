@@ -32,8 +32,8 @@ defimpl Xema.Castable, for: Map do
 
   def cast(map, %Schema{type: nil}), do: {:ok, map}
 
-  def cast(_, %Schema{type: expected}),
-    do: {:error, %{expected: expected, got: :map}}
+  def cast(_, %Schema{type: type}),
+    do: {:error, %{to: type, cast: Map}}
 
   defp cast_key(value, :atoms) when is_binary(value) do
     case to_existing_atom(value) do
@@ -64,8 +64,8 @@ defimpl Xema.Castable, for: BitString do
 
   def cast(str, %Schema{type: :any}), do: {:ok, str}
 
-  def cast(_, %Schema{type: expected}),
-    do: {:error, %{expected: expected, got: :string}}
+  def cast(_, %Schema{type: type}),
+    do: {:error, %{to: type, cast: BitString}}
 end
 
 defimpl Xema.Castable, for: Integer do
@@ -79,6 +79,6 @@ defimpl Xema.Castable, for: Integer do
 
   def cast(int, %Schema{type: nil}), do: {:ok, int}
 
-  def cast(_, %Schema{type: expected}),
-    do: {:error, %{expected: expected, got: :integer}}
+  def cast(_, %Schema{type: type}),
+    do: {:error, %{to: type, cast: Integer}}
 end

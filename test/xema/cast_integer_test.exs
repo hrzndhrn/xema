@@ -27,6 +27,13 @@ defmodule Xema.CastMapTest do
     end
 
     test "from an invalid type", %{schema: schema} do
+      assert cast(schema, %{}) == {:error, %{cast: Map, to: :integer}}
+    end
+
+    test "from a type without protocol implementation", %{schema: schema} do
+      assert_raise(Protocol.UndefinedError, fn ->
+        cast(schema, ~r/.*/)
+      end)
     end
   end
 end

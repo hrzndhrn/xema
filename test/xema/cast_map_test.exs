@@ -23,7 +23,7 @@ defmodule Xema.CastMapTest do
     end
 
     test "from an integer", %{schema: schema} do
-      assert cast(schema, 11) == {:error, %{type: :map, value: 11}}
+      assert cast(schema, 11) == {:error, %{cast: Integer, to: :map}}
     end
   end
 
@@ -80,8 +80,10 @@ defmodule Xema.CastMapTest do
       data = %{"bla" => 11}
       assert validate(schema, data) == {:error, %{keys: :atoms}}
 
-      assert cast(schema, data) ==
-               {:error, %{properties: %{bla: %{type: :string, value: 11}}}}
+      assert {:ok, cast} = cast(schema, data)
+      assert cast == %{bla: "11"}
+
+      assert validate(schema, cast) == :ok
     end
 
     test "from map with atoms keys and valid property", %{schema: schema} do
@@ -96,8 +98,10 @@ defmodule Xema.CastMapTest do
       assert validate(schema, data) ==
                {:error, %{properties: %{bla: %{type: :string, value: 11}}}}
 
-      assert cast(schema, data) ==
-               {:error, %{properties: %{bla: %{type: :string, value: 11}}}}
+      assert {:ok, cast} = cast(schema, data)
+      assert cast == %{bla: "11"}
+
+      assert validate(schema, cast) == :ok
     end
 
     test "from a map with unknown atom", %{schema: schema} do
@@ -191,11 +195,16 @@ defmodule Xema.CastMapTest do
     test "from an invalid map", %{schema: schema} do
       data = %{"foo" => %{"num" => "42"}}
 
-      expected =
-        {:error,
-         %{properties: %{foo: %{properties: %{num: %{value: 42, maximum: 12}}}}}}
+      assert {:ok, cast} = cast(schema, data)
+      assert cast == %{foo: %{num: 42}}
 
-      assert cast(schema, data) == expected
+      assert validate(schema, cast) ==
+               {:error,
+                %{
+                  properties: %{
+                    foo: %{properties: %{num: %{value: 42, maximum: 12}}}
+                  }
+                }}
     end
   end
 
