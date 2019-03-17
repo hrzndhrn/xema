@@ -449,7 +449,7 @@ defmodule Xema do
   defp nested_source(val), do: val
 
   @doc """
-  Converts the data using the specified schema.
+  Converts the given data using the specified schema.
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do

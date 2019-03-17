@@ -27,6 +27,7 @@ defmodule Xema.CastIntegerTest do
     end
 
     test "from an invalid type", %{schema: schema} do
+      assert cast(schema, []) == {:error, %{cast: List, to: :integer}}
       assert cast(schema, %{}) == {:error, %{cast: Map, to: :integer}}
     end
 
