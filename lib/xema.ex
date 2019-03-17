@@ -66,6 +66,7 @@ defmodule Xema do
 
   use Xema.Behaviour
 
+  alias Xema.Castable
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaValidator
@@ -446,4 +447,60 @@ defmodule Xema do
        do: Enum.map(val, &nested_source/1)
 
   defp nested_source(val), do: val
+
+  @doc """
+  TODO
+  """
+  def cast(%Xema{schema: schema} = xema, value) do
+    with {:cast, {:ok, cast}} <- {:cast, do_cast(schema, value, [])},
+         {:validate, :ok} <- {:validate, validate(xema, cast)} do
+      {:ok, cast}
+    else
+      {:cast, {:error, reason}} when is_map(reason) ->
+        {:error, Map.update!(reason, :path, fn path -> Enum.reverse(path) end)}
+
+      {:cast, error} ->
+        error
+
+      {:validate, error} ->
+        error
+    end
+  end
+
+  defp do_cast(nil, value, _), do: value
+
+  defp do_cast(%Schema{} = schema, map, path) when is_map(map) do
+    with {:ok, cast} <- Castable.cast(map, schema) do
+      cast_values(schema, cast, path)
+    else
+      {:error, reason} when is_map(reason) ->
+        {:error, reason}
+
+      {:error, reason} ->
+        {:error, %{path: path, reason: reason}}
+    end
+  end
+
+  defp do_cast(%Schema{} = schema, value, path) do
+    Castable.cast(value, schema)
+  end
+
+  defp cast_values(%Schema{properties: nil}, map, _) when is_map(map),
+    do: {:ok, map}
+
+  defp cast_values(%Schema{properties: properties}, map, path)
+       when is_map(map),
+       do:
+         Enum.reduce_while(map, %{}, fn {key, value}, acc ->
+           case do_cast(Map.get(properties, key), value, [key | path]) do
+             {:ok, cast} ->
+               {:cont, {:ok, Map.put(acc, key, cast)}}
+
+             {:error, reason} when is_map(reason) ->
+               {:halt, {:error, reason}}
+
+             {:error, reason} ->
+               {:halt, {:error, %{path: [key | path], reason: reason}}}
+           end
+         end)
 end
