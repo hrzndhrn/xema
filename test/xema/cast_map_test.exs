@@ -163,7 +163,10 @@ defmodule Xema.CastMapTest do
                     num: {:integer, maximum: 12},
                     bar:
                       {:map,
-                       keys: :atoms, properties: %{num: {:integer, maximum: 12}}}
+                       keys: :atoms,
+                       properties: %{
+                         num: {:integer, maximum: 12}
+                       }}
                   }}
              }}
           )

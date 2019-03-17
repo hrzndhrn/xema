@@ -1,4 +1,4 @@
-defmodule Xema.CastMapTest do
+defmodule Xema.CastIntegerTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [cast: 2, validate: 2]

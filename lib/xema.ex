@@ -449,8 +449,9 @@ defmodule Xema do
   defp nested_source(val), do: val
 
   @doc """
-  TODO
+  Converts the data using the specified schema.
   """
+  @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
     with {:ok, cast} <- do_cast(schema, value, []) do
       {:ok, cast}
@@ -463,8 +464,7 @@ defmodule Xema do
     end
   end
 
-  defp do_cast(nil, value, _), do: value
-
+  @spec do_cast(Schema.t(), term, list) :: {:ok, term} | {:error, term}
   defp do_cast(%Schema{} = schema, map, path) when is_map(map) do
     with {:ok, cast} <- Castable.cast(map, schema) do
       cast_values(schema, cast, path)
@@ -477,10 +477,10 @@ defmodule Xema do
     end
   end
 
-  defp do_cast(%Schema{} = schema, value, path) do
-    Castable.cast(value, schema)
-  end
+  defp do_cast(%Schema{} = schema, value, _path),
+    do: Castable.cast(value, schema)
 
+  @spec cast_values(Schema.t(), term, list) :: {:ok, term} | {:error, term}
   defp cast_values(%Schema{properties: nil}, map, _) when is_map(map),
     do: {:ok, map}
 
