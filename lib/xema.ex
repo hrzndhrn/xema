@@ -453,14 +453,11 @@ defmodule Xema do
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
-    with {:ok, cast} <- do_cast(schema, value, []) do
-      {:ok, cast}
-    else
-      {:error, %{path: _} = reason} ->
-        {:error, Map.update!(reason, :path, fn path -> Enum.reverse(path) end)}
-
-      error ->
-        error
+    try do
+      do_cast(schema, value, [])
+    catch
+      {:error, %{path: path} = reason} ->
+        {:error, %{reason | path: Enum.reverse(path)}}
     end
   end
 
@@ -469,16 +466,19 @@ defmodule Xema do
     with {:ok, cast} <- Castable.cast(map, schema) do
       cast_values(schema, cast, path)
     else
-      {:error, reason} when is_map(reason) ->
-        {:error, reason}
-
       {:error, reason} ->
-        {:error, %{path: path, reason: reason}}
+        throw({:error, %{path: path, reason: reason}})
     end
   end
 
-  defp do_cast(%Schema{} = schema, value, _path),
-    do: Castable.cast(value, schema)
+  defp do_cast(%Schema{} = schema, value, path) do
+    with {:ok, cast} <- Castable.cast(value, schema) do
+      {:ok, cast}
+    else
+      {:error, reason} ->
+        throw({:error, %{path: path, reason: reason}})
+    end
+  end
 
   @spec cast_values(Schema.t(), term, list) :: {:ok, term} | {:error, term}
   defp cast_values(%Schema{properties: nil}, map, _) when is_map(map),
@@ -492,11 +492,8 @@ defmodule Xema do
              {:ok, cast} ->
                {:cont, {:ok, Map.put(acc, key, cast)}}
 
-             {:error, reason} when is_map(reason) ->
-               {:halt, {:error, reason}}
-
              {:error, reason} ->
-               {:halt, {:error, %{path: [key | path], reason: reason}}}
+               throw({:error, %{path: [key | path], reason: reason}})
            end
          end)
 end

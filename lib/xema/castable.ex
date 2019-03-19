@@ -108,8 +108,12 @@ defimpl Xema.Castable, for: List do
 
   def cast(list, %Schema{type: :list}), do: {:ok, list}
 
-  def cast(_, %Schema{type: type}),
-    do: {:error, %{to: type, cast: List}}
+  def cast(list, %Schema{type: type}) do
+    case Keyword.keyword?(list) do
+      true -> {:error, %{to: type, cast: Keyword}}
+      false -> {:error, %{to: type, cast: List}}
+    end
+  end
 end
 
 defimpl Xema.Castable, for: Map do
