@@ -24,7 +24,7 @@ defmodule Xema.Cast.MapTest do
 
     test "from an integer", %{schema: schema} do
       assert cast(schema, 11) ==
-               {:error, %{path: [], reason: %{cast: Integer, to: :map}}}
+               {:error, %{path: [], reason: %{cast: Integer, to: :map, value: 11}}}
     end
   end
 
@@ -114,8 +114,7 @@ defmodule Xema.Cast.MapTest do
   describe "cast/2 with a map schema, [keys: :strings] and properties" do
     setup do
       %{
-        schema:
-          Xema.new({:map, keys: :strings, properties: %{"bla" => :string}})
+        schema: Xema.new({:map, keys: :strings, properties: %{"bla" => :string}})
       }
     end
 
@@ -224,7 +223,7 @@ defmodule Xema.Cast.MapTest do
 
     test "with an invalid value", %{schema: schema} do
       assert cast(schema, %{num: "77."}) ==
-               {:error, %{path: [:num], reason: :not_an_integer}}
+               {:error, %{path: [:num], reason: {:not_an_integer, "77."}}}
     end
   end
 end

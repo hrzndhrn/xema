@@ -24,17 +24,17 @@ defmodule Xema.Cast.FloatTest do
 
     test "from an invalid string", %{schema: schema} do
       assert cast(schema, "66,6") ==
-               {:error, %{path: [], reason: :not_a_float}}
+               {:error, %{path: [], reason: %{cast: String, to: :float, value: "66,6"}}}
     end
 
     test "from an invalid type", %{schema: schema} do
       assert cast(schema, :foo) ==
-               {:error, %{path: [], reason: %{cast: Atom, to: :float}}}
+               {:error, %{path: [], reason: %{cast: Atom, to: :float, value: :foo}}}
 
       assert cast(schema, 42) ==
                {:error, %{path: [], reason: %{cast: Integer, to: :float}}}
 
-      assert cast(schema, [foo: 42]) ==
+      assert cast(schema, foo: 42) ==
                {:error, %{path: [], reason: %{cast: Keyword, to: :float}}}
 
       assert cast(schema, [42]) ==

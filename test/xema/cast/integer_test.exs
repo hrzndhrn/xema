@@ -34,7 +34,7 @@ defmodule Xema.Cast.IntegerTest do
       assert cast(schema, 1.0) ==
                {:error, %{path: [], reason: %{cast: Float, to: :integer}}}
 
-      assert cast(schema, [foo: 42]) ==
+      assert cast(schema, foo: 42) ==
                {:error, %{path: [], reason: %{cast: Keyword, to: :integer}}}
 
       assert cast(schema, [42]) ==

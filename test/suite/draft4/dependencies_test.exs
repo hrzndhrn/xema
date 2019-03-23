@@ -83,10 +83,7 @@ defmodule Draft4.DependenciesTest do
   describe "multiple dependencies subschema" do
     setup do
       %{
-        schema:
-          Xema.new(
-            dependencies: %{bar: [properties: %{bar: :integer, foo: :integer}]}
-          )
+        schema: Xema.new(dependencies: %{bar: [properties: %{bar: :integer, foo: :integer}]})
       }
     end
 

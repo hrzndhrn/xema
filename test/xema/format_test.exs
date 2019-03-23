@@ -12,8 +12,7 @@ defmodule FormatTest do
       data = "1990-02-31T15:59:60.123-08:00"
 
       assert validate(schema, data) ==
-               {:error,
-                %{format: :date_time, value: "1990-02-31T15:59:60.123-08:00"}}
+               {:error, %{format: :date_time, value: "1990-02-31T15:59:60.123-08:00"}}
     end
   end
 

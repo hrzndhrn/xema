@@ -91,8 +91,7 @@ defmodule Xema.UseTest do
 
   test "validate/2 returns an error tuple for an invalid nums map" do
     assert Schema.validate(:nums, %{pos: [1, -2, 3], neg: [-5, -4]}) ==
-             {:error,
-              %{properties: %{pos: %{items: [{1, %{minimum: 0, value: -2}}]}}}}
+             {:error, %{properties: %{pos: %{items: [{1, %{minimum: 0, value: -2}}]}}}}
   end
 
   test "validate!/2 raises a ValidationError for an invalid user" do

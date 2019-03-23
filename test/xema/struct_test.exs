@@ -43,9 +43,7 @@ defmodule Xema.StructTest do
     end
 
     test "validate/2 with invalid struct", %{schema: schema} do
-      expected =
-        {:error,
-         %{module: Xema.StructTest.Foo, value: %Xema.StructTest.Bar{foo: nil}}}
+      expected = {:error, %{module: Xema.StructTest.Foo, value: %Xema.StructTest.Bar{foo: nil}}}
 
       assert validate(schema, %Bar{}) == expected
     end
@@ -61,8 +59,7 @@ defmodule Xema.StructTest do
     end
 
     test "validate/2 with invalid struct", %{schema: schema} do
-      expected =
-        {:error, %{module: Regex, value: %Xema.StructTest.Bar{foo: nil}}}
+      expected = {:error, %{module: Regex, value: %Xema.StructTest.Bar{foo: nil}}}
 
       assert validate(schema, %Bar{}) == expected
     end

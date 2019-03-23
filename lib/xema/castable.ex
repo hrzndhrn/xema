@@ -18,8 +18,8 @@ defimpl Xema.Castable, for: Atom do
 
   def cast(atom, %Schema{type: :string}), do: {:ok, to_string(atom)}
 
-  def cast(_, %Schema{type: type}),
-    do: {:error, %{to: type, cast: Atom}}
+  def cast(atom, %Schema{type: type}),
+    do: {:error, %{to: type, cast: Atom, value: atom}}
 end
 
 defimpl Xema.Castable, for: BitString do
@@ -53,20 +53,20 @@ defimpl Xema.Castable, for: BitString do
 
   def cast(str, %Schema{type: :string}), do: {:ok, str}
 
-  def cast(_, %Schema{type: type}),
-    do: {:error, %{to: type, cast: BitString}}
+  def cast(str, %Schema{type: type}),
+    do: {:error, %{to: type, cast: BitString, value: str}}
 
   defp to_integer(str) do
     case Integer.parse(str) do
       {int, ""} -> {:ok, int}
-      _ -> {:error, :not_an_integer}
+      _ -> {:error, {:not_an_integer, str}}
     end
   end
 
   defp to_float(str) do
     case Float.parse(str) do
       {int, ""} -> {:ok, int}
-      _ -> {:error, :not_a_float}
+      _ -> {:error, {:not_a_float, str}}
     end
   end
 end
@@ -82,8 +82,8 @@ defimpl Xema.Castable, for: Float do
 
   def cast(float, %Schema{type: :string}), do: {:ok, to_string(float)}
 
-  def cast(_, %Schema{type: type}),
-    do: {:error, %{to: type, cast: Float}}
+  def cast(float, %Schema{type: type}),
+    do: {:error, %{to: type, cast: Float, value: float}}
 end
 
 defimpl Xema.Castable, for: Integer do
@@ -97,8 +97,8 @@ defimpl Xema.Castable, for: Integer do
 
   def cast(int, %Schema{type: :string}), do: {:ok, to_string(int)}
 
-  def cast(_, %Schema{type: type}),
-    do: {:error, %{to: type, cast: Integer}}
+  def cast(int, %Schema{type: type}),
+    do: {:error, %{to: type, cast: Integer, value: int}}
 end
 
 defimpl Xema.Castable, for: List do
@@ -110,8 +110,8 @@ defimpl Xema.Castable, for: List do
 
   def cast(list, %Schema{type: type}) do
     case Keyword.keyword?(list) do
-      true -> {:error, %{to: type, cast: Keyword}}
-      false -> {:error, %{to: type, cast: List}}
+      true -> {:error, %{to: type, cast: Keyword, value: list}}
+      false -> {:error, %{to: type, cast: List, value: list}}
     end
   end
 end
@@ -135,8 +135,8 @@ defimpl Xema.Castable, for: Map do
     end)
   end
 
-  def cast(_, %Schema{type: type}),
-    do: {:error, %{to: type, cast: Map}}
+  def cast(map, %Schema{type: type}),
+    do: {:error, %{to: type, cast: Map, value: map}}
 
   defp cast_key(value, :atoms) when is_binary(value) do
     case to_existing_atom(value) do

@@ -97,8 +97,7 @@ defmodule Xema.CustomValidatorTest do
       {:ok, to, 0} = DateTime.from_iso8601("2015-01-23T23:50:07Z")
 
       assert Schemas.validate(:timespan, %{from: from, to: to}) ==
-               {:error,
-                %{properties: %{to: %{value: to, module: NaiveDateTime}}}}
+               {:error, %{properties: %{to: %{value: to, module: NaiveDateTime}}}}
     end
   end
 end
