@@ -468,12 +468,10 @@ defmodule Xema do
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
-    try do
-      do_cast(schema, value, [])
-    catch
-      {:error, %{path: path} = reason} ->
-        {:error, %{reason | path: Enum.reverse(path)}}
-    end
+    do_cast(schema, value, [])
+  catch
+    {:error, %{path: path} = reason} ->
+      {:error, %{reason | path: Enum.reverse(path)}}
   end
 
   @spec do_cast(Schema.t(), term, list) :: {:ok, term} | {:error, term}

@@ -167,7 +167,7 @@ defmodule Xema.Cast.ListTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        msg = "cannot cast #{inspect data} to :list"
+        msg = "cannot cast #{inspect(data)} to :list"
 
         assert_raise CastError, msg, fn -> cast!(schema, data) end
       end)
