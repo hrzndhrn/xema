@@ -67,6 +67,7 @@ defmodule Xema do
   use Xema.Behaviour
 
   alias Xema.Castable
+  alias Xema.CastError
   alias Xema.Ref
   alias Xema.Schema
   alias Xema.SchemaValidator
@@ -449,7 +450,21 @@ defmodule Xema do
   defp nested_source(val), do: val
 
   @doc """
-  Converts the given data using the specified schema.
+  Converts the given data using the specified schema. Returns the `result}` or an exception.
+  """
+  @spec cast(Xema.t(), term) :: term
+  def cast!(xema, value) do
+    with {:ok, cast} <- cast(xema, value) do
+      cast
+    else
+      {:error, reason} ->
+        raise CastError, reason
+    end
+  end
+
+  @doc """
+  Converts the given data using the specified schema. Returns `{:ok, result}` or
+  `{:error, reason}`.
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
@@ -467,7 +482,16 @@ defmodule Xema do
       cast_values(schema, cast, path)
     else
       {:error, reason} ->
-        throw({:error, %{path: path, reason: reason}})
+        throw({:error, Map.put(reason, :path, path)})
+    end
+  end
+
+  defp do_cast(%Schema{} = schema, list, path) when is_list(list) or is_tuple(list) do
+    with {:ok, cast} <- Castable.cast(list, schema) do
+      cast_values(schema, cast, path)
+    else
+      {:error, reason} ->
+        throw({:error, Map.put(reason, :path, path)})
     end
   end
 
@@ -476,24 +500,60 @@ defmodule Xema do
       {:ok, cast}
     else
       {:error, reason} ->
-        throw({:error, %{path: path, reason: reason}})
+        throw({:error, Map.put(reason, :path, path)})
     end
   end
 
   @spec cast_values(Schema.t(), term, list) :: {:ok, term} | {:error, term}
-  defp cast_values(%Schema{properties: nil}, map, _) when is_map(map),
-    do: {:ok, map}
+  defp cast_values(%Schema{properties: nil}, map, _) when is_map(map), do: {:ok, map}
 
-  defp cast_values(%Schema{properties: properties}, map, path)
-       when is_map(map),
-       do:
-         Enum.reduce_while(map, %{}, fn {key, value}, acc ->
-           case do_cast(Map.get(properties, key), value, [key | path]) do
-             {:ok, cast} ->
-               {:cont, {:ok, Map.put(acc, key, cast)}}
+  defp cast_values(%Schema{properties: properties}, map, path) when is_map(map),
+    do:
+      {:ok,
+       Enum.into(map, %{}, fn {key, value} ->
+         with {:ok, cast} <- do_cast(Map.get(properties, key), value, [key | path]) do
+           {key, cast}
+         else
+           {:error, reason} ->
+             throw({:error, Map.put(reason, :path, [key | path])})
+         end
+       end)}
 
-             {:error, reason} ->
-               throw({:error, %{path: [key | path], reason: reason}})
-           end
-         end)
+  defp cast_values(%Schema{items: nil}, tuple, _path) when is_tuple(tuple), do: {:ok, tuple}
+
+  defp cast_values(%Schema{items: nil}, list, _path) when is_list(list), do: {:ok, list}
+
+  defp cast_values(%Schema{items: items}, list, path) when is_list(list) and is_list(items),
+    do:
+      {:ok,
+       list
+       |> Enum.with_index()
+       |> Enum.map(fn {value, index} ->
+         case Enum.at(items, index) do
+           nil ->
+             value
+
+           schema ->
+             with {:ok, cast} <- do_cast(schema, value, [index | path]) do
+               cast
+             else
+               {:error, reason} ->
+                 throw({:error, Map.put(reason, :path, [index | path])})
+             end
+         end
+       end)}
+
+  defp cast_values(%Schema{items: items}, list, path) when is_list(list),
+    do:
+      {:ok,
+       list
+       |> Enum.with_index()
+       |> Enum.map(fn {value, index} ->
+         with {:ok, cast} <- do_cast(items, value, [index | path]) do
+           cast
+         else
+           {:error, reason} ->
+             throw({:error, Map.put(reason, :path, [index | path])})
+         end
+       end)}
 end

@@ -1,7 +1,11 @@
 defmodule Xema.Cast.FloatTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [cast: 2, validate: 2]
+  alias Xema.CastError
+
+  import Xema, only: [cast: 2, cast!: 2, validate: 2]
+
+  @set [55, [55], [num: 55], :foo, %{}, {:tuplt}]
 
   describe "cast/2 with a minimal integer schema" do
     setup do
@@ -10,7 +14,7 @@ defmodule Xema.Cast.FloatTest do
       }
     end
 
-    test "from an integer", %{schema: schema} do
+    test "from a float", %{schema: schema} do
       data = 42.0
       assert validate(schema, data) == :ok
       assert cast(schema, data) == {:ok, data}
@@ -24,30 +28,58 @@ defmodule Xema.Cast.FloatTest do
 
     test "from an invalid string", %{schema: schema} do
       assert cast(schema, "66,6") ==
-               {:error, %{path: [], reason: %{cast: String, to: :float, value: "66,6"}}}
+               {:error, %{path: [], to: :float, value: "66,6"}}
     end
 
     test "from an invalid type", %{schema: schema} do
-      assert cast(schema, :foo) ==
-               {:error, %{path: [], reason: %{cast: Atom, to: :float, value: :foo}}}
-
-      assert cast(schema, 42) ==
-               {:error, %{path: [], reason: %{cast: Integer, to: :float}}}
-
-      assert cast(schema, foo: 42) ==
-               {:error, %{path: [], reason: %{cast: Keyword, to: :float}}}
-
-      assert cast(schema, [42]) ==
-               {:error, %{path: [], reason: %{cast: List, to: :float}}}
-
-      assert cast(schema, %{}) ==
-               {:error, %{path: [], reason: %{cast: Map, to: :float}}}
+      Enum.each(@set, fn data ->
+        assert cast(schema, data) ==
+                 {:error, %{path: [], to: :float, value: data}}
+      end)
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
       assert_raise(Protocol.UndefinedError, fn ->
         cast(schema, ~r/.*/)
       end)
+    end
+  end
+
+  describe "cast!/2 with a minimal integer schema" do
+    setup do
+      %{
+        schema: Xema.new(:float)
+      }
+    end
+
+    test "from a float", %{schema: schema} do
+      assert cast!(schema, 42.7) == 42.7
+    end
+
+    test "from a string", %{schema: schema} do
+      assert cast!(schema, 24.5) == 24.5
+    end
+
+    test "from an invalid string", %{schema: schema} do
+      assert_raise_cast_error(schema, "66,6")
+    end
+
+    test "from a type without protocol implementation", %{schema: schema} do
+      assert_raise(Protocol.UndefinedError, fn ->
+        cast!(schema, ~r/.*/)
+      end)
+    end
+
+    test "from an invalid type", %{schema: schema} do
+      Enum.each(@set, fn data -> assert_raise_cast_error(schema, data) end)
+    end
+
+    defp assert_raise_cast_error(schema, data) do
+      msg = "cannot cast #{inspect(data)} to :float"
+
+      assert_raise CastError, msg, fn ->
+        cast!(schema, data)
+      end
     end
   end
 end

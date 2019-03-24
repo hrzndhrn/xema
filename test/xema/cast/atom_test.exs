@@ -1,7 +1,11 @@
 defmodule Xema.Cast.AtomTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [cast: 2, validate: 2]
+  alias Xema.CastError
+
+  import Xema, only: [cast: 2, cast!: 2, validate: 2]
+
+  @set [42, 1.0, [foo: 42], [42], %{}, {:tuple}]
 
   describe "cast/2 with a minimal integer schema" do
     setup do
@@ -24,30 +28,62 @@ defmodule Xema.Cast.AtomTest do
 
     test "from an invalid string", %{schema: schema} do
       assert cast(schema, "xyz") ==
-               {:error, %{path: [], reason: {:unknown_atom, "xyz"}}}
+               {:error, %{path: [], to: :atom, value: "xyz"}}
     end
 
     test "from an invalid type", %{schema: schema} do
-      assert cast(schema, 42) ==
-               {:error, %{path: [], reason: %{cast: Integer, to: :atom}}}
-
-      assert cast(schema, 1.0) ==
-               {:error, %{path: [], reason: %{cast: Float, to: :atom}}}
-
-      assert cast(schema, foo: 42) ==
-               {:error, %{path: [], reason: %{cast: Keyword, to: :atom}}}
-
-      assert cast(schema, [42]) ==
-               {:error, %{path: [], reason: %{cast: List, to: :atom}}}
-
-      assert cast(schema, %{}) ==
-               {:error, %{path: [], reason: %{cast: Map, to: :atom}}}
+      Enum.each(@set, fn data ->
+        assert cast(schema, data) ==
+                 {:error, %{path: [], to: :atom, value: data}}
+      end)
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
       assert_raise(Protocol.UndefinedError, fn ->
         cast(schema, ~r/.*/)
       end)
+    end
+  end
+
+  describe "cast!/2 with a minimal integer schema" do
+    setup do
+      %{
+        schema: Xema.new(:atom)
+      }
+    end
+
+    test "from an atom", %{schema: schema} do
+      assert cast!(schema, :foo) == :foo
+    end
+
+    test "from a string", %{schema: schema} do
+      assert cast!(schema, "foo") == :foo
+    end
+
+    test "from an invalid string", %{schema: schema} do
+      msg = ~s|cannot cast "xyz" to :atom, the atom is unknown|
+
+      assert_raise CastError, msg, fn ->
+        cast!(schema, "xyz")
+      end
+    end
+
+    test "from a type without protocol implementation", %{schema: schema} do
+      assert_raise(Protocol.UndefinedError, fn ->
+        cast!(schema, ~r/.*/)
+      end)
+    end
+
+    test "from an invalid type", %{schema: schema} do
+      Enum.each(@set, fn data -> assert_raise_cast_error(schema, data) end)
+    end
+
+    defp assert_raise_cast_error(schema, data) do
+      msg = "cannot cast #{inspect(data)} to :atom"
+
+      assert_raise CastError, msg, fn ->
+        cast!(schema, data)
+      end
     end
   end
 end
