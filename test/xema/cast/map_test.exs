@@ -515,7 +515,7 @@ defmodule Xema.Cast.MapTest do
                 }}
     end
 
-    test "from a keyword list",%{schema: schema} do
+    test "from a keyword list", %{schema: schema} do
       assert cast!(schema, foo: [num: "5"]) == %{foo: %{num: 5}}
     end
   end
