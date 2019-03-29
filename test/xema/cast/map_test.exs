@@ -5,6 +5,8 @@ defmodule Xema.Cast.MapTest do
 
   alias Xema.CastError
 
+  @set [1, 1.1, [42], {:tuple}, :atom]
+
   #
   # Xema.cast/2
   #
@@ -22,15 +24,27 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, data) == {:ok, data}
     end
 
-    test "from a valid map with atom keys", %{schema: schema} do
+    test "from a map with atom keys", %{schema: schema} do
       data = %{bla: "foo"}
       assert validate(schema, data) == :ok
       assert cast(schema, data) == {:ok, data}
     end
 
-    test "from an integer", %{schema: schema} do
-      assert cast(schema, 11) ==
-               {:error, %{path: [], to: :map, value: 11}}
+    test "from a map with string keys", %{schema: schema} do
+      data = %{"bla" => "foo"}
+      assert validate(schema, data) == :ok
+      assert cast(schema, data) == {:ok, data}
+    end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast(schema, foo: 6) == {:ok, %{foo: 6}}
+    end
+
+    test "from an invalid type", %{schema: schema} do
+      Enum.each(@set, fn data ->
+        assert cast(schema, data) ==
+                 {:error, %{path: [], to: :map, value: data}}
+      end)
     end
   end
 
@@ -50,6 +64,10 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, %{"xyz" => "z"}) ==
                {:error, %{path: [], to: :map, key: "xyz"}}
     end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast(schema, foo: 6) == {:ok, %{foo: 6}}
+    end
   end
 
   describe "cast/2 with a map schema and [keys: :strings]" do
@@ -67,6 +85,10 @@ defmodule Xema.Cast.MapTest do
     test "from a map with string keys", %{schema: schema} do
       data = %{"abc" => 55, "zzz" => "z"}
       assert cast(schema, data) == {:ok, data}
+    end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast(schema, foo: 6) == {:ok, %{"foo" => 6}}
     end
   end
 
@@ -115,6 +137,10 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, %{"xyz" => "z"}) ==
                {:error, %{path: [], key: "xyz", to: :map}}
     end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast(schema, foo: 6) == {:ok, %{foo: 6}}
+    end
   end
 
   describe "cast/2 with a map schema, [keys: :strings] and properties" do
@@ -151,6 +177,14 @@ defmodule Xema.Cast.MapTest do
       assert validate(schema, data) == {:error, %{keys: :strings}}
 
       assert cast(schema, data) == {:ok, %{"bla" => "11"}}
+    end
+
+    test "from a map with additional property", %{schema: schema} do
+      assert cast(schema, %{bla: 42, foo: 11}) == {:ok, %{"bla" => "42", "foo" => 11}}
+    end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast(schema, bla: 6, foo: 11) == {:ok, %{"bla" => "6", "foo" => 11}}
     end
   end
 
@@ -214,6 +248,20 @@ defmodule Xema.Cast.MapTest do
                   }
                 }}
     end
+
+    test "from a keyword list nested in a map", %{schema: schema} do
+      data = %{"foo" => [num: 2]}
+      expected = {:ok, %{foo: %{num: 2}}}
+
+      assert cast(schema, data) == expected
+    end
+
+    test "from nested keyword lists", %{schema: schema} do
+      data = [foo: [num: 2]]
+      expected = {:ok, %{foo: %{num: 2}}}
+
+      assert cast(schema, data) == expected
+    end
   end
 
   describe "cast/2 with an integer property" do
@@ -227,8 +275,17 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, %{num: "77"}) == {:ok, %{num: 77}}
     end
 
+    test "with a valid value from a keyword list", %{schema: schema} do
+      assert cast(schema, num: "77") == {:ok, %{num: 77}}
+    end
+
     test "with an invalid value", %{schema: schema} do
       assert cast(schema, %{num: "77."}) ==
+               {:error, %{path: [:num], to: :integer, value: "77."}}
+    end
+
+    test "with an invalid value from a keyword list", %{schema: schema} do
+      assert cast(schema, num: "77.") ==
                {:error, %{path: [:num], to: :integer, value: "77."}}
     end
   end
@@ -249,17 +306,22 @@ defmodule Xema.Cast.MapTest do
       assert cast!(schema, data) == data
     end
 
-    test "from a valid map with atom keys", %{schema: schema} do
+    test "from a map with atom keys", %{schema: schema} do
       data = %{bla: "foo"}
       assert cast!(schema, data) == data
     end
 
+    test "from a map with key strings", %{schema: schema} do
+      data = %{"bla" => "foo"}
+      assert cast!(schema, data) == data
+    end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast!(schema, foo: 5) == %{foo: 5}
+    end
+
     test "from an invalid type", %{schema: schema} do
-      assert_raise_cast_error(schema, 11)
-      assert_raise_cast_error(schema, 11.1)
-      assert_raise_cast_error(schema, [])
-      assert_raise_cast_error(schema, :atom)
-      assert_raise_cast_error(schema, true)
+      Enum.each(@set, fn data -> assert_raise_cast_error(schema, data) end)
     end
   end
 
@@ -278,6 +340,10 @@ defmodule Xema.Cast.MapTest do
     test "from a map with unknown atom", %{schema: schema} do
       assert_raise_cast_error(schema, %{"xyz" => "z"}, %{key: "xyz"})
     end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast!(schema, foo: 7) == %{foo: 7}
+    end
   end
 
   describe "cast!/2 with a map schema and [keys: :strings]" do
@@ -294,6 +360,10 @@ defmodule Xema.Cast.MapTest do
     test "from a map with string keys", %{schema: schema} do
       data = %{"abc" => 55, "zzz" => "z"}
       assert cast!(schema, data) == data
+    end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast!(schema, foo: 9) == %{"foo" => 9}
     end
   end
 
@@ -340,6 +410,10 @@ defmodule Xema.Cast.MapTest do
     test "from a map with unknown atom", %{schema: schema} do
       assert_raise_cast_error(schema, %{"xyz" => "z"}, %{key: "xyz"})
     end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast!(schema, foo: 77) == %{foo: 77}
+    end
   end
 
   describe "cast!/2 with a map schema, [keys: :strings] and properties" do
@@ -365,9 +439,9 @@ defmodule Xema.Cast.MapTest do
     end
 
     test "from map with atoms keys", %{schema: schema} do
-      data = %{bla: "foo"}
+      data = %{bla: "foo", bar: 5}
       assert validate(schema, data) == {:error, %{keys: :strings}}
-      assert cast!(schema, data) == %{"bla" => "foo"}
+      assert cast!(schema, data) == %{"bla" => "foo", "bar" => 5}
     end
 
     test "from map with atom keys and castable value", %{schema: schema} do
@@ -375,6 +449,10 @@ defmodule Xema.Cast.MapTest do
 
       assert validate(schema, data) == {:error, %{keys: :strings}}
       assert cast!(schema, data) == %{"bla" => "11"}
+    end
+
+    test "from a keyword list", %{schema: schema} do
+      assert cast!(schema, bla: 11, foo: 7) == %{"bla" => "11", "foo" => 7}
     end
   end
 
@@ -436,9 +514,13 @@ defmodule Xema.Cast.MapTest do
                   }
                 }}
     end
+
+    test "from a keyword list",%{schema: schema} do
+      assert cast!(schema, foo: [num: "5"]) == %{foo: %{num: 5}}
+    end
   end
 
-  describe "cast!/2 with an integer property" do
+  describe "cast!/2 with an integer property schema" do
     setup do
       %{
         schema: Xema.new(properties: %{num: :integer})
@@ -449,17 +531,23 @@ defmodule Xema.Cast.MapTest do
       assert cast!(schema, %{num: "77"}) == %{num: 77}
     end
 
+    test "with a valid value from a keyword list", %{schema: schema} do
+      assert cast!(schema, num: "77") == %{num: 77}
+    end
+
     test "with an invalid value", %{schema: schema} do
       assert_raise_cast_error(schema, %{num: "77."}, %{path: [:num], to: :integer, value: "77."})
+    end
+
+    test "with an invalid value from a keyword list", %{schema: schema} do
+      assert_raise_cast_error(schema, [num: "77."], %{path: [:num], to: :integer, value: "77."})
     end
   end
 
   defp assert_raise_cast_error(schema, value, opts \\ %{}) do
     msg = error_msg(value, opts)
 
-    assert_raise CastError, msg, fn ->
-      cast!(schema, value)
-    end
+    assert_raise CastError, msg, fn -> cast!(schema, value) end
   end
 
   defp error_msg(_, %{path: path, key: key}) do

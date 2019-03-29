@@ -502,6 +502,8 @@ defmodule Xema do
     end
   end
 
+  defp do_cast(nil, value, _), do: {:ok, value}
+
   @spec cast_values(Schema.t(), term, list) :: {:ok, term} | {:error, term}
   defp cast_values(%Schema{properties: nil}, map, _) when is_map(map), do: {:ok, map}
 

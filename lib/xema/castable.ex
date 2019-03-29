@@ -111,13 +111,40 @@ end
 defimpl Xema.Castable, for: List do
   alias Xema.Schema
 
+  def cast([], %Schema{type: :map}), do: {:ok, %{}}
+
+  def cast(list, %Schema{type: :any, properties: properties}) when not is_nil(properties) do
+    with :ok <- check_keyword(list) do
+      {:ok, Enum.into(list, %{}, & &1)}
+    end
+  end
+
   def cast(list, %Schema{type: :any}), do: {:ok, list}
 
   def cast(list, %Schema{type: boolean}) when is_boolean(boolean), do: {:ok, list}
 
   def cast(list, %Schema{type: :list}), do: {:ok, list}
 
+  def cast(list, %Schema{type: :map, keys: keys}) when keys in [nil, :atoms] do
+    with :ok <- check_keyword(list) do
+      {:ok, Enum.into(list, %{}, & &1)}
+    end
+  end
+
+  def cast(list, %Schema{type: :map, keys: :strings}) do
+    with :ok <- check_keyword(list) do
+      {:ok, Enum.into(list, %{}, fn {key, value} -> {to_string(key), value} end)}
+    end
+  end
+
   def cast(list, %Schema{type: type}), do: {:error, %{to: type, value: list}}
+
+  defp check_keyword(list) do
+    case Keyword.keyword?(list) do
+      true -> :ok
+      false -> {:error, %{to: :map, value: list}}
+    end
+  end
 end
 
 defimpl Xema.Castable, for: Map do
