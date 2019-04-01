@@ -27,14 +27,17 @@ defmodule Xema.Cast.FloatTest do
     end
 
     test "from an invalid string", %{schema: schema} do
-      assert cast(schema, "66,6") ==
-               {:error, %{path: [], to: :float, value: "66,6"}}
+      data = "66,6"
+      expected = {:error, CastError.exception(%{path: [], to: :float, value: "66,6"})}
+
+      assert cast(schema, data) == expected
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert cast(schema, data) ==
-                 {:error, %{path: [], to: :float, value: data}}
+        expected = {:error, CastError.exception(%{path: [], to: :float, value: data})}
+
+        assert cast(schema, data) == expected
       end)
     end
 

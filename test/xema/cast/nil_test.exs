@@ -19,7 +19,9 @@ defmodule Xema.Cast.NilTest do
 
     test "cast/2 with invalid value", %{schema: schema, set: set} do
       Enum.each(set, fn data ->
-        assert cast(schema, data) == {:error, %{path: [], to: nil, value: data}}
+        expected = {:error, CastError.exception(%{path: [], to: nil, value: data})}
+
+        assert cast(schema, data) == expected
       end)
     end
 

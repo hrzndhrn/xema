@@ -111,10 +111,18 @@ end
 defimpl Xema.Castable, for: List do
   alias Xema.Schema
 
+  def cast([], %Schema{type: :keyword}), do: {:ok, []}
+
+  def cast(list, %Schema{type: :keyword}) do
+    with :ok <- check_keyword(list, :keyword) do
+      {:ok, list}
+    end
+  end
+
   def cast([], %Schema{type: :map}), do: {:ok, %{}}
 
   def cast(list, %Schema{type: :any, properties: properties}) when not is_nil(properties) do
-    with :ok <- check_keyword(list) do
+    with :ok <- check_keyword(list, :map) do
       {:ok, Enum.into(list, %{}, & &1)}
     end
   end
@@ -123,26 +131,42 @@ defimpl Xema.Castable, for: List do
 
   def cast(list, %Schema{type: boolean}) when is_boolean(boolean), do: {:ok, list}
 
-  def cast(list, %Schema{type: :list}), do: {:ok, list}
+  def cast([], %Schema{type: :tuple}), do: {:ok, {}}
+
+  def cast(list, %Schema{type: :tuple}) do
+    case Keyword.keyword?(list) do
+      true -> {:error, %{to: :tuple, value: list}}
+      false -> {:ok, List.to_tuple(list)}
+    end
+  end
+
+  def cast([], %Schema{type: :list}), do: {:ok, []}
+
+  def cast(list, %Schema{type: :list}) do
+    case Keyword.keyword?(list) do
+      true -> {:error, %{to: :list, value: list}}
+      false -> {:ok, list}
+    end
+  end
 
   def cast(list, %Schema{type: :map, keys: keys}) when keys in [nil, :atoms] do
-    with :ok <- check_keyword(list) do
+    with :ok <- check_keyword(list, :map) do
       {:ok, Enum.into(list, %{}, & &1)}
     end
   end
 
   def cast(list, %Schema{type: :map, keys: :strings}) do
-    with :ok <- check_keyword(list) do
+    with :ok <- check_keyword(list, :map) do
       {:ok, Enum.into(list, %{}, fn {key, value} -> {to_string(key), value} end)}
     end
   end
 
   def cast(list, %Schema{type: type}), do: {:error, %{to: type, value: list}}
 
-  defp check_keyword(list) do
+  defp check_keyword(list, to) do
     case Keyword.keyword?(list) do
       true -> :ok
-      false -> {:error, %{to: :map, value: list}}
+      false -> {:error, %{to: to, value: list}}
     end
   end
 end
@@ -155,6 +179,18 @@ defimpl Xema.Castable, for: Map do
   def cast(map, %Schema{type: :any}), do: {:ok, map}
 
   def cast(map, %Schema{type: boolean}) when is_boolean(boolean), do: {:ok, map}
+
+  def cast(map, %Schema{type: :keyword}) do
+    Enum.reduce_while(map, {:ok, []}, fn {key, value}, {:ok, acc} ->
+      case cast_key(key, :atoms) do
+        {:ok, key} ->
+          {:cont, {:ok, [{key, value} | acc]}}
+
+        :error ->
+          {:halt, {:error, %{to: :keyword, key: key}}}
+      end
+    end)
+  end
 
   def cast(map, %Schema{type: :map, keys: keys}) do
     Enum.reduce_while(map, {:ok, %{}}, fn {key, value}, {:ok, acc} ->

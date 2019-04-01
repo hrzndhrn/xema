@@ -16,25 +16,30 @@ defmodule Xema.Cast.AtomTest do
 
     test "from an atom", %{schema: schema} do
       data = :foo
+
       assert validate(schema, data) == :ok
       assert cast(schema, data) == {:ok, data}
     end
 
     test "from a string", %{schema: schema} do
       data = "foo"
+
       assert validate(schema, data) == {:error, %{type: :atom, value: "foo"}}
       assert cast(schema, data) == {:ok, :foo}
     end
 
     test "from an invalid string", %{schema: schema} do
-      assert cast(schema, "xyz") ==
-               {:error, %{path: [], to: :atom, value: "xyz"}}
+      data = "xyz"
+      expected = {:error, CastError.exception(%{path: [], to: :atom, value: "xyz"})}
+
+      assert cast(schema, data) == expected
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert cast(schema, data) ==
-                 {:error, %{path: [], to: :atom, value: data}}
+        expected = {:error, CastError.exception(%{path: [], to: :atom, value: data})}
+
+        assert cast(schema, data) == expected
       end)
     end
 

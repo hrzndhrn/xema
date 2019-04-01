@@ -16,25 +16,30 @@ defmodule Xema.Cast.IntegerTest do
 
     test "from an integer", %{schema: schema} do
       data = 42
+
       assert validate(schema, data) == :ok
       assert cast(schema, data) == {:ok, data}
     end
 
     test "from a string", %{schema: schema} do
       data = "42"
+
       assert validate(schema, data) == {:error, %{type: :integer, value: "42"}}
       assert cast(schema, data) == {:ok, 42}
     end
 
     test "from an invalid string", %{schema: schema} do
-      assert cast(schema, "66.6") ==
-               {:error, %{path: [], to: :integer, value: "66.6"}}
+      data = "66.6"
+      expected = {:error, CastError.exception(%{path: [], to: :integer, value: "66.6"})}
+
+      assert cast(schema, data) == expected
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert cast(schema, data) ==
-                 {:error, %{path: [], to: :integer, value: data}}
+        expected = {:error, CastError.exception(%{path: [], to: :integer, value: data})}
+
+        assert cast(schema, data) == expected
       end)
     end
 

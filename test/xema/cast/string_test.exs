@@ -33,7 +33,8 @@ defmodule Xema.Cast.StringTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert cast(schema, data) == {:error, %{path: [], to: :string, value: data}}
+        expected = {:error, CastError.exception(%{path: [], to: :string, value: data})}
+        assert cast(schema, data) == expected
       end)
     end
 

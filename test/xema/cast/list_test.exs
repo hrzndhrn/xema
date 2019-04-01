@@ -5,7 +5,7 @@ defmodule Xema.Cast.ListTest do
 
   alias Xema.CastError
 
-  @set [:atom, "str", 1.1, 1, %{}]
+  @set [:atom, "str", 1.1, 1, %{}, [a: 1]]
 
   #
   # Xema.cast/2
@@ -39,7 +39,9 @@ defmodule Xema.Cast.ListTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert cast(schema, data) == {:error, %{path: [], to: :list, value: data}}
+        expected = {:error, CastError.exception(%{path: [], to: :list, value: data})}
+
+        assert cast(schema, data) == expected
       end)
     end
 
@@ -71,8 +73,10 @@ defmodule Xema.Cast.ListTest do
     end
 
     test "from a list with invalid value", %{schema: schema} do
-      assert cast(schema, ["1", "2", "foo"]) ==
-               {:error, %{path: [2], to: :integer, value: "foo"}}
+      data = ["1", "2", "foo"]
+      expected = {:error, CastError.exception(%{path: [2], to: :integer, value: "foo"})}
+
+      assert cast(schema, data) == expected
     end
   end
 
@@ -97,7 +101,10 @@ defmodule Xema.Cast.ListTest do
     end
 
     test "from a list with invalid value", %{schema: schema} do
-      assert cast(schema, ["foo", 2]) == {:error, %{path: [0], to: :integer, value: "foo"}}
+      data = ["foo", 2]
+      expected = {:error, CastError.exception(%{path: [0], to: :integer, value: "foo"})}
+
+      assert cast(schema, data) == expected
     end
 
     test "from a tuple with casted values", %{schema: schema} do
@@ -113,7 +120,10 @@ defmodule Xema.Cast.ListTest do
     end
 
     test "from a tuple with invalid value", %{schema: schema} do
-      assert cast(schema, {"foo", 2}) == {:error, %{path: [0], to: :integer, value: "foo"}}
+      data = {"foo", 2}
+      expected = {:error, CastError.exception(%{path: [0], to: :integer, value: "foo"})}
+
+      assert cast(schema, data) == expected
     end
   end
 
@@ -130,8 +140,10 @@ defmodule Xema.Cast.ListTest do
     end
 
     test "from invalid data", %{schema: schema} do
-      assert cast(schema, [[[1, "1"], ["foo", 2]], [{"3", 3}]]) ==
-               {:error, %{path: [0, 1, 0], to: :integer, value: "foo"}}
+      data = [[[1, "1"], ["foo", 2]], [{"3", 3}]]
+      expected = {:error, CastError.exception(%{path: [0, 1, 0], to: :integer, value: "foo"})}
+
+      assert cast(schema, data) == expected
     end
   end
 

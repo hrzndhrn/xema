@@ -30,12 +30,12 @@ defmodule Xema.CastError do
     "cannot cast #{inspect(value)} to :atom, the atom is unknown"
   end
 
-  def format_error(%{path: [], to: :map, key: key}) when is_binary(key) do
-    "cannot cast #{inspect(key)} to :map key, the atom is unknown"
+  def format_error(%{path: [], to: to, key: key}) when is_binary(key) do
+    "cannot cast #{inspect(key)} to #{inspect(to)} key, the atom is unknown"
   end
 
-  def format_error(%{path: path, to: :map, key: key}) when is_binary(key) do
-    "cannot cast #{inspect(key)} to :map key at #{inspect(path)}, the atom is unknown"
+  def format_error(%{path: path, to: to, key: key}) when is_binary(key) do
+    "cannot cast #{inspect(key)} to #{inspect(to)} key at #{inspect(path)}, the atom is unknown"
   end
 
   def format_error(%{path: [], to: to, value: value}) do
