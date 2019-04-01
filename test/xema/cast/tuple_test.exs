@@ -150,7 +150,6 @@ defmodule Xema.Cast.TupleTest do
     end
   end
 
-
   #
   # Xema.cast!/2
   #
@@ -278,7 +277,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from valid data", %{schema: schema} do
       assert cast!(schema, [[[1, "1"], ["2", 2]], [{"3", 3}]]) ==
-        {{{1, "1"}, {2, "2"}}, {{3, "3"}}}
+               {{{1, "1"}, {2, "2"}}, {{3, "3"}}}
     end
 
     test "from invalid data", %{schema: schema} do
