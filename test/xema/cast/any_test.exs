@@ -7,7 +7,7 @@ defmodule Xema.Cast.AnyTest do
     setup do
       %{
         schema: Xema.new(:any),
-        set: [:atom, "str", 1.1, 1, [], %{}, {:a, "a"}]
+        set: [:atom, "str", 1.1, 1, [], %{}, {:a, "a"}, {:tuple}]
       }
     end
 

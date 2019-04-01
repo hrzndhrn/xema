@@ -3,9 +3,11 @@ defmodule Xema.CastError do
   Raised when a cast fails.
   """
 
+  defexception [:message, :path, :to, :value, :key]
+
   alias Xema.CastError
 
-  defexception [:message, :path, :to, :value, :key]
+  @type t :: %CastError{}
 
   @impl true
   def exception(%{path: path, to: to, value: value} = error) do
