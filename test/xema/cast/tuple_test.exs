@@ -255,11 +255,6 @@ defmodule Xema.Cast.TupleTest do
       assert cast!(schema, [1, "two"]) == {1, "two"}
     end
 
-
-  # === TODO ===
-
-
-
     test "from a list with castable values", %{schema: schema} do
       assert cast!(schema, ["1", 2]) == {1, "2"}
     end
