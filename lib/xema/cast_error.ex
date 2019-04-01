@@ -9,6 +9,13 @@ defmodule Xema.CastError do
 
   @type t :: %CastError{}
 
+  @type error :: %{
+          to: atom,
+          value: term,
+          key: String.t(),
+          path: [atom | integer | String.t()]
+        }
+
   @impl true
   def exception(%{path: path, to: to, value: value} = error) do
     %CastError{
@@ -28,6 +35,10 @@ defmodule Xema.CastError do
     }
   end
 
+  @doc """
+  Formats the error map to an error message.
+  """
+  @spec format_error(error) :: String.t()
   def format_error(%{path: [], to: :atom, value: value}) when is_binary(value) do
     "cannot cast #{inspect(value)} to :atom, the atom is unknown"
   end

@@ -52,8 +52,10 @@ defmodule Xema.Cast.BooleanTest do
     end
 
     test "from a string", %{schema: schema} do
-      assert_raise_cast_error(schema, "true")
-      assert_raise_cast_error(schema, "false")
+      data = "true"
+      msg = "cannot cast #{inspect(data)} to :boolean"
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
@@ -63,15 +65,11 @@ defmodule Xema.Cast.BooleanTest do
     end
 
     test "from an invalid type", %{schema: schema} do
-      Enum.each(@set, fn data -> assert_raise_cast_error(schema, data) end)
-    end
+      Enum.each(@set, fn data ->
+        msg = "cannot cast #{inspect(data)} to :boolean"
 
-    defp assert_raise_cast_error(schema, data) do
-      msg = "cannot cast #{inspect(data)} to :boolean"
-
-      assert_raise CastError, msg, fn ->
-        cast!(schema, data)
-      end
+        assert_raise CastError, msg, fn -> cast!(schema, data) end
+      end)
     end
   end
 end

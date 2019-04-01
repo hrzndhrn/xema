@@ -80,15 +80,11 @@ defmodule Xema.Cast.AtomTest do
     end
 
     test "from an invalid type", %{schema: schema} do
-      Enum.each(@set, fn data -> assert_raise_cast_error(schema, data) end)
-    end
+      Enum.each(@set, fn data ->
+        msg = "cannot cast #{inspect(data)} to :atom"
 
-    defp assert_raise_cast_error(schema, data) do
-      msg = "cannot cast #{inspect(data)} to :atom"
-
-      assert_raise CastError, msg, fn ->
-        cast!(schema, data)
-      end
+        assert_raise CastError, msg, fn -> cast!(schema, data) end
+      end)
     end
   end
 end

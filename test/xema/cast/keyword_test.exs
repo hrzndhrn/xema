@@ -197,12 +197,15 @@ defmodule Xema.Cast.KeywordTest do
 
     test "from a map with string keys and unknown atom", %{schema: schema} do
       data = %{"xyz" => 55}
-      assert_raise_cast_error(schema, data, %{key: "xyz"})
+      msg = ~s|cannot cast "xyz" to :keyword key, the atom is unknown|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert_raise_cast_error(schema, data)
+        msg = "cannot cast #{inspect(data)} to :keyword"
+        assert_raise CastError, msg, fn -> cast!(schema, data) end
       end)
     end
 
@@ -241,7 +244,9 @@ defmodule Xema.Cast.KeywordTest do
 
     test "from a map with string keys and unknown atom", %{schema: schema} do
       data = %{"xyz" => 55}
-      assert_raise_cast_error(schema, data, %{key: "xyz"})
+      msg = ~s|cannot cast "xyz" to :keyword key, the atom is unknown|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with atom keys", %{schema: schema} do
@@ -271,31 +276,28 @@ defmodule Xema.Cast.KeywordTest do
     end
 
     test "from a keyword list with an invalid value", %{schema: schema} do
-      assert_raise_cast_error(
-        schema,
-        [foo: [str: 5, num: "x"]],
-        %{path: [:foo, :num], value: "x", to: :integer}
-      )
+      data = [foo: [str: 5, num: "x"]]
+      msg = ~s|cannot cast "x" to :integer at [:foo, :num]|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with string keys", %{schema: schema} do
       assert cast!(schema, %{"foo" => %{"str" => 6, "num" => "8"}}) == [foo: [str: "6", num: 8]]
     end
 
-    @tag :only
     test "from a map with string keys and an invalid value", %{schema: schema} do
-      assert_raise_cast_error(
-        schema,
-        %{"foo" => %{"str" => 6, "num" => "z"}},
-        %{path: [:foo, :num], value: "z", to: :integer}
-      )
+      data = %{"foo" => %{"str" => 6, "num" => "z"}}
+      msg = ~s|cannot cast "z" to :integer at [:foo, :num]|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with string keys and an unknown atom", %{schema: schema} do
-      assert_raise_cast_error(schema, %{"foo" => %{"str" => 6, "xyz" => "z"}}, %{
-        path: [:foo],
-        key: "xyz"
-      })
+      data = %{"foo" => %{"str" => 6, "xyz" => "z"}}
+      msg = ~s|cannot cast "xyz" to :keyword key at [:foo], the atom is unknown|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with atom keys", %{schema: schema} do
@@ -303,32 +305,10 @@ defmodule Xema.Cast.KeywordTest do
     end
 
     test "from a map with atom keys and an invalid value", %{schema: schema} do
-      assert_raise_cast_error(
-        schema,
-        %{"foo" => %{"str" => 6, "num" => "z"}},
-        %{path: [:foo, :num], value: "z", to: :integer}
-      )
+      data = %{"foo" => %{"str" => 6, "num" => "z"}}
+      msg = ~s|cannot cast "z" to :integer at [:foo, :num]|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
-  end
-
-  defp assert_raise_cast_error(schema, value, opts \\ %{}) do
-    msg = error_msg(value, opts)
-    assert_raise CastError, msg, fn -> cast!(schema, value) end
-  end
-
-  defp error_msg(_, %{path: path, key: key}) do
-    "cannot cast #{inspect(key)} to :keyword key at #{inspect(path)}, the atom is unknown"
-  end
-
-  defp error_msg(_, %{key: key}) do
-    "cannot cast #{inspect(key)} to :keyword key, the atom is unknown"
-  end
-
-  defp error_msg(_, %{to: to, path: path, value: value}) do
-    "cannot cast #{inspect(value)} to #{inspect(to)} at #{inspect(path)}"
-  end
-
-  defp error_msg(value, _) do
-    "cannot cast #{inspect(value)} to :keyword"
   end
 end

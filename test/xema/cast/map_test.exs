@@ -329,7 +329,11 @@ defmodule Xema.Cast.MapTest do
     end
 
     test "from an invalid type", %{schema: schema} do
-      Enum.each(@set, fn data -> assert_raise_cast_error(schema, data) end)
+      Enum.each(@set, fn data ->
+        msg = "cannot cast #{inspect(data)} to :map"
+
+        assert_raise CastError, msg, fn -> cast!(schema, data) end
+      end)
     end
   end
 
@@ -346,7 +350,10 @@ defmodule Xema.Cast.MapTest do
     end
 
     test "from a map with unknown atom", %{schema: schema} do
-      assert_raise_cast_error(schema, %{"xyz" => "z"}, %{key: "xyz"})
+      data = %{"xyz" => "z"}
+      msg = ~s|cannot cast "xyz" to :map key, the atom is unknown|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a keyword list", %{schema: schema} do
@@ -416,7 +423,10 @@ defmodule Xema.Cast.MapTest do
     end
 
     test "from a map with unknown atom", %{schema: schema} do
-      assert_raise_cast_error(schema, %{"xyz" => "z"}, %{key: "xyz"})
+      data = %{"xyz" => "z"}
+      msg = ~s|cannot cast "xyz" to :map key, the atom is unknown|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a keyword list", %{schema: schema} do
@@ -498,14 +508,16 @@ defmodule Xema.Cast.MapTest do
 
     test "from a map with unknown key", %{schema: schema} do
       data = %{"foo" => %{"xyz" => 42}}
+      msg = ~s|cannot cast "xyz" to :map key at [:foo], the atom is unknown|
 
-      assert_raise_cast_error(schema, data, %{key: "xyz", path: [:foo]})
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with unknown key (deeper)", %{schema: schema} do
       data = %{"foo" => %{"bar" => %{"xyz" => 42}}}
+      msg = ~s|cannot cast "xyz" to :map key at [:foo, :bar], the atom is unknown|
 
-      assert_raise_cast_error(schema, data, %{key: "xyz", path: [:foo, :bar]})
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from an invalid map", %{schema: schema} do
@@ -544,33 +556,17 @@ defmodule Xema.Cast.MapTest do
     end
 
     test "with an invalid value", %{schema: schema} do
-      assert_raise_cast_error(schema, %{num: "77."}, %{path: [:num], to: :integer, value: "77."})
+      data = %{num: "77."}
+      msg = ~s|cannot cast "77." to :integer at [:num]|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "with an invalid value from a keyword list", %{schema: schema} do
-      assert_raise_cast_error(schema, [num: "77."], %{path: [:num], to: :integer, value: "77."})
+      data = [num: "77."]
+      msg = ~s|cannot cast "77." to :integer at [:num]|
+
+      assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
-  end
-
-  defp assert_raise_cast_error(schema, value, opts \\ %{}) do
-    msg = error_msg(value, opts)
-
-    assert_raise CastError, msg, fn -> cast!(schema, value) end
-  end
-
-  defp error_msg(_, %{path: path, key: key}) do
-    "cannot cast #{inspect(key)} to :map key at #{inspect(path)}, the atom is unknown"
-  end
-
-  defp error_msg(_, %{key: key}) do
-    "cannot cast #{inspect(key)} to :map key, the atom is unknown"
-  end
-
-  defp error_msg(_, %{to: to, path: path, value: value}) do
-    "cannot cast #{inspect(value)} to #{inspect(to)} at #{inspect(path)}"
-  end
-
-  defp error_msg(value, _) do
-    "cannot cast #{inspect(value)} to :map"
   end
 end
