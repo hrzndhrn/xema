@@ -474,10 +474,9 @@ defmodule Xema do
   @spec do_cast(Schema.t(), term, list) :: {:ok, term} | {:error, term}
   defp do_cast(%Schema{} = schema, value, path)
        when is_list(value) or is_tuple(value) or is_map(value) do
-    # TODO !!!!
-    bla = cast_values(schema, value, path)
+    value = cast_values(schema, value, path)
 
-    with {:ok, cast} <- Castable.cast(bla, schema) do
+    with {:ok, cast} <- Castable.cast(value, schema) do
       cast
     else
       {:error, reason} ->
