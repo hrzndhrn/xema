@@ -123,7 +123,7 @@ defmodule Xema.Cast.StructTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :struct, value: data})}
+        expected = {:error, CastError.exception(%{path: [], to: User, value: data})}
         assert cast(schema, data) == expected
       end)
     end
@@ -197,7 +197,7 @@ defmodule Xema.Cast.StructTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :struct, value: data})}
+        expected = {:error, CastError.exception(%{path: [], to: User, value: data})}
         assert cast(schema, data) == expected
       end)
     end
@@ -307,7 +307,7 @@ defmodule Xema.Cast.StructTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        msg = "cannot cast #{inspect(data)} to :struct"
+        msg = "cannot cast #{inspect(data)} to Test.User"
 
         assert_raise CastError, msg, fn ->
           cast!(schema, data)
@@ -374,7 +374,7 @@ defmodule Xema.Cast.StructTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        msg = "cannot cast #{inspect(data)} to :struct"
+        msg = "cannot cast #{inspect(data)} to Test.User"
 
         assert_raise CastError, msg, fn ->
           cast!(schema, data)
