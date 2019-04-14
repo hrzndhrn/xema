@@ -2,10 +2,22 @@ defmodule Xema.CustomValidatorTest do
   use ExUnit.Case, async: true
 
   defmodule Palindrome do
-    def validate(str) do
+    def check(str) do
       case str == String.reverse(str) do
         true -> :ok
         false -> {:error, :no_palindrome}
+      end
+    end
+  end
+
+  defmodule ThreeWords do
+    @behaviour Xema.Validator
+
+    @impl true
+    def validate(str) do
+      case length(String.split(str, " ")) do
+        3 -> :ok
+        _ -> {:error, :not_three_words}
       end
     end
   end
@@ -19,7 +31,8 @@ defmodule Xema.CustomValidatorTest do
            properties: %{
              short: string(max_length: 3),
              long: string(min_length: 5),
-             palindrome: string(validator: {Palindrome, :validate})
+             palindrome: string(validator: {Palindrome, :check}),
+             three: string(validator: ThreeWords)
            }
          )
 
@@ -35,7 +48,7 @@ defmodule Xema.CustomValidatorTest do
     def timespan_validator(%{from: from, to: to}) do
       case NaiveDateTime.diff(from, to) < 0 do
         true -> :ok
-        false -> {:error, :to_before_form}
+        false -> {:error, :to_before_from}
       end
     end
   end
@@ -45,7 +58,8 @@ defmodule Xema.CustomValidatorTest do
       assert Schemas.valid?(:strings, %{
                short: "foo",
                long: "foobar",
-               palindrome: "rats live on no evil star"
+               palindrome: "rats live on no evil star",
+               three: "one two three"
              })
     end
 
@@ -53,17 +67,19 @@ defmodule Xema.CustomValidatorTest do
       assert Schemas.validate(:strings, %{
                short: "foobar",
                long: "foo",
-               palindrome: "cats live on no evil star"
+               palindrome: "cats live on no evil star",
+               three: "one"
              }) ==
                {:error,
                 %{
                   properties: %{
                     long: %{min_length: 5, value: "foo"},
+                    short: %{max_length: 3, value: "foobar"},
+                    three: %{validator: :not_three_words, value: "one"},
                     palindrome: %{
                       validator: :no_palindrome,
                       value: "cats live on no evil star"
-                    },
-                    short: %{max_length: 3, value: "foobar"}
+                    }
                   }
                 }}
     end
@@ -84,7 +100,7 @@ defmodule Xema.CustomValidatorTest do
       assert Schemas.validate(:timespan, %{from: from, to: to}) ==
                {:error,
                 %{
-                  validator: :to_before_form,
+                  validator: :to_before_from,
                   value: %{
                     from: ~N[2019-01-03 12:05:42],
                     to: ~N[2019-01-01 12:05:42]

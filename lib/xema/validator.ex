@@ -9,6 +9,8 @@ defmodule Xema.Validator do
   alias Xema.Ref
   alias Xema.Schema
 
+  @callback validate(any) :: {:ok, any} | {:error, any}
+
   @compile {
     :inline,
     get_type: 1, struct?: 1, struct?: 2, type?: 2, types: 2, validate_by: 4
@@ -953,6 +955,13 @@ defmodule Xema.Validator do
 
   defp custom_validator(%{validator: {module, validator}}, value) do
     with {:error, reason} <- apply(module, validator, [value]) do
+      {:error, %{validator: reason, value: value}}
+    end
+  end
+
+  defp custom_validator(%{validator: behaviour}, value)
+       when not is_nil(behaviour) and is_atom(behaviour) do
+    with {:error, reason} <- apply(behaviour, :validate, [value]) do
       {:error, %{validator: reason, value: value}}
     end
   end

@@ -105,6 +105,36 @@ false
 {:error, %{validator: :no_palindrome, value: "bike"}}
 ```
 
+A validator can also be specified as behaviour.
+
+```elixir
+iex> defmodule Example.Palindrome do
+...>   @behaviour Xema.Validator
+...>
+...>   @impl true
+...>   def validate(str) do
+...>     case str == String.reverse(str) do
+...>       true -> :ok
+...>       false -> {:error, :no_palindrome}
+...>     end
+...>   end
+...> end
+...>
+...> defmodule Example.Schema do
+...>   use Xema
+...>
+...>   xema :palindrome,
+...>        string(validator: Example.Palindrome)
+...> end
+...>
+...> Example.Schema.valid?(:palindrome, "racecar")
+true
+...> Example.Schema.valid?(:palindrome, "bike")
+false
+...> Example.Schema.validate(:palindrome, "bike")
+{:error, %{validator: :no_palindrome, value: "bike"}}
+```
+
 The custom validator can also be a part of the schema module.
 
 ```elixir
