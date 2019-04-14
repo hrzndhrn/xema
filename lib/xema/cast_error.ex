@@ -58,8 +58,4 @@ defmodule Xema.CastError do
   def format_error(%{path: path, to: to, value: value}) do
     "cannot cast #{inspect(value)} to #{inspect(to)} at #{inspect(path)}"
   end
-
-  def format_error(error) do
-    "unexpected error: #{inspect(error)}"
-  end
 end

@@ -75,6 +75,7 @@ defmodule Xema.Cast.KeywordTest do
       assert cast(schema, data) == {:ok, data}
     end
 
+    @tag :only
     test "from a keyword list", %{schema: schema} do
       data = [foo: 42, str: "foo"]
       assert validate(schema, data) == :ok

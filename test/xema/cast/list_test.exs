@@ -127,6 +127,16 @@ defmodule Xema.Cast.ListTest do
     end
   end
 
+  describe "cast/2 with properties" do
+    setup do
+      %{schema: Xema.new({:list, properties: %{foo: :integer}})}
+    end
+
+    test "ignores properties for list", %{schema: schema} do
+      assert cast(schema, {"a"}) == {:ok, ["a"]}
+    end
+  end
+
   describe "cast/2 with nested schema" do
     setup do
       %{

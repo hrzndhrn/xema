@@ -463,7 +463,7 @@ defmodule Xema do
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
-    do_cast(schema, value, [])
+    {:ok, do_cast(schema, value, [])}
   catch
     {:error, %{path: path} = reason} ->
       {:error, CastError.exception(%{reason | path: Enum.reverse(path)})}
@@ -490,64 +490,49 @@ defmodule Xema do
 
   defp do_cast(%Schema{} = schema, value, path) do
     with {:ok, cast} <- Castable.cast(value, schema) do
-      {:ok, cast}
+      cast
     else
       {:error, reason} ->
         throw({:error, Map.put(reason, :path, path)})
     end
   end
 
-  defp do_cast(nil, value, _), do: {:ok, value}
+  defp do_cast(nil, value, _), do: value
 
   @spec cast_values(Schema.t(), term, list) :: {:ok, term} | {:error, term}
-  defp cast_values(%Schema{properties: nil}, map, _) when is_map(map), do: {:ok, map}
+  defp cast_values(%Schema{properties: nil}, map, _) when is_map(map), do: map
 
   defp cast_values(%Schema{properties: _} = schema, %{__struct__: module} = struct, path) do
-    with {:ok, fields} <- cast_values(schema, Map.from_struct(struct), path) do
-      {:ok, struct(module, fields)}
-    end
+    fields = cast_values(schema, Map.from_struct(struct), path)
+    struct(module, fields)
   end
 
   defp cast_values(%Schema{properties: properties}, map, path) when is_map(map),
     do:
-      {:ok,
-       Enum.into(map, %{}, fn {key, value} ->
-         with {:ok, cast} <- do_cast(Map.get(properties, key), value, [key | path]) do
-           {key, cast}
-         else
-           {:error, reason} ->
-             throw({:error, Map.put(reason, :path, [key | path])})
-         end
-       end)}
-
-  defp cast_values(%Schema{type: :keyword, properties: nil}, list, _) when is_list(list),
-    do: {:ok, list}
+      Enum.into(map, %{}, fn {key, value} ->
+        cast = do_cast(Map.get(properties, key), value, [key | path])
+        {key, cast}
+      end)
 
   defp cast_values(%Schema{properties: properties}, list, path)
        when is_list(list) and is_map(properties) do
     case Keyword.keyword?(list) do
       false ->
-        {:ok, list}
+        list
 
       true ->
-        {:ok,
-         Enum.map(list, fn {key, value} ->
-           with {:ok, cast} <- do_cast(Map.get(properties, key), value, [key | path]) do
-             {key, cast}
-           else
-             {:error, reason} ->
-               throw({:error, Map.put(reason, :path, [key | path])})
-           end
-         end)}
+        Enum.map(list, fn {key, value} ->
+          {key, do_cast(Map.get(properties, key), value, [key | path])}
+        end)
     end
   end
 
-  defp cast_values(%Schema{items: nil}, tuple, _path) when is_tuple(tuple), do: {:ok, tuple}
+  defp cast_values(%Schema{items: nil}, tuple, _path) when is_tuple(tuple), do: tuple
 
-  defp cast_values(%Schema{items: nil}, list, _path) when is_list(list), do: {:ok, list}
+  defp cast_values(%Schema{items: nil}, list, _path) when is_list(list), do: list
 
-  defp cast_values(%Schema{items: items}, list, path) when is_list(list) and is_list(items) do
-    result =
+  defp cast_values(%Schema{items: items}, list, path) when is_list(list) and is_list(items),
+    do:
       list
       |> Enum.with_index()
       |> Enum.map(fn {value, index} ->
@@ -556,36 +541,21 @@ defmodule Xema do
             value
 
           schema ->
-            with {:ok, cast} <- do_cast(schema, value, [index | path]) do
-              cast
-            else
-              {:error, reason} ->
-                throw({:error, Map.put(reason, :path, [index | path])})
-            end
+            do_cast(schema, value, [index | path])
         end
       end)
 
-    {:ok, result}
-  end
-
-  defp cast_values(%Schema{items: items}, list, path) when is_list(list) do
-    result =
+  defp cast_values(%Schema{items: items}, list, path) when is_list(list),
+    do:
       list
       |> Enum.with_index()
       |> Enum.map(fn {value, index} ->
-        with {:ok, cast} <- do_cast(items, value, [index | path]) do
-          cast
-        else
-          {:error, reason} ->
-            throw({:error, Map.put(reason, :path, [index | path])})
-        end
+        do_cast(items, value, [index | path])
       end)
 
-    {:ok, result}
-  end
-
-  defp cast_values(schema, tuple, path) when is_tuple(tuple) do
-    {:ok, result} = cast_values(schema, Tuple.to_list(tuple), path)
-    {:ok, List.to_tuple(result)}
-  end
+  defp cast_values(schema, tuple, path) when is_tuple(tuple),
+    do:
+      schema
+      |> cast_values(Tuple.to_list(tuple), path)
+      |> List.to_tuple()
 end
