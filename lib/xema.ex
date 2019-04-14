@@ -66,6 +66,8 @@ defmodule Xema do
 
   use Xema.Behaviour
 
+  import Xema.Utils, only: [to_existing_atom: 1]
+
   alias Xema.Castable
   alias Xema.CastError
   alias Xema.Ref
@@ -470,18 +472,13 @@ defmodule Xema do
   end
 
   @spec do_cast(Schema.t(), term, list) :: {:ok, term} | {:error, term}
-  defp do_cast(%Schema{} = schema, map, path) when is_map(map) do
-    with {:ok, cast} <- Castable.cast(map, schema) do
-      cast_values(schema, cast, path)
-    else
-      {:error, reason} ->
-        throw({:error, Map.put(reason, :path, path)})
-    end
-  end
+  defp do_cast(%Schema{} = schema, value, path)
+       when is_list(value) or is_tuple(value) or is_map(value) do
+    # TODO !!!!
+    bla = cast_values(schema, value, path)
 
-  defp do_cast(%Schema{} = schema, list, path) when is_list(list) or is_tuple(list) do
-    with {:ok, cast} <- Castable.cast(list, schema) do
-      cast_values(schema, cast, path)
+    with {:ok, cast} <- Castable.cast(bla, schema) do
+      cast
     else
       {:error, reason} ->
         throw({:error, Map.put(reason, :path, path)})
@@ -507,23 +504,28 @@ defmodule Xema do
     struct(module, fields)
   end
 
-  defp cast_values(%Schema{properties: properties}, map, path) when is_map(map),
+  defp cast_values(%Schema{properties: properties, type: :keyword}, map, path) when is_map(map),
     do:
       Enum.into(map, %{}, fn {key, value} ->
-        cast = do_cast(Map.get(properties, key), value, [key | path])
-        {key, cast}
+        {key, do_cast(Map.get(properties, to_existing_atom(key)), value, [key | path])}
       end)
 
-  defp cast_values(%Schema{properties: properties}, list, path)
+  defp cast_values(%Schema{properties: properties, keys: keys}, map, path) when is_map(map),
+    do:
+      Enum.into(map, %{}, fn {key, value} ->
+        {key, do_cast(Map.get(properties, key_to(keys, key)), value, [key | path])}
+      end)
+
+  defp cast_values(%Schema{properties: properties, keys: keys}, list, path)
        when is_list(list) and is_map(properties) do
     case Keyword.keyword?(list) do
-      false ->
-        list
-
       true ->
         Enum.map(list, fn {key, value} ->
-          {key, do_cast(Map.get(properties, key), value, [key | path])}
+          {key, do_cast(Map.get(properties, key_to(keys, key)), value, [key | path])}
         end)
+
+      false ->
+        list
     end
   end
 
@@ -558,4 +560,10 @@ defmodule Xema do
       schema
       |> cast_values(Tuple.to_list(tuple), path)
       |> List.to_tuple()
+
+  defp key_to(:atoms, str) when is_binary(str), do: to_existing_atom(str)
+
+  defp key_to(:strings, atom) when is_atom(atom), do: to_string(atom)
+
+  defp key_to(_, value), do: value
 end

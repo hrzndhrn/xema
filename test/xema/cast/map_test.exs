@@ -226,14 +226,14 @@ defmodule Xema.Cast.MapTest do
 
     test "from a map with unknown key", %{schema: schema} do
       data = %{"foo" => %{"xyz" => 42}}
-      expected = {:error, CastError.exception(%{path: [:foo], key: "xyz", to: :map})}
+      expected = {:error, CastError.exception(%{path: ["foo"], key: "xyz", to: :map})}
 
       assert cast(schema, data) == expected
     end
 
     test "from a map with unknown key (deeper)", %{schema: schema} do
       data = %{"foo" => %{"bar" => %{"xyz" => 42}}}
-      expected = {:error, CastError.exception(%{path: [:foo, :bar], key: "xyz", to: :map})}
+      expected = {:error, CastError.exception(%{path: ["foo", "bar"], key: "xyz", to: :map})}
 
       assert cast(schema, data) == expected
     end
@@ -508,14 +508,14 @@ defmodule Xema.Cast.MapTest do
 
     test "from a map with unknown key", %{schema: schema} do
       data = %{"foo" => %{"xyz" => 42}}
-      msg = ~s|cannot cast "xyz" to :map key at [:foo], the atom is unknown|
+      msg = ~s|cannot cast "xyz" to :map key at ["foo"], the atom is unknown|
 
       assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with unknown key (deeper)", %{schema: schema} do
       data = %{"foo" => %{"bar" => %{"xyz" => 42}}}
-      msg = ~s|cannot cast "xyz" to :map key at [:foo, :bar], the atom is unknown|
+      msg = ~s|cannot cast "xyz" to :map key at ["foo", "bar"], the atom is unknown|
 
       assert_raise CastError, msg, fn -> cast!(schema, data) end
     end
