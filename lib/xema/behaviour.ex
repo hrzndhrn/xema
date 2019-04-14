@@ -4,13 +4,15 @@ defmodule Xema.Behaviour do
   # A behaviour module for implementing a schema validator. This behaviour is
   # just for `Xema` and `JsonXema`.
 
-  alias Xema.Ref
-  alias Xema.Schema
-  alias Xema.Utils
-  alias Xema.Validator
-
-  alias Xema.SchemaError
-  alias Xema.ValidationError
+  alias Xema.{
+    Loader,
+    Ref,
+    Schema,
+    SchemaError,
+    Utils,
+    ValidationError,
+    Validator
+  }
 
   @inline_default true
 
@@ -347,8 +349,7 @@ defmodule Xema.Behaviour do
     end
   end
 
-  defp resolve(uri, nil),
-    do: Application.get_env(:xema, :loader).fetch(uri)
+  defp resolve(uri, nil), do: Loader.fetch(uri)
 
   defp resolve(uri, loader), do: loader.fetch(uri)
 

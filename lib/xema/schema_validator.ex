@@ -2,10 +2,8 @@ defmodule Xema.SchemaValidator do
   @moduledoc false
 
   # credo:disable-for-this-file Credo.Check.Design.DuplicatedCode
-  #
-  alias Xema.Ref
-  alias Xema.Schema
-  alias Xema.SchemaError
+
+  alias Xema.{Ref, Schema, SchemaError}
 
   def schema,
     do:

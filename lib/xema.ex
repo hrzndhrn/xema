@@ -68,11 +68,13 @@ defmodule Xema do
 
   import Xema.Utils, only: [to_existing_atom: 1]
 
-  alias Xema.Castable
-  alias Xema.CastError
-  alias Xema.Ref
-  alias Xema.Schema
-  alias Xema.SchemaValidator
+  alias Xema.{
+    Castable,
+    CastError,
+    Ref,
+    Schema,
+    SchemaValidator
+  }
 
   @keywords Schema.keywords()
   @types Schema.types()
