@@ -35,10 +35,7 @@ defmodule Xema.SchemaError do
 
   def exception(reason),
     do: %SchemaError{
-      message:
-        "Can't build schema! Reason:\n#{
-          reason |> inspect() |> Code.format_string!()
-        }",
+      message: "Can't build schema! Reason:\n#{reason |> inspect() |> Code.format_string!()}",
       reason: reason
     }
 end

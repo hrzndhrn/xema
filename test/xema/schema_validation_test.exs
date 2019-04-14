@@ -60,10 +60,8 @@ defmodule Xema.SchemaValidationTest do
               ]
             ],
             additional_properties: {:ref, "#/definitions/schema"},
-            definitions:
-              {:map, additional_properties: {:ref, "#/definitions/schema"}},
-            properties:
-              {:map, additional_properties: {:ref, "#/definitions/schema"}},
+            definitions: {:map, additional_properties: {:ref, "#/definitions/schema"}},
+            properties: {:map, additional_properties: {:ref, "#/definitions/schema"}},
             pattern_properties:
               {:map,
                additional_properties: {:ref, "#/definitions/schema"},

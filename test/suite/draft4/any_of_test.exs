@@ -32,8 +32,7 @@ defmodule Draft4.AnyOfTest do
   describe "anyOf with base schema" do
     setup do
       %{
-        schema:
-          Xema.new({:string, [any_of: [[max_length: 2], [min_length: 4]]]})
+        schema: Xema.new({:string, [any_of: [[max_length: 2], [min_length: 4]]]})
       }
     end
 

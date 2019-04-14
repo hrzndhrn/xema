@@ -22,8 +22,7 @@ defmodule Draft4.RefRemoteTest do
   describe "fragment within remote ref" do
     setup do
       %{
-        schema:
-          Xema.new({:ref, "http://localhost:1234/subSchemas.exon#/integer"})
+        schema: Xema.new({:ref, "http://localhost:1234/subSchemas.exon#/integer"})
       }
     end
 
@@ -41,10 +40,7 @@ defmodule Draft4.RefRemoteTest do
   describe "ref within remote ref" do
     setup do
       %{
-        schema:
-          Xema.new(
-            {:ref, "http://localhost:1234/subSchemas.exon#/refToInteger"}
-          )
+        schema: Xema.new({:ref, "http://localhost:1234/subSchemas.exon#/refToInteger"})
       }
     end
 
@@ -89,8 +85,7 @@ defmodule Draft4.RefRemoteTest do
             {:map,
              [
                definitions: %{
-                 baz:
-                   {:list, [id: "folder/", items: {:ref, "folderInteger.exon"}]}
+                 baz: {:list, [id: "folder/", items: {:ref, "folderInteger.exon"}]}
                },
                id: "http://localhost:1234/scope_change_defs1.exon",
                properties: %{list: {:ref, "#/definitions/baz"}}

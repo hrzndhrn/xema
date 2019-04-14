@@ -252,8 +252,7 @@ defmodule Xema.MapTest do
         schema:
           Xema.new({
             :map,
-            properties: %{foo: {:string, min_length: 3}},
-            additional_properties: :integer
+            properties: %{foo: {:string, min_length: 3}}, additional_properties: :integer
           })
       }
     end
@@ -316,8 +315,7 @@ defmodule Xema.MapTest do
         schema:
           Xema.new({
             :map,
-            properties: %{a: :number, b: :number, c: :number},
-            required: [:a, :b, :c]
+            properties: %{a: :number, b: :number, c: :number}, required: [:a, :b, :c]
           })
       }
     end
@@ -342,8 +340,7 @@ defmodule Xema.MapTest do
   describe "map schema with required property (string keys)" do
     setup do
       %{
-        schema:
-          Xema.new({:map, properties: %{"foo" => :number}, required: ["foo"]})
+        schema: Xema.new({:map, properties: %{"foo" => :number}, required: ["foo"]})
       }
     end
 

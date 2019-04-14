@@ -30,7 +30,9 @@ defmodule Xema.Utils do
         iex> Xema.Utils.to_existing_atom("not_existing_atom")
         nil
   """
-  @spec to_existing_atom(String.t()) :: atom | nil
+  @spec to_existing_atom(String.t() | atom) :: atom | nil
+  def to_existing_atom(atom) when is_atom(atom), do: atom
+
   def to_existing_atom(string) when is_binary(string) do
     String.to_existing_atom(string)
   rescue

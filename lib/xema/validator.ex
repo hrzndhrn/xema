@@ -486,8 +486,7 @@ defmodule Xema.Validator do
     do: {:error, %{value: value, minimum: minimum}}
 
   defp minimum(minimum, exclusive, value),
-    do:
-      {:error, %{value: value, minimum: minimum, exclusive_minimum: exclusive}}
+    do: {:error, %{value: value, minimum: minimum, exclusive_minimum: exclusive}}
 
   @spec maximum(Xema.Schema.t(), any) :: result
   defp maximum(%{maximum: nil}, _value), do: :ok
@@ -507,8 +506,7 @@ defmodule Xema.Validator do
     do: {:error, %{value: value, maximum: maximum}}
 
   defp maximum(maximum, exclusive, value),
-    do:
-      {:error, %{value: value, maximum: maximum, exclusive_maximum: exclusive}}
+    do: {:error, %{value: value, maximum: maximum, exclusive_maximum: exclusive}}
 
   @spec multiple_of(Xema.Schema.t(), number) :: result
   defp multiple_of(%{multiple_of: nil} = _keywords, _value), do: :ok
