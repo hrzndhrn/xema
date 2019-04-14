@@ -342,8 +342,7 @@ defmodule Xema do
     end
   end
 
-  defp maybe_schema({:ref, str} = ref) when is_binary(str),
-    do: schema(ref)
+  defp maybe_schema({:ref, str} = ref) when is_binary(str), do: schema(ref)
 
   defp maybe_schema({atom, list} = tuple)
        when is_atom(atom) and is_list(list) do
@@ -355,8 +354,7 @@ defmodule Xema do
 
   defp maybe_schema(%{__struct__: _} = struct), do: struct
 
-  defp maybe_schema(map) when is_map(map),
-    do: map_values(map, &maybe_schema/1)
+  defp maybe_schema(map) when is_map(map), do: map_values(map, &maybe_schema/1)
 
   defp maybe_schema(value), do: value
 
@@ -379,9 +377,8 @@ defmodule Xema do
   # Returns a map where each value is the result of invoking `fun` on each
   # value of the given `map`.
   @spec map_values(map, (any -> any)) :: map
-  defp map_values(map, fun)
-       when is_map(map) and is_function(fun),
-       do: Enum.into(map, %{}, fn {key, val} -> {key, fun.(val)} end)
+  defp map_values(map, fun) when is_map(map) and is_function(fun),
+    do: Enum.into(map, %{}, fn {key, val} -> {key, fun.(val)} end)
 
   @doc """
   Returns the source for a given `xema`. The output can differ from the input
@@ -439,13 +436,11 @@ defmodule Xema do
 
   defp nested_source(%{__struct__: _} = val), do: val
 
-  defp nested_source(val)
-       when is_map(val),
-       do: map_values(val, &nested_source/1)
+  defp nested_source(val) when is_map(val) do
+    map_values(val, &nested_source/1)
+  end
 
-  defp nested_source(val)
-       when is_list(val),
-       do: Enum.map(val, &nested_source/1)
+  defp nested_source(val) when is_list(val), do: Enum.map(val, &nested_source/1)
 
   defp nested_source(val), do: val
 
@@ -506,6 +501,12 @@ defmodule Xema do
 
   @spec cast_values(Schema.t(), term, list) :: {:ok, term} | {:error, term}
   defp cast_values(%Schema{properties: nil}, map, _) when is_map(map), do: {:ok, map}
+
+  defp cast_values(%Schema{properties: _} = schema, %{__struct__: module} = struct, path) do
+    with {:ok, fields} <- cast_values(schema, Map.from_struct(struct), path) do
+      {:ok, struct(module, fields)}
+    end
+  end
 
   defp cast_values(%Schema{properties: properties}, map, path) when is_map(map),
     do:

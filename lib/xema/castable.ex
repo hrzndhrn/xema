@@ -131,6 +131,15 @@ defimpl Xema.Castable, for: List do
 
   def cast(list, %Schema{type: boolean}) when is_boolean(boolean), do: {:ok, list}
 
+  def cast(list, %Schema{type: :struct, module: nil}), do: {:error, %{to: :struct, value: list}}
+
+  def cast(list, %Schema{type: :struct, module: module}) do
+    case Keyword.keyword?(list) do
+      true -> {:ok, struct!(module, list)}
+      false -> {:error, %{to: :struct, value: list}}
+    end
+  end
+
   def cast([], %Schema{type: :tuple}), do: {:ok, {}}
 
   def cast(list, %Schema{type: :tuple}) do
@@ -180,6 +189,14 @@ defimpl Xema.Castable, for: Map do
 
   def cast(map, %Schema{type: boolean}) when is_boolean(boolean), do: {:ok, map}
 
+  def cast(map, %Schema{type: :struct, module: nil}), do: {:ok, map}
+
+  def cast(map, %Schema{type: :struct, module: module}) do
+    with {:ok, fields} <- fields(map) do
+      {:ok, struct!(module, fields)}
+    end
+  end
+
   def cast(map, %Schema{type: :keyword}) do
     Enum.reduce_while(map, {:ok, []}, fn {key, value}, {:ok, acc} ->
       case cast_key(key, :atoms) do
@@ -218,6 +235,18 @@ defimpl Xema.Castable, for: Map do
     do: {:ok, Atom.to_string(value)}
 
   defp cast_key(value, _), do: {:ok, value}
+
+  defp fields(map) do
+    Enum.reduce_while(map, {:ok, %{}}, fn {key, value}, {:ok, acc} ->
+      case cast_key(key, :atoms) do
+        {:ok, key} ->
+          {:cont, {:ok, Map.put(acc, key, value)}}
+
+        :error ->
+          {:halt, {:error, %{to: :struct, key: key}}}
+      end
+    end)
+  end
 end
 
 defimpl Xema.Castable, for: Tuple do
