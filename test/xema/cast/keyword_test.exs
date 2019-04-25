@@ -33,7 +33,7 @@ defmodule Xema.Cast.KeywordTest do
     test "from a map with atom keys", %{schema: schema} do
       data = %{foo: 42}
       expected = [foo: 42]
-      assert validate(schema, data) == {:error, %{type: :keyword, value: data}}
+      assert {:error, %{type: :keyword, value: data}} = validate(schema, data)
       assert cast(schema, data) == {:ok, expected}
     end
 
@@ -59,9 +59,7 @@ defmodule Xema.Cast.KeywordTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast(schema, ~r/.*/)
-      end)
+      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
     end
   end
 

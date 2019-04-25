@@ -22,7 +22,7 @@ defmodule Xema.Cast.FloatTest do
 
     test "from a string", %{schema: schema} do
       data = "42.6"
-      assert validate(schema, data) == {:error, %{type: :float, value: "42.6"}}
+      assert {:error, %{type: :float, value: "42.6"}} = validate(schema, data)
       assert cast(schema, data) == {:ok, 42.6}
     end
 
@@ -42,9 +42,7 @@ defmodule Xema.Cast.FloatTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast(schema, ~r/.*/)
-      end)
+      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
     end
   end
 

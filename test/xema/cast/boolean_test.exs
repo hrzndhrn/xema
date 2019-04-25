@@ -1,7 +1,7 @@
 defmodule Xema.Cast.BooleanTest do
   use ExUnit.Case, async: true
 
-  alias Xema.CastError
+  alias Xema.{CastError, ValidationError}
 
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
@@ -20,8 +20,14 @@ defmodule Xema.Cast.BooleanTest do
     end
 
     test "from a string", %{schema: schema} do
-      assert validate(schema, "true") == {:error, %{type: :boolean, value: "true"}}
-      assert validate(schema, "false") == {:error, %{type: :boolean, value: "false"}}
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :boolean, got "true".|,
+                reason: %{
+                  type: :boolean,
+                  value: "true"
+                }
+              }} = validate(schema, "true")
     end
 
     test "from an invalid type", %{schema: schema} do
@@ -33,9 +39,7 @@ defmodule Xema.Cast.BooleanTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast(schema, ~r/.*/)
-      end)
+      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
     end
   end
 

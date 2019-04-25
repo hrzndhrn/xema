@@ -24,7 +24,7 @@ defmodule Xema.Cast.IntegerTest do
     test "from a string", %{schema: schema} do
       data = "42"
 
-      assert validate(schema, data) == {:error, %{type: :integer, value: "42"}}
+      assert {:error, %{type: :integer, value: "42"}} = validate(schema, data)
       assert cast(schema, data) == {:ok, 42}
     end
 
@@ -44,9 +44,7 @@ defmodule Xema.Cast.IntegerTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast(schema, ~r/.*/)
-      end)
+      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
     end
   end
 

@@ -34,7 +34,7 @@ defmodule Xema.Cast.TupleTest do
       data = [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}]
       expected = {:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}}
 
-      assert validate(schema, data) == {:error, %{type: :tuple, value: data}}
+      assert {:error, %{type: :tuple, value: data}} = validate(schema, data)
       assert cast(schema, data) == {:ok, expected}
     end
 
@@ -47,9 +47,7 @@ defmodule Xema.Cast.TupleTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast(schema, ~r/.*/)
-      end)
+      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
     end
   end
 
@@ -179,7 +177,7 @@ defmodule Xema.Cast.TupleTest do
       data = [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}]
       expected = {:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}}
 
-      assert validate(schema, data) == {:error, %{type: :tuple, value: data}}
+      assert {:error, %{type: :tuple, value: data}} = validate(schema, data)
       assert cast!(schema, data) == expected
     end
 

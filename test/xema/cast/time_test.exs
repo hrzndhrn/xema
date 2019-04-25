@@ -35,15 +35,15 @@ defmodule Xema.Cast.TimeTest do
     end
 
     test "raises an error for a keyword list", %{schema: schema} do
-      assert_raise KeyError, fn -> cast(schema, foo: 55) end
+      assert {:error, %KeyError{}} = cast(schema, foo: 55)
     end
 
     test "raises an error for a map", %{schema: schema} do
-      assert_raise KeyError, fn -> cast(schema, %{foo: 55}) end
+      assert {:error, %KeyError{}} = cast(schema, %{foo: 55})
     end
 
     test "raises an error for an empty map", %{schema: schema} do
-      assert_raise ArgumentError, fn -> cast(schema, %{}) end
+      assert {:error, %ArgumentError{}} = cast(schema, %{})
     end
   end
 
