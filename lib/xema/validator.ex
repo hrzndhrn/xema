@@ -650,99 +650,92 @@ defmodule Xema.Validator do
          items_tuple(
            items,
            Map.get(schema, :additional_items, true),
-           list,
-           0,
+           Enum.with_index(list),
            [],
            opts
          )
 
   defp items(%{items: items}, list, opts),
-    do: items_list(items, list, 0, [], opts)
+    do: items_list(items, Enum.with_index(list), [], opts)
 
-  @spec items_list(Xema.Schema.t(), list, integer, list, keyword) :: result
+  @spec items_list(Xema.Schema.t(), [{any, integer}], list, keyword) :: result
 
-  defp items_list(%{type: false}, [], _, _, _), do: :ok
-  defp items_list(%{type: false}, _, _, _, _), do: {:error, %{type: false}}
-  defp items_list(%{type: true}, _, _, _, _), do: :ok
+  defp items_list(%{type: false}, [], _, _), do: :ok
+  defp items_list(%{type: false}, _, _, _), do: {:error, %{type: false}}
+  defp items_list(%{type: true}, _, _, _), do: :ok
 
-  defp items_list(_schema, [], _at, [], _opts), do: :ok
+  defp items_list(_schema, [], [], _opts), do: :ok
 
-  defp items_list(_schema, [], _at, errors, _opts),
+  defp items_list(_schema, [], errors, _opts),
     do: {:error, %{items: Enum.reverse(errors)}}
 
-  defp items_list(schema, [item | list], at, errors, opts) do
+  defp items_list(schema, [{item, index} | list], errors, opts) do
     case do_validate(schema, item, opts) do
       :ok ->
-        items_list(schema, list, at + 1, errors, opts)
+        items_list(schema, list, errors, opts)
 
       {:error, reason} ->
-        items_list(schema, list, at + 1, [{at, reason} | errors], opts)
+        items_list(schema, list, [{index, reason} | errors], opts)
     end
   end
 
   @spec items_tuple(
           list,
           nil | boolean | Xema.Schema.t(),
-          list,
-          integer,
+          [{any, integer}],
           list,
           keyword
         ) :: result
-  defp items_tuple(_schemas, _additonal_items, [], _at, [], _opts), do: :ok
+  defp items_tuple(_schemas, _additonal_items, [], [], _opts), do: :ok
 
-  defp items_tuple(_schemas, _additonal_items, [], _at, errors, _opts),
+  defp items_tuple(_schemas, _additonal_items, [], errors, _opts),
     do: {:error, %{items: Enum.reverse(errors)}}
 
-  defp items_tuple([], false, [_ | list], at, errors, opts),
+  defp items_tuple([], false, [{_, index} | list], errors, opts),
     do:
       items_tuple(
         [],
         false,
         list,
-        at + 1,
-        [{at, %{additional_items: false}} | errors],
+        [{index, %{additional_items: false}} | errors],
         opts
       )
 
-  defp items_tuple([], additional_items, _list, _at, [], _opts)
+  defp items_tuple([], additional_items, _list, [], _opts)
        when additional_items in [nil, true],
        do: :ok
 
-  defp items_tuple([], additional_items, _list, _at, errors, _opts)
+  defp items_tuple([], additional_items, _list, errors, _opts)
        when additional_items in [nil, true],
        do: {:error, %{items: Enum.reverse(errors)}}
 
-  defp items_tuple([], schema, [item | list], at, errors, opts) do
+  defp items_tuple([], schema, [{item, index} | list], errors, opts) do
     case do_validate(schema, item, opts) do
       :ok ->
-        items_tuple([], schema, list, at + 1, errors, opts)
+        items_tuple([], schema, list, errors, opts)
 
       {:error, reason} ->
-        items_tuple([], schema, list, at + 1, [{at, reason} | errors], opts)
+        items_tuple([], schema, list, [{index, reason} | errors], opts)
     end
   end
 
   defp items_tuple(
          [schema | schemas],
          additional_items,
-         [item | list],
-         at,
+         [{item, index} | list],
          errors,
          opts
        ) do
     case do_validate(schema, item, opts) do
       :ok ->
-        items_tuple(schemas, additional_items, list, at + 1, errors, opts)
+        items_tuple(schemas, additional_items, list, errors, opts)
 
       {:error, reason} ->
         items_tuple(
           schemas,
           additional_items,
           list,
-          at + 1,
-          [
-            {at, reason} | errors
-          ],
+          [ {index, reason} | errors ],
           opts
         )
     end
