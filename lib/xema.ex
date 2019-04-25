@@ -156,7 +156,9 @@ defmodule Xema do
   def init({:ref, pointer}), do: init({:any, ref: pointer})
 
   def init(data) do
-    SchemaValidator.validate!(data)
+    # TODO
+    # IO.inspect "No SchemaValidator", label: :warn
+    # SchemaValidator.validate!(data)
     schema(data)
   end
 
@@ -468,6 +470,9 @@ defmodule Xema do
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
     {:ok, do_cast(schema, value, [])}
+  rescue
+    error ->
+      {:error, error}
   catch
     {:error, %{path: path} = reason} ->
       {:error, CastError.exception(%{reason | path: Enum.reverse(path)})}

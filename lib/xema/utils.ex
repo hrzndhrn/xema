@@ -5,20 +5,6 @@ defmodule Xema.Utils do
   """
 
   @doc """
-  Returns `b` if `a` is `nil`, otherwise `a`
-
-  ## Examples
-
-        iex> Xema.Utils.default(:a, :b)
-        :a
-        iex> Xema.Utils.default(nil, :b)
-        :b
-  """
-  @spec default(any, any) :: any
-  def default(nil, b), do: b
-  def default(a, _b), do: a
-
-  @doc """
   Converts the given `string` to an existing atom. Returns `nil` if the
   atom does not exist.
 

@@ -86,7 +86,7 @@ defmodule Xema.Behaviour do
 
       defp do_validate(schema, value, opts) do
         with {:error, error} <- Validator.validate(schema, value, opts),
-             do: {:error, on_error(error)}
+             do: {:error, error |> on_error |> ValidationError.exception()}
       end
 
       @doc """
@@ -96,7 +96,7 @@ defmodule Xema.Behaviour do
       @spec validate!(__MODULE__.t() | Schema.t(), any) :: :ok
       def validate!(xema, value) do
         with {:error, reason} <- validate(xema, value),
-             do: raise(ValidationError, reason)
+             do: raise(reason)
       end
 
       # This function can be overwritten to transform the reason map of an

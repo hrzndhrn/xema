@@ -1,6 +1,7 @@
 defmodule Xema.Validator do
-  @moduledoc false
-  # This module contains all validators to check data against a schema.
+  @moduledoc """
+  This module contains all validators to check data against a schema.
+  """
 
   use Xema.Format
 
@@ -9,6 +10,10 @@ defmodule Xema.Validator do
   alias Xema.Ref
   alias Xema.Schema
 
+  @doc """
+  A callback for custom validators. For an example see:
+  [Custom validators](examples.html#custom-validator)
+  """
   @callback validate(any) :: {:ok, any} | {:error, any}
 
   @compile {
@@ -612,22 +617,24 @@ defmodule Xema.Validator do
   @spec contains(Schema.t(), any) :: result
   defp contains(%{contains: nil}, _), do: :ok
 
-  defp contains(%{contains: schema}, tuple) when is_tuple(tuple) do
-    tuple
-    |> Tuple.to_list()
-    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
-    |> case do
-      true -> :ok
-      false -> {:error, %{value: tuple, contains: schema}}
-    end
-  end
+  defp contains(%{contains: _} = schema, tuple)
+       when is_tuple(tuple),
+       do: contains(schema, Tuple.to_list(tuple))
 
   defp contains(%{contains: schema}, list) when is_list(list) do
-    list
-    |> Enum.any?(fn value -> Xema.valid?(schema, value) end)
-    |> case do
+    errors =
+      list
+      |> Enum.with_index()
+      |> Enum.reduce([], fn {value, index}, acc ->
+        case do_validate(schema, value, nil) do
+          :ok -> acc
+          {:error, reason} -> [{index, reason} | acc]
+        end
+      end)
+
+    case length(errors) < length(list) do
       true -> :ok
-      false -> {:error, %{value: list, contains: schema}}
+      false -> {:error, %{value: list, contains: Enum.reverse(errors)}}
     end
   end
 
@@ -637,12 +644,12 @@ defmodule Xema.Validator do
   defp items(schema, tuple, opts) when is_tuple(tuple),
     do: items(schema, Tuple.to_list(tuple), opts)
 
-  defp items(%{items: items, additional_items: additional_items}, list, opts)
+  defp items(%{items: items} = schema, list, opts)
        when is_list(items),
        do:
          items_tuple(
            items,
-           default(additional_items, true),
+           Map.get(schema, :additional_items, true),
            list,
            0,
            [],
@@ -693,16 +700,17 @@ defmodule Xema.Validator do
         false,
         list,
         at + 1,
-        [
-          {at, %{additional_items: false}} | errors
-        ],
+        [{at, %{additional_items: false}} | errors],
         opts
       )
 
-  defp items_tuple([], true, _list, _at, [], _opts), do: :ok
+  defp items_tuple([], additional_items, _list, _at, [], _opts)
+       when additional_items in [nil, true],
+       do: :ok
 
-  defp items_tuple([], true, _list, _at, errors, _opts),
-    do: {:error, %{items: Enum.reverse(errors)}}
+  defp items_tuple([], additional_items, _list, _at, errors, _opts)
+       when additional_items in [nil, true],
+       do: {:error, %{items: Enum.reverse(errors)}}
 
   defp items_tuple([], schema, [item | list], at, errors, opts) do
     case do_validate(schema, item, opts) do
@@ -746,14 +754,14 @@ defmodule Xema.Validator do
   defp keys(%{keys: :atoms}, map) do
     case map |> Map.keys() |> Enum.all?(&is_atom/1) do
       true -> :ok
-      false -> {:error, %{keys: :atoms}}
+      false -> {:error, %{keys: :atoms, value: map}}
     end
   end
 
   defp keys(%{keys: :strings}, map) do
     case map |> Map.keys() |> Enum.all?(&is_binary/1) do
       true -> :ok
-      false -> {:error, %{keys: :strings}}
+      false -> {:error, %{keys: :strings, value: map}}
     end
   end
 
@@ -817,19 +825,19 @@ defmodule Xema.Validator do
   defp size(%{min_properties: nil, max_properties: nil}, _map), do: :ok
 
   defp size(%{min_properties: min, max_properties: max}, map) do
-    do_size(length(Map.keys(map)), min, max)
+    do_size(length(Map.keys(map)), min, max, map)
   end
 
-  @spec do_size(number, number, number) :: result
-  defp do_size(len, min, _max) when not is_nil(min) and len < min do
-    {:error, %{min_properties: min}}
+  @spec do_size(number, number, number, map) :: result
+  defp do_size(len, min, _max, map) when not is_nil(min) and len < min do
+    {:error, %{min_properties: min, value: map}}
   end
 
-  defp do_size(len, _min, max) when not is_nil(max) and len > max do
-    {:error, %{max_properties: max}}
+  defp do_size(len, _min, max, map) when not is_nil(max) and len > max do
+    {:error, %{max_properties: max, value: map}}
   end
 
-  defp do_size(_len, _min, _max), do: :ok
+  defp do_size(_len, _min, _max, _map), do: :ok
 
   @spec patterns(Xema.Schema.t(), map, keyword) :: {:ok, map} | {:error, map}
   defp patterns(%{pattern_properties: nil}, map, _opts), do: {:ok, map}
@@ -884,7 +892,7 @@ defmodule Xema.Validator do
 
     case result == %{} do
       true -> :ok
-      false -> {:error, result}
+      false -> {:error, %{properties: result}}
     end
   end
 
