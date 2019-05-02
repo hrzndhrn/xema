@@ -76,13 +76,14 @@ defmodule Xema.Behaviour do
       def validate(schema, value), do: validate(schema, value, [])
 
       @doc false
-      @spec validate(Schema.t(), any, keyword) :: Validator.result()
-      def validate(%Schema{} = schema, value, opts),
-        do: do_validate(schema, value, opts)
-
-      @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
+      @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
       def validate(%{} = schema, value, opts),
         do: do_validate(schema, value, opts)
+
+      # TODO: delete
+      # @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
+      # def validate(%{} = schema, value, opts),
+      #   do: do_validate(schema, value, opts)
 
       defp do_validate(schema, value, opts) do
         with {:error, error} <- Validator.validate(schema, value, opts),
@@ -99,8 +100,7 @@ defmodule Xema.Behaviour do
              do: raise(reason)
       end
 
-      # This function can be overwritten to transform the reason map of an
-      # error tuple.
+      # This function can be overwritten to transform the reason map of an error tuple.
       defp on_error(error), do: error
       defoverridable on_error: 1
     end

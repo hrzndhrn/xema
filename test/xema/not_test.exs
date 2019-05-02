@@ -3,6 +3,8 @@ defmodule Xema.NotTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.ValidationError
+
   describe "keyword not:" do
     setup do
       %{schema: Xema.new({:any, not: :integer})}
@@ -17,7 +19,13 @@ defmodule Xema.NotTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, 1) == {:error, %{not: :ok, value: 1}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Value is valid against schema from not, got 1.",
+                 reason: %{not: :ok, value: 1}
+               }
+             } = validate(schema, 1)
     end
   end
 
@@ -29,7 +37,13 @@ defmodule Xema.NotTest do
     end
 
     test "any value is valid", %{schema: schema} do
-      assert validate(schema, 19) == {:error, %{not: :ok, value: 19}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Value is valid against schema from not, got 19.",
+                 reason: %{not: :ok, value: 19}
+               }
+             } = validate(schema, 19)
     end
   end
 
@@ -63,8 +77,13 @@ defmodule Xema.NotTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, %{foo: "foo"}) ==
-               {:error, %{properties: %{foo: %{not: :ok, value: "foo"}}}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Value is valid against schema from not, got "foo", at [:foo].|,
+                 reason: %{properties: %{foo: %{not: :ok, value: "foo"}}}
+               }
+             } = validate(schema, %{foo: "foo"})
     end
   end
 

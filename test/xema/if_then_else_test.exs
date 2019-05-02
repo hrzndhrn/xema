@@ -3,6 +3,8 @@ defmodule Xema.IfThenElseTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.ValidationError
+
   describe "if then" do
     setup do
       %{
@@ -20,8 +22,15 @@ defmodule Xema.IfThenElseTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, "") ==
-               {:error, %{then: %{min_length: 1, value: ""}}}
+      msg = """
+      Schema for then does not match.
+        Expected minimum length of 1, got "".\
+      """
+
+      assert {
+               :error,
+               %ValidationError{message: ^msg, reason: %{then: %{min_length: 1, value: ""}}}
+             } = validate(schema, "")
     end
   end
 
@@ -43,8 +52,15 @@ defmodule Xema.IfThenElseTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, "") ==
-               {:error, %{else: %{min_length: 1, value: ""}}}
+      msg = """
+      Schema for else does not match.
+        Expected minimum length of 1, got "".\
+      """
+
+      assert {
+               :error,
+               %ValidationError{message: ^msg, reason: %{else: %{min_length: 1, value: ""}}}
+             } = validate(schema, "")
     end
   end
 
@@ -66,22 +82,46 @@ defmodule Xema.IfThenElseTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, 1.1) ==
-               {:error, %{else: %{type: :integer, value: 1.1}}}
+      msg = """
+      Schema for else does not match.
+        Expected :integer, got 1.1.\
+      """
 
-      assert validate(schema, []) ==
-               {:error, %{then: %{min_items: 2, value: []}}}
+      assert {
+               :error,
+               %ValidationError{message: ^msg, reason: %{else: %{type: :integer, value: 1.1}}}
+             } = validate(schema, 1.1)
 
-      assert validate(schema, [1, 2, "foo", "bar"]) ==
-               {:error,
-                %{
-                  then: %{
-                    items: [
-                      {2, %{type: :integer, value: "foo"}},
-                      {3, %{type: :integer, value: "bar"}}
-                    ]
-                  }
-                }}
+      msg = """
+      Schema for then does not match.
+        Expected at least 2 items, got [].\
+      """
+
+      assert {
+               :error,
+               %ValidationError{message: ^msg, reason: %{then: %{min_items: 2, value: []}}}
+             } = validate(schema, [])
+
+      msg = """
+      Schema for then does not match.
+        Expected :integer, got "foo", at [2].
+        Expected :integer, got "bar", at [3].\
+      """
+
+      assert {
+               :error,
+               %ValidationError{
+                 message: ^msg,
+                 reason: %{
+                   then: %{
+                     items: [
+                       {2, %{type: :integer, value: "foo"}},
+                       {3, %{type: :integer, value: "bar"}}
+                     ]
+                   }
+                 }
+               }
+             } = validate(schema, [1, 2, "foo", "bar"])
     end
   end
 end

@@ -3,6 +3,8 @@ defmodule Xema.MultiTypeTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.ValidationError
+
   describe "schema with type string or nil:" do
     setup do
       %{schema: Xema.new({[:string, nil], min_length: 5})}
@@ -13,7 +15,13 @@ defmodule Xema.MultiTypeTest do
     end
 
     test "with an invalid string", %{schema: schema} do
-      assert validate(schema, "foo") == {:error, %{min_length: 5, value: "foo"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected minimum length of 5, got "foo".|,
+                 reason: %{min_length: 5, value: "foo"}
+               }
+             } = validate(schema, "foo")
     end
 
     test "with nil", %{schema: schema} do
@@ -21,8 +29,13 @@ defmodule Xema.MultiTypeTest do
     end
 
     test "with integer", %{schema: schema} do
-      assert validate(schema, 42) ==
-               {:error, %{type: [:string, nil], value: 42}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected [:string, nil], got 42.",
+                 reason: %{type: [:string, nil], value: 42}
+               }
+             } = validate(schema, 42)
     end
   end
 
@@ -40,8 +53,13 @@ defmodule Xema.MultiTypeTest do
     end
 
     test "with a string", %{schema: schema} do
-      assert validate(schema, %{foo: "foo"}) ==
-               {:error, %{properties: %{foo: %{type: [:number, nil], value: "foo"}}}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected [:number, nil], got "foo", at [:foo].|,
+                 reason: %{properties: %{foo: %{type: [:number, nil], value: "foo"}}}
+               }
+             } = validate(schema, %{foo: "foo"})
     end
   end
 
@@ -59,8 +77,13 @@ defmodule Xema.MultiTypeTest do
     end
 
     test "with a number", %{schema: schema} do
-      assert validate(schema, 42) ==
-               {:error, %{type: [:string, nil], value: 42}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected [:string, nil], got 42.",
+                 reason: %{type: [:string, nil], value: 42}
+               }
+             } = validate(schema, 42)
     end
   end
 end

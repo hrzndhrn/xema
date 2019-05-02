@@ -136,7 +136,7 @@ defmodule Xema.Validator do
          :ok <- any_of(schema, value, opts),
          :ok <- one_of(schema, value, opts),
          :ok <- const(schema, value),
-         :ok <- if_then_else(schema, value),
+         :ok <- if_then_else(schema, value, opts),
          do: :ok
   end
 
@@ -175,7 +175,7 @@ defmodule Xema.Validator do
     with :ok <- size(schema, value),
          :ok <- keys(schema, value),
          :ok <- required(schema, value),
-         :ok <- property_names(schema, value),
+         :ok <- property_names(schema, value, opts),
          :ok <- dependencies(schema, value, opts),
          {:ok, patts_rest} <- patterns(schema, value, opts),
          {:ok, props_rest} <- properties(schema, value, opts),
@@ -190,7 +190,7 @@ defmodule Xema.Validator do
          :ok <- size(schema, value),
          :ok <- keys(schema, value),
          :ok <- required(schema, value),
-         :ok <- property_names(schema, value),
+         :ok <- property_names(schema, value, opts),
          {:ok, patts_rest} <- patterns(schema, value, opts),
          {:ok, props_rest} <- properties(schema, value, opts),
          value <- intersection(props_rest, patts_rest),
@@ -294,47 +294,55 @@ defmodule Xema.Validator do
   defp const(%{const: const}, value),
     do: {:error, %{const: const, value: value}}
 
-  @spec if_then_else(Xema.t() | Schema.t(), any) :: result
-  defp if_then_else(%{if: nil}, _value), do: :ok
-  defp if_then_else(%{then: nil, else: nil}, _value), do: :ok
+  @spec if_then_else(Xema.t() | Schema.t(), any, keyword) :: result
+  defp if_then_else(%{if: nil}, _value, _opts), do: :ok
+  defp if_then_else(%{then: nil, else: nil}, _value, _opts), do: :ok
 
-  defp if_then_else(
-         %{if: schema_if, then: schema_then, else: schema_else},
-         value
-       ) do
+  defp if_then_else(%{if: schema_if, then: schema_then, else: schema_else}, value, opts) do
     case Xema.valid?(schema_if, value) do
       true ->
-        if_then_else(:then, schema_then, value)
+        if_then_else(:then, schema_then, value, opts)
 
       false ->
-        if_then_else(:else, schema_else, value)
+        if_then_else(:else, schema_else, value, opts)
     end
   end
 
   @spec if_then_else(atom, Schema.t() | nil, any) :: result
-  defp if_then_else(_key, nil, _value), do: :ok
+  defp if_then_else(_key, nil, _value, _opts), do: :ok
 
-  defp if_then_else(key, schema, value) do
-    case Xema.validate(schema, value) do
+  defp if_then_else(key, schema, value, opts) do
+    case do_validate(schema, value, opts) do
       :ok -> :ok
       {:error, reason} -> {:error, Map.new([{key, reason}])}
     end
   end
 
-  @spec property_names(Xema.t() | Schema.t(), map) :: result
-  defp property_names(%{property_names: nil}, _map), do: :ok
+  @spec property_names(Xema.t() | Schema.t(), map, keyword) :: result
+  defp property_names(%{property_names: nil}, _map, _opts), do: :ok
 
-  defp property_names(%{property_names: schema}, map) do
+  defp property_names(%{property_names: schema}, map, opts) do
     map
     |> Map.keys()
-    |> Enum.filter(fn
-      key when is_binary(key) -> not Xema.valid?(schema, key)
-      key when is_atom(key) -> not Xema.valid?(schema, Atom.to_string(key))
-      _ -> false
+    |> Enum.reduce([], fn
+      key, acc when is_binary(key) ->
+        case do_validate(schema, key, opts) do
+          :ok -> acc
+          {:error, reason} -> [{key, reason} | acc]
+        end
+
+      key, acc when is_atom(key) ->
+        case do_validate(schema, Atom.to_string(key), opts) do
+          :ok -> acc
+          {:error, reason} -> [{key, reason} | acc]
+        end
+
+      _, acc ->
+        acc
     end)
     |> case do
       [] -> :ok
-      keys -> {:error, %{value: keys, property_names: schema}}
+      errors -> {:error, %{value: Map.keys(map), property_names: Enum.reverse(errors)}}
     end
   end
 
@@ -423,26 +431,35 @@ defmodule Xema.Validator do
   defp one_of(%{one_of: nil}, _value, _opts), do: :ok
 
   defp one_of(%{one_of: schemas}, value, opts) do
-    errors = do_one_of(schemas, value, opts)
+    case do_one_of(schemas, value, opts) do
+      %{success: [], errors: errors} ->
+        {:error, %{one_of: {:error, Enum.reverse(errors)}, value: value}}
 
-    case length(schemas) - length(errors) do
-      1 -> :ok
-      _ -> {:error, %{one_of: errors, value: value}}
+      %{success: [_]} ->
+        :ok
+
+      %{success: success} ->
+        {:error, %{one_of: {:ok, Enum.reverse(success)}, value: value}}
     end
   end
 
   @spec do_one_of(list, any, keyword) :: [map]
   defp do_one_of(schemas, value, opts),
     do:
-      Enum.reduce(schemas, [], fn schema, acc ->
-        case do_validate(schema, value, opts) do
-          :ok ->
-            acc
+      schemas
+      |> Enum.with_index()
+      |> Enum.reduce(
+        %{errors: [], success: []},
+        fn {schema, index}, %{errors: errors, success: success} ->
+          case do_validate(schema, value, opts) do
+            :ok ->
+              %{errors: errors, success: [index | success]}
 
-          {:error, error} ->
-            [error | acc]
+            {:error, error} ->
+              %{errors: [error | errors], success: success}
+          end
         end
-      end)
+      )
 
   @spec exclusive_maximum(Xema.Schema.t(), any) :: result
   defp exclusive_maximum(%{exclusive_maximum: nil}, _value), do: :ok
@@ -617,9 +634,11 @@ defmodule Xema.Validator do
   @spec contains(Schema.t(), any) :: result
   defp contains(%{contains: nil}, _), do: :ok
 
-  defp contains(%{contains: _} = schema, tuple)
-       when is_tuple(tuple),
-       do: contains(schema, Tuple.to_list(tuple))
+  defp contains(%{contains: _} = schema, tuple) when is_tuple(tuple) do
+    with {:error, reason} <- contains(schema, Tuple.to_list(tuple)) do
+      {:error, %{reason | value: tuple}}
+    end
+  end
 
   defp contains(%{contains: schema}, list) when is_list(list) do
     errors =
@@ -735,7 +754,7 @@ defmodule Xema.Validator do
           schemas,
           additional_items,
           list,
-          [ {index, reason} | errors ],
+          [{index, reason} | errors],
           opts
         )
     end

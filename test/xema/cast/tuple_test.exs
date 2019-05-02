@@ -3,7 +3,7 @@ defmodule Xema.Cast.TupleTest do
 
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
-  alias Xema.CastError
+  alias Xema.{CastError, ValidationError}
 
   @set [:atom, "str", 1.1, 1, %{}, [a: 5]]
 
@@ -34,7 +34,12 @@ defmodule Xema.Cast.TupleTest do
       data = [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}]
       expected = {:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}}
 
-      assert {:error, %{type: :tuple, value: data}} = validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :tuple, got [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}].|,
+                reason: %{type: :tuple, value: data}
+              }} = validate(schema, data)
+
       assert cast(schema, data) == {:ok, expected}
     end
 
@@ -177,7 +182,12 @@ defmodule Xema.Cast.TupleTest do
       data = [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}]
       expected = {:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}}
 
-      assert {:error, %{type: :tuple, value: data}} = validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :tuple, got [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}].|,
+                reason: %{type: :tuple, value: data}
+              }} = validate(schema, data)
+
       assert cast!(schema, data) == expected
     end
 

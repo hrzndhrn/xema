@@ -15,7 +15,7 @@ defmodule Xema.ValidationErrorTest do
     rescue
       error ->
         assert %ValidationError{} = error
-        assert error.message == "Validation failed!"
+        assert error.message == ~s|Expected :integer, got "foo".|
         assert error.reason == %{type: :integer, value: "foo"}
     end
   end

@@ -3,7 +3,7 @@ defmodule Xema.SchemaError do
   Raised when a schema can't be build.
   """
 
-  alias Xema.SchemaError
+  alias Xema.{SchemaError, ValidationError}
 
   defexception [:message, :reason]
 
@@ -33,9 +33,9 @@ defmodule Xema.SchemaError do
 
   def exception(%{__struct__: CompileError} = error), do: error
 
-  def exception(reason),
+  def exception(%ValidationError{} = error),
     do: %SchemaError{
-      message: "Can't build schema! Reason:\n#{reason |> inspect() |> Code.format_string!()}",
-      reason: reason
+      message: "Can't build schema:\n#{error.message}",
+      reason: error.reason
     }
 end

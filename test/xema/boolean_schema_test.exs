@@ -3,6 +3,8 @@ defmodule Xema.BooleanSchemaTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.ValidationError
+
   describe "true schema:" do
     setup do
       %{schema: Xema.new(true)}
@@ -47,11 +49,25 @@ defmodule Xema.BooleanSchemaTest do
     end
 
     test "validate/2 returns always {:error, %{type: false}}", %{schema: schema} do
-      assert(validate(schema, true) == {:error, %{type: false}})
-      assert(validate(schema, 42) == {:error, %{type: false}})
-      assert(validate(schema, "foo") == {:error, %{type: false}})
-      assert(validate(schema, []) == {:error, %{type: false}})
-      assert(validate(schema, %{}) == {:error, %{type: false}})
+      assert {:error,
+              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
+               validate(schema, true)
+
+      assert {:error,
+              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
+               validate(schema, 42)
+
+      assert {:error,
+              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
+               validate(schema, "true")
+
+      assert {:error,
+              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
+               validate(schema, [])
+
+      assert {:error,
+              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
+               validate(schema, %{})
     end
   end
 

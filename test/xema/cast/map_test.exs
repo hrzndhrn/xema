@@ -3,7 +3,7 @@ defmodule Xema.Cast.MapTest do
 
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
-  alias Xema.CastError
+  alias Xema.{CastError, ValidationError}
 
   @set [1, 1.1, [42], {:tuple}, :atom]
 
@@ -103,13 +103,24 @@ defmodule Xema.Cast.MapTest do
 
     test "from map with string keys and valid property", %{schema: schema} do
       data = %{"bla" => "foo"}
-      assert {:error, %{keys: :atoms}} = validate(schema, data)
+
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :atoms as key, got %{"bla" => "foo"}.|,
+                reason: %{keys: :atoms}
+              }} = validate(schema, data)
+
       assert cast(schema, data) == {:ok, %{bla: "foo"}}
     end
 
     test "from map with string keys and integer property", %{schema: schema} do
       data = %{"bla" => 11}
-      assert {:error, %{keys: :atoms}} = validate(schema, data)
+
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :atoms as key, got %{"bla" => 11}.|,
+                reason: %{keys: :atoms}
+              }} = validate(schema, data)
 
       assert {:ok, cast} = cast(schema, data)
       assert cast == %{bla: "11"}
@@ -126,7 +137,11 @@ defmodule Xema.Cast.MapTest do
     test "from map with atom keys and a castable value", %{schema: schema} do
       data = %{bla: 11}
 
-      assert {:error, %{properties: %{bla: %{type: :string, value: 11}}}} = validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                message: "Expected :string, got 11, at [:bla].",
+                reason: %{properties: %{bla: %{type: :string, value: 11}}}
+              }} = validate(schema, data)
 
       assert {:ok, cast} = cast(schema, data)
       assert cast == %{bla: "11"}
@@ -162,22 +177,35 @@ defmodule Xema.Cast.MapTest do
     test "from map with string keys and castable value", %{schema: schema} do
       data = %{"bla" => 11}
 
-      assert {:error, %{properties: %{"bla" => %{type: :string, value: 11}}}} =
-               validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :string, got 11, at ["bla"].|,
+                reason: %{properties: %{"bla" => %{type: :string, value: 11}}}
+              }} = validate(schema, data)
 
       assert cast(schema, data) == {:ok, %{"bla" => "11"}}
     end
 
     test "from map with atoms keys", %{schema: schema} do
       data = %{bla: "foo"}
-      assert {:error, %{keys: :strings}} = validate(schema, data)
+
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :strings as key, got %{bla: "foo"}.|,
+                reason: %{keys: :strings}
+              }} = validate(schema, data)
+
       assert cast(schema, data) == {:ok, %{"bla" => "foo"}}
     end
 
     test "from map with atom keys and castable value", %{schema: schema} do
       data = %{bla: 11}
 
-      assert {:error, %{keys: :strings}} = validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :strings as key, got %{bla: 11}.|,
+                reason: %{keys: :strings}
+              }} = validate(schema, data)
 
       assert cast(schema, data) == {:ok, %{"bla" => "11"}}
     end
@@ -244,9 +272,12 @@ defmodule Xema.Cast.MapTest do
       assert cast == %{foo: %{num: 42}}
 
       assert {:error,
-              %{
-                properties: %{
-                  foo: %{properties: %{num: %{value: 42, maximum: 12}}}
+              %ValidationError{
+                message: "Value 42 exceeds maximum value of 12, at [:foo, :num].",
+                reason: %{
+                  properties: %{
+                    foo: %{properties: %{num: %{value: 42, maximum: 12}}}
+                  }
                 }
               }} = validate(schema, cast)
     end
@@ -394,7 +425,12 @@ defmodule Xema.Cast.MapTest do
 
     test "from map with string keys and integer property", %{schema: schema} do
       data = %{"bla" => 11}
-      assert {:error, %{keys: :atoms}} = validate(schema, data)
+
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :atoms as key, got %{"bla" => 11}.|,
+                reason: %{keys: :atoms}
+              }} = validate(schema, data)
 
       assert cast = cast!(schema, data)
       assert cast == %{bla: "11"}
@@ -411,7 +447,11 @@ defmodule Xema.Cast.MapTest do
     test "from map with atom keys and a castable value", %{schema: schema} do
       data = %{bla: 11}
 
-      assert {:error, %{properties: %{bla: %{type: :string, value: 11}}}} = validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                message: "Expected :string, got 11, at [:bla].",
+                reason: %{properties: %{bla: %{type: :string, value: 11}}}
+              }} = validate(schema, data)
 
       assert cast = cast!(schema, data)
       assert cast == %{bla: "11"}
@@ -447,22 +487,36 @@ defmodule Xema.Cast.MapTest do
     test "from map with string keys and castable value", %{schema: schema} do
       data = %{"bla" => 11}
 
-      assert {:error, %{properties: %{"bla" => %{type: :string, value: 11}}}} =
-               validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :string, got 11, at ["bla"].|,
+                reason: %{properties: %{"bla" => %{type: :string, value: 11}}}
+              }} = validate(schema, data)
 
       assert cast!(schema, data) == %{"bla" => "11"}
     end
 
     test "from map with atoms keys", %{schema: schema} do
       data = %{bla: "foo", bar: 5}
-      assert {:error, %{keys: :strings}} = validate(schema, data)
+
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :strings as key, got %{bar: 5, bla: "foo"}.|,
+                reason: %{keys: :strings}
+              }} = validate(schema, data)
+
       assert cast!(schema, data) == %{"bla" => "foo", "bar" => 5}
     end
 
     test "from map with atom keys and castable value", %{schema: schema} do
       data = %{bla: 11}
 
-      assert {:error, %{keys: :strings}} = validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                message: "Expected :strings as key, got %{bla: 11}.",
+                reason: %{keys: :strings}
+              }} = validate(schema, data)
+
       assert cast!(schema, data) == %{"bla" => "11"}
     end
 
@@ -524,9 +578,12 @@ defmodule Xema.Cast.MapTest do
       assert cast == %{foo: %{num: 42}}
 
       assert {:error,
-              %{
-                properties: %{
-                  foo: %{properties: %{num: %{value: 42, maximum: 12}}}
+              %ValidationError{
+                message: "Value 42 exceeds maximum value of 12, at [:foo, :num].",
+                reason: %{
+                  properties: %{
+                    foo: %{properties: %{num: %{value: 42, maximum: 12}}}
+                  }
                 }
               }} = validate(schema, cast)
     end

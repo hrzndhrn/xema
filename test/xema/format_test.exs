@@ -3,6 +3,8 @@ defmodule FormatTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.ValidationError
+
   describe "validation of date-time strings" do
     setup do
       %{schema: Xema.new(format: :date_time)}
@@ -11,8 +13,16 @@ defmodule FormatTest do
     test "with an invalid day in date-time string", %{schema: schema} do
       data = "1990-02-31T15:59:60.123-08:00"
 
-      assert validate(schema, data) ==
-               {:error, %{format: :date_time, value: "1990-02-31T15:59:60.123-08:00"}}
+      msg =
+        ~s|String "1990-02-31T15:59:60.123-08:00" does not validate against format :date_time.|
+
+      assert {
+               :error,
+               %ValidationError{
+                 message: ^msg,
+                 reason: %{format: :date_time, value: "1990-02-31T15:59:60.123-08:00"}
+               }
+             } = validate(schema, data)
     end
   end
 
@@ -36,8 +46,13 @@ defmodule FormatTest do
     end
 
     test "with an invalid string", %{schema: schema} do
-      assert validate(schema, "a(.*b") ==
-               {:error, %{format: :regex, value: "a(.*b"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|String "a(.*b" does not validate against format :regex.|,
+                 reason: %{format: :regex, value: "a(.*b"}
+               }
+             } = validate(schema, "a(.*b")
     end
   end
 end

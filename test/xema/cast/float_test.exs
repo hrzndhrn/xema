@@ -1,7 +1,7 @@
 defmodule Xema.Cast.FloatTest do
   use ExUnit.Case, async: true
 
-  alias Xema.CastError
+  alias Xema.{CastError, ValidationError}
 
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
@@ -22,7 +22,16 @@ defmodule Xema.Cast.FloatTest do
 
     test "from a string", %{schema: schema} do
       data = "42.6"
-      assert {:error, %{type: :float, value: "42.6"}} = validate(schema, data)
+
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :float, got "42.6".|,
+                reason: %{
+                  type: :float,
+                  value: "42.6"
+                }
+              }} = validate(schema, data)
+
       assert cast(schema, data) == {:ok, 42.6}
     end
 

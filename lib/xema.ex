@@ -56,7 +56,12 @@ defmodule Xema do
   iex> Schema.validate(%{name: "John", age: 21})
   :ok
   iex> Schema.validate(%{name: "", age: 21})
-  {:error, %{properties: %{name: %{min_length: 1, value: ""}}}}
+  {:error, %Xema.ValidationError{
+    message: ~s|Expected minimum length of 1, got "", at [:name].|,
+    reason: %{
+      properties: %{name: %{min_length: 1, value: ""}}}
+    }
+  }
   iex> Schema.valid?(:nums, %{pos: [1, 2, 3]})
   true
   iex> Schema.valid?(:nums, %{neg: [1, 2, 3]})
@@ -124,7 +129,12 @@ defmodule Xema do
       iex> Xema.valid?(schema, [2, 3, 4])
       true
       iex> Xema.validate(schema, [2, 3, 1])
-      {:error, %{items: [{2, %{value: 1, minimum: 2}}]}}
+      {:error, %Xema.ValidationError{
+        message: "Value 1 is less than minimum value of 2, at [2].",
+        reason: %{
+          items: [{2, %{value: 1, minimum: 2}}]}
+        }
+      }
 
   More examples can be found on page
   [Usage](https://hexdocs.pm/xema/usage.html#content).
@@ -156,9 +166,7 @@ defmodule Xema do
   def init({:ref, pointer}), do: init({:any, ref: pointer})
 
   def init(data) do
-    # TODO
-    # IO.inspect "No SchemaValidator", label: :warn
-    # SchemaValidator.validate!(data)
+    SchemaValidator.validate!(data)
     schema(data)
   end
 

@@ -27,7 +27,6 @@ defmodule Xema.IntegerTest do
              } = validate(schema, 2.3)
     end
 
-    @tag :only
     test "validate!/2 with a float", %{schema: schema} do
       msg = "Expected :integer, got 2.3."
 

@@ -3,6 +3,8 @@ defmodule Xema.NilTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.ValidationError
+
   describe "'nil' schema" do
     setup do
       %{schema: Xema.new(nil)}
@@ -17,9 +19,10 @@ defmodule Xema.NilTest do
     end
 
     test "validate/2 with non-nil value", %{schema: schema} do
-      expected = {:error, %{type: nil, value: 1}}
-
-      assert validate(schema, 1) == expected
+      assert {
+               :error,
+               %ValidationError{message: "Expected nil, got 1.", reason: %{type: nil, value: 1}}
+             } = validate(schema, 1)
     end
   end
 end

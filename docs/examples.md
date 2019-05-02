@@ -22,8 +22,8 @@ iex> defmodule Example.Basic do
 ...>   @default true
 ...>   xema :foo, :string
 ...> end
-...>
-...> Example.Basic.valid?(
+iex>
+iex> Example.Basic.valid?(
 ...>   :person,
 ...>   %{first_name: "James", last_name: "Brown", age: 42}
 ...> )
@@ -33,14 +33,17 @@ true
 ...>   %{first_name: :james, last_name: "Brown", age: 42}
 ...> )
 false
-...> Example.Basic.validate(
+iex> Example.Basic.validate(
 ...>   :person,
 ...>   %{first_name: :james, last_name: "Brown", age: 42}
 ...> )
-{:error, %{properties: %{first_name: %{type: :string, value: :james}}}}
-...> Example.Basic.valid?("foo")
+{:error, %Xema.ValidationError{
+  message: "Expected :string, got :james, at [:first_name].",
+  reason: %{properties: %{first_name: %{type: :string, value: :james}}}
+}}
+iex> Example.Basic.valid?("foo")
 true
-...> Example.Basic.valid?(:foo)
+iex> Example.Basic.valid?(:foo)
 false
 ```
 
@@ -64,15 +67,24 @@ iex> defmodule Example.Options do
 ...>          additional_properties: false
 ...>        )
 ...> end
-...>
-...> Example.Options.validate(foo: :bar, limit: 11, msg: "foo")
+iex>
+iex> Example.Options.validate(foo: :bar, limit: 11, msg: "foo")
 :ok
-...> Example.Options.validate(foo: :foo, limit: 11)
-{:error, %{properties: %{foo: %{enum: [:bar, :baz], value: :foo}}}}
-...> Example.Options.validate(foo: :bar)
-{:error, %{required: [:limit]}}
-...> Example.Options.validate(foo: :bar, limit: 11, message: "foo")
-{:error, %{properties: %{message: %{additional_properties: false}}}}
+iex> Example.Options.validate(foo: :foo, limit: 11)
+{:error, %Xema.ValidationError{
+  message: "Value :foo is not defined in enum, at [:foo].",
+  reason: %{properties: %{foo: %{enum: [:bar, :baz], value: :foo}}}
+}}
+iex> Example.Options.validate(foo: :bar)
+{:error, %Xema.ValidationError{
+  message: "Required properties are missing: [:limit].",
+  reason: %{required: [:limit]}
+}}
+iex> Example.Options.validate(foo: :bar, limit: 11, message: "foo")
+{:error, %Xema.ValidationError{
+  message: "Expected only defined properties, got key [:message].",
+  reason: %{properties: %{message: %{additional_properties: false}}}
+}}
 ```
 
 ## Custom validator
@@ -89,26 +101,29 @@ iex> defmodule Example.Palindrome do
 ...>     end
 ...>   end
 ...> end
-...>
-...> defmodule Example.Schema do
+iex>
+iex> defmodule Example.PaliSchema do
 ...>   use Xema
 ...>
 ...>   xema :palindrome,
 ...>        string(validator: {Example.Palindrome, :check})
 ...> end
 ...>
-...> Example.Schema.valid?(:palindrome, "racecar")
+...> Example.PaliSchema.valid?(:palindrome, "racecar")
 true
-...> Example.Schema.valid?(:palindrome, "bike")
+iex> Example.PaliSchema.valid?(:palindrome, "bike")
 false
-...> Example.Schema.validate(:palindrome, "bike")
-{:error, %{validator: :no_palindrome, value: "bike"}}
+iex> Example.PaliSchema.validate(:palindrome, "bike")
+{:error, %Xema.ValidationError{
+  message: ~s|Validator fails with :no_palindrome for value "bike".|,
+  reason: %{validator: :no_palindrome, value: "bike"}
+}}
 ```
 
 A validator can also be specified as behaviour.
 
 ```elixir
-iex> defmodule Example.Palindrome do
+iex> defmodule Example.PalindromeB do
 ...>   @behaviour Xema.Validator
 ...>
 ...>   @impl true
@@ -119,20 +134,23 @@ iex> defmodule Example.Palindrome do
 ...>     end
 ...>   end
 ...> end
-...>
-...> defmodule Example.Schema do
+iex>
+iex> defmodule Example.PaliSchemaB do
 ...>   use Xema
 ...>
 ...>   xema :palindrome,
-...>        string(validator: Example.Palindrome)
+...>        string(validator: Example.PalindromeB)
 ...> end
 ...>
-...> Example.Schema.valid?(:palindrome, "racecar")
+...> Example.PaliSchemaB.valid?(:palindrome, "racecar")
 true
-...> Example.Schema.valid?(:palindrome, "bike")
+iex> Example.PaliSchemaB.valid?(:palindrome, "bike")
 false
-...> Example.Schema.validate(:palindrome, "bike")
-{:error, %{validator: :no_palindrome, value: "bike"}}
+iex> Example.PaliSchemaB.validate(:palindrome, "bike")
+{:error, %Xema.ValidationError{
+  message: ~s|Validator fails with :no_palindrome for value "bike".|,
+  reason: %{validator: :no_palindrome, value: "bike"}
+}}
 ```
 
 The custom validator can also be a part of the schema module.
@@ -149,8 +167,8 @@ iex> defmodule Example.Range do
 ...>          },
 ...>          validator: &Example.Range.check/1
 ...>        )
-...>
-...>   def check(%{from: from, to: to}) do
+iex>
+iex>   def check(%{from: from, to: to}) do
 ...>     case from < to do
 ...>       true -> :ok
 ...>       false -> {:error, :from_greater_to}
@@ -160,8 +178,14 @@ iex> defmodule Example.Range do
 ...>
 ...> Example.Range.validate(:range, %{from: 6, to: 8})
 :ok
-...> Example.Range.validate(:range, %{from: 66, to: 8})
-{:error, %{validator: :from_greater_to, value: %{from: 66, to: 8}}}
-...> Example.Range.validate(:range, %{from: 166, to: 118})
-{:error, %{properties: %{to: %{maximum: 100, value: 118}}}}
+iex> Example.Range.validate(:range, %{from: 66, to: 8})
+{:error, %Xema.ValidationError{
+  message: "Validator fails with :from_greater_to for value %{from: 66, to: 8}.",
+  reason: %{validator: :from_greater_to, value: %{from: 66, to: 8}}
+}}
+iex> Example.Range.validate(:range, %{from: 166, to: 118})
+{:error, %Xema.ValidationError{
+  message: "Value 118 exceeds maximum value of 100, at [:to].",
+  reason: %{properties: %{to: %{maximum: 100, value: 118}}}
+}}
 ```

@@ -3,7 +3,7 @@ defmodule Xema.Cast.KeywordTest do
 
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
-  alias Xema.CastError
+  alias Xema.{CastError, ValidationError}
 
   @set [:atom, "str", 1.1, 1, [4], {:tuple}]
 
@@ -33,7 +33,16 @@ defmodule Xema.Cast.KeywordTest do
     test "from a map with atom keys", %{schema: schema} do
       data = %{foo: 42}
       expected = [foo: 42]
-      assert {:error, %{type: :keyword, value: data}} = validate(schema, data)
+
+      assert {:error,
+              %ValidationError{
+                message: "Expected :keyword, got %{foo: 42}.",
+                reason: %{
+                  type: :keyword,
+                  value: data
+                }
+              }} = validate(schema, data)
+
       assert cast(schema, data) == {:ok, expected}
     end
 

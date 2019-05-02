@@ -321,8 +321,8 @@ defmodule Xema.ListTest do
     test "no element of minimum 4", %{schema: schema} do
       msg = """
       No items match contains.
-        Value 2 is less than minimum value of 4.
-        Value 3 is less than minimum value of 4.\
+        Value 2 is less than minimum value of 4, at [0].
+        Value 3 is less than minimum value of 4, at [1].\
       """
 
       assert {
@@ -361,9 +361,9 @@ defmodule Xema.ListTest do
     test "no element of minimum 4", %{schema: schema} do
       msg = """
       No items match contains.
-        Value 1 is less than minimum value of 4.
-        Value 2 is less than minimum value of 4.
-        Value 3 is less than minimum value of 4.\
+        Value 1 is less than minimum value of 4, at [0].
+        Value 2 is less than minimum value of 4, at [1].
+        Value 3 is less than minimum value of 4, at [2].\
       """
 
       assert {
