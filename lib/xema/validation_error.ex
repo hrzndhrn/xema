@@ -7,8 +7,6 @@ defmodule Xema.ValidationError do
 
   defexception [:message, :reason]
 
-  # TODO: remove all when's
-
   @impl true
   def exception(error) do
     %ValidationError{reason: error, message: format_error(error)}
@@ -338,6 +336,7 @@ defmodule Xema.ValidationError do
   defp indent(list) when is_list(list), do: Enum.map(list, fn str -> "  #{str}" end)
 
   defp indent(str) do
+    raise "ooh"
     blanks = "  "
     blanks <> String.replace(str, ~r/\n/, "\n#{blanks}", global: true)
   end
