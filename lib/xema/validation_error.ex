@@ -51,6 +51,7 @@ defmodule Xema.ValidationError do
 
   defp format_error(%{minimum: minimum, exclusive_minimum: true, value: value}, path, acc)
        when minimum == value do
+    # The guard is used to match values of different types (integer, float).
     msg = "Value #{inspect(value)} equals exclusive minimum value of #{inspect(minimum)}"
     [msg <> at_path(path) | acc]
   end
@@ -70,13 +71,14 @@ defmodule Xema.ValidationError do
     [msg <> at_path(path) | acc]
   end
 
-  defp format_error(%{minimum: minimum, value: value}, path, acc) when not is_nil(minimum) do
+  defp format_error(%{minimum: minimum, value: value}, path, acc) do
     msg = "Value #{inspect(value)} is less than minimum value of #{inspect(minimum)}"
     [msg <> at_path(path) | acc]
   end
 
   defp format_error(%{maximum: maximum, exclusive_maximum: true, value: value}, path, acc)
        when maximum == value do
+    # The guard is used to match values of different types (integer, float).
     msg = "Value #{inspect(value)} equals exclusive maximum value of #{inspect(maximum)}"
     [msg <> at_path(path) | acc]
   end
@@ -116,22 +118,22 @@ defmodule Xema.ValidationError do
     [msg <> at_path(path) | acc]
   end
 
-  defp format_error(%{enum: enum, value: value}, path, acc) when not is_nil(enum) do
+  defp format_error(%{enum: _enum, value: value}, path, acc) do
     msg = "Value #{inspect(value)} is not defined in enum"
     [msg <> at_path(path) | acc]
   end
 
-  defp format_error(%{keys: keys, value: value}, path, acc) when not is_nil(keys) do
+  defp format_error(%{keys: keys, value: value}, path, acc) do
     msg = "Expected #{inspect(keys)} as key, got #{inspect(value)}"
     [msg <> at_path(path) | acc]
   end
 
-  defp format_error(%{min_properties: min, value: value}, path, acc) when not is_nil(min) do
+  defp format_error(%{min_properties: min, value: value}, path, acc) do
     msg = "Expected at least #{inspect(min)} properties, got #{inspect(value)}"
     [msg <> at_path(path) | acc]
   end
 
-  defp format_error(%{max_properties: max, value: value}, path, acc) when not is_nil(max) do
+  defp format_error(%{max_properties: max, value: value}, path, acc) do
     msg = "Expected at most #{inspect(max)} properties, got #{inspect(value)}"
     [msg <> at_path(path) | acc]
   end
@@ -229,7 +231,7 @@ defmodule Xema.ValidationError do
     [msg <> at_path(path) | acc]
   end
 
-  defp format_error(%{required: required}, path, acc) when is_list(required) do
+  defp format_error(%{required: required}, path, acc) do
     msg = "Required properties are missing: #{inspect(required)}"
     [msg <> at_path(path) | acc]
   end
@@ -275,12 +277,12 @@ defmodule Xema.ValidationError do
     [msg | acc]
   end
 
-  defp format_error(%{min_items: min, value: value}, path, acc) when not is_nil(min) do
+  defp format_error(%{min_items: min, value: value}, path, acc) do
     msg = "Expected at least #{inspect(min)} items, got #{inspect(value)}"
     [msg <> at_path(path) | acc]
   end
 
-  defp format_error(%{max_items: max, value: value}, path, acc) when not is_nil(max) do
+  defp format_error(%{max_items: max, value: value}, path, acc) do
     msg = "Expected at most #{inspect(max)} items, got #{inspect(value)}"
     [msg <> at_path(path) | acc]
   end
