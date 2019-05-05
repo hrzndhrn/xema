@@ -16,8 +16,8 @@ before_script:
   - MIX_ENV=test mix compile --warnings-as-errors
 
 script:
+  - if [[ "$TRAVIS_ELIXIR_VERSION" == "1.8"* ]]; then mix format --check-formatted ;fi
   - mix credo --strict
-  - mix format --check-formatted
   - mix coveralls.travis
 
 sudo: required
