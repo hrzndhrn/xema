@@ -18,7 +18,6 @@ before_script:
 script:
   - mix credo --strict
   - mix format --check-formatted
-  - mix dialyzer --halt-exit-status
   - mix coveralls.travis
 
 sudo: required
