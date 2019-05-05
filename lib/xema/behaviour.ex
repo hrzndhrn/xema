@@ -1,8 +1,8 @@
 defmodule Xema.Behaviour do
-  @moduledoc false
-
-  # A behaviour module for implementing a schema validator. This behaviour is
-  # just for `Xema` and `JsonXema`.
+  @moduledoc """
+  A behaviour module for implementing a schema validator. This behaviour is
+  just for `Xema` and `JsonXema`.
+  """
 
   alias Xema.{
     Loader,
@@ -77,15 +77,7 @@ defmodule Xema.Behaviour do
 
       @doc false
       @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
-      def validate(%{} = schema, value, opts),
-        do: do_validate(schema, value, opts)
-
-      # TODO: delete
-      # @spec validate(__MODULE__.t(), any, keyword) :: Validator.result()
-      # def validate(%{} = schema, value, opts),
-      #   do: do_validate(schema, value, opts)
-
-      defp do_validate(schema, value, opts) do
+      def validate(%{} = schema, value, opts) do
         with {:error, error} <- Validator.validate(schema, value, opts),
              do: {:error, error |> on_error |> ValidationError.exception()}
       end

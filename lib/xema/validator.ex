@@ -10,12 +10,6 @@ defmodule Xema.Validator do
   alias Xema.Ref
   alias Xema.Schema
 
-  @doc """
-  A callback for custom validators. For an example see:
-  [Custom validators](examples.html#custom-validator)
-  """
-  @callback validate(any) :: {:ok, any} | {:error, any}
-
   @compile {
     :inline,
     get_type: 1, struct?: 1, struct?: 2, type?: 2, types: 2, validate_by: 4
@@ -39,17 +33,27 @@ defmodule Xema.Validator do
   ]
 
   @doc """
+  A callback for custom validators. For an example see:
+  [Custom validators](examples.html#custom-validator)
+  """
+  @callback validate(any) :: :ok | result
+
+  @doc """
   Validates `data` against the given `schema`.
   """
-  @spec validate(Xema.t() | Schema.t(), any, keyword) :: result
-  def validate(%Schema{} = schema, value, opts),
-    do: do_validate(schema, value, opts)
+  @spec validate(Xema.t() | Schema.t(), any) :: result
+  def validate(schema, data), do: validate(schema, data, [])
 
-  def validate(%{schema: schema} = xema, value, opts),
+  @doc false
+  @spec validate(Xema.t() | Schema.t(), any, keyword) :: result
+  def validate(%Schema{} = schema, data, opts),
+    do: do_validate(schema, data, opts)
+
+  def validate(%{schema: schema} = xema, data, opts),
     do:
       do_validate(
         schema,
-        value,
+        data,
         opts
         |> Keyword.put_new(:root, xema)
         |> Keyword.put_new(:master, xema)

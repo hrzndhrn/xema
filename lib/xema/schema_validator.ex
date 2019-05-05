@@ -1,11 +1,13 @@
 defmodule Xema.SchemaValidator do
-  @moduledoc false
+  @moduledoc """
+  A validator for the schema input.
+  """
 
   # credo:disable-for-this-file Credo.Check.Design.DuplicatedCode
 
   alias Xema.{Ref, Schema, SchemaError}
 
-  def schema,
+  defp schema,
     do:
       struct(Xema,
         refs: %{
@@ -446,9 +448,12 @@ defmodule Xema.SchemaValidator do
         }
       )
 
+  @doc """
+  Returns `:ok` if the data valid against the xema schema.
+  """
   @spec validate!(any) :: :ok
-  def validate!(val) do
-    case Xema.validate(schema(), val, []) do
+  def validate!(data) do
+    case Xema.validate(schema(), data, []) do
       :ok ->
         :ok
 

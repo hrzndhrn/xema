@@ -22,15 +22,16 @@ defmodule Xema.IfThenElseTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      msg = """
-      Schema for then does not match.
-        Expected minimum length of 1, got "".\
-      """
-
-      assert {
+      assert validate(schema, "") == {
                :error,
-               %ValidationError{message: ^msg, reason: %{then: %{min_length: 1, value: ""}}}
-             } = validate(schema, "")
+               %ValidationError{
+                 message: """
+                 Schema for then does not match.
+                   Expected minimum length of 1, got "".\
+                 """,
+                 reason: %{then: %{min_length: 1, value: ""}}
+               }
+             }
     end
   end
 
@@ -52,14 +53,15 @@ defmodule Xema.IfThenElseTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      msg = """
-      Schema for else does not match.
-        Expected minimum length of 1, got "".\
-      """
-
       assert {
                :error,
-               %ValidationError{message: ^msg, reason: %{else: %{min_length: 1, value: ""}}}
+               %ValidationError{
+                 message: """
+                 Schema for else does not match.
+                   Expected minimum length of 1, got "".\
+                 """,
+                 reason: %{else: %{min_length: 1, value: ""}}
+               }
              } = validate(schema, "")
     end
   end
@@ -82,36 +84,36 @@ defmodule Xema.IfThenElseTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      msg = """
-      Schema for else does not match.
-        Expected :integer, got 1.1.\
-      """
-
-      assert {
-               :error,
-               %ValidationError{message: ^msg, reason: %{else: %{type: :integer, value: 1.1}}}
-             } = validate(schema, 1.1)
-
-      msg = """
-      Schema for then does not match.
-        Expected at least 2 items, got [].\
-      """
-
-      assert {
-               :error,
-               %ValidationError{message: ^msg, reason: %{then: %{min_items: 2, value: []}}}
-             } = validate(schema, [])
-
-      msg = """
-      Schema for then does not match.
-        Expected :integer, got "foo", at [2].
-        Expected :integer, got "bar", at [3].\
-      """
-
-      assert {
+      assert validate(schema, 1.1) == {
                :error,
                %ValidationError{
-                 message: ^msg,
+                 message: """
+                 Schema for else does not match.
+                   Expected :integer, got 1.1.\
+                 """,
+                 reason: %{else: %{type: :integer, value: 1.1}}
+               }
+             }
+
+      assert validate(schema, []) == {
+               :error,
+               %ValidationError{
+                 message: """
+                 Schema for then does not match.
+                   Expected at least 2 items, got [].\
+                 """,
+                 reason: %{then: %{min_items: 2, value: []}}
+               }
+             }
+
+      assert validate(schema, [1, 2, "foo", "bar"]) == {
+               :error,
+               %ValidationError{
+                 message: """
+                 Schema for then does not match.
+                   Expected :integer, got "foo", at [2].
+                   Expected :integer, got "bar", at [3].\
+                 """,
                  reason: %{
                    then: %{
                      items: [
@@ -121,7 +123,7 @@ defmodule Xema.IfThenElseTest do
                    }
                  }
                }
-             } = validate(schema, [1, 2, "foo", "bar"])
+             }
     end
   end
 end

@@ -5,6 +5,9 @@ defmodule Xema.ValidationError do
 
   alias Xema.ValidationError
 
+  @type path :: [atom | integer | String.t()]
+  @type opts :: [] | [path: path]
+
   defexception [:message, :reason]
 
   @impl true
@@ -16,6 +19,20 @@ defmodule Xema.ValidationError do
       %ValidationError{reason: error, message: "Unexpected error."}
   end
 
+  @doc """
+  This function returns an error message for an error or error tuple.
+
+  ## Example
+
+  ```elixir
+  iex> schema = Xema.new(:integer)
+  iex> schema
+  ...>   |> Xema.Validator.validate(1.1)
+  ...>   |> Xema.ValidationError.format_error()
+  "Expected :integer, got 1.1."
+  ```
+  """
+  @spec format_error({:error, map} | map) :: String.t()
   def format_error({:error, error}), do: format_error(error)
 
   def format_error(error),
@@ -25,7 +42,43 @@ defmodule Xema.ValidationError do
       |> Enum.reverse()
       |> Enum.join("\n")
 
+  @doc """
+  Traverse the error tree and invokes the given function.
+
+  ## Example
+
+  ```elixir
+  iex> fun = fn _error, path, acc ->
+  ...>   ["Error at " <> inspect(path) | acc]
+  ...> end
+  iex>
+  iex> schema = Xema.new(
+  ...>   properties: %{
+  ...>     int: :integer,
+  ...>     names: {:list, items: :string},
+  ...>     num: [any_of: [:integer, :float]]
+  ...>   }
+  ...> )
+  iex>
+  iex> data = %{int: "x", names: [1, "x", 5], num: :foo}
+  iex>
+  iex> schema
+  ...>   |> Xema.Validator.validate(data)
+  ...>   |> Xema.ValidationError.travers_errors([], fun)
+  [
+    "Error at [:num]",
+    "Error at [:names, 2]",
+    "Error at [:names, 0]",
+    "Error at [:names]",
+    "Error at [:int]",
+    "Error at []"
+  ]
+  """
+  @spec travers_errors({:error, map} | map, acc, (map, path, acc -> acc), opts) :: acc
+        when acc: any
   def travers_errors(error, acc, fun, opts \\ [])
+
+  def travers_errors({:error, error}, acc, fun, opts), do: travers_errors(error, acc, fun, opts)
 
   def travers_errors(error, acc, fun, []), do: travers_errors(error, acc, fun, path: [])
 
@@ -151,16 +204,26 @@ defmodule Xema.ValidationError do
     [msg <> at_path(path) | acc]
   end
 
-  defp format_error(%{then: errors}, path, acc) do
-    msg = "Schema for then does not match#{at_path(path)}\n"
-    errors = errors |> format_error() |> indent()
-    [msg <> errors | acc]
+  defp format_error(%{then: error}, path, acc) do
+    msg = ["Schema for then does not match#{at_path(path)}"]
+
+    error =
+      error
+      |> travers_errors([], &format_error/3, path: path)
+      |> indent()
+
+    Enum.concat([error, msg, acc])
   end
 
-  defp format_error(%{else: errors}, path, acc) do
-    msg = "Schema for else does not match#{at_path(path)}\n"
-    errors = errors |> format_error() |> indent()
-    [msg <> errors | acc]
+  defp format_error(%{else: error}, path, acc) do
+    msg = ["Schema for else does not match#{at_path(path)}"]
+
+    error =
+      error
+      |> travers_errors([], &format_error/3, path: path)
+      |> indent()
+
+    Enum.concat([error, msg, acc])
   end
 
   defp format_error(%{not: :ok, value: value}, path, acc) do
@@ -333,11 +396,5 @@ defmodule Xema.ValidationError do
 
   defp at_path(path), do: ", at #{inspect(path)}."
 
-  defp indent(list) when is_list(list), do: Enum.map(list, fn str -> "  #{str}" end)
-
-  defp indent(str) do
-    raise "ooh"
-    blanks = "  "
-    blanks <> String.replace(str, ~r/\n/, "\n#{blanks}", global: true)
-  end
+  defp indent(list), do: Enum.map(list, fn str -> "  #{str}" end)
 end

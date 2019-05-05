@@ -1,6 +1,7 @@
 defmodule Xema.Schema do
-  @moduledoc false
-  # This module contains the struct for the keywords of a schema.
+  @moduledoc """
+  This module contains the struct for the keywords of a schema.
+  """
 
   alias Xema.Ref
   alias Xema.Schema
