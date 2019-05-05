@@ -52,9 +52,7 @@ defmodule Xema.Mixfile do
 
   defp deps do
     [
-      {:benchee, "~> 0.14", only: :dev},
-      {:benchee_json, "~> 0.6", only: :dev},
-      {:benchee_html, "~> 0.6", only: :dev},
+      {:benchee, "~> 1.0", only: :dev},
       {:cowboy, "~> 2.4", only: :test},
       {:credo, "~> 1.0", only: [:dev, :test]},
       {:decimal, "~> 1.7", optional: true},
