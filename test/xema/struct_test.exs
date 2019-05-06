@@ -3,6 +3,8 @@ defmodule Xema.StructTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.ValidationError
+
   defmodule Foo do
     defstruct [:bar]
   end
@@ -21,15 +23,23 @@ defmodule Xema.StructTest do
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      expected = {:error, %{type: :struct, value: "foo"}}
-
-      assert validate(schema, "foo") == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :struct, got "foo".|,
+                 reason: %{type: :struct, value: "foo"}
+               }
+             } = validate(schema, "foo")
     end
 
     test "validate/2 with a map", %{schema: schema} do
-      expected = {:error, %{type: :struct, value: %{}}}
-
-      assert validate(schema, %{}) == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected :struct, got %{}.",
+                 reason: %{type: :struct, value: %{}}
+               }
+             } = validate(schema, %{})
     end
   end
 
@@ -43,9 +53,13 @@ defmodule Xema.StructTest do
     end
 
     test "validate/2 with invalid struct", %{schema: schema} do
-      expected = {:error, %{module: Xema.StructTest.Foo, value: %Xema.StructTest.Bar{foo: nil}}}
-
-      assert validate(schema, %Bar{}) == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected Xema.StructTest.Foo, got %Xema.StructTest.Bar{foo: nil}.",
+                 reason: %{module: Xema.StructTest.Foo, value: %Xema.StructTest.Bar{foo: nil}}
+               }
+             } = validate(schema, %Bar{})
     end
   end
 
@@ -59,9 +73,13 @@ defmodule Xema.StructTest do
     end
 
     test "validate/2 with invalid struct", %{schema: schema} do
-      expected = {:error, %{module: Regex, value: %Xema.StructTest.Bar{foo: nil}}}
-
-      assert validate(schema, %Bar{}) == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected Regex, got %Xema.StructTest.Bar{foo: nil}.",
+                 reason: %{module: Regex, value: %Xema.StructTest.Bar{foo: nil}}
+               }
+             } = validate(schema, %Bar{})
     end
   end
 end

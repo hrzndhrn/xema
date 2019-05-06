@@ -3,6 +3,8 @@ defmodule Xema.StringTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.ValidationError
+
   describe "'string' schema:" do
     setup do
       %{schema: Xema.new(:string)}
@@ -13,15 +15,23 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a number", %{schema: schema} do
-      expected = {:error, %{type: :string, value: 1}}
-
-      assert validate(schema, 1) == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected :string, got 1.",
+                 reason: %{type: :string, value: 1}
+               }
+             } = validate(schema, 1)
     end
 
     test "validate/2 with nil", %{schema: schema} do
-      expected = {:error, %{type: :string, value: nil}}
-
-      assert validate(schema, nil) == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected :string, got nil.",
+                 reason: %{type: :string, value: nil}
+               }
+             } = validate(schema, nil)
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -43,12 +53,23 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a too short string", %{schema: schema} do
-      assert validate(schema, "f") == {:error, %{min_length: 3, value: "f"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected minimum length of 3, got "f".|,
+                 reason: %{min_length: 3, value: "f"}
+               }
+             } = validate(schema, "f")
     end
 
     test "validate/2 with a too long string", %{schema: schema} do
-      assert validate(schema, "foobar") ==
-               {:error, %{max_length: 4, value: "foobar"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected maximum length of 4, got "foobar".|,
+                 reason: %{max_length: 4, value: "foobar"}
+               }
+             } = validate(schema, "foobar")
     end
   end
 
@@ -62,8 +83,13 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a none matching string", %{schema: schema} do
-      assert validate(schema, "a to a") ==
-               {:error, %{value: "a to a", pattern: ~r/^.+match.+$/}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Pattern ~r/^.+match.+$/ does not match value "a to a".|,
+                 reason: %{value: "a to a", pattern: ~r/^.+match.+$/}
+               }
+             } = validate(schema, "a to a")
     end
   end
 
@@ -77,8 +103,13 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a none matching string", %{schema: schema} do
-      assert validate(schema, "a to a") ==
-               {:error, %{value: "a to a", pattern: ~r/^.+match.+$/}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Pattern ~r/^.+match.+$/ does not match value "a to a".|,
+                 reason: %{value: "a to a", pattern: ~r/^.+match.+$/}
+               }
+             } = validate(schema, "a to a")
     end
   end
 
@@ -92,9 +123,13 @@ defmodule Xema.StringTest do
     end
 
     test "validate/2 with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{enum: ["one", "two"], value: "foo"}}
-
-      assert validate(schema, "foo") == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Value "foo" is not defined in enum.|,
+                 reason: %{enum: ["one", "two"], value: "foo"}
+               }
+             } = assert(validate(schema, "foo"))
     end
   end
 end

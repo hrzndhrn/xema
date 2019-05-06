@@ -3,9 +3,7 @@ defmodule Xema.RefRemoteTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
-  alias Xema.Ref
-  alias Xema.Schema
-  alias Xema.SchemaError
+  alias Xema.{Ref, Schema, SchemaError, ValidationError}
 
   test "http server" do
     assert %{body: body} = HTTPoison.get!("http://localhost:1234/folder/folderInteger.exon")
@@ -55,7 +53,13 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :integer, got \"1\".|,
+                 reason: %{type: :integer, value: "1"}
+               }
+             } = validate(schema, "1")
     end
   end
 
@@ -69,7 +73,13 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :integer, got "1".|,
+                 reason: %{type: :integer, value: "1"}
+               }
+             } = validate(schema, "1")
     end
   end
 
@@ -85,7 +95,13 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :integer, got "1".|,
+                 reason: %{type: :integer, value: "1"}
+               }
+             } = validate(schema, "1")
     end
 
     test "schema structure", %{schema: schema} do
@@ -109,7 +125,13 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :integer, got "1".|,
+                 reason: %{type: :integer, value: "1"}
+               }
+             } = validate(schema, "1")
     end
 
     test "schema structure", %{schema: schema} do
@@ -204,7 +226,13 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :integer, got "1".|,
+                 reason: %{type: :integer, value: "1"}
+               }
+             } = validate(schema, "1")
     end
   end
 
@@ -224,7 +252,13 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, "1") == {:error, %{type: :integer, value: "1"}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :integer, got "1".|,
+                 reason: %{type: :integer, value: "1"}
+               }
+             } = validate(schema, "1")
     end
 
     test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
@@ -281,13 +315,15 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, %{list: ["1"]}) ==
-               {:error,
-                %{
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :integer, got "1", at [:list, 0].|,
+                reason: %{
                   properties: %{
                     list: %{items: [{0, %{type: :integer, value: "1"}}]}
                   }
-                }}
+                }
+              }} = validate(schema, %{list: ["1"]})
     end
 
     test "inline schema structure", %{schema: schema} do
@@ -326,19 +362,29 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, %{name: 1}) ==
-               {:error,
-                %{
-                  properties: %{
-                    name: %{
-                      any_of: [
-                        %{type: nil, value: 1},
-                        %{type: :string, value: 1}
-                      ],
-                      value: 1
-                    }
-                  }
-                }}
+      msg = """
+      No match of any schema, at [:name].
+        Expected nil, got 1, at [:name].
+        Expected :string, got 1, at [:name].\
+      """
+
+      assert {
+               :error,
+               %ValidationError{
+                 message: ^msg,
+                 reason: %{
+                   properties: %{
+                     name: %{
+                       any_of: [
+                         %{type: nil, value: 1},
+                         %{type: :string, value: 1}
+                       ],
+                       value: 1
+                     }
+                   }
+                 }
+               }
+             } = validate(schema, %{name: 1})
     end
   end
 
@@ -386,9 +432,16 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, %{name: 1}) ==
-               {:error,
-                %{
+      msg = """
+      No match of any schema, at [:name].
+        Expected nil, got 1, at [:name].
+        Expected :string, got 1, at [:name].\
+      """
+
+      assert {:error,
+              %ValidationError{
+                message: ^msg,
+                reason: %{
                   properties: %{
                     name: %{
                       any_of: [
@@ -398,7 +451,8 @@ defmodule Xema.RefRemoteTest do
                       value: 1
                     }
                   }
-                }}
+                }
+              }} = validate(schema, %{name: 1})
     end
   end
 
@@ -418,8 +472,13 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, %{int: "1"}) ==
-               {:error, %{properties: %{int: %{type: :integer, value: "1"}}}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :integer, got "1", at [:int].|,
+                 reason: %{properties: %{int: %{type: :integer, value: "1"}}}
+               }
+             } = validate(schema, %{int: "1"})
     end
   end
 
@@ -442,8 +501,13 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, %{int: "1"}) ==
-               {:error, %{properties: %{int: %{type: :integer, value: "1"}}}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :integer, got "1", at [:int].|,
+                 reason: %{properties: %{int: %{type: :integer, value: "1"}}}
+               }
+             } = validate(schema, %{int: "1"})
     end
   end
 

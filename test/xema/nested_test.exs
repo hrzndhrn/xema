@@ -3,6 +3,8 @@ defmodule Xema.NestedTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.ValidationError
+
   describe "list of objects in one schema" do
     setup do
       %{
@@ -47,17 +49,17 @@ defmodule Xema.NestedTest do
         ]
       }
 
-      error =
-        {:error,
-         %{
-           properties: %{
-             items: %{
-               items: [{1, %{properties: %{num: %{minimum: 0, value: -2}}}}]
-             }
-           }
-         }}
-
-      assert validate(schema, data) == error
+      assert {:error,
+              %ValidationError{
+                message: "Value -2 is less than minimum value of 0, at [:items, 1, :num].",
+                reason: %{
+                  properties: %{
+                    items: %{
+                      items: [{1, %{properties: %{num: %{minimum: 0, value: -2}}}}]
+                    }
+                  }
+                }
+              }} = validate(schema, data)
     end
   end
 
@@ -105,17 +107,17 @@ defmodule Xema.NestedTest do
         ]
       }
 
-      error =
-        {:error,
-         %{
-           properties: %{
-             items: %{
-               items: [{1, %{properties: %{num: %{minimum: 0, value: -2}}}}]
-             }
-           }
-         }}
-
-      assert validate(schema, data) == error
+      assert {:error,
+              %ValidationError{
+                message: "Value -2 is less than minimum value of 0, at [:items, 1, :num].",
+                reason: %{
+                  properties: %{
+                    items: %{
+                      items: [{1, %{properties: %{num: %{minimum: 0, value: -2}}}}]
+                    }
+                  }
+                }
+              }} = validate(schema, data)
     end
   end
 end

@@ -37,7 +37,8 @@ defmodule Xema.Mixfile do
 
       # Dialyzer
       dialyzer: [
-        ignore_warnings: "dialyzer.ignore-warnings"
+        ignore_warnings: ".dialyzer_ignore.exs",
+        plt_add_apps: [:decimal]
       ]
     ]
   end
@@ -52,9 +53,7 @@ defmodule Xema.Mixfile do
 
   defp deps do
     [
-      {:benchee, "~> 0.14", only: :dev},
-      {:benchee_json, "~> 0.6", only: :dev},
-      {:benchee_html, "~> 0.6", only: :dev},
+      {:benchee, "~> 1.0", only: :dev},
       {:cowboy, "~> 2.4", only: :test},
       {:credo, "~> 1.0", only: [:dev, :test]},
       {:decimal, "~> 1.7", optional: true},

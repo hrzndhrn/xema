@@ -72,8 +72,13 @@ defmodule Xema.UseTest do
   end
 
   test "validate/1 returns an error tuple for an invalid person" do
-    assert Schema.validate(name: "John", age: -21) ==
-             {:error, %{properties: %{age: %{minimum: 0, value: -21}}}}
+    assert {
+             :error,
+             %ValidationError{
+               message: "Value -21 is less than minimum value of 0, at [:age].",
+               reason: %{properties: %{age: %{minimum: 0, value: -21}}}
+             }
+           } = Schema.validate(name: "John", age: -21)
   end
 
   test "validate/2 returns :ok for a valid user" do
@@ -85,13 +90,23 @@ defmodule Xema.UseTest do
   end
 
   test "validate/2 returns an error tuple for an invalid user" do
-    assert Schema.validate(:user, %{name: "", age: 21}) ==
-             {:error, %{properties: %{name: %{min_length: 1, value: ""}}}}
+    assert {
+             :error,
+             %ValidationError{
+               message: ~s|Expected minimum length of 1, got "", at [:name].|,
+               reason: %{properties: %{name: %{min_length: 1, value: ""}}}
+             }
+           } = Schema.validate(:user, %{name: "", age: 21})
   end
 
   test "validate/2 returns an error tuple for an invalid nums map" do
-    assert Schema.validate(:nums, %{pos: [1, -2, 3], neg: [-5, -4]}) ==
-             {:error, %{properties: %{pos: %{items: [{1, %{minimum: 0, value: -2}}]}}}}
+    assert {
+             :error,
+             %ValidationError{
+               message: "Value -2 is less than minimum value of 0, at [:pos, 1].",
+               reason: %{properties: %{pos: %{items: [{1, %{minimum: 0, value: -2}}]}}}
+             }
+           } = Schema.validate(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
   end
 
   test "validate!/2 raises a ValidationError for an invalid user" do

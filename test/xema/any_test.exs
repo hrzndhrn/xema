@@ -3,6 +3,8 @@ defmodule Xema.AnyTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.ValidationError
+
   describe "'any' schema" do
     setup do
       %{schema: Xema.new(:any)}
@@ -57,9 +59,14 @@ defmodule Xema.AnyTest do
     end
 
     test "validate/2 with a value that is not in the enum", %{schema: schema} do
-      expected = {:error, %{value: 2, enum: [1, 1.2, [1], "foo", :bar]}}
-
-      assert validate(schema, 2) == expected
+      assert {:error,
+              %ValidationError{
+                message: "Value 2 is not defined in enum.",
+                reason: %{
+                  value: 2,
+                  enum: [1, 1.2, [1], "foo", :bar]
+                }
+              }} = validate(schema, 2)
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -98,7 +105,13 @@ defmodule Xema.AnyTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, 0) == {:error, %{minimum: 2, value: 0}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Value 0 is less than minimum value of 2.",
+                 reason: %{minimum: 2, value: 0}
+               }
+             } = validate(schema, 0)
     end
 
     test "validate/2 ignore non-numbers", %{schema: schema} do
@@ -121,7 +134,13 @@ defmodule Xema.AnyTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      assert validate(schema, 3) == {:error, %{multiple_of: 2, value: 3}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Value 3 is not a multiple of 2.",
+                 reason: %{multiple_of: 2, value: 3}
+               }
+             } = validate(schema, 3)
     end
 
     test "validate/2 ignore non-numbers", %{schema: schema} do
@@ -161,12 +180,16 @@ defmodule Xema.AnyTest do
       assert validate(schema, %{foo: 1}) == :ok
     end
 
-    test """
-         object with property having schema false is invalid
-         """,
-         %{schema: schema} do
-      assert validate(schema, %{bar: 2}) ==
-               {:error, %{dependencies: %{bar: %{type: false}}}}
+    test "object with property having schema false is invalid", %{schema: schema} do
+      msg = """
+      Dependencies for :bar failed.
+        Schema always fails validation.\
+      """
+
+      assert {
+               :error,
+               %ValidationError{message: ^msg, reason: %{dependencies: %{bar: %{type: false}}}}
+             } = validate(schema, %{bar: 2})
     end
   end
 end

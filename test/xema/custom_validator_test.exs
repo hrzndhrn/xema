@@ -1,6 +1,8 @@
 defmodule Xema.CustomValidatorTest do
   use ExUnit.Case, async: true
 
+  alias Xema.ValidationError
+
   defmodule Palindrome do
     def check(str) do
       case str == String.reverse(str) do
@@ -64,6 +66,13 @@ defmodule Xema.CustomValidatorTest do
     end
 
     test "with invalid data" do
+      message = """
+      Expected minimum length of 5, got "foo", at [:long].
+      Validator fails with :no_palindrome for value "cats live on no evil star", at [:palindrome].
+      Expected maximum length of 3, got "foobar", at [:short].
+      Validator fails with :not_three_words for value "one", at [:three].\
+      """
+
       assert Schemas.validate(:strings, %{
                short: "foobar",
                long: "foo",
@@ -71,14 +80,17 @@ defmodule Xema.CustomValidatorTest do
                three: "one"
              }) ==
                {:error,
-                %{
-                  properties: %{
-                    long: %{min_length: 5, value: "foo"},
-                    short: %{max_length: 3, value: "foobar"},
-                    three: %{validator: :not_three_words, value: "one"},
-                    palindrome: %{
-                      validator: :no_palindrome,
-                      value: "cats live on no evil star"
+                %ValidationError{
+                  message: message,
+                  reason: %{
+                    properties: %{
+                      long: %{min_length: 5, value: "foo"},
+                      short: %{max_length: 3, value: "foobar"},
+                      three: %{validator: :not_three_words, value: "one"},
+                      palindrome: %{
+                        validator: :no_palindrome,
+                        value: "cats live on no evil star"
+                      }
                     }
                   }
                 }}
@@ -97,13 +109,27 @@ defmodule Xema.CustomValidatorTest do
       from = ~N[2019-01-03 12:05:42]
       to = ~N[2019-01-01 12:05:42]
 
+      message =
+        String.replace(
+          """
+          Validator fails with :to_before_from
+          for value %{from: ~N[2019-01-03 12:05:42],
+          to: ~N[2019-01-01 12:05:42]}.\
+          """,
+          "\n",
+          " "
+        )
+
       assert Schemas.validate(:timespan, %{from: from, to: to}) ==
                {:error,
-                %{
-                  validator: :to_before_from,
-                  value: %{
-                    from: ~N[2019-01-03 12:05:42],
-                    to: ~N[2019-01-01 12:05:42]
+                %ValidationError{
+                  message: message,
+                  reason: %{
+                    validator: :to_before_from,
+                    value: %{
+                      from: ~N[2019-01-03 12:05:42],
+                      to: ~N[2019-01-01 12:05:42]
+                    }
                   }
                 }}
     end
@@ -113,7 +139,12 @@ defmodule Xema.CustomValidatorTest do
       {:ok, to, 0} = DateTime.from_iso8601("2015-01-23T23:50:07Z")
 
       assert Schemas.validate(:timespan, %{from: from, to: to}) ==
-               {:error, %{properties: %{to: %{value: to, module: NaiveDateTime}}}}
+               {:error,
+                %ValidationError{
+                  message:
+                    "Expected NaiveDateTime, got #DateTime<2015-01-23 23:50:07Z>, at [:to].",
+                  reason: %{properties: %{to: %{value: to, module: NaiveDateTime}}}
+                }}
     end
   end
 end

@@ -3,6 +3,8 @@ defmodule Xema.BooleanTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.ValidationError
+
   describe "'boolean' schema" do
     setup do
       %{schema: Xema.new(:boolean)}
@@ -37,9 +39,13 @@ defmodule Xema.BooleanTest do
     end
 
     test "validate/2 with non boolean value", %{schema: schema} do
-      expected = {:error, %{type: :boolean, value: "true"}}
-
-      assert validate(schema, "true") == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :boolean, got "true".|,
+                 reason: %{type: :boolean, value: "true"}
+               }
+             } = validate(schema, "true")
     end
   end
 end

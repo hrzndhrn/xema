@@ -3,6 +3,8 @@ defmodule Xema.AtomTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.ValidationError
+
   describe "atom schema" do
     setup do
       %{schema: Xema.new(:atom)}
@@ -13,11 +15,27 @@ defmodule Xema.AtomTest do
     end
 
     test "validate/2 with a float", %{schema: schema} do
-      assert validate(schema, 2.3) == {:error, %{type: :atom, value: 2.3}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected :atom, got 2.3.",
+                 reason: %{
+                   type: :atom,
+                   value: 2.3
+                 }
+               }
+             } = validate(schema, 2.3)
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      assert validate(schema, "foo") == {:error, %{type: :atom, value: "foo"}}
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :atom, got "foo".|,
+                reason: %{
+                  type: :atom,
+                  value: "foo"
+                }
+              }} = validate(schema, "foo")
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do

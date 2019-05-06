@@ -3,7 +3,7 @@ defmodule Xema.Cast.ListTest do
 
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
-  alias Xema.CastError
+  alias Xema.{CastError, ValidationError}
 
   @set [:atom, "str", 1.1, 1, %{}, [a: 1]]
 
@@ -33,7 +33,16 @@ defmodule Xema.Cast.ListTest do
     test "from a tuple", %{schema: schema} do
       data = {:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}}
       expected = [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}]
-      assert validate(schema, data) == {:error, %{type: :list, value: data}}
+
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :list, got {:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}}.|,
+                reason: %{
+                  type: :list,
+                  value: ^data
+                }
+              }} = validate(schema, data)
+
       assert cast(schema, data) == {:ok, expected}
     end
 
@@ -46,9 +55,7 @@ defmodule Xema.Cast.ListTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast(schema, ~r/.*/)
-      end)
+      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
     end
   end
 
@@ -183,7 +190,15 @@ defmodule Xema.Cast.ListTest do
     test "from a tuple", %{schema: schema} do
       data = {:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}}
       expected = [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}]
-      assert validate(schema, data) == {:error, %{type: :list, value: data}}
+
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :list, got {:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}}.|,
+                 reason: %{type: :list, value: ^data}
+               }
+             } = validate(schema, data)
+
       assert cast!(schema, data) == expected
     end
 

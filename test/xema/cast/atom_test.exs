@@ -1,7 +1,7 @@
 defmodule Xema.Cast.AtomTest do
   use ExUnit.Case, async: true
 
-  alias Xema.CastError
+  alias Xema.{CastError, ValidationError}
 
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
@@ -24,7 +24,15 @@ defmodule Xema.Cast.AtomTest do
     test "from a string", %{schema: schema} do
       data = "foo"
 
-      assert validate(schema, data) == {:error, %{type: :atom, value: "foo"}}
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :atom, got "foo".|,
+                reason: %{
+                  type: :atom,
+                  value: "foo"
+                }
+              }} = validate(schema, data)
+
       assert cast(schema, data) == {:ok, :foo}
     end
 
@@ -44,9 +52,7 @@ defmodule Xema.Cast.AtomTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast(schema, ~r/.*/)
-      end)
+      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
     end
   end
 

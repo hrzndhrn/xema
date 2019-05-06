@@ -3,6 +3,8 @@ defmodule Xema.TupleTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Xema.ValidationError
+
   describe "tuple schema" do
     setup do
       %{schema: Xema.new(:tuple)}
@@ -17,9 +19,13 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      expected = {:error, %{type: :tuple, value: "not a tuple"}}
-
-      assert validate(schema, "not a tuple") == expected
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :tuple, got "not a tuple".|,
+                 reason: %{type: :tuple, value: "not a tuple"}
+               }
+             } = validate(schema, "not a tuple")
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -37,7 +43,13 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 with too short tuple", %{schema: schema} do
-      assert validate(schema, {1}) == {:error, %{value: {1}, min_items: 2}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected at least 2 items, got {1}.",
+                 reason: %{value: {1}, min_items: 2}
+               }
+             } = validate(schema, {1})
     end
 
     test "validate/2 with proper tuple", %{schema: schema} do
@@ -45,8 +57,13 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 with to long tuple", %{schema: schema} do
-      assert validate(schema, {1, 2, 3, 4}) ==
-               {:error, %{value: {1, 2, 3, 4}, max_items: 3}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected at most 3 items, got {1, 2, 3, 4}.",
+                 reason: %{value: {1, 2, 3, 4}, max_items: 3}
+               }
+             } = validate(schema, {1, 2, 3, 4})
     end
   end
 
@@ -67,15 +84,15 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 integers with invalid tuple", %{integers: schema} do
-      expected =
-        {:error,
-         %{
-           items: [
-             {2, %{type: :integer, value: "foo"}}
-           ]
-         }}
-
-      assert validate(schema, {1, 2, "foo"}) == expected
+      assert {:error,
+              %ValidationError{
+                message: ~s|Expected :integer, got "foo", at [2].|,
+                reason: %{
+                  items: [
+                    {2, %{type: :integer, value: "foo"}}
+                  ]
+                }
+              }} = validate(schema, {1, 2, "foo"})
     end
 
     test "validate/2 strings with empty tuple", %{strings: schema} do
@@ -87,17 +104,21 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 strings with invalid tuple", %{strings: schema} do
-      expected = {
-        :error,
-        %{
-          items: [
-            {0, %{type: :string, value: 1}},
-            {1, %{type: :string, value: 2}}
-          ]
-        }
-      }
+      msg = """
+      Expected :string, got 1, at [0].
+      Expected :string, got 2, at [1].\
+      """
 
-      assert validate(schema, {1, 2, "foo"}) == expected
+      assert {:error,
+              %ValidationError{
+                message: ^msg,
+                reason: %{
+                  items: [
+                    {0, %{type: :string, value: 1}},
+                    {1, %{type: :string, value: 2}}
+                  ]
+                }
+              }} = validate(schema, {1, 2, "foo"})
     end
   end
 
@@ -122,7 +143,15 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 false schema with non empty tuple", %{false_schema: schema} do
-      assert validate(schema, {1, "a"}) == {:error, %{type: false}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Schema always fails validation.",
+                 reason: %{
+                   type: false
+                 }
+               }
+             } = validate(schema, {1, "a"})
     end
   end
 
@@ -136,8 +165,13 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 with tuple of not unique items", %{schema: schema} do
-      assert validate(schema, {1, 2, 3, 3, 4}) ==
-               {:error, %{value: {1, 2, 3, 3, 4}, unique_items: true}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected unique items, got {1, 2, 3, 3, 4}.",
+                 reason: %{value: {1, 2, 3, 3, 4}, unique_items: true}
+               }
+             } = validate(schema, {1, 2, 3, 3, 4})
     end
   end
 
@@ -160,16 +194,31 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 with invalid values", %{schema: schema} do
-      assert validate(schema, {"foo", "bar"}) ==
-               {:error, %{items: [{1, %{type: :number, value: "bar"}}]}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected :number, got "bar", at [1].|,
+                 reason: %{items: [{1, %{type: :number, value: "bar"}}]}
+               }
+             } = validate(schema, {"foo", "bar"})
 
-      assert validate(schema, {"x", 33}) ==
-               {:error, %{items: [{0, %{value: "x", min_length: 3}}]}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected minimum length of 3, got \"x\", at [0].|,
+                 reason: %{items: [{0, %{value: "x", min_length: 3}}]}
+               }
+             } = validate(schema, {"x", 33})
     end
 
     test "validate/2 with invalid value and additional item", %{schema: schema} do
-      assert validate(schema, {"x", 33, 7}) ==
-               {:error, %{items: [{0, %{value: "x", min_length: 3}}]}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected minimum length of 3, got \"x\", at [0].|,
+                 reason: %{items: [{0, %{value: "x", min_length: 3}}]}
+               }
+             } = validate(schema, {"x", 33, 7})
     end
 
     test "validate/2 with additional item", %{schema: schema} do
@@ -197,8 +246,13 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 with additional item", %{schema: schema} do
-      assert validate(schema, {"foo", 42, "add"}) ==
-               {:error, %{items: [{2, %{additional_items: false}}]}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Unexpected additional item, at [2].",
+                 reason: %{items: [{2, %{additional_items: false}}]}
+               }
+             } = validate(schema, {"foo", 42, "add"})
     end
   end
 
@@ -221,8 +275,13 @@ defmodule Xema.TupleTest do
     end
 
     test "validate/2 with invalid additional item", %{schema: schema} do
-      assert validate(schema, {11, "twelve", 13}) ==
-               {:error, %{items: [{2, %{type: :string, value: 13}}]}}
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Expected :string, got 13, at [2].",
+                 reason: %{items: [{2, %{type: :string, value: 13}}]}
+               }
+             } = validate(schema, {11, "twelve", 13})
     end
   end
 
@@ -242,8 +301,25 @@ defmodule Xema.TupleTest do
     end
 
     test "no element of minimum 4", %{schema: schema} do
-      assert validate(schema, {1, 2, 3}) ==
-               {:error, %{value: {1, 2, 3}, contains: Xema.new(minimum: 4).schema}}
+      msg = """
+      No items match contains.
+        Value 1 is less than minimum value of 4, at [0].
+        Value 2 is less than minimum value of 4, at [1].
+        Value 3 is less than minimum value of 4, at [2].\
+      """
+
+      assert {:error,
+              %ValidationError{
+                message: ^msg,
+                reason: %{
+                  value: {1, 2, 3},
+                  contains: [
+                    {0, %{minimum: 4, value: 1}},
+                    {1, %{minimum: 4, value: 2}},
+                    {2, %{minimum: 4, value: 3}}
+                  ]
+                }
+              }} = validate(schema, {1, 2, 3})
     end
   end
 
@@ -265,8 +341,27 @@ defmodule Xema.TupleTest do
     end
 
     test "no element of minimum 4", %{schema: schema} do
-      assert validate(schema, {1, 2, 3}) ==
-               {:error, %{value: {1, 2, 3}, contains: Xema.new(minimum: 4).schema}}
+      msg = """
+      No items match contains.
+        Value 1 is less than minimum value of 4, at [0].
+        Value 2 is less than minimum value of 4, at [1].
+        Value 3 is less than minimum value of 4, at [2].\
+      """
+
+      assert {
+               :error,
+               %ValidationError{
+                 message: ^msg,
+                 reason: %{
+                   value: {1, 2, 3},
+                   contains: [
+                     {0, %{minimum: 4, value: 1}},
+                     {1, %{minimum: 4, value: 2}},
+                     {2, %{minimum: 4, value: 3}}
+                   ]
+                 }
+               }
+             } = validate(schema, {1, 2, 3})
     end
   end
 end

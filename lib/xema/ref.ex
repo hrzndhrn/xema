@@ -1,11 +1,10 @@
 defmodule Xema.Ref do
-  @moduledoc false
-  # This module contains a struct and functions to represent and handle
-  # references.
+  @moduledoc """
+  This module contains a struct and functions to represent and handle
+  references.
+  """
 
-  alias Xema.Ref
-  alias Xema.Schema
-  alias Xema.Utils
+  alias Xema.{Ref, Schema, Utils, Validator}
 
   require Logger
 
@@ -47,7 +46,7 @@ defmodule Xema.Ref do
           :ok | {:error, map}
   def validate(ref, value, opts) do
     {schema, opts} = fetch_from_opts!(ref, opts)
-    Xema.validate(schema, value, opts)
+    Validator.validate(schema, value, opts)
   end
 
   @doc """

@@ -3,7 +3,7 @@ locals_without_parens = [
 ]
 
 [
-  inputs: ["mix.exs", "{config,lib,test,bench}/**/*.{ex,exs}"],
+  inputs: ["mix.exs", ".dialyzer_ignore.exs", "{config,lib,test,bench}/**/*.{ex,exs}"],
   locals_without_parens: locals_without_parens,
   export: [
     locals_without_parens: locals_without_parens

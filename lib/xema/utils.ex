@@ -1,22 +1,7 @@
 defmodule Xema.Utils do
-  @moduledoc false
-  _ = """
+  @moduledoc """
   Some utilities for Xema.
   """
-
-  @doc """
-  Returns `b` if `a` is `nil`, otherwise `a`
-
-  ## Examples
-
-        iex> Xema.Utils.default(:a, :b)
-        :a
-        iex> Xema.Utils.default(nil, :b)
-        :b
-  """
-  @spec default(any, any) :: any
-  def default(nil, b), do: b
-  def default(a, _b), do: a
 
   @doc """
   Converts the given `string` to an existing atom. Returns `nil` if the
@@ -40,10 +25,22 @@ defmodule Xema.Utils do
   end
 
   @doc """
+  Returns whether the given `key` exists in the given `value`.
+
   Returns true if
   * `value` is a map and contains `key` as a key.
   * `value` is a keyword and contains `key` as a key.
   * `value` is a list of tuples with `key`as the first element.
+
+  ## Example
+
+        iex> alias Xema.Utils
+        iex> Utils.has_key?(%{foo: 5}, :foo)
+        true
+        iex> Utils.has_key?([foo: 5], :foo)
+        true
+        iex> Utils.has_key?([{"foo", 5}], "foo")
+        true
   """
   @spec has_key?(map | keyword | [{String.t(), any}], any) :: boolean
   def has_key?([], _), do: false
@@ -60,7 +57,7 @@ defmodule Xema.Utils do
   @doc """
   Returns `nil` if `uri_1` and `uri_2` are `nil`.
   Parses a URI when the other URI is `nil`.
-  Merges URIs if both are nor nil.
+  Merges URIs if both are not nil.
   """
   @spec update_uri(URI.t() | String.t() | nil, URI.t() | String.t() | nil) ::
           URI.t() | nil

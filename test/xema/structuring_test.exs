@@ -3,6 +3,8 @@ defmodule Xema.StructuringTest do
 
   import Xema, only: [validate: 2]
 
+  alias Xema.ValidationError
+
   describe "structuring schema without definitions and ref" do
     setup do
       positive = Xema.new({:integer, minimum: 1})
@@ -26,15 +28,25 @@ defmodule Xema.StructuringTest do
     end
 
     test "validate/2 with invalid data", %{schema: schema} do
-      assert validate(schema, %{a: -1, b: -2, c: 3}) ==
-               {:error,
-                %{
-                  properties: %{
-                    a: %{minimum: 1, value: -1},
-                    b: %{minimum: 1, value: -2},
-                    c: %{maximum: -1, value: 3}
-                  }
-                }}
+      msg = """
+      Value -1 is less than minimum value of 1, at [:a].
+      Value -2 is less than minimum value of 1, at [:b].
+      Value 3 exceeds maximum value of -1, at [:c].\
+      """
+
+      assert {
+               :error,
+               %ValidationError{
+                 message: ^msg,
+                 reason: %{
+                   properties: %{
+                     a: %{minimum: 1, value: -1},
+                     b: %{minimum: 1, value: -2},
+                     c: %{maximum: -1, value: 3}
+                   }
+                 }
+               }
+             } = validate(schema, %{a: -1, b: -2, c: 3})
     end
   end
 end
