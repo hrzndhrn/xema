@@ -1,4 +1,0 @@
-# Ignore warnings caused by the following problem:
-# https://github.com/elixir-lang/elixir/issues/7177
-The pattern 'error' can never match the type {'error',atom() | [atom()]}
-The pattern {'error', _errors@1} can never match the type 'ok'

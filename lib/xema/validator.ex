@@ -165,7 +165,7 @@ defmodule Xema.Validator do
          :ok <- max_items(schema, value),
          :ok <- unique(schema, value),
          :ok <- items(schema, value, opts),
-         :ok <- contains(schema, value),
+         :ok <- contains(schema, value, opts),
          do: :ok
   end
 
@@ -447,7 +447,7 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_one_of(list, any, keyword) :: [map]
+  @spec do_one_of(list, any, keyword) :: %{errors: [map], success: [map]}
   defp do_one_of(schemas, value, opts),
     do:
       schemas
@@ -635,21 +635,21 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec contains(Schema.t(), any) :: result
-  defp contains(%{contains: nil}, _), do: :ok
+  @spec contains(Schema.t(), any, keyword) :: result
+  defp contains(%{contains: nil}, _, _), do: :ok
 
-  defp contains(%{contains: _} = schema, tuple) when is_tuple(tuple) do
-    with {:error, reason} <- contains(schema, Tuple.to_list(tuple)) do
+  defp contains(%{contains: _} = schema, tuple, opts) when is_tuple(tuple) do
+    with {:error, reason} <- contains(schema, Tuple.to_list(tuple), opts) do
       {:error, %{reason | value: tuple}}
     end
   end
 
-  defp contains(%{contains: schema}, list) when is_list(list) do
+  defp contains(%{contains: schema}, list, opts) when is_list(list) do
     errors =
       list
       |> Enum.with_index()
       |> Enum.reduce([], fn {value, index}, acc ->
-        case do_validate(schema, value, nil) do
+        case do_validate(schema, value, opts) do
           :ok -> acc
           {:error, reason} -> [{index, reason} | acc]
         end

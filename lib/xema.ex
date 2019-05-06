@@ -459,9 +459,9 @@ defmodule Xema do
   defp nested_source(val), do: val
 
   @doc """
-  Converts the given data using the specified schema. Returns the `result}` or an exception.
+  Converts the given data using the specified schema. Returns the converted data or an exception.
   """
-  @spec cast(Xema.t(), term) :: term
+  @spec cast!(Xema.t(), term) :: term
   def cast!(xema, value) do
     with {:ok, cast} <- cast(xema, value) do
       cast
@@ -477,7 +477,7 @@ defmodule Xema do
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
-    {:ok, do_cast(schema, value, [])}
+    {:ok, do_cast!(schema, value, [])}
   rescue
     error ->
       {:error, error}
@@ -486,10 +486,10 @@ defmodule Xema do
       {:error, CastError.exception(%{reason | path: Enum.reverse(path)})}
   end
 
-  @spec do_cast(Schema.t(), term, list) :: {:ok, term} | {:error, term}
-  defp do_cast(%Schema{} = schema, value, path)
+  @spec do_cast!(Schema.t(), term, list) :: {:ok, term} | {:error, term}
+  defp do_cast!(%Schema{} = schema, value, path)
        when is_list(value) or is_tuple(value) or is_map(value) do
-    value = cast_values(schema, value, path)
+    value = cast_values!(schema, value, path)
 
     with {:ok, cast} <- Castable.cast(value, schema) do
       cast
@@ -499,7 +499,7 @@ defmodule Xema do
     end
   end
 
-  defp do_cast(%Schema{} = schema, value, path) do
+  defp do_cast!(%Schema{} = schema, value, path) do
     with {:ok, cast} <- Castable.cast(value, schema) do
       cast
     else
@@ -508,34 +508,34 @@ defmodule Xema do
     end
   end
 
-  defp do_cast(nil, value, _), do: value
+  defp do_cast!(nil, value, _), do: value
 
-  @spec cast_values(Schema.t(), term, list) :: {:ok, term} | {:error, term}
-  defp cast_values(%Schema{properties: nil}, map, _) when is_map(map), do: map
+  @spec cast_values!(Schema.t(), term, list) :: term
+  defp cast_values!(%Schema{properties: nil}, map, _) when is_map(map), do: map
 
-  defp cast_values(%Schema{properties: _} = schema, %{__struct__: module} = struct, path) do
-    fields = cast_values(schema, Map.from_struct(struct), path)
+  defp cast_values!(%Schema{properties: _} = schema, %{__struct__: module} = struct, path) do
+    fields = cast_values!(schema, Map.from_struct(struct), path)
     struct(module, fields)
   end
 
-  defp cast_values(%Schema{properties: properties, type: :keyword}, map, path) when is_map(map),
+  defp cast_values!(%Schema{properties: properties, type: :keyword}, map, path) when is_map(map),
     do:
       Enum.into(map, %{}, fn {key, value} ->
-        {key, do_cast(Map.get(properties, to_existing_atom(key)), value, [key | path])}
+        {key, do_cast!(Map.get(properties, to_existing_atom(key)), value, [key | path])}
       end)
 
-  defp cast_values(%Schema{properties: properties, keys: keys}, map, path) when is_map(map),
+  defp cast_values!(%Schema{properties: properties, keys: keys}, map, path) when is_map(map),
     do:
       Enum.into(map, %{}, fn {key, value} ->
-        {key, do_cast(Map.get(properties, key_to(keys, key)), value, [key | path])}
+        {key, do_cast!(Map.get(properties, key_to(keys, key)), value, [key | path])}
       end)
 
-  defp cast_values(%Schema{properties: properties, keys: keys}, list, path)
+  defp cast_values!(%Schema{properties: properties, keys: keys}, list, path)
        when is_list(list) and is_map(properties) do
     case Keyword.keyword?(list) do
       true ->
         Enum.map(list, fn {key, value} ->
-          {key, do_cast(Map.get(properties, key_to(keys, key)), value, [key | path])}
+          {key, do_cast!(Map.get(properties, key_to(keys, key)), value, [key | path])}
         end)
 
       false ->
@@ -543,11 +543,11 @@ defmodule Xema do
     end
   end
 
-  defp cast_values(%Schema{items: nil}, tuple, _path) when is_tuple(tuple), do: tuple
+  defp cast_values!(%Schema{items: nil}, tuple, _path) when is_tuple(tuple), do: tuple
 
-  defp cast_values(%Schema{items: nil}, list, _path) when is_list(list), do: list
+  defp cast_values!(%Schema{items: nil}, list, _path) when is_list(list), do: list
 
-  defp cast_values(%Schema{items: items}, list, path) when is_list(list) and is_list(items),
+  defp cast_values!(%Schema{items: items}, list, path) when is_list(list) and is_list(items),
     do:
       list
       |> Enum.with_index()
@@ -557,22 +557,22 @@ defmodule Xema do
             value
 
           schema ->
-            do_cast(schema, value, [index | path])
+            do_cast!(schema, value, [index | path])
         end
       end)
 
-  defp cast_values(%Schema{items: items}, list, path) when is_list(list),
+  defp cast_values!(%Schema{items: items}, list, path) when is_list(list),
     do:
       list
       |> Enum.with_index()
       |> Enum.map(fn {value, index} ->
-        do_cast(items, value, [index | path])
+        do_cast!(items, value, [index | path])
       end)
 
-  defp cast_values(schema, tuple, path) when is_tuple(tuple),
+  defp cast_values!(schema, tuple, path) when is_tuple(tuple),
     do:
       schema
-      |> cast_values(Tuple.to_list(tuple), path)
+      |> cast_values!(Tuple.to_list(tuple), path)
       |> List.to_tuple()
 
   defp key_to(:atoms, str) when is_binary(str), do: to_existing_atom(str)

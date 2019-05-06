@@ -37,7 +37,8 @@ defmodule Xema.Mixfile do
 
       # Dialyzer
       dialyzer: [
-        ignore_warnings: "dialyzer.ignore-warnings"
+        ignore_warnings: ".dialyzer_ignore.exs",
+        plt_add_apps: [:decimal]
       ]
     ]
   end
