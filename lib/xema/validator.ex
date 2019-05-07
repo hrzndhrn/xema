@@ -262,14 +262,12 @@ defmodule Xema.Validator do
   defp type?(_, _), do: false
 
   @spec struct?(any) :: boolean
-  defp struct?(val) when is_map(val), do: Map.has_key?(val, :__struct__)
+  defp struct?(%_{}), do: true
 
   defp struct?(_), do: false
 
   @spec struct?(any, atom) :: boolean
-  defp struct?(val, module)
-       when is_map(val) and is_atom(module),
-       do: Map.get(val, :__struct__) == module
+  defp struct?(%module{}, module), do: true
 
   defp struct?(_, _), do: false
 

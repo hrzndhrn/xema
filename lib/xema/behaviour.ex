@@ -366,13 +366,13 @@ defmodule Xema.Behaviour do
         reduce(value, x, Path.join(path, to_string(key)), fun)
       end)
 
-  defp reduce(%{__struct__: _struct} = struct, acc, path, fun),
+  defp reduce(%_{} = struct, acc, path, fun),
     do: fun.(struct, acc, path)
 
   defp reduce(map, acc, path, fun) when is_map(map),
     do:
       Enum.reduce(map, fun.(map, acc, path), fn
-        {%{__struct__: key}, value}, acc ->
+        {%key{}, value}, acc ->
           reduce(value, acc, Path.join(path, to_string(key)), fun)
 
         {key, value}, acc ->
@@ -407,7 +407,7 @@ defmodule Xema.Behaviour do
     |> fun.(id)
   end
 
-  defp map(%{__struct__: _} = struct, _fun, _id), do: struct
+  defp map(%_{} = struct, _fun, _id), do: struct
 
   defp map(map, fun, id) when is_map(map),
     do: Enum.into(map, %{}, fn {k, v} -> {k, map(v, fun, id)} end)
@@ -434,7 +434,7 @@ defmodule Xema.Behaviour do
     end
   end
 
-  defp circular?(%{__struct__: _} = struct, reference, root, acc),
+  defp circular?(%_{} = struct, reference, root, acc),
     do: struct |> Map.from_struct() |> circular?(reference, root, acc)
 
   defp circular?(values, reference, root, acc)

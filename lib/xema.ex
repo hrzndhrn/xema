@@ -366,7 +366,7 @@ defmodule Xema do
     end
   end
 
-  defp maybe_schema(%{__struct__: _} = struct), do: struct
+  defp maybe_schema(%_{} = struct), do: struct
 
   defp maybe_schema(map) when is_map(map), do: map_values(map, &maybe_schema/1)
 
@@ -448,7 +448,7 @@ defmodule Xema do
 
   defp nested_source(%MapSet{} = val), do: Map.keys(val.map)
 
-  defp nested_source(%{__struct__: _} = val), do: val
+  defp nested_source(%_{} = struct), do: struct
 
   defp nested_source(val) when is_map(val) do
     map_values(val, &nested_source/1)
@@ -513,7 +513,7 @@ defmodule Xema do
   @spec cast_values!(Schema.t(), term, list) :: term
   defp cast_values!(%Schema{properties: nil}, map, _) when is_map(map), do: map
 
-  defp cast_values!(%Schema{properties: _} = schema, %{__struct__: module} = struct, path) do
+  defp cast_values!(%Schema{properties: _} = schema, %module{} = struct, path) do
     fields = cast_values!(schema, Map.from_struct(struct), path)
     struct(module, fields)
   end

@@ -29,9 +29,9 @@ defmodule Xema.SchemaError do
       reason: reason
     }
 
-  def exception(%{__struct__: SyntaxError} = error), do: error
+  def exception(%SyntaxError{} = error), do: error
 
-  def exception(%{__struct__: CompileError} = error), do: error
+  def exception(%CompileError{} = error), do: error
 
   def exception(%ValidationError{} = error),
     do: %SchemaError{
