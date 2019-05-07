@@ -16,12 +16,13 @@ before_script:
   - mix do deps.get, deps.compile
   - MIX_ENV=test mix compile --warnings-as-errors
   - travis_wait mix dialyzer --plt
+  - if [[ "$TRAVIS_ELIXIR_VERSION" == "1.8"* ]]; then travis_wait mix dialyzer --plt ;fi
 
 script:
   - if [[ "$TRAVIS_ELIXIR_VERSION" == "1.8"* ]]; then mix format --check-formatted ;fi
   - mix credo --strict
   - mix coveralls.travis
-  - mix dialyzer --halt-exit-status
+  - if [[ "$TRAVIS_ELIXIR_VERSION" == "1.8"* ]]; then mix dialyzer --halt-exit-status ;fi
 
 sudo: required
 
