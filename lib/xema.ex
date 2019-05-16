@@ -477,7 +477,9 @@ defmodule Xema do
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
-    {:ok, do_cast!(schema, value, [])}
+    result = do_cast!(schema, value, [])
+
+    with :ok <- validate(schema, result), do: {:ok, result}
   rescue
     error ->
       {:error, error}

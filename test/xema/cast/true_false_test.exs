@@ -3,6 +3,8 @@ defmodule Xema.Cast.TrueFalseTest do
 
   import Xema, only: [cast: 2, cast!: 2]
 
+  alias Xema.ValidationError
+
   @set [:atom, "str", 1.1, 1, [], %{}, {:tuple}]
 
   describe "true schema" do
@@ -44,7 +46,12 @@ defmodule Xema.Cast.TrueFalseTest do
 
     test "cast/2", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert cast(schema, data) == {:ok, data}
+        assert cast(schema, data) ==
+                 {:error,
+                  %ValidationError{
+                    message: "Schema always fails validation.",
+                    reason: %{type: false}
+                  }}
       end)
     end
 
@@ -54,7 +61,9 @@ defmodule Xema.Cast.TrueFalseTest do
 
     test "cast!/2", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert cast!(schema, data) == data
+        assert_raise(ValidationError, fn ->
+          cast!(schema, data) == data
+        end)
       end)
     end
 

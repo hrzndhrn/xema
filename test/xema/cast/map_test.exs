@@ -268,18 +268,16 @@ defmodule Xema.Cast.MapTest do
     test "from an invalid map", %{schema: schema} do
       data = %{"foo" => %{"num" => "42"}}
 
-      assert {:ok, cast} = cast(schema, data)
-      assert cast == %{foo: %{num: 42}}
-
-      assert {:error,
-              %ValidationError{
-                message: "Value 42 exceeds maximum value of 12, at [:foo, :num].",
-                reason: %{
-                  properties: %{
-                    foo: %{properties: %{num: %{value: 42, maximum: 12}}}
+      assert cast(schema, data) ==
+               {:error,
+                %ValidationError{
+                  message: "Value 42 exceeds maximum value of 12, at [:foo, :num].",
+                  reason: %{
+                    properties: %{
+                      foo: %{properties: %{num: %{value: 42, maximum: 12}}}
+                    }
                   }
-                }
-              }} = validate(schema, cast)
+                }}
     end
 
     test "from a keyword list nested in a map", %{schema: schema} do
@@ -574,18 +572,9 @@ defmodule Xema.Cast.MapTest do
     test "from an invalid map", %{schema: schema} do
       data = %{"foo" => %{"num" => "42"}}
 
-      assert cast = cast!(schema, data)
-      assert cast == %{foo: %{num: 42}}
-
-      assert {:error,
-              %ValidationError{
-                message: "Value 42 exceeds maximum value of 12, at [:foo, :num].",
-                reason: %{
-                  properties: %{
-                    foo: %{properties: %{num: %{value: 42, maximum: 12}}}
-                  }
-                }
-              }} = validate(schema, cast)
+      assert_raise ValidationError,
+                   "Value 42 exceeds maximum value of 12, at [:foo, :num].",
+                   fn -> cast!(schema, data) end
     end
 
     test "from a keyword list", %{schema: schema} do
