@@ -513,38 +513,36 @@ defmodule Xema do
   defp do_cast!(nil, value, _), do: value
 
   @spec castable_cast(Schema.t(), term) :: {:ok, term} | {:error, term}
-  defp castable_cast(%Schema{caster: caster, module: module}, value) when is_function(caster) do
-    case caster.(value) do
-      {:ok, _} = ok -> ok
-      _ -> {:error, %{to: module, value: value}}
+  defp castable_cast(%Schema{} = schema, value) do
+    case do_castable_cast(schema, value) do
+      {:ok, _} = ok ->
+        ok
+
+      _ ->
+        case schema do
+          %{type: :struct, module: module} -> {:error, %{to: module, value: value}}
+          %{type: type} -> {:error, %{to: type, value: value}}
+        end
     end
   end
 
-  defp castable_cast(%Schema{caster: {caster, fun}, module: module}, value)
-       when is_atom(caster) and is_atom(fun) do
-    case apply(caster, fun, [value]) do
-      {:ok, _} = ok -> ok
-      _ -> {:error, %{to: module, value: value}}
-    end
-  end
+  defp do_castable_cast(%Schema{caster: caster}, value)
+       when is_function(caster),
+       do: caster.(value)
 
-  defp castable_cast(%Schema{caster: {caster, fun, args}, module: module}, value)
-       when is_atom(caster) and is_atom(fun) do
-    case apply(caster, fun, [value | args]) do
-      {:ok, _} = ok -> ok
-      _ -> {:error, %{to: module, value: value}}
-    end
-  end
+  defp do_castable_cast(%Schema{caster: {caster, fun}}, value)
+       when is_atom(caster) and is_atom(fun),
+       do: apply(caster, fun, [value])
 
-  defp castable_cast(%Schema{caster: caster, module: module}, value)
-       when caster != nil and is_atom(caster) do
-    case caster.cast(value) do
-      {:ok, _} = ok -> ok
-      _ -> {:error, %{to: module, value: value}}
-    end
-  end
+  defp do_castable_cast(%Schema{caster: {caster, fun, args}}, value)
+       when is_atom(caster) and is_atom(fun),
+       do: apply(caster, fun, [value | args])
 
-  defp castable_cast(schema, value), do: Castable.cast(value, schema)
+  defp do_castable_cast(%Schema{caster: caster}, value)
+       when caster != nil and is_atom(caster),
+       do: caster.cast(value)
+
+  defp do_castable_cast(schema, value), do: Castable.cast(value, schema)
 
   @spec cast_values!(Schema.t(), term, list) :: term
   defp cast_values!(%Schema{properties: nil}, map, _) when is_map(map), do: map
