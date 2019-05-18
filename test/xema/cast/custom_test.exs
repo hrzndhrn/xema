@@ -19,7 +19,7 @@ defmodule Xema.Cast.CustomTest do
     def path(%URI{} = uri, _), do: {:ok, uri}
 
     def path(path, string) when is_binary(path) and is_binary(string),
-      do: {:ok, URI.parse(string) |> Map.put(:path, path)}
+      do: {:ok, string |> URI.parse() |> Map.put(:path, path)}
 
     def path(_, _), do: :error
   end
