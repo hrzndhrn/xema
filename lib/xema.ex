@@ -518,6 +518,9 @@ defmodule Xema do
       {:ok, _} = ok ->
         ok
 
+      {:error, _} = error ->
+        error
+
       _ ->
         case schema do
           %{type: :struct, module: module} -> {:error, %{to: module, value: value}}
