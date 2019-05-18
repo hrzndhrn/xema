@@ -16,6 +16,8 @@ defmodule Xema.Schema do
   * `additional_properties` disallow additional properties, if set to true.
   * 'all_of' a list of schemas they must all be valid.
   * 'any_of' a list of schemas with any valid schema.
+  * `caster` a custom caster. This can be a function, a tuple with
+    module and function name, or a `Xema.Caster` behaviour.
   * `comment` for the schema.
   * `const` specifies a constant.
   * `content_encoding` annotation for the encoding.
@@ -66,14 +68,15 @@ defmodule Xema.Schema do
   * `then` see `if`, `then`, `else`
   * `type` specifies the data type for a schema.
   * `unique_items` disallow duplicate items, if set to true.
-  * `validator` a custom validator. This can be a function or a tuple with
-    module and function name.
+  * `validator` a custom validator. This can be a function, a tuple with
+    module and function name, or a `Xema.Validator` behaviour.
   """
   @type t :: %Schema{
           additional_items: Xema.t() | Schema.t() | boolean | nil,
           additional_properties: map | boolean | nil,
           all_of: [Schema.t()] | nil,
           any_of: [Schema.t()] | nil,
+          caster: function | module | {module, atom} | {module, atom, arity} | list,
           comment: String.t() | nil,
           const: any,
           content_encoding: String.t() | nil,
@@ -117,11 +120,7 @@ defmodule Xema.Schema do
           title: String.t() | nil,
           type: type | [type],
           unique_items: boolean | nil,
-          validator:
-            function
-            | {module, function}
-            | {module, function, list}
-            | list
+          validator: function | module | {module, atom} | {module, atom, arity} | list
         }
 
   defstruct [
@@ -129,6 +128,7 @@ defmodule Xema.Schema do
     :additional_properties,
     :all_of,
     :any_of,
+    :caster,
     :comment,
     :const,
     :content_encoding,

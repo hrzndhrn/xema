@@ -493,7 +493,7 @@ defmodule Xema do
        when is_list(value) or is_tuple(value) or is_map(value) do
     value = cast_values!(schema, value, path)
 
-    with {:ok, cast} <- Castable.cast(value, schema) do
+    with {:ok, cast} <- castable_cast(schema, value) do
       cast
     else
       {:error, reason} ->
@@ -502,7 +502,7 @@ defmodule Xema do
   end
 
   defp do_cast!(%Schema{} = schema, value, path) do
-    with {:ok, cast} <- Castable.cast(value, schema) do
+    with {:ok, cast} <- castable_cast(schema, value) do
       cast
     else
       {:error, reason} ->
@@ -511,6 +511,40 @@ defmodule Xema do
   end
 
   defp do_cast!(nil, value, _), do: value
+
+  @spec castable_cast(Schema.t(), term) :: {:ok, term} | {:error, term}
+  defp castable_cast(%Schema{caster: caster, module: module}, value) when is_function(caster) do
+    case caster.(value) do
+      {:ok, _} = ok -> ok
+      _ -> {:error, %{to: module, value: value}}
+    end
+  end
+
+  defp castable_cast(%Schema{caster: {caster, fun}, module: module}, value)
+       when is_atom(caster) and is_atom(fun) do
+    case apply(caster, fun, [value]) do
+      {:ok, _} = ok -> ok
+      _ -> {:error, %{to: module, value: value}}
+    end
+  end
+
+  defp castable_cast(%Schema{caster: {caster, fun, args}, module: module}, value)
+       when is_atom(caster) and is_atom(fun) do
+    case apply(caster, fun, [value | args]) do
+      {:ok, _} = ok -> ok
+      _ -> {:error, %{to: module, value: value}}
+    end
+  end
+
+  defp castable_cast(%Schema{caster: caster, module: module}, value)
+       when caster != nil and is_atom(caster) do
+    case caster.cast(value) do
+      {:ok, _} = ok -> ok
+      _ -> {:error, %{to: module, value: value}}
+    end
+  end
+
+  defp castable_cast(schema, value), do: Castable.cast(value, schema)
 
   @spec cast_values!(Schema.t(), term, list) :: term
   defp cast_values!(%Schema{properties: nil}, map, _) when is_map(map), do: map
