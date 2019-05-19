@@ -188,3 +188,88 @@ iex> Example.Range.validate(:range, %{from: 166, to: 118})
   reason: %{properties: %{to: %{maximum: 100, value: 118}}}
 }}
 ```
+
+## Cast JSON
+
+The following example cast data structure that is decoded by `Jason.decode!/1`.
+For the encoding of `URI` a `Jason.Encoder` implementation is needed.
+
+```elixir
+defimpl Jason.Encoder, for: URI do
+  def encode(uri, _opts) do
+    ~s|"#{URI.to_string(uri)}"|
+  end
+end
+```
+
+This example shows how a complex data structure decoded by a JSON parser can be
+converted in a form described by a schema.
+
+```elixir
+iex> defmodule CasterUri do
+...>   @behaviour Xema.Caster
+...>
+...>   @impl true
+...>   def cast(%URI{} = uri), do: {:ok, uri}
+...>
+...>   def cast(string) when is_binary(string), do: {:ok, URI.parse(string)}
+...>
+...>   def cast(_), do: :error
+...> end
+iex>
+iex> defmodule UserSchema do
+...>   use Xema
+...>
+...>   xema :user,
+...>        map(
+...>          keys: :atoms,
+...>          properties: %{
+...>            name: :string,
+...>            birthday: strux(Date),
+...>            favorites:
+...>              map(
+...>                keys: :atoms,
+...>                properties: %{
+...>                  fruits: list(items: atom(enum: [:apple, :orange, :banana])),
+...>                  uris: list(items: strux(URI, caster: CasterUri))
+...>                }
+...>              )
+...>          },
+...>          additional_properties: false
+...>       )
+...> end
+iex>
+iex> {:ok, json} =
+...>   %{
+...>     "name" => "Nick",
+...>     "birthday" => ~D|2000-04-17|,
+...>     "favorites" => %{
+...>       "fruits" => ~w(apple banana),
+...>       "uris" => ["https://elixir-lang.org/"]
+...>     }
+...>   }
+...>   |> UserSchema.cast!()
+...>   |> Jason.encode()
+{:ok, "{\"birthday\":\"2000-04-17\",\"favorites\":{\"fruits\":[\"apple\",\"banana\"],\"uris\":[\"https://elixir-lang.org/\"]},\"name\":\"Nick\"}"}
+iex>
+iex> json |> Jason.decode!() |> UserSchema.cast!()
+%{
+  birthday: ~D[2000-04-17],
+  favorites: %{
+    fruits: [:apple, :banana],
+    uris: [
+      %URI{
+        authority: "elixir-lang.org",
+        fragment: nil,
+        host: "elixir-lang.org",
+        path: "/",
+        port: 443,
+        query: nil,
+        scheme: "https",
+        userinfo: nil
+      }
+    ]
+  },
+  name: "Nick"
+}
+```

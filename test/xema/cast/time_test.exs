@@ -12,6 +12,12 @@ defmodule Xema.Cast.TimeTest do
       %{schema: Xema.new({:struct, module: Time})}
     end
 
+    test "from a time", %{schema: schema} do
+      time = Time.utc_now()
+
+      assert cast(schema, time) == {:ok, time}
+    end
+
     test "from a valid string", %{schema: schema} do
       time = Time.utc_now()
       data = Time.to_iso8601(time)

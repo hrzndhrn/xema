@@ -12,6 +12,12 @@ defmodule Xema.Cast.DateTest do
       %{schema: Xema.new({:struct, module: Date})}
     end
 
+    test "from a date", %{schema: schema} do
+      date = Date.utc_today()
+
+      assert cast(schema, date) == {:ok, date}
+    end
+
     test "from a valid string", %{schema: schema} do
       date = Date.utc_today()
       data = Date.to_iso8601(date)
