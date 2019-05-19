@@ -1,7 +1,8 @@
 defmodule XemaTest do
   use ExUnit.Case
 
-  doctest Xema
-  doctest Usage
+  doctest Cast
   doctest Examples
+  doctest Usage
+  doctest Xema
 end

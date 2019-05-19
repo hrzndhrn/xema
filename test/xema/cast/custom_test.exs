@@ -292,4 +292,28 @@ defmodule Xema.Cast.CustomTest do
                 }}
     end
   end
+
+  describe "use Xema an caster behaviour" do
+    defmodule UriSchema do
+      use Xema
+
+      xema :uri,
+           map(
+             keys: :strings,
+             properties: %{
+               "uri" => strux(URI, caster: UriCaster)
+             },
+             additional_properties: false
+           )
+    end
+
+    test "valid?/1" do
+      refute UriSchema.valid?(%{"uri" => "http://www.example.com"})
+    end
+
+    test "cast/1" do
+      assert UriSchema.cast(%{uri: "http://www.example.com"}) ==
+               {:ok, %{"uri" => URI.parse("http://www.example.com")}}
+    end
+  end
 end

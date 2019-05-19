@@ -30,6 +30,7 @@ defmodule Xema.Mixfile do
         extras: [
           "docs/readme.md",
           "docs/usage.md",
+          "docs/cast.md",
           "docs/loader.md",
           "docs/examples.md",
           "docs/unsupported.md"
