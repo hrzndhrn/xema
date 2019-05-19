@@ -25,5 +25,5 @@ dist: trusty
 
 cache:
   directories:
-    - _build
     - deps
+    - test/support/plts

@@ -43,7 +43,7 @@ defmodule Xema.Mixfile do
       dialyzer: [
         ignore_warnings: ".dialyzer_ignore.exs",
         plt_add_apps: [:decimal],
-        plt_file: {:no_warn, "test/support/dialyzer.plt"}
+        plt_file: {:no_warn, "test/support/plts/dialyzer.plt"}
       ]
     ]
   end

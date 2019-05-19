@@ -60,8 +60,8 @@ Temporary Items
 ### etc ###
 
 # dialyzer plt
-/test/support/*.plt
-/test/support/*.plt.hash
+/test/support/plts/*.plt
+/test/support/plts/*.plt.hash
 
 # Sleeping files
 zzz.*
