@@ -25,8 +25,7 @@ defmodule Xema.CustomValidatorTest do
   end
 
   defmodule Schemas do
-    alias Xema
-    import Xema.Builder
+    use Xema, multi: true
 
     xema :strings,
          map(

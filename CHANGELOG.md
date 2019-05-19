@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0 dev
+
++ Add option `multi` to use multiple schema modules: `use Xeam, multi: true`.
+
 ## 0.8.0 2019/03/10
 
 + Inline references in schemas by default. Increased performance of reference

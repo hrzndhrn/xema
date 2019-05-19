@@ -5,68 +5,102 @@ defmodule Xema do
   All available keywords to construct a schema are described on page
   [Usage](usage.html).
 
-  This module can be used to construct a schema module.
+  This module can be used to construct a schema module. Should a module
+  contain multiple schemas the option `multi: true` is required.
 
   `use Xema` imports `Xema.Builder` and extends the module with the functions
   + `__MODULE__.valid?/2`
   + `__MODULE__.validate/2`
   + `__MODULE__.validate!/2`
+  + `__MODULE__.cast/2`
+  + `__MODULE__.cast!/2`
 
   The macro `xema/2` supports the construction of a schema. After that
-  the schema is available as a function.
+  the schema is available via the functions above.
 
-  A schema can also be tagged with `@default true` and then called by
+  In a multi schema module a schema can be tagged with `@default true` and
+  then called by
   + `__MODULE__.valid?/1`
   + `__MODULE__.validate/1`
   + `__MODULE__.validate!/1`
+  + `__MODULE__.cast/1`
+  + `__MODULE__.cast!/1`
 
-  ## Example
+  The functions with arity 1 are also available for single schema modules.
 
-  ```elixir
-  iex> defmodule Schema do
-  ...>   use Xema
-  ...>
-  ...>   @pos integer(minimum: 0)
-  ...>   @neg integer(maximum: 0)
-  ...>
-  ...>   @default true
-  ...>   xema :user,
-  ...>        map(
-  ...>          properties: %{
-  ...>            name: string(min_length: 1),
-  ...>            age: @pos
-  ...>          }
-  ...>        )
-  ...>
-  ...>   xema :nums,
-  ...>        map(
-  ...>          properties: %{
-  ...>            pos: list(items: @pos),
-  ...>            neg: list(items: @neg)
-  ...>          }
-  ...>        )
-  ...> end
-  iex>
-  iex> Schema.valid?(:user, %{name: "John", age: 21})
-  true
-  iex> Schema.valid?(%{name: "John", age: 21})
-  true
-  iex> Schema.valid?(%{name: "", age: 21})
-  false
-  iex> Schema.validate(%{name: "John", age: 21})
-  :ok
-  iex> Schema.validate(%{name: "", age: 21})
-  {:error, %Xema.ValidationError{
-    message: ~s|Expected minimum length of 1, got "", at [:name].|,
-    reason: %{
-      properties: %{name: %{min_length: 1, value: ""}}}
-    }
-  }
-  iex> Schema.valid?(:nums, %{pos: [1, 2, 3]})
-  true
-  iex> Schema.valid?(:nums, %{neg: [1, 2, 3]})
-  false
-  ```
+  ## Examples
+
+  Sinlge schema module:
+
+      iex> defmodule SingleSchema do
+      ...>   use Xema
+      ...>
+      ...>   xema :num, number(minimum: 1)
+      ...> end
+      iex>
+      iex> SingleSchema.valid?(:num, 6)
+      true
+      iex> SingleSchema.valid?(5)
+      true
+      iex> SingleSchema.validate(0)
+      {:error, %Xema.ValidationError{
+         message: "Value 0 is less than minimum value of 1.",
+         reason: %{minimum: 1, value: 0}
+      }}
+      iex> SingleSchema.cast("5")
+      {:ok, 5}
+      iex> SingleSchema.cast("-5")
+      {:error, %Xema.ValidationError{
+         message: "Value -5 is less than minimum value of 1.",
+         reason: %{minimum: 1, value: -5}
+      }}
+
+  Multi schema module:
+
+      iex> defmodule Schema do
+      ...>   use Xema, multi: true
+      ...>
+      ...>   @pos integer(minimum: 0)
+      ...>   @neg integer(maximum: 0)
+      ...>
+      ...>   @default true
+      ...>   xema :user,
+      ...>        map(
+      ...>          properties: %{
+      ...>            name: string(min_length: 1),
+      ...>            age: @pos
+      ...>          }
+      ...>        )
+      ...>
+      ...>   xema :nums,
+      ...>        map(
+      ...>          properties: %{
+      ...>            pos: list(items: @pos),
+      ...>            neg: list(items: @neg)
+      ...>          }
+      ...>        )
+      ...> end
+      iex>
+      iex> Schema.valid?(:user, %{name: "John", age: 21})
+      true
+      iex> Schema.valid?(%{name: "John", age: 21})
+      true
+      iex> Schema.valid?(%{name: "", age: 21})
+      false
+      iex> Schema.validate(%{name: "John", age: 21})
+      :ok
+      iex> Schema.validate(%{name: "", age: 21})
+      {:error, %Xema.ValidationError{
+        message: ~s|Expected minimum length of 1, got "", at [:name].|,
+        reason: %{
+          properties: %{name: %{min_length: 1, value: ""}}}
+        }
+      }
+      iex> Schema.valid?(:nums, %{pos: [1, 2, 3]})
+      true
+      iex> Schema.valid?(:nums, %{neg: [1, 2, 3]})
+      false
+      ```
   """
 
   use Xema.Behaviour
@@ -85,11 +119,14 @@ defmodule Xema do
   @types Schema.types()
 
   @doc false
-  defmacro __using__(_opts) do
+  defmacro __using__(opts) do
+    multi = Keyword.get(opts, :multi, false)
+
     quote do
       import Xema.Builder
       @xemas []
       @default false
+      @multi unquote(multi)
     end
   end
 
@@ -473,11 +510,32 @@ defmodule Xema do
 
   @doc """
   Converts the given data using the specified schema. Returns `{:ok, result}` or
-  `{:error, reason}`.
+  `{:error, reason}`. The `result` is converted and validated with the schema.
+
+  ## Examples:
+
+      iex> schema = Xema.new({:integer, minimum: 1})
+      iex> Xema.cast(schema, "5")
+      {:ok, 5}
+      iex> Xema.cast(schema, "five")
+      {:error, %Xema.CastError{
+        key: nil,
+        message: ~s|cannot cast "five" to :integer|,
+        path: [],
+        to: :integer,
+        value: "five"
+      }}
+      iex> Xema.cast(schema, "0")
+      {:error, %Xema.ValidationError{
+        message: "Value 0 is less than minimum value of 1.",
+        reason: %{minimum: 1, value: 0}
+      }}
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
   def cast(%Xema{schema: schema}, value) do
-    {:ok, do_cast!(schema, value, [])}
+    result = do_cast!(schema, value, [])
+
+    with :ok <- validate(schema, result), do: {:ok, result}
   rescue
     error ->
       {:error, error}
@@ -491,7 +549,7 @@ defmodule Xema do
        when is_list(value) or is_tuple(value) or is_map(value) do
     value = cast_values!(schema, value, path)
 
-    with {:ok, cast} <- Castable.cast(value, schema) do
+    with {:ok, cast} <- castable_cast(schema, value) do
       cast
     else
       {:error, reason} ->
@@ -500,7 +558,7 @@ defmodule Xema do
   end
 
   defp do_cast!(%Schema{} = schema, value, path) do
-    with {:ok, cast} <- Castable.cast(value, schema) do
+    with {:ok, cast} <- castable_cast(schema, value) do
       cast
     else
       {:error, reason} ->
@@ -509,6 +567,41 @@ defmodule Xema do
   end
 
   defp do_cast!(nil, value, _), do: value
+
+  @spec castable_cast(Schema.t(), term) :: {:ok, term} | {:error, term}
+  defp castable_cast(%Schema{} = schema, value) do
+    case do_castable_cast(schema, value) do
+      {:ok, _} = ok ->
+        ok
+
+      {:error, _} = error ->
+        error
+
+      _ ->
+        case schema do
+          %{type: :struct, module: module} -> {:error, %{to: module, value: value}}
+          %{type: type} -> {:error, %{to: type, value: value}}
+        end
+    end
+  end
+
+  defp do_castable_cast(%Schema{caster: caster}, value)
+       when is_function(caster),
+       do: caster.(value)
+
+  defp do_castable_cast(%Schema{caster: {caster, fun}}, value)
+       when is_atom(caster) and is_atom(fun),
+       do: apply(caster, fun, [value])
+
+  defp do_castable_cast(%Schema{caster: {caster, fun, args}}, value)
+       when is_atom(caster) and is_atom(fun),
+       do: apply(caster, fun, [value | args])
+
+  defp do_castable_cast(%Schema{caster: caster}, value)
+       when caster != nil and is_atom(caster),
+       do: caster.cast(value)
+
+  defp do_castable_cast(schema, value), do: Castable.cast(value, schema)
 
   @spec cast_values!(Schema.t(), term, list) :: term
   defp cast_values!(%Schema{properties: nil}, map, _) when is_map(map), do: map

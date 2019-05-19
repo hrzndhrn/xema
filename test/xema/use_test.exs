@@ -3,131 +3,208 @@ defmodule Xema.UseTest do
 
   alias Xema.ValidationError
 
-  defmodule Schema do
-    use Xema
+  test "use Xema with multiple schema and option multi false raises error" do
+    message = "Use `use Xema, multi: true` to setup multiple schema in a module."
 
-    @pos integer(minimum: 0)
-    @neg integer(maximum: 0)
+    assert_raise RuntimeError, message, fn ->
+      defmodule MultiError do
+        use Xema
 
-    xema :user,
-         map(
-           properties: %{
-             name: string(min_length: 1),
-             age: @pos
-           }
-         )
+        xema :int, integer()
 
-    @default true
-    xema :person,
-         keyword(
-           properties: %{
-             name: string(min_length: 1),
-             age: @pos
-           }
-         )
-
-    xema :nums,
-         map(
-           properties: %{
-             pos: list(items: @pos),
-             neg: list(items: @neg)
-           }
-         )
-  end
-
-  test "valid?/2 returns true for a valid person" do
-    assert Schema.valid?(:person, name: "John", age: 21)
-  end
-
-  test "valid?/2 returns false for an invalid person" do
-    refute Schema.valid?(:person, name: "John", age: -21)
-  end
-
-  test "valid?/1 returns true for a valid person" do
-    assert Schema.valid?(name: "John", age: 21)
-  end
-
-  test "valid?/1 returns false for an invalid person" do
-    refute Schema.valid?(name: "John", age: -21)
-  end
-
-  test "valid?/2 returns true for a valid user" do
-    assert Schema.valid?(:user, %{name: "John", age: 21})
-  end
-
-  test "valid?/2 returns true for a valid nums map" do
-    assert Schema.valid?(:nums, %{pos: [1, 2, 3], neg: [-5, -4]})
-  end
-
-  test "valid?/2 returns false for an invalid user" do
-    refute Schema.valid?(:user, %{name: "", age: 21})
-  end
-
-  test "valid?/2 returns false for an invalid nums map" do
-    refute Schema.valid?(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
-  end
-
-  test "validate/1 returns :ok for a valid person" do
-    assert Schema.validate(name: "John", age: 21) == :ok
-  end
-
-  test "validate/1 returns an error tuple for an invalid person" do
-    assert {
-             :error,
-             %ValidationError{
-               message: "Value -21 is less than minimum value of 0, at [:age].",
-               reason: %{properties: %{age: %{minimum: 0, value: -21}}}
-             }
-           } = Schema.validate(name: "John", age: -21)
-  end
-
-  test "validate/2 returns :ok for a valid user" do
-    assert Schema.validate(:user, %{name: "John", age: 21}) == :ok
-  end
-
-  test "validate/2 returns :ok for a valid nums map" do
-    assert Schema.validate(:nums, %{pos: [1, 2, 3], neg: [-5, -4]}) == :ok
-  end
-
-  test "validate/2 returns an error tuple for an invalid user" do
-    assert {
-             :error,
-             %ValidationError{
-               message: ~s|Expected minimum length of 1, got "", at [:name].|,
-               reason: %{properties: %{name: %{min_length: 1, value: ""}}}
-             }
-           } = Schema.validate(:user, %{name: "", age: 21})
-  end
-
-  test "validate/2 returns an error tuple for an invalid nums map" do
-    assert {
-             :error,
-             %ValidationError{
-               message: "Value -2 is less than minimum value of 0, at [:pos, 1].",
-               reason: %{properties: %{pos: %{items: [{1, %{minimum: 0, value: -2}}]}}}
-             }
-           } = Schema.validate(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
-  end
-
-  test "validate!/2 raises a ValidationError for an invalid user" do
-    assert_raise ValidationError, fn ->
-      Schema.validate!(:user, %{name: "", age: 21})
+        xema :str, string()
+      end
     end
   end
 
-  test "validate!/2 raises a ValidationError for an invalid nums map" do
-    assert_raise ValidationError, fn ->
-      Schema.validate!(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
+  describe "module with one schema" do
+    defmodule UserSchema do
+      use Xema
+
+      xema :user,
+           map(
+             properties: %{
+               name: string(min_length: 1),
+               age: integer(minimum: 0)
+             }
+           )
+    end
+
+    test "valild?/2 returns true for a valied user" do
+      assert UserSchema.valid?(:user, %{name: "Nick", age: 24})
+    end
+
+    test "valild?/1 returns true for a valied user" do
+      assert UserSchema.valid?(%{name: "Nick", age: 24})
+    end
+
+    test "cast/1 returns casted data" do
+      assert UserSchema.cast(%{name: "Nick", age: "42"}) == {:ok, %{age: 42, name: "Nick"}}
+    end
+
+    test "cast/1 returns an error tuple with CastError for invalid data" do
+      assert UserSchema.cast(%{name: [], age: "42"}) ==
+               {:error,
+                %Xema.CastError{
+                  key: nil,
+                  message: "cannot cast [] to :string at [:name]",
+                  path: [:name],
+                  to: :string,
+                  value: []
+                }}
+    end
+
+    test "cast/1 returns an errot tuple with ValidationError for invalid data" do
+      assert UserSchema.cast(%{name: "Nick", age: "-42"}) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: "Value -42 is less than minimum value of 0, at [:age].",
+                  reason: %{properties: %{age: %{minimum: 0, value: -42}}}
+                }}
+    end
+
+    test "cast!/1 returns casted data" do
+      assert UserSchema.cast!(%{name: "Nick", age: "42"}) == %{age: 42, name: "Nick"}
     end
   end
 
-  test "validate!/1 returns :ok for a valid person" do
-    assert Schema.validate!(name: "John", age: 21) == :ok
-  end
+  describe "module with multiple schemas" do
+    defmodule Schema do
+      use Xema, multi: true
 
-  test "validate!/1 raises a ValidationError for an invalid person" do
-    assert_raise ValidationError, fn ->
-      Schema.validate!(age: -1)
+      @pos integer(minimum: 0)
+      @neg integer(maximum: 0)
+
+      xema :user,
+           map(
+             properties: %{
+               name: string(min_length: 1),
+               age: @pos
+             }
+           )
+
+      @default true
+      xema :person,
+           keyword(
+             properties: %{
+               name: string(min_length: 1),
+               age: @pos
+             }
+           )
+
+      xema :nums,
+           map(
+             properties: %{
+               pos: list(items: @pos),
+               neg: list(items: @neg)
+             }
+           )
+    end
+
+    test "valid?/2 returns true for a valid person" do
+      assert Schema.valid?(:person, name: "John", age: 21)
+    end
+
+    test "valid?/2 returns false for an invalid person" do
+      refute Schema.valid?(:person, name: "John", age: -21)
+    end
+
+    test "valid?/1 returns true for a valid person" do
+      assert Schema.valid?(name: "John", age: 21)
+    end
+
+    test "valid?/1 returns false for an invalid person" do
+      refute Schema.valid?(name: "John", age: -21)
+    end
+
+    test "valid?/2 returns true for a valid user" do
+      assert Schema.valid?(:user, %{name: "John", age: 21})
+    end
+
+    test "valid?/2 returns true for a valid nums map" do
+      assert Schema.valid?(:nums, %{pos: [1, 2, 3], neg: [-5, -4]})
+    end
+
+    test "valid?/2 returns false for an invalid user" do
+      refute Schema.valid?(:user, %{name: "", age: 21})
+    end
+
+    test "valid?/2 returns false for an invalid nums map" do
+      refute Schema.valid?(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
+    end
+
+    test "validate/1 returns :ok for a valid person" do
+      assert Schema.validate(name: "John", age: 21) == :ok
+    end
+
+    test "validate/1 returns an error tuple for an invalid person" do
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Value -21 is less than minimum value of 0, at [:age].",
+                 reason: %{properties: %{age: %{minimum: 0, value: -21}}}
+               }
+             } = Schema.validate(name: "John", age: -21)
+    end
+
+    test "validate/2 returns :ok for a valid user" do
+      assert Schema.validate(:user, %{name: "John", age: 21}) == :ok
+    end
+
+    test "validate/2 returns :ok for a valid nums map" do
+      assert Schema.validate(:nums, %{pos: [1, 2, 3], neg: [-5, -4]}) == :ok
+    end
+
+    test "validate/2 returns an error tuple for an invalid user" do
+      assert {
+               :error,
+               %ValidationError{
+                 message: ~s|Expected minimum length of 1, got "", at [:name].|,
+                 reason: %{properties: %{name: %{min_length: 1, value: ""}}}
+               }
+             } = Schema.validate(:user, %{name: "", age: 21})
+    end
+
+    test "validate/2 returns an error tuple for an invalid nums map" do
+      assert {
+               :error,
+               %ValidationError{
+                 message: "Value -2 is less than minimum value of 0, at [:pos, 1].",
+                 reason: %{properties: %{pos: %{items: [{1, %{minimum: 0, value: -2}}]}}}
+               }
+             } = Schema.validate(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
+    end
+
+    test "validate!/2 raises a ValidationError for an invalid user" do
+      assert_raise ValidationError, fn ->
+        Schema.validate!(:user, %{name: "", age: 21})
+      end
+    end
+
+    test "validate!/2 raises a ValidationError for an invalid nums map" do
+      assert_raise ValidationError, fn ->
+        Schema.validate!(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
+      end
+    end
+
+    test "validate!/1 returns :ok for a valid person" do
+      assert Schema.validate!(name: "John", age: 21) == :ok
+    end
+
+    test "validate!/1 raises a ValidationError for an invalid person" do
+      assert_raise ValidationError, fn ->
+        Schema.validate!(age: -1)
+      end
+    end
+
+    test "cast/2 returns casted data" do
+      assert Schema.cast(:nums, %{pos: [1, "2"], neg: [-5, "-4"]}) ==
+               {:ok, %{neg: [-5, -4], pos: [1, 2]}}
+    end
+
+    test "cast!/2 returns casted data" do
+      assert Schema.cast!(:nums, %{pos: [1, "2"], neg: [-5, "-4"]}) ==
+               %{neg: [-5, -4], pos: [1, 2]}
     end
   end
 end

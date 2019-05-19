@@ -3,6 +3,7 @@ defmodule Xema.Cast.StructTest do
 
   import Xema, only: [cast: 2, cast!: 2]
 
+  alias Xema.ValidationError
   # A test struct with Xema.Castable protocol implementation
   alias Test.User
   # A test strucht without Xema.Castable protocol implementation
@@ -25,17 +26,35 @@ defmodule Xema.Cast.StructTest do
 
     test "from an empty map", %{schema: schema} do
       data = %{}
-      assert cast(schema, data) == {:ok, data}
+
+      assert cast(schema, data) ==
+               {:error,
+                %ValidationError{
+                  message: "Expected :struct, got %{}.",
+                  reason: %{type: :struct, value: %{}}
+                }}
     end
 
     test "from a map with atom keys", %{schema: schema} do
       data = %{foo: 6}
-      assert cast(schema, data) == {:ok, data}
+
+      assert cast(schema, data) ==
+               {:error,
+                %ValidationError{
+                  message: "Expected :struct, got %{foo: 6}.",
+                  reason: %{type: :struct, value: %{foo: 6}}
+                }}
     end
 
     test "from a map with string keys", %{schema: schema} do
       data = %{"foo" => 6}
-      assert cast(schema, data) == {:ok, data}
+
+      assert cast(schema, data) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: "Expected :struct, got %{\"foo\" => 6}.",
+                  reason: %{type: :struct, value: %{"foo" => 6}}
+                }}
     end
 
     test "from a struct with castabel implementation", %{schema: schema} do
@@ -208,17 +227,23 @@ defmodule Xema.Cast.StructTest do
 
     test "from an empty map", %{schema: schema} do
       data = %{}
-      assert cast!(schema, data) == data
+      assert_raise ValidationError, "Expected :struct, got %{}.", fn -> cast!(schema, data) end
     end
 
     test "from a map with atom keys", %{schema: schema} do
       data = %{foo: 6}
-      assert cast!(schema, data) == data
+
+      assert_raise ValidationError, "Expected :struct, got %{foo: 6}.", fn ->
+        cast!(schema, data) == data
+      end
     end
 
     test "from a map with string keys", %{schema: schema} do
       data = %{"foo" => 6}
-      assert cast!(schema, data) == data
+
+      assert_raise ValidationError, ~s|Expected :struct, got %{"foo" => 6}.|, fn ->
+        cast!(schema, data) == data
+      end
     end
 
     test "from a struct with castabel implementation", %{schema: schema} do
