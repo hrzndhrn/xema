@@ -77,7 +77,17 @@ defmodule Xema.Builder do
   """
   defmacro xema(name, schema) do
     quote do
+
+      if Module.get_attribute(__MODULE__, :multi) == nil do
+        raise "Use `use Xema` to to use the `xema/2` macro."
+      end
+
       Module.register_attribute(__MODULE__, :xemas, accumulate: true)
+
+
+      if !@multi && length(@xemas) > 0 do
+        raise "Use `use Xema, multi: true` to setup multiple schema in a module."
+      end
 
       Module.put_attribute(
         __MODULE__,
@@ -94,7 +104,7 @@ defmodule Xema.Builder do
       def validate!(unquote(name), data),
         do: Xema.validate!(@xemas[unquote(name)], data)
 
-      if Module.get_attribute(__MODULE__, :default) do
+      if Module.get_attribute(__MODULE__, :default) || !@multi do
         Module.put_attribute(__MODULE__, :default, false)
 
         def valid?(data),

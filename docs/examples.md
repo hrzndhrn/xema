@@ -8,7 +8,7 @@ A minimal example.
 
 ```elixir
 iex> defmodule Example.Basic do
-...>   use Xema
+...>   use Xema, multi: true
 ...>
 ...>   xema :person,
 ...>        map(
@@ -55,7 +55,6 @@ An example to check opts.
 iex> defmodule Example.Options do
 ...>   use Xema
 ...>
-...>   @default true
 ...>   xema :opts,
 ...>        keyword(
 ...>          properties: %{
