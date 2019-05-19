@@ -12,6 +12,8 @@ defmodule Xema do
   + `__MODULE__.valid?/2`
   + `__MODULE__.validate/2`
   + `__MODULE__.validate!/2`
+  + `__MODULE__.cast/2`
+  + `__MODULE__.cast!/2`
 
   The macro `xema/2` supports the construction of a schema. After that
   the schema is available via the functions above.
@@ -21,6 +23,8 @@ defmodule Xema do
   + `__MODULE__.valid?/1`
   + `__MODULE__.validate/1`
   + `__MODULE__.validate!/1`
+  + `__MODULE__.cast/1`
+  + `__MODULE__.cast!/1`
 
   The functions with arity 1 are also available for single schema modules.
 
@@ -43,7 +47,13 @@ defmodule Xema do
          message: "Value 0 is less than minimum value of 1.",
          reason: %{minimum: 1, value: 0}
       }}
-
+      iex> SingleSchema.cast("5")
+      {:ok, 5}
+      iex> SingleSchema.cast("-5")
+      {:error, %Xema.ValidationError{
+         message: "Value -5 is less than minimum value of 1.",
+         reason: %{minimum: 1, value: -5}
+      }}
 
   Multi schema module:
 

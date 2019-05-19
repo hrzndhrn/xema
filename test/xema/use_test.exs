@@ -37,6 +37,35 @@ defmodule Xema.UseTest do
     test "valild?/1 returns true for a valied user" do
       assert UserSchema.valid?(%{name: "Nick", age: 24})
     end
+
+    test "cast/1 returns casted data" do
+      assert UserSchema.cast(%{name: "Nick", age: "42"}) == {:ok, %{age: 42, name: "Nick"}}
+    end
+
+    test "cast/1 returns an error tuple with CastError for invalid data" do
+      assert UserSchema.cast(%{name: [], age: "42"}) ==
+               {:error,
+                %Xema.CastError{
+                  key: nil,
+                  message: "cannot cast [] to :string at [:name]",
+                  path: [:name],
+                  to: :string,
+                  value: []
+                }}
+    end
+
+    test "cast/1 returns an errot tuple with ValidationError for invalid data" do
+      assert UserSchema.cast(%{name: "Nick", age: "-42"}) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: "Value -42 is less than minimum value of 0, at [:age].",
+                  reason: %{properties: %{age: %{minimum: 0, value: -42}}}
+                }}
+    end
+
+    test "cast!/1 returns casted data" do
+      assert UserSchema.cast!(%{name: "Nick", age: "42"}) == %{age: 42, name: "Nick"}
+    end
   end
 
   describe "module with multiple schemas" do
@@ -166,6 +195,16 @@ defmodule Xema.UseTest do
       assert_raise ValidationError, fn ->
         Schema.validate!(age: -1)
       end
+    end
+
+    test "cast/2 returns casted data" do
+      assert Schema.cast(:nums, %{pos: [1, "2"], neg: [-5, "-4"]}) ==
+               {:ok, %{neg: [-5, -4], pos: [1, 2]}}
+    end
+
+    test "cast!/2 returns casted data" do
+      assert Schema.cast!(:nums, %{pos: [1, "2"], neg: [-5, "-4"]}) ==
+               %{neg: [-5, -4], pos: [1, 2]}
     end
   end
 end
