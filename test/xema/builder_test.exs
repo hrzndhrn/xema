@@ -5,6 +5,20 @@ defmodule Xema.BuilderTest do
 
   import Xema.Builder
 
+  describe "xema/2" do
+    test "raise an error when Xema.Builder is just imported" do
+      message = "Use `use Xema` to to use the `xema/2` macro."
+
+      assert_raise RuntimeError, message, fn ->
+        defmodule Foo do
+          import Xema.Builder
+
+          xema :foo, integer()
+        end
+      end
+    end
+  end
+
   describe "any function" do
     test "with a simple schema" do
       schema = Xema.new(any())

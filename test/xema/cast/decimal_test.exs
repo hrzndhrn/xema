@@ -12,6 +12,12 @@ defmodule Xema.Cast.DecimalTest do
       %{schema: Xema.new({:struct, module: Decimal})}
     end
 
+    test "from a decimal", %{schema: schema} do
+      data = Decimal.from_float(55.5)
+
+      assert cast(schema, data) == {:ok, data}
+    end
+
     test "from a valid string", %{schema: schema} do
       assert cast(schema, "45.6") == {:ok, Decimal.from_float(45.6)}
     end

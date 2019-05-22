@@ -110,6 +110,45 @@ defimpl Xema.Castable, for: BitString do
   end
 end
 
+defimpl Xema.Castable, for: Date do
+  alias Xema.Schema
+
+  def cast(date, %Schema{type: :struct, module: Date}), do: {:ok, date}
+
+  def cast(date, %Schema{type: :struct, module: module})
+      when not is_nil(module),
+      do: {:error, %{to: module, value: date}}
+
+  def cast(date, %Schema{type: type}),
+    do: {:error, %{to: type, value: date}}
+end
+
+defimpl Xema.Castable, for: DateTime do
+  alias Xema.Schema
+
+  def cast(date_time, %Schema{type: :struct, module: DateTime}), do: {:ok, date_time}
+
+  def cast(date_time, %Schema{type: :struct, module: module})
+      when not is_nil(module),
+      do: {:error, %{to: module, value: date_time}}
+
+  def cast(date_time, %Schema{type: type}),
+    do: {:error, %{to: type, value: date_time}}
+end
+
+defimpl Xema.Castable, for: Decimal do
+  alias Xema.Schema
+
+  def cast(decimal, %Schema{type: :struct, module: Decimal}), do: {:ok, decimal}
+
+  def cast(decimal, %Schema{type: :struct, module: module})
+      when not is_nil(module),
+      do: {:error, %{to: module, value: decimal}}
+
+  def cast(decimal, %Schema{type: type}),
+    do: {:error, %{to: type, value: decimal}}
+end
+
 defimpl Xema.Castable, for: Float do
   alias Xema.Schema
 
@@ -322,6 +361,32 @@ defimpl Xema.Castable, for: Map do
       end
     end)
   end
+end
+
+defimpl Xema.Castable, for: NaiveDateTime do
+  alias Xema.Schema
+
+  def cast(date_time, %Schema{type: :struct, module: NaiveDateTime}), do: {:ok, date_time}
+
+  def cast(date_time, %Schema{type: :struct, module: module})
+      when not is_nil(module),
+      do: {:error, %{to: module, value: date_time}}
+
+  def cast(date_time, %Schema{type: type}),
+    do: {:error, %{to: type, value: date_time}}
+end
+
+defimpl Xema.Castable, for: Time do
+  alias Xema.Schema
+
+  def cast(time, %Schema{type: :struct, module: Time}), do: {:ok, time}
+
+  def cast(time, %Schema{type: :struct, module: module})
+      when not is_nil(module),
+      do: {:error, %{to: module, value: time}}
+
+  def cast(time, %Schema{type: type}),
+    do: {:error, %{to: type, value: time}}
 end
 
 defimpl Xema.Castable, for: Tuple do

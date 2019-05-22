@@ -13,13 +13,16 @@ defmodule Xema.Mixfile do
       package: package(),
       elixirc_paths: elixirc_paths(Mix.env()),
       source_url: "https://github.com/hrzndhrn/xema",
+      aliases: aliases(),
 
       # Coveralls
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
+        carp: :test,
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
+        "coveralls.travis": :test,
         "coveralls.html": :test
       ],
 
@@ -28,6 +31,7 @@ defmodule Xema.Mixfile do
         extras: [
           "docs/readme.md",
           "docs/usage.md",
+          "docs/cast.md",
           "docs/loader.md",
           "docs/examples.md",
           "docs/unsupported.md"
@@ -38,7 +42,8 @@ defmodule Xema.Mixfile do
       # Dialyzer
       dialyzer: [
         ignore_warnings: ".dialyzer_ignore.exs",
-        plt_add_apps: [:decimal]
+        plt_add_apps: [:decimal],
+        plt_file: {:no_warn, "test/support/plts/dialyzer.plt"}
       ]
     ]
   end
@@ -57,7 +62,7 @@ defmodule Xema.Mixfile do
       {:cowboy, "~> 2.4", only: :test},
       {:credo, "~> 1.0", only: [:dev, :test]},
       {:decimal, "~> 1.7", optional: true},
-      {:dialyxir, "~> 1.0.0-rc.4", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.4", only: :dev, runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
       {:inch_ex, "~> 2.0", only: [:dev, :test]},
@@ -68,6 +73,10 @@ defmodule Xema.Mixfile do
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp aliases do
+    [carp: "test --seed 0 --max-failures 1 --trace"]
+  end
 
   defp package do
     [
