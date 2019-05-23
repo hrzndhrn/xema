@@ -26,20 +26,22 @@ defmodule Xema.StructTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :struct, got "foo".|,
                  reason: %{type: :struct, value: "foo"}
-               }
+               } = error
              } = validate(schema, "foo")
+
+      assert Exception.message(error) == ~s|Expected :struct, got "foo".|
     end
 
     test "validate/2 with a map", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected :struct, got %{}.",
                  reason: %{type: :struct, value: %{}}
-               }
+               } = error
              } = validate(schema, %{})
+
+      assert Exception.message(error) == "Expected :struct, got %{}."
     end
   end
 
@@ -56,10 +58,12 @@ defmodule Xema.StructTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected Xema.StructTest.Foo, got %Xema.StructTest.Bar{foo: nil}.",
                  reason: %{module: Xema.StructTest.Foo, value: %Xema.StructTest.Bar{foo: nil}}
-               }
+               } = error
              } = validate(schema, %Bar{})
+
+      assert Exception.message(error) ==
+               "Expected Xema.StructTest.Foo, got %Xema.StructTest.Bar{foo: nil}."
     end
   end
 
@@ -76,10 +80,11 @@ defmodule Xema.StructTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected Regex, got %Xema.StructTest.Bar{foo: nil}.",
                  reason: %{module: Regex, value: %Xema.StructTest.Bar{foo: nil}}
-               }
+               } = error
              } = validate(schema, %Bar{})
+
+      assert Exception.message(error) == "Expected Regex, got %Xema.StructTest.Bar{foo: nil}."
     end
   end
 end

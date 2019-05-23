@@ -18,10 +18,11 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :keyword, got "foo".|,
                  reason: %{type: :keyword, value: "foo"}
-               }
+               } = error
              } = validate(schema, "foo")
+
+      assert Exception.message(error) == ~s|Expected :keyword, got "foo".|
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -55,32 +56,34 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :number, got "foo", at [:foo].|,
                  reason: %{
                    properties: %{
                      foo: %{type: :number, value: "foo"}
                    }
                  }
-               }
+               } = error
              } = validate(schema, foo: "foo", bar: "bar")
 
-      msg = """
-      Expected :string, got 2, at [:bar].
-      Expected :number, got "foo", at [:foo].\
-      """
+      assert Exception.message(error) == ~s|Expected :number, got "foo", at [:foo].|
 
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      foo: %{type: :number, value: "foo"},
                      bar: %{type: :string, value: 2}
                    }
                  }
-               }
+               } = error
              } = validate(schema, foo: "foo", bar: 2)
+
+      message = """
+      Expected :string, got 2, at [:bar].
+      Expected :number, got "foo", at [:foo].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -93,10 +96,11 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected at least 2 properties, got %{foo: 42}.",
                  reason: %{min_properties: 2}
-               }
+               } = error
              } = validate(schema, foo: 42)
+
+      assert Exception.message(error) == "Expected at least 2 properties, got %{foo: 42}."
     end
 
     test "validate/2 with valid amount of properties", %{schema: schema} do
@@ -107,10 +111,12 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected at most 3 properties, got %{a: 1, b: 2, c: 3, d: 4}.",
                  reason: %{max_properties: 3}
-               }
+               } = error
              } = validate(schema, a: 1, b: 2, c: 3, d: 4)
+
+      assert Exception.message(error) ==
+               "Expected at most 3 properties, got %{a: 1, b: 2, c: 3, d: 4}."
     end
   end
 
@@ -133,34 +139,36 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected only defined properties, got key [:add].",
                  reason: %{
                    properties: %{
                      add: %{additional_properties: false}
                    }
                  }
-               }
+               } = error
              } = validate(schema, foo: 44, add: 1)
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:add]."
     end
 
     test "validate/2 with additional properties", %{schema: schema} do
-      msg = """
-      Expected only defined properties, got key [:add].
-      Expected only defined properties, got key [:plus].\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      add: %{additional_properties: false},
                      plus: %{additional_properties: false}
                    }
                  }
-               }
+               } = error
              } = validate(schema, foo: 44, add: 1, plus: 3)
+
+      message = """
+      Expected only defined properties, got key [:add].
+      Expected only defined properties, got key [:plus].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -182,33 +190,35 @@ defmodule Xema.KeywordTest do
     test "validate/2 with invalid additional property", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :integer, got "invalid", at [:add].|,
                 reason: %{
                   properties: %{
                     add: %{type: :integer, value: "invalid"}
                   }
                 }
-              }} = validate(schema, foo: "foo", add: "invalid")
+              } = error} = validate(schema, foo: "foo", add: "invalid")
+
+      assert Exception.message(error) == ~s|Expected :integer, got "invalid", at [:add].|
     end
 
     test "validate/2 with invalid additional properties", %{schema: schema} do
-      msg = """
-      Expected :integer, got "invalid", at [:add].
-      Expected :integer, got "+", at [:plus].\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      add: %{type: :integer, value: "invalid"},
                      plus: %{type: :integer, value: "+"}
                    }
                  }
-               }
+               } = error
              } = validate(schema, foo: "foo", add: "invalid", plus: "+")
+
+      message = """
+      Expected :integer, got "invalid", at [:add].
+      Expected :integer, got "+", at [:plus].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -227,12 +237,13 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Required properties are missing: [:foo].",
                  reason: %{
                    required: [:foo]
                  }
-               }
+               } = error
              } = validate(schema, missing: 44)
+
+      assert Exception.message(error) == "Required properties are missing: [:foo]."
     end
   end
 
@@ -251,12 +262,13 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Required properties are missing: [:a, :c].",
                  reason: %{
                    required: [:a, :c]
                  }
-               }
+               } = error
              } = validate(schema, b: 3, d: 8)
+
+      assert Exception.message(error) == "Required properties are missing: [:a, :c]."
     end
   end
 
@@ -283,14 +295,15 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected only defined properties, got key [:x_1].",
                  reason: %{
                    properties: %{
                      x_1: %{additional_properties: false}
                    }
                  }
-               }
+               } = error
              } = validate(schema, x_1: 44)
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:x_1]."
     end
   end
 
@@ -317,14 +330,15 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected only defined properties, got key [:x_1].",
                  reason: %{
                    properties: %{
                      x_1: %{additional_properties: false}
                    }
                  }
-               }
+               } = error
              } = validate(schema, x_1: 44)
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:x_1]."
     end
   end
 
@@ -351,14 +365,15 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected only defined properties, got key [:x_1].",
                  reason: %{
                    properties: %{
                      x_1: %{additional_properties: false}
                    }
                  }
-               }
+               } = error
              } = validate(schema, x_1: 44)
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:x_1]."
     end
   end
 
@@ -412,14 +427,15 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Dependencies for :b failed. Missing required key :c.",
                  reason: %{
                    dependencies: %{
                      b: :c
                    }
                  }
-               }
+               } = error
              } = validate(schema, a: 1, b: 2)
+
+      assert Exception.message(error) == "Dependencies for :b failed. Missing required key :c."
     end
   end
 
@@ -453,12 +469,13 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Dependencies for :b failed. Missing required key :c.",
                  reason: %{
                    dependencies: %{b: :c}
                  }
-               }
+               } = error
              } = validate(schema, a: 1, b: 2)
+
+      assert Exception.message(error) == "Dependencies for :b failed. Missing required key :c."
     end
   end
 
@@ -494,15 +511,17 @@ defmodule Xema.KeywordTest do
     end
 
     test "validate/2 with missing dependency", %{schema: schema} do
-      msg = """
+      assert {
+               :error,
+               %ValidationError{reason: %{dependencies: %{b: %{required: [:c]}}}} = error
+             } = validate(schema, a: 1, b: 2)
+
+      message = """
       Dependencies for :b failed.
         Required properties are missing: [:c].\
       """
 
-      assert {
-               :error,
-               %ValidationError{message: ^msg, reason: %{dependencies: %{b: %{required: [:c]}}}}
-             } = validate(schema, a: 1, b: 2)
+      assert Exception.message(error) == message
     end
   end
 
@@ -535,10 +554,12 @@ defmodule Xema.KeywordTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Dependencies for :penny failed. Missing required key :pound.",
                  reason: %{dependencies: %{penny: :pound}}
-               }
+               } = error
              } = validate(schema, penny: 1)
+
+      assert Exception.message(error) ==
+               "Dependencies for :penny failed. Missing required key :pound."
     end
   end
 
@@ -562,16 +583,9 @@ defmodule Xema.KeywordTest do
     test "with invalid atom keys", %{schema: schema} do
       data = [foo: 1, a: 2, b: 3]
 
-      msg = """
-      Invalid property names.
-        :a : Expected minimum length of 3, got "a".
-        :b : Expected minimum length of 3, got "b".\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    value: [:a, :b, :foo],
                    property_names: [
@@ -579,8 +593,16 @@ defmodule Xema.KeywordTest do
                      b: %{min_length: 3, value: "b"}
                    ]
                  }
-               }
+               } = error
              } = validate(schema, data)
+
+      message = """
+      Invalid property names.
+        :a : Expected minimum length of 3, got "a".
+        :b : Expected minimum length of 3, got "b".\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 end

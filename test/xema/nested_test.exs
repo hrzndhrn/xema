@@ -51,7 +51,6 @@ defmodule Xema.NestedTest do
 
       assert {:error,
               %ValidationError{
-                message: "Value -2 is less than minimum value of 0, at [:items, 1, :num].",
                 reason: %{
                   properties: %{
                     items: %{
@@ -59,7 +58,10 @@ defmodule Xema.NestedTest do
                     }
                   }
                 }
-              }} = validate(schema, data)
+              } = error} = validate(schema, data)
+
+      assert Exception.message(error) ==
+               "Value -2 is less than minimum value of 0, at [:items, 1, :num]."
     end
   end
 
@@ -109,7 +111,6 @@ defmodule Xema.NestedTest do
 
       assert {:error,
               %ValidationError{
-                message: "Value -2 is less than minimum value of 0, at [:items, 1, :num].",
                 reason: %{
                   properties: %{
                     items: %{
@@ -117,7 +118,10 @@ defmodule Xema.NestedTest do
                     }
                   }
                 }
-              }} = validate(schema, data)
+              } = error} = validate(schema, data)
+
+      assert Exception.message(error) ==
+               "Value -2 is less than minimum value of 0, at [:items, 1, :num]."
     end
   end
 end

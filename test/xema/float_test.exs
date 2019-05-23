@@ -18,20 +18,22 @@ defmodule Xema.FloatTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected :float, got 2.",
                  reason: %{type: :float, value: 2}
-               }
+               } = error
              } = validate(schema, 2)
+
+      assert Exception.message(error) == "Expected :float, got 2."
     end
 
     test "validate/2 with a string", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :float, got "foo".|,
                  reason: %{type: :float, value: "foo"}
-               }
+               } = error
              } = validate(schema, "foo")
+
+      assert Exception.message(error) == ~s|Expected :float, got "foo".|
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -58,20 +60,22 @@ defmodule Xema.FloatTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 1.0 is less than minimum value of 2.",
                  reason: %{value: 1.0, minimum: 2}
-               }
+               } = error
              } = validate(schema, 1.0)
+
+      assert Exception.message(error) == "Value 1.0 is less than minimum value of 2."
     end
 
     test "validate/2 with a too big float", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 5.0 exceeds maximum value of 4.",
                  reason: %{value: 5.0, maximum: 4}
-               }
+               } = error
              } = validate(schema, 5.0)
+
+      assert Exception.message(error) == "Value 5.0 exceeds maximum value of 4."
     end
   end
 
@@ -94,40 +98,44 @@ defmodule Xema.FloatTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 1.0 is less than minimum value of 2.",
                  reason: %{value: 1.0, minimum: 2, exclusive_minimum: true}
-               }
+               } = error
              } = validate(schema, 1.0)
+
+      assert Exception.message(error) == "Value 1.0 is less than minimum value of 2."
     end
 
     test "validate/2 with a minimum float", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 2.0 equals exclusive minimum value of 2.",
                  reason: %{value: 2.0, minimum: 2, exclusive_minimum: true}
-               }
+               } = error
              } = validate(schema, 2.0)
+
+      assert Exception.message(error) == "Value 2.0 equals exclusive minimum value of 2."
     end
 
     test "validate/2 with a maximum float", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 4.0 equals exclusive maximum value of 4.",
                  reason: %{value: 4.0, maximum: 4, exclusive_maximum: true}
-               }
+               } = error
              } = validate(schema, 4.0)
+
+      assert Exception.message(error) == "Value 4.0 equals exclusive maximum value of 4."
     end
 
     test "validate/2 with a too big float", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 5.0 exceeds maximum value of 4.",
                  reason: %{value: 5.0, maximum: 4, exclusive_maximum: true}
-               }
+               } = error
              } = validate(schema, 5.0)
+
+      assert Exception.message(error) == "Value 5.0 exceeds maximum value of 4."
     end
   end
 
@@ -150,20 +158,22 @@ defmodule Xema.FloatTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 1.2 equals exclusive minimum value of 1.2.",
                  reason: %{exclusive_minimum: 1.2, value: 1.2}
-               }
+               } = error
              } = validate(schema, 1.2)
+
+      assert Exception.message(error) == "Value 1.2 equals exclusive minimum value of 1.2."
     end
 
     test "validate/2 with a float equal to exclusive maximum", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 1.4 equals exclusive maximum value of 1.4.",
                  reason: %{exclusive_maximum: 1.4, value: 1.4}
-               }
+               } = error
              } = validate(schema, 1.4)
+
+      assert Exception.message(error) == "Value 1.4 equals exclusive maximum value of 1.4."
     end
   end
 
@@ -180,10 +190,11 @@ defmodule Xema.FloatTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 6.2 is not a multiple of 1.2.",
                  reason: %{value: 6.2, multiple_of: 1.2}
-               }
+               } = error
              } = validate(schema, 6.2)
+
+      assert Exception.message(error) == "Value 6.2 is not a multiple of 1.2."
     end
   end
 
@@ -200,10 +211,11 @@ defmodule Xema.FloatTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 2.2 is not defined in enum.",
                  reason: %{enum: [1.2, 1.3, 3.3], value: 2.2}
-               }
+               } = error
              } = validate(schema, 2.2)
+
+      assert Exception.message(error) == "Value 2.2 is not defined in enum."
     end
   end
 end

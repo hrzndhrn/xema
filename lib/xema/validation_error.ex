@@ -3,20 +3,20 @@ defmodule Xema.ValidationError do
   Raised when a validation fails.
   """
 
-  alias Xema.ValidationError
-
   @type path :: [atom | integer | String.t()]
   @type opts :: [] | [path: path]
 
   defexception [:message, :reason]
 
   @impl true
-  def exception(error) do
-    %ValidationError{reason: error, message: format_error(error)}
-  rescue
-    error ->
-      # Exception.format(:error, error, __STACKTRACE__) |>IO.puts
-      %ValidationError{reason: error, message: "Unexpected error."}
+  def message(%{message: nil} = exception), do: format_error(exception.reason)
+
+  def message(%{message: message}), do: message
+
+  @impl true
+  def blame(exception, stacktrace) do
+    message = message(exception.reason)
+    {%{exception | message: message}, stacktrace}
   end
 
   @doc """

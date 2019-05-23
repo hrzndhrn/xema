@@ -22,10 +22,11 @@ defmodule Xema.NotTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value is valid against schema from not, got 1.",
                  reason: %{not: :ok, value: 1}
-               }
+               } = error
              } = validate(schema, 1)
+
+      assert Exception.message(error) == "Value is valid against schema from not, got 1."
     end
   end
 
@@ -40,10 +41,11 @@ defmodule Xema.NotTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value is valid against schema from not, got 19.",
                  reason: %{not: :ok, value: 19}
-               }
+               } = error
              } = validate(schema, 19)
+
+      assert Exception.message(error) == "Value is valid against schema from not, got 19."
     end
   end
 
@@ -80,10 +82,12 @@ defmodule Xema.NotTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Value is valid against schema from not, got "foo", at [:foo].|,
                  reason: %{properties: %{foo: %{not: :ok, value: "foo"}}}
-               }
+               } = error
              } = validate(schema, %{foo: "foo"})
+
+      assert Exception.message(error) ==
+               ~s|Value is valid against schema from not, got "foo", at [:foo].|
     end
   end
 

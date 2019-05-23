@@ -17,22 +17,14 @@ defmodule Xema.CastError do
         }
 
   @impl true
-  def exception(%{path: path, to: to, value: value} = error) do
-    %CastError{
-      message: format_error(error),
-      to: to,
-      value: value,
-      path: path
-    }
-  end
+  def message(%{message: nil} = exception), do: format_error(exception)
 
-  def exception(%{path: path, to: to, key: key} = error) do
-    %CastError{
-      message: format_error(error),
-      to: to,
-      key: key,
-      path: path
-    }
+  def message(%{message: message}), do: message
+
+  @impl true
+  def blame(exception, stacktrace) do
+    message = message(exception)
+    {%{exception | message: message}, stacktrace}
   end
 
   @doc """

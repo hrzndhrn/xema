@@ -13,16 +13,17 @@ defmodule FormatTest do
     test "with an invalid day in date-time string", %{schema: schema} do
       data = "1990-02-31T15:59:60.123-08:00"
 
-      msg =
+      message =
         ~s|String "1990-02-31T15:59:60.123-08:00" does not validate against format :date_time.|
 
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{format: :date_time, value: "1990-02-31T15:59:60.123-08:00"}
-               }
+               } = error
              } = validate(schema, data)
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -49,10 +50,12 @@ defmodule FormatTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|String "a(.*b" does not validate against format :regex.|,
                  reason: %{format: :regex, value: "a(.*b"}
-               }
+               } = error
              } = validate(schema, "a(.*b")
+
+      assert Exception.message(error) ==
+               ~s|String "a(.*b" does not validate against format :regex.|
     end
   end
 end

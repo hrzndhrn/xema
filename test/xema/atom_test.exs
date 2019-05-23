@@ -18,24 +18,26 @@ defmodule Xema.AtomTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected :atom, got 2.3.",
                  reason: %{
                    type: :atom,
                    value: 2.3
                  }
-               }
+               } = error
              } = validate(schema, 2.3)
+
+      assert Exception.message(error) == "Expected :atom, got 2.3."
     end
 
     test "validate/2 with a string", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :atom, got "foo".|,
                 reason: %{
                   type: :atom,
                   value: "foo"
                 }
-              }} = validate(schema, "foo")
+              } = error} = validate(schema, "foo")
+
+      assert Exception.message(error) == ~s|Expected :atom, got "foo".|
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do

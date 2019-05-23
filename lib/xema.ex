@@ -44,14 +44,12 @@ defmodule Xema do
       true
       iex> SingleSchema.validate(0)
       {:error, %Xema.ValidationError{
-         message: "Value 0 is less than minimum value of 1.",
          reason: %{minimum: 1, value: 0}
       }}
       iex> SingleSchema.cast("5")
       {:ok, 5}
       iex> SingleSchema.cast("-5")
       {:error, %Xema.ValidationError{
-         message: "Value -5 is less than minimum value of 1.",
          reason: %{minimum: 1, value: -5}
       }}
 
@@ -91,7 +89,6 @@ defmodule Xema do
       :ok
       iex> Schema.validate(%{name: "", age: 21})
       {:error, %Xema.ValidationError{
-        message: ~s|Expected minimum length of 1, got "", at [:name].|,
         reason: %{
           properties: %{name: %{min_length: 1, value: ""}}}
         }
@@ -167,7 +164,6 @@ defmodule Xema do
       true
       iex> Xema.validate(schema, [2, 3, 1])
       {:error, %Xema.ValidationError{
-        message: "Value 1 is less than minimum value of 2, at [2].",
         reason: %{
           items: [{2, %{value: 1, minimum: 2}}]}
         }
@@ -520,14 +516,12 @@ defmodule Xema do
       iex> Xema.cast(schema, "five")
       {:error, %Xema.CastError{
         key: nil,
-        message: ~s|cannot cast "five" to :integer|,
         path: [],
         to: :integer,
         value: "five"
       }}
       iex> Xema.cast(schema, "0")
       {:error, %Xema.ValidationError{
-        message: "Value 0 is less than minimum value of 1.",
         reason: %{minimum: 1, value: 0}
       }}
   """
@@ -540,8 +534,14 @@ defmodule Xema do
     error ->
       {:error, error}
   catch
-    {:error, %{path: path} = reason} ->
-      {:error, CastError.exception(%{reason | path: Enum.reverse(path)})}
+    {:error, reason} ->
+      {:error,
+       CastError.exception(
+         to: Map.get(reason, :to),
+         key: Map.get(reason, :key),
+         value: Map.get(reason, :value),
+         path: Enum.reverse(reason.path)
+       )}
   end
 
   @spec do_cast!(Schema.t(), term, list) :: {:ok, term} | {:error, term}

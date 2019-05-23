@@ -26,7 +26,6 @@ defmodule Xema.Cast.AtomTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :atom, got "foo".|,
                 reason: %{
                   type: :atom,
                   value: "foo"
@@ -38,14 +37,14 @@ defmodule Xema.Cast.AtomTest do
 
     test "from an invalid string", %{schema: schema} do
       data = "xyz"
-      expected = {:error, CastError.exception(%{path: [], to: :atom, value: "xyz"})}
+      expected = {:error, CastError.exception(path: [], to: :atom, value: "xyz")}
 
       assert cast(schema, data) == expected
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :atom, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :atom, value: data)}
 
         assert cast(schema, data) == expected
       end)

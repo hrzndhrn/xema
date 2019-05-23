@@ -15,15 +15,15 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with a string", %{schema: schema} do
-      assert validate(schema, "foo") ==
-               {:error,
-                %ValidationError{
-                  message: ~s|Expected :map, got "foo".|,
-                  reason: %{
-                    type: :map,
-                    value: "foo"
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  type: :map,
+                  value: "foo"
+                }
+              } = error} = validate(schema, "foo")
+
+      assert Exception.message(error) == ~s|Expected :map, got "foo".|
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -59,31 +59,33 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid values", %{schema: schema} do
-      assert validate(schema, %{foo: "foo", bar: "bar"}) ==
-               {:error,
-                %ValidationError{
-                  message: ~s|Expected :number, got "foo", at [:foo].|,
-                  reason: %{
-                    properties: %{
-                      foo: %{type: :number, value: "foo"}
-                    }
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    foo: %{type: :number, value: "foo"}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{foo: "foo", bar: "bar"})
 
-      assert validate(schema, %{foo: "foo", bar: 2}) ==
-               {:error,
-                %ValidationError{
-                  message: """
-                  Expected :string, got 2, at [:bar].
-                  Expected :number, got "foo", at [:foo].\
-                  """,
-                  reason: %{
-                    properties: %{
-                      foo: %{type: :number, value: "foo"},
-                      bar: %{type: :string, value: 2}
-                    }
+      assert Exception.message(error) == ~s|Expected :number, got "foo", at [:foo].|
+
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    foo: %{type: :number, value: "foo"},
+                    bar: %{type: :string, value: 2}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{foo: "foo", bar: 2})
+
+      message = """
+      Expected :string, got 2, at [:bar].
+      Expected :number, got "foo", at [:foo].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -112,16 +114,16 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid values", %{schema: schema} do
-      assert validate(schema, %{"foo" => "foo", "bar" => "bar"}) ==
-               {:error,
-                %ValidationError{
-                  message: ~s|Expected :number, got "foo", at ["foo"].|,
-                  reason: %{
-                    properties: %{
-                      "foo" => %{type: :number, value: "foo"}
-                    }
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    "foo" => %{type: :number, value: "foo"}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{"foo" => "foo", "bar" => "bar"})
+
+      assert Exception.message(error) == ~s|Expected :number, got "foo", at ["foo"].|
     end
   end
 
@@ -148,12 +150,13 @@ defmodule Xema.MapTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :atoms as key, got %{"foo" => 1}.|,
                  reason: %{
                    keys: :atoms
                  }
-               }
+               } = error
              } = validate(schema, %{"foo" => 1})
+
+      assert Exception.message(error) == ~s|Expected :atoms as key, got %{"foo" => 1}.|
     end
   end
 
@@ -176,12 +179,13 @@ defmodule Xema.MapTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected :strings as key, got %{foo: 1}.",
                  reason: %{
                    keys: :strings
                  }
-               }
+               } = error
              } = validate(schema, %{foo: 1})
+
+      assert Exception.message(error) == "Expected :strings as key, got %{foo: 1}."
     end
 
     test "validate/2 invalid key type", %{schema: schema} do
@@ -198,12 +202,13 @@ defmodule Xema.MapTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected at least 2 properties, got %{foo: 42}.",
                  reason: %{
                    min_properties: 2
                  }
-               }
+               } = error
              } = validate(schema, %{foo: 42})
+
+      assert Exception.message(error) == "Expected at least 2 properties, got %{foo: 42}."
     end
 
     test "validate/2 with valid amount of properties", %{schema: schema} do
@@ -214,12 +219,14 @@ defmodule Xema.MapTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected at most 3 properties, got %{a: 1, b: 2, c: 3, d: 4}.",
                  reason: %{
                    max_properties: 3
                  }
-               }
+               } = error
              } = validate(schema, %{a: 1, b: 2, c: 3, d: 4})
+
+      assert Exception.message(error) ==
+               "Expected at most 3 properties, got %{a: 1, b: 2, c: 3, d: 4}."
     end
   end
 
@@ -239,33 +246,35 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key type", %{schema: schema} do
-      assert validate(schema, %{"foo" => 44}) ==
-               {:error,
-                %ValidationError{
-                  message: ~s|Expected only defined properties, got key [\"foo\"].|,
-                  reason: %{
-                    properties: %{
-                      "foo" => %{additional_properties: false}
-                    }
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    "foo" => %{additional_properties: false}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{"foo" => 44})
+
+      assert Exception.message(error) == ~s|Expected only defined properties, got key [\"foo\"].|
     end
 
     test "validate/2 with additional property", %{schema: schema} do
-      assert validate(schema, %{foo: 44, add: 1, extra: 2}) ==
-               {:error,
-                %ValidationError{
-                  message: """
-                  Expected only defined properties, got key [:add].
-                  Expected only defined properties, got key [:extra].\
-                  """,
-                  reason: %{
-                    properties: %{
-                      add: %{additional_properties: false},
-                      extra: %{additional_properties: false}
-                    }
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    add: %{additional_properties: false},
+                    extra: %{additional_properties: false}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{foo: 44, add: 1, extra: 2})
+
+      message = """
+      Expected only defined properties, got key [:add].
+      Expected only defined properties, got key [:extra].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -285,16 +294,16 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key type", %{schema: schema} do
-      assert validate(schema, %{foo: 44}) ==
-               {:error,
-                %ValidationError{
-                  message: "Expected only defined properties, got key [:foo].",
-                  reason: %{
-                    properties: %{
-                      foo: %{additional_properties: false}
-                    }
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    foo: %{additional_properties: false}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{foo: 44})
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:foo]."
     end
   end
 
@@ -317,32 +326,34 @@ defmodule Xema.MapTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got \"invalid\", at [:add].|,
                  reason: %{
                    properties: %{add: %{type: :integer, value: "invalid"}}
                  }
-               }
+               } = error
              } = validate(schema, %{foo: "foo", add: "invalid"})
+
+      assert Exception.message(error) == ~s|Expected :integer, got \"invalid\", at [:add].|
     end
 
     test "validate/2 with invalid additional properties", %{schema: schema} do
-      msg = """
-      Expected :integer, got "invalid", at [:add].
-      Expected :integer, got "+", at [:plus].\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      add: %{type: :integer, value: "invalid"},
                      plus: %{type: :integer, value: "+"}
                    }
                  }
-               }
+               } = error
              } = validate(schema, %{foo: "foo", add: "invalid", plus: "+"})
+
+      message = """
+      Expected :integer, got "invalid", at [:add].
+      Expected :integer, got "+", at [:plus].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -356,25 +367,25 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key type", %{schema: schema} do
-      assert validate(schema, %{"foo" => 44}) ==
-               {:error,
-                %ValidationError{
-                  message: "Required properties are missing: [:foo].",
-                  reason: %{
-                    required: [:foo]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  required: [:foo]
+                }
+              } = error} = validate(schema, %{"foo" => 44})
+
+      assert Exception.message(error) == "Required properties are missing: [:foo]."
     end
 
     test "validate/2 with missing key", %{schema: schema} do
-      assert validate(schema, %{missing: 44}) ==
-               {:error,
-                %ValidationError{
-                  message: "Required properties are missing: [:foo].",
-                  reason: %{
-                    required: [:foo]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  required: [:foo]
+                }
+              } = error} = validate(schema, %{missing: 44})
+
+      assert Exception.message(error) == "Required properties are missing: [:foo]."
     end
   end
 
@@ -390,25 +401,25 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key type", %{schema: schema} do
-      assert validate(schema, %{"a" => 1, "b" => 2, "c" => 3}) ==
-               {:error,
-                %ValidationError{
-                  message: "Required properties are missing: [:a, :b, :c].",
-                  reason: %{
-                    required: [:a, :b, :c]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  required: [:a, :b, :c]
+                }
+              } = error} = validate(schema, %{"a" => 1, "b" => 2, "c" => 3})
+
+      assert Exception.message(error) == "Required properties are missing: [:a, :b, :c]."
     end
 
     test "validate/2 without required properties", %{schema: schema} do
-      assert validate(schema, %{b: 3, d: 8}) ==
-               {:error,
-                %ValidationError{
-                  message: "Required properties are missing: [:a, :c].",
-                  reason: %{
-                    required: [:a, :c]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  required: [:a, :c]
+                }
+              } = error} = validate(schema, %{b: 3, d: 8})
+
+      assert Exception.message(error) == "Required properties are missing: [:a, :c]."
     end
   end
 
@@ -424,25 +435,25 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid key type", %{schema: schema} do
-      assert validate(schema, %{foo: 44}) ==
-               {:error,
-                %ValidationError{
-                  message: ~s|Required properties are missing: ["foo"].|,
-                  reason: %{
-                    required: ["foo"]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  required: ["foo"]
+                }
+              } = error} = validate(schema, %{foo: 44})
+
+      assert Exception.message(error) == ~s|Required properties are missing: ["foo"].|
     end
 
     test "validate/2 with missing key", %{schema: schema} do
-      assert validate(schema, %{missing: 44}) ==
-               {:error,
-                %ValidationError{
-                  message: ~s|Required properties are missing: ["foo"].|,
-                  reason: %{
-                    required: ["foo"]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  required: ["foo"]
+                }
+              } = error} = validate(schema, %{missing: 44})
+
+      assert Exception.message(error) == ~s|Required properties are missing: ["foo"].|
     end
   end
 
@@ -466,16 +477,16 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid map", %{schema: schema} do
-      assert validate(schema, %{x_1: 44}) ==
-               {:error,
-                %ValidationError{
-                  message: "Expected only defined properties, got key [:x_1].",
-                  reason: %{
-                    properties: %{
-                      x_1: %{additional_properties: false}
-                    }
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    x_1: %{additional_properties: false}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{x_1: 44})
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:x_1]."
     end
   end
 
@@ -499,16 +510,16 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid map", %{schema: schema} do
-      assert validate(schema, %{x_1: 44}) ==
-               {:error,
-                %ValidationError{
-                  message: "Expected only defined properties, got key [:x_1].",
-                  reason: %{
-                    properties: %{
-                      x_1: %{additional_properties: false}
-                    }
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    x_1: %{additional_properties: false}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{x_1: 44})
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:x_1]."
     end
   end
 
@@ -532,16 +543,16 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with invalid map", %{schema: schema} do
-      assert validate(schema, %{x_1: 44}) ==
-               {:error,
-                %ValidationError{
-                  message: "Expected only defined properties, got key [:x_1].",
-                  reason: %{
-                    properties: %{
-                      x_1: %{additional_properties: false}
-                    }
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  properties: %{
+                    x_1: %{additional_properties: false}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{x_1: 44})
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:x_1]."
     end
   end
 
@@ -592,16 +603,16 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with missing dependency", %{schema: schema} do
-      assert validate(schema, %{a: 1, b: 2}) ==
-               {:error,
-                %ValidationError{
-                  message: "Dependencies for :b failed. Missing required key :c.",
-                  reason: %{
-                    dependencies: %{
-                      b: :c
-                    }
-                  }
-                }}
+      {:error,
+       %ValidationError{
+         reason: %{
+           dependencies: %{
+             b: :c
+           }
+         }
+       } = error} = validate(schema, %{a: 1, b: 2})
+
+      assert Exception.message(error) == "Dependencies for :b failed. Missing required key :c."
     end
   end
 
@@ -633,14 +644,14 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with missing dependency", %{schema: schema} do
-      assert validate(schema, %{b: 2, c: 2}) ==
-               {:error,
-                %ValidationError{
-                  message: "Dependencies for :b failed. Missing required key :d.",
-                  reason: %{
-                    dependencies: %{b: :d}
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  dependencies: %{b: :d}
+                }
+              } = error} = validate(schema, %{b: 2, c: 2})
+
+      assert Exception.message(error) == "Dependencies for :b failed. Missing required key :d."
     end
   end
 
@@ -676,20 +687,21 @@ defmodule Xema.MapTest do
     end
 
     test "validate/2 with missing dependency", %{schema: schema} do
-      msg = """
+      assert {
+               :error,
+               %ValidationError{
+                 reason: %{
+                   dependencies: %{b: %{required: [:c]}}
+                 }
+               } = error
+             } = validate(schema, %{a: 1, b: 2})
+
+      message = """
       Dependencies for :b failed.
         Required properties are missing: [:c].\
       """
 
-      assert {
-               :error,
-               %ValidationError{
-                 message: ^msg,
-                 reason: %{
-                   dependencies: %{b: %{required: [:c]}}
-                 }
-               }
-             } = validate(schema, %{a: 1, b: 2})
+      assert Exception.message(error) == message
     end
   end
 
@@ -722,12 +734,14 @@ defmodule Xema.MapTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Dependencies for :penny failed. Missing required key :pound.",
                  reason: %{
                    dependencies: %{penny: :pound}
                  }
-               }
+               } = error
              } = validate(schema, %{penny: 1})
+
+      assert Exception.message(error) ==
+               "Dependencies for :penny failed. Missing required key :pound."
     end
   end
 
@@ -747,37 +761,41 @@ defmodule Xema.MapTest do
     end
 
     test "with invalid atom keys", %{schema: schema} do
-      assert validate(schema, %{foo: 1, a: 2, b: 3}) ==
-               {:error,
-                %ValidationError{
-                  message: """
-                  Invalid property names.
-                    :a : Expected minimum length of 3, got "a".
-                    :b : Expected minimum length of 3, got "b".\
-                  """,
-                  reason: %{
-                    property_names: [
-                      a: %{min_length: 3, value: "a"},
-                      b: %{min_length: 3, value: "b"}
-                    ],
-                    value: [:a, :b, :foo]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  property_names: [
+                    a: %{min_length: 3, value: "a"},
+                    b: %{min_length: 3, value: "b"}
+                  ],
+                  value: [:a, :b, :foo]
+                }
+              } = error} = validate(schema, %{foo: 1, a: 2, b: 3})
+
+      message = """
+      Invalid property names.
+        :a : Expected minimum length of 3, got "a".
+        :b : Expected minimum length of 3, got "b".\
+      """
+
+      assert Exception.message(error) == message
     end
 
     test "with invalid string keys", %{schema: schema} do
-      assert validate(schema, %{"foo" => 1, "a" => 2}) ==
-               {:error,
-                %ValidationError{
-                  message: """
-                  Invalid property names.
-                    "a" : Expected minimum length of 3, got "a".\
-                  """,
-                  reason: %{
-                    property_names: [{"a", %{min_length: 3, value: "a"}}],
-                    value: ["a", "foo"]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  property_names: [{"a", %{min_length: 3, value: "a"}}],
+                  value: ["a", "foo"]
+                }
+              } = error} = validate(schema, %{"foo" => 1, "a" => 2})
+
+      message = """
+      Invalid property names.
+        "a" : Expected minimum length of 3, got "a".\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -797,70 +815,73 @@ defmodule Xema.MapTest do
     end
 
     test "validate with invalid property properties", %{schema: schema} do
-      assert validate(schema, %{properties: "maybe"}) ==
-               {:error,
-                %Xema.ValidationError{
-                  message: ~s|Value "maybe" is not defined in enum, at [:properties].|,
-                  reason: %{
+      assert {:error,
+              %Xema.ValidationError{
+                reason: %{
+                  properties: %{
                     properties: %{
-                      properties: %{
-                        enum: ["yes", "no"],
-                        value: "maybe"
-                      }
+                      enum: ["yes", "no"],
+                      value: "maybe"
                     }
                   }
-                }}
+                }
+              } = error} = validate(schema, %{properties: "maybe"})
+
+      assert Exception.message(error) ==
+               ~s|Value "maybe" is not defined in enum, at [:properties].|
     end
 
     test "validate with invalid property items", %{schema: schema} do
-      assert validate(schema, %{items: 5}) ==
-               {:error,
-                %Xema.ValidationError{
-                  message: "Expected :string, got 5, at [:items].",
-                  reason: %{
-                    properties: %{
-                      items: %{
-                        type: :string,
-                        value: 5
-                      }
+      assert {:error,
+              %Xema.ValidationError{
+                reason: %{
+                  properties: %{
+                    items: %{
+                      type: :string,
+                      value: 5
                     }
                   }
-                }}
+                }
+              } = error} = validate(schema, %{items: 5})
+
+      assert Exception.message(error) == "Expected :string, got 5, at [:items]."
     end
 
     test "validate with invalid property minimum", %{schema: schema} do
-      assert validate(schema, %{minimum: "5"}) ==
-               {:error,
-                %Xema.ValidationError{
-                  message: ~s|Expected :integer, got \"5\", at [:minimum].|,
-                  reason: %{
-                    properties: %{
-                      minimum: %{
-                        type: :integer,
-                        value: "5"
-                      }
+      assert {:error,
+              %Xema.ValidationError{
+                reason: %{
+                  properties: %{
+                    minimum: %{
+                      type: :integer,
+                      value: "5"
                     }
                   }
-                }}
+                }
+              } = error} = validate(schema, %{minimum: "5"})
+
+      assert Exception.message(error) == ~s|Expected :integer, got \"5\", at [:minimum].|
     end
 
     test "validate with invalid properties", %{schema: schema} do
-      assert validate(schema, %{properties: "maybe", items: 5, minimum: "5"}) ==
-               {:error,
-                %Xema.ValidationError{
-                  message: """
-                  Expected :string, got 5, at [:items].
-                  Expected :integer, got "5", at [:minimum].
-                  Value "maybe" is not defined in enum, at [:properties].\
-                  """,
-                  reason: %{
-                    properties: %{
-                      minimum: %{type: :integer, value: "5"},
-                      properties: %{enum: ["yes", "no"], value: "maybe"},
-                      items: %{type: :string, value: 5}
-                    }
+      assert {:error,
+              %Xema.ValidationError{
+                reason: %{
+                  properties: %{
+                    minimum: %{type: :integer, value: "5"},
+                    properties: %{enum: ["yes", "no"], value: "maybe"},
+                    items: %{type: :string, value: 5}
                   }
-                }}
+                }
+              } = error} = validate(schema, %{properties: "maybe", items: 5, minimum: "5"})
+
+      message = """
+      Expected :string, got 5, at [:items].
+      Expected :integer, got "5", at [:minimum].
+      Value "maybe" is not defined in enum, at [:properties].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 end

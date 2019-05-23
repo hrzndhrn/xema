@@ -42,7 +42,7 @@ defmodule Xema.Cast.MapTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :map, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :map, value: data)}
         assert cast(schema, data) == expected
       end)
     end
@@ -62,7 +62,7 @@ defmodule Xema.Cast.MapTest do
 
     test "from a map with unknown atom", %{schema: schema} do
       data = %{"xyz" => "zyx"}
-      expected = {:error, CastError.exception(%{path: [], key: "xyz", to: :map})}
+      expected = {:error, CastError.exception(path: [], key: "xyz", to: :map)}
 
       assert cast(schema, data) == expected
     end
@@ -106,7 +106,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :atoms as key, got %{"bla" => "foo"}.|,
                 reason: %{keys: :atoms}
               }} = validate(schema, data)
 
@@ -118,7 +117,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :atoms as key, got %{"bla" => 11}.|,
                 reason: %{keys: :atoms}
               }} = validate(schema, data)
 
@@ -139,7 +137,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: "Expected :string, got 11, at [:bla].",
                 reason: %{properties: %{bla: %{type: :string, value: 11}}}
               }} = validate(schema, data)
 
@@ -151,7 +148,7 @@ defmodule Xema.Cast.MapTest do
 
     test "from a map with unknown atom", %{schema: schema} do
       data = %{"xyz" => "z"}
-      expected = {:error, CastError.exception(%{path: [], key: "xyz", to: :map})}
+      expected = {:error, CastError.exception(path: [], key: "xyz", to: :map)}
 
       assert cast(schema, data) == expected
     end
@@ -179,7 +176,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :string, got 11, at ["bla"].|,
                 reason: %{properties: %{"bla" => %{type: :string, value: 11}}}
               }} = validate(schema, data)
 
@@ -191,7 +187,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :strings as key, got %{bla: "foo"}.|,
                 reason: %{keys: :strings}
               }} = validate(schema, data)
 
@@ -203,7 +198,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :strings as key, got %{bla: 11}.|,
                 reason: %{keys: :strings}
               }} = validate(schema, data)
 
@@ -253,14 +247,14 @@ defmodule Xema.Cast.MapTest do
 
     test "from a map with unknown key", %{schema: schema} do
       data = %{"foo" => %{"xyz" => 42}}
-      expected = {:error, CastError.exception(%{path: ["foo"], key: "xyz", to: :map})}
+      expected = {:error, CastError.exception(path: ["foo"], key: "xyz", to: :map)}
 
       assert cast(schema, data) == expected
     end
 
     test "from a map with unknown key (deeper)", %{schema: schema} do
       data = %{"foo" => %{"bar" => %{"xyz" => 42}}}
-      expected = {:error, CastError.exception(%{path: ["foo", "bar"], key: "xyz", to: :map})}
+      expected = {:error, CastError.exception(path: ["foo", "bar"], key: "xyz", to: :map)}
 
       assert cast(schema, data) == expected
     end
@@ -271,7 +265,6 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, data) ==
                {:error,
                 %ValidationError{
-                  message: "Value 42 exceeds maximum value of 12, at [:foo, :num].",
                   reason: %{
                     properties: %{
                       foo: %{properties: %{num: %{value: 42, maximum: 12}}}
@@ -312,14 +305,14 @@ defmodule Xema.Cast.MapTest do
 
     test "with an invalid value", %{schema: schema} do
       data = %{num: "77."}
-      expected = {:error, CastError.exception(%{path: [:num], to: :integer, value: "77."})}
+      expected = {:error, CastError.exception(path: [:num], to: :integer, value: "77.")}
 
       assert cast(schema, data) == expected
     end
 
     test "with an invalid value from a keyword list", %{schema: schema} do
       data = [num: "77."]
-      expected = {:error, CastError.exception(%{path: [:num], to: :integer, value: "77."})}
+      expected = {:error, CastError.exception(path: [:num], to: :integer, value: "77.")}
 
       assert cast(schema, data) == expected
     end
@@ -426,7 +419,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :atoms as key, got %{"bla" => 11}.|,
                 reason: %{keys: :atoms}
               }} = validate(schema, data)
 
@@ -447,7 +439,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: "Expected :string, got 11, at [:bla].",
                 reason: %{properties: %{bla: %{type: :string, value: 11}}}
               }} = validate(schema, data)
 
@@ -487,7 +478,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :string, got 11, at ["bla"].|,
                 reason: %{properties: %{"bla" => %{type: :string, value: 11}}}
               }} = validate(schema, data)
 
@@ -499,7 +489,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :strings as key, got %{bar: 5, bla: "foo"}.|,
                 reason: %{keys: :strings}
               }} = validate(schema, data)
 
@@ -511,7 +500,6 @@ defmodule Xema.Cast.MapTest do
 
       assert {:error,
               %ValidationError{
-                message: "Expected :strings as key, got %{bla: 11}.",
                 reason: %{keys: :strings}
               }} = validate(schema, data)
 

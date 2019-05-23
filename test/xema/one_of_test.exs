@@ -29,34 +29,28 @@ defmodule Xema.OneOfTest do
       assert {
                :error,
                %ValidationError{
-                 message: "More as one schema matches (indexes: [0, 1]).",
                  reason: %{one_of: {:ok, [0, 1]}, value: 15}
-               }
+               } = error
              } = validate(schema, 15)
+
+      assert Exception.message(error) == "More as one schema matches (indexes: [0, 1])."
     end
 
     test "validate/2 with an invalid value that matched all schemas", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: "More as one schema matches (indexes: [0, 1, 2]).",
                  reason: %{one_of: {:ok, [0, 1, 2]}, value: 30}
-               }
+               } = error
              } = validate(schema, 30)
+
+      assert Exception.message(error) == "More as one schema matches (indexes: [0, 1, 2])."
     end
 
     test "validate/2 with an invalid value that matched no schema", %{schema: schema} do
-      msg = """
-      No match of any schema.
-        Value 4 is not a multiple of 3.
-        Value 4 is not a multiple of 5.
-        Value 4 is not a multiple of 30.\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    one_of:
                      {:error,
@@ -67,8 +61,17 @@ defmodule Xema.OneOfTest do
                       ]},
                    value: 4
                  }
-               }
+               } = error
              } = validate(schema, 4)
+
+      message = """
+      No match of any schema.
+        Value 4 is not a multiple of 3.
+        Value 4 is not a multiple of 5.
+        Value 4 is not a multiple of 30.\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -95,27 +98,29 @@ defmodule Xema.OneOfTest do
       assert {
                :error,
                %ValidationError{
-                 message: "More as one schema matches (indexes: [0, 1]).",
                  reason: %{one_of: {:ok, [0, 1]}, value: 15}
-               }
+               } = error
              } = validate(schema, 15)
 
-      msg = """
+      assert Exception.message(error) == "More as one schema matches (indexes: [0, 1])."
+
+      assert {
+               :error,
+               %ValidationError{
+                 reason: %{
+                   one_of: {:error, [%{multiple_of: 3, value: 4}, %{multiple_of: 5, value: 4}]},
+                   value: 4
+                 }
+               } = error
+             } = validate(schema, 4)
+
+      message = """
       No match of any schema.
         Value 4 is not a multiple of 3.
         Value 4 is not a multiple of 5.\
       """
 
-      assert {
-               :error,
-               %ValidationError{
-                 message: ^msg,
-                 reason: %{
-                   one_of: {:error, [%{multiple_of: 3, value: 4}, %{multiple_of: 5, value: 4}]},
-                   value: 4
-                 }
-               }
-             } = validate(schema, 4)
+      assert Exception.message(error) == message
     end
   end
 

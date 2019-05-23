@@ -10,17 +10,17 @@ iex> Xema.cast(schema, "5")
 {:ok, 5}
 iex> Xema.cast(schema, "-5")
 {:error, %Xema.ValidationError{
-  message: "Value -5 is less than minimum value of 1.",
   reason: %{minimum: 1, value: -5}
 }}
-iex> Xema.cast(schema, [])
+iex> {:error, error} = Xema.cast(schema, [])
 {:error, %Xema.CastError{
-  message: "cannot cast [] to :integer",
   key: nil,
   path: [],
   to: :integer,
   value: []
 }}
+iex> Exception.message(error)
+"cannot cast [] to :integer"
 ```
 
 With `use Xema` the functions are also available.
@@ -36,7 +36,6 @@ iex> Int.cast("6")
 {:ok, 6}
 iex> Int.cast("-1")
 {:error, %Xema.ValidationError{
-  message: "Value -1 is less than minimum value of 1.",
   reason: %{minimum: 1, value: -1}
 }}
 ```

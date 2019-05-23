@@ -21,18 +21,19 @@ defmodule Xema.AllOfTest do
     end
 
     test "validate/2 with an imvalid value", %{schema: schema} do
-      msg = """
+      assert {
+               :error,
+               %ValidationError{
+                 reason: %{all_of: [%{minimum: 0, value: -1}], value: -1}
+               } = error
+             } = validate(schema, -1)
+
+      message = """
       No match of all schema.
         Value -1 is less than minimum value of 0.\
       """
 
-      assert {
-               :error,
-               %ValidationError{
-                 message: ^msg,
-                 reason: %{all_of: [%{minimum: 0, value: -1}], value: -1}
-               }
-             } = validate(schema, -1)
+      assert Exception.message(error) == message
     end
   end
 

@@ -25,7 +25,6 @@ defmodule Xema.Cast.FloatTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :float, got "42.6".|,
                 reason: %{
                   type: :float,
                   value: "42.6"
@@ -37,14 +36,14 @@ defmodule Xema.Cast.FloatTest do
 
     test "from an invalid string", %{schema: schema} do
       data = "66,6"
-      expected = {:error, CastError.exception(%{path: [], to: :float, value: "66,6"})}
+      expected = {:error, CastError.exception(path: [], to: :float, value: "66,6")}
 
       assert cast(schema, data) == expected
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :float, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :float, value: data)}
 
         assert cast(schema, data) == expected
       end)

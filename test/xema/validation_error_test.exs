@@ -16,7 +16,8 @@ defmodule Xema.ValidationErrorTest do
     rescue
       error ->
         assert %ValidationError{} = error
-        assert error.message == ~s|Expected :integer, got "foo".|
+        assert error.message == nil
+        assert Exception.message(error) == ~s|Expected :integer, got "foo".|
         assert error.reason == %{type: :integer, value: "foo"}
     end
   end
@@ -34,17 +35,19 @@ defmodule Xema.ValidationErrorTest do
 
   describe "exception/1" do
     test "returns unexpected error for unexpected reason" do
-      assert ValidationError.exception("foo") == %Xema.ValidationError{
-               message: "Unexpected error.",
+      error = ValidationError.exception(reason: "foo")
+
+      assert error == %Xema.ValidationError{
+               message: nil,
                reason: "foo"
              }
+
+      assert Exception.message(error) == "Unexpected error."
     end
 
     test "returns unexpected error for internal exception" do
-      assert ValidationError.exception(%{items: {}}) == %Xema.ValidationError{
-               message: "Unexpected error.",
-               reason: %Protocol.UndefinedError{description: "", protocol: Enumerable, value: {}}
-             }
+      error = ValidationError.exception(reason: %{items: {}})
+      assert Exception.message(error) =~ "got Protocol.UndefinedError with message"
     end
   end
 end

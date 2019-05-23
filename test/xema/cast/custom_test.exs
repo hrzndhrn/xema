@@ -62,22 +62,22 @@ defmodule Xema.Cast.CustomTest do
       assert validate(schema, data) ==
                {:error,
                 %ValidationError{
-                  message: ~s|Expected :struct, got "https://elixir-lang.org/docs.html".|,
                   reason: %{
                     type: :struct,
                     value: "https://elixir-lang.org/docs.html"
                   }
                 }}
 
-      assert cast(schema, data) ==
-               {:error,
-                %CastError{
-                  key: nil,
-                  path: [],
-                  value: "https://elixir-lang.org/docs.html",
-                  message: "cannot cast \"https://elixir-lang.org/docs.html\" to URI",
-                  to: URI
-                }}
+      assert {:error,
+              %CastError{
+                key: nil,
+                path: [],
+                value: "https://elixir-lang.org/docs.html",
+                to: URI
+              } = error} = cast(schema, data)
+
+      assert Exception.message(error) ==
+               ~s|cannot cast "https://elixir-lang.org/docs.html" to URI|
 
       assert_raise CastError, fn -> cast!(schema, data) end
     end
@@ -116,7 +116,6 @@ defmodule Xema.Cast.CustomTest do
       assert validate(schema, data) ==
                {:error,
                 %ValidationError{
-                  message: ~s|Expected :struct, got "https://elixir-lang.org/docs.html".|,
                   reason: %{
                     type: :struct,
                     value: "https://elixir-lang.org/docs.html"
@@ -131,15 +130,15 @@ defmodule Xema.Cast.CustomTest do
     end
 
     test "from a float", %{schema: schema} do
-      assert cast(schema, 5.0) ==
-               {:error,
-                %CastError{
-                  key: nil,
-                  message: "cannot cast 5.0 to URI",
-                  path: [],
-                  to: URI,
-                  value: 5.0
-                }}
+      assert {:error,
+              %CastError{
+                key: nil,
+                path: [],
+                to: URI,
+                value: 5.0
+              } = error} = cast(schema, 5.0)
+
+      assert Exception.message(error) == "cannot cast 5.0 to URI"
     end
   end
 
@@ -170,7 +169,6 @@ defmodule Xema.Cast.CustomTest do
       assert validate(schema, data) ==
                {:error,
                 %ValidationError{
-                  message: ~s|Expected :struct, got "https://elixir-lang.org/docs.html".|,
                   reason: %{
                     type: :struct,
                     value: "https://elixir-lang.org/docs.html"
@@ -181,15 +179,15 @@ defmodule Xema.Cast.CustomTest do
     end
 
     test "from a float", %{schema: schema} do
-      assert cast(schema, 5.0) ==
-               {:error,
-                %CastError{
-                  key: nil,
-                  message: "cannot cast 5.0 to URI",
-                  path: [],
-                  to: URI,
-                  value: 5.0
-                }}
+      assert {:error,
+              %CastError{
+                key: nil,
+                path: [],
+                to: URI,
+                value: 5.0
+              } = error} = cast(schema, 5.0)
+
+      assert Exception.message(error) == "cannot cast 5.0 to URI"
     end
   end
 
@@ -220,7 +218,6 @@ defmodule Xema.Cast.CustomTest do
       assert validate(schema, data) ==
                {:error,
                 %ValidationError{
-                  message: ~s|Expected :struct, got "/docs.html".|,
                   reason: %{
                     type: :struct,
                     value: "/docs.html"
@@ -231,15 +228,15 @@ defmodule Xema.Cast.CustomTest do
     end
 
     test "from a float", %{schema: schema} do
-      assert cast(schema, 5.0) ==
-               {:error,
-                %CastError{
-                  key: nil,
-                  message: "cannot cast 5.0 to URI",
-                  path: [],
-                  to: URI,
-                  value: 5.0
-                }}
+      assert {:error,
+              %CastError{
+                key: nil,
+                path: [],
+                to: URI,
+                value: 5.0
+              } = error} = cast(schema, 5.0)
+
+      assert Exception.message(error) == "cannot cast 5.0 to URI"
     end
   end
 
@@ -270,7 +267,6 @@ defmodule Xema.Cast.CustomTest do
       assert validate(schema, data) ==
                {:error,
                 %ValidationError{
-                  message: ~s|Expected :struct, got "https://elixir-lang.org/docs.html".|,
                   reason: %{
                     type: :struct,
                     value: "https://elixir-lang.org/docs.html"
@@ -281,15 +277,15 @@ defmodule Xema.Cast.CustomTest do
     end
 
     test "from a float", %{schema: schema} do
-      assert cast(schema, 5.0) ==
-               {:error,
-                %CastError{
-                  key: nil,
-                  message: "cannot cast 5.0 to URI",
-                  path: [],
-                  to: URI,
-                  value: 5.0
-                }}
+      assert {:error,
+              %CastError{
+                key: nil,
+                path: [],
+                to: URI,
+                value: 5.0
+              } = error} = cast(schema, 5.0)
+
+      assert Exception.message(error) == "cannot cast 5.0 to URI"
     end
   end
 

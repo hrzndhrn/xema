@@ -18,26 +18,27 @@ defmodule Xema.IntegerTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected :integer, got 2.3.",
                  reason: %{
                    type: :integer,
                    value: 2.3
                  }
-               }
+               } = error
              } = validate(schema, 2.3)
+
+      assert Exception.message(error) == "Expected :integer, got 2.3."
     end
 
     test "validate!/2 with a float", %{schema: schema} do
-      msg = "Expected :integer, got 2.3."
+      message = "Expected :integer, got 2.3."
 
-      assert_raise ValidationError, msg, fn ->
+      assert_raise ValidationError, message, fn ->
         assert validate!(schema, 2.3)
       end
     end
 
     test "validate/2 with a string", %{schema: schema} do
       assert validate(schema, "foo") ==
-               {:error, ValidationError.exception(%{type: :integer, value: "foo"})}
+               {:error, ValidationError.exception(reason: %{type: :integer, value: "foo"})}
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -61,12 +62,13 @@ defmodule Xema.IntegerTest do
     test "with an invalid value", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 1 is less than minimum value of 2.",
                 reason: %{
                   minimum: 2,
                   value: 1
                 }
-              }} = validate(schema, 1)
+              } = error} = validate(schema, 1)
+
+      assert Exception.message(error) == "Value 1 is less than minimum value of 2."
     end
   end
 
@@ -84,23 +86,25 @@ defmodule Xema.IntegerTest do
     test "validate/2 with a too small integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 1 is less than minimum value of 2.",
                 reason: %{
                   value: 1,
                   minimum: 2
                 }
-              }} = validate(schema, 1)
+              } = error} = validate(schema, 1)
+
+      assert Exception.message(error) == "Value 1 is less than minimum value of 2."
     end
 
     test "validate/2 with a too big integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 5 exceeds maximum value of 4.",
                 reason: %{
                   value: 5,
                   maximum: 4
                 }
-              }} = validate(schema, 5)
+              } = error} = validate(schema, 5)
+
+      assert Exception.message(error) == "Value 5 exceeds maximum value of 4."
     end
   end
 
@@ -118,23 +122,25 @@ defmodule Xema.IntegerTest do
     test "validate/2 with a too small integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 1 is less than minimum value of 2.",
                 reason: %{
                   value: 1,
                   minimum: 2
                 }
-              }} = validate(schema, 1)
+              } = error} = validate(schema, 1)
+
+      assert Exception.message(error) == "Value 1 is less than minimum value of 2."
     end
 
     test "validate/2 with a too big integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 5 exceeds maximum value of 4.",
                 reason: %{
                   value: 5,
                   maximum: 4
                 }
-              }} = validate(schema, 5)
+              } = error} = validate(schema, 5)
+
+      assert Exception.message(error) == "Value 5 exceeds maximum value of 4."
     end
   end
 
@@ -156,49 +162,53 @@ defmodule Xema.IntegerTest do
     test "validate/2 with a too small integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 1 is less than minimum value of 2.",
                 reason: %{
                   value: 1,
                   minimum: 2,
                   exclusive_minimum: true
                 }
-              }} = validate(schema, 1)
+              } = error} = validate(schema, 1)
+
+      assert Exception.message(error) == "Value 1 is less than minimum value of 2."
     end
 
     test "validate/2 with a minimum integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 2 equals exclusive minimum value of 2.",
                 reason: %{
                   minimum: 2,
                   exclusive_minimum: true,
                   value: 2
                 }
-              }} = validate(schema, 2)
+              } = error} = validate(schema, 2)
+
+      assert Exception.message(error) == "Value 2 equals exclusive minimum value of 2."
     end
 
     test "validate/2 with a maximum integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 4 equals exclusive maximum value of 4.",
                 reason: %{
                   value: 4,
                   maximum: 4,
                   exclusive_maximum: true
                 }
-              }} = validate(schema, 4)
+              } = error} = validate(schema, 4)
+
+      assert Exception.message(error) == "Value 4 equals exclusive maximum value of 4."
     end
 
     test "validate/2 with a too big integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 5 exceeds maximum value of 4.",
                 reason: %{
                   value: 5,
                   maximum: 4,
                   exclusive_maximum: true
                 }
-              }} = validate(schema, 5)
+              } = error} = validate(schema, 5)
+
+      assert Exception.message(error) == "Value 5 exceeds maximum value of 4."
     end
   end
 
@@ -220,34 +230,37 @@ defmodule Xema.IntegerTest do
     test "validate/2 with a too small integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 1 is less than minimum value of 2.",
                 reason: %{
                   value: 1,
                   exclusive_minimum: 2
                 }
-              }} = validate(schema, 1)
+              } = error} = validate(schema, 1)
+
+      assert Exception.message(error) == "Value 1 is less than minimum value of 2."
     end
 
     test "validate/2 with a minimum integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 2 equals exclusive minimum value of 2.",
                 reason: %{
                   exclusive_minimum: 2,
                   value: 2
                 }
-              }} = validate(schema, 2)
+              } = error} = validate(schema, 2)
+
+      assert Exception.message(error) == "Value 2 equals exclusive minimum value of 2."
     end
 
     test "validate/2 with a maximum integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 4 equals exclusive maximum value of 4.",
                 reason: %{
                   value: 4,
                   exclusive_maximum: 4
                 }
-              }} = validate(schema, 4)
+              } = error} = validate(schema, 4)
+
+      assert Exception.message(error) == "Value 4 equals exclusive maximum value of 4."
     end
   end
 
@@ -263,12 +276,13 @@ defmodule Xema.IntegerTest do
     test "validate/2 with an invalid integer", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 7 is not a multiple of 2.",
                 reason: %{
                   value: 7,
                   multiple_of: 2
                 }
-              }} = validate(schema, 7)
+              } = error} = validate(schema, 7)
+
+      assert Exception.message(error) == "Value 7 is not a multiple of 2."
     end
   end
 
@@ -284,12 +298,13 @@ defmodule Xema.IntegerTest do
     test "with a value that is not in the enum", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 2 is not defined in enum.",
                 reason: %{
                   enum: [1, 3],
                   value: 2
                 }
-              }} = validate(schema, 2)
+              } = error} = validate(schema, 2)
+
+      assert Exception.message(error) == "Value 2 is not defined in enum."
     end
   end
 end

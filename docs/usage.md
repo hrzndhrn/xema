@@ -27,11 +27,12 @@ The nil type matches only `nil`.
 iex> schema = Xema.new :nil
 iex> Xema.validate schema, nil
 :ok
-iex> Xema.validate schema, 0
+iex> {:error, error} = Xema.validate schema, 0
 {:error, %Xema.ValidationError{
-  message: "Expected nil, got 0.",
   reason: %{type: :nil, value: 0}
 }}
+iex> Exception.message(error)
+"Expected nil, got 0."
 ```
 
 ## <a id="boolean"></a> Type boolean
@@ -43,11 +44,12 @@ iex> Xema.validate schema, true
 :ok
 iex> Xema.valid? schema, false
 true
-iex> Xema.validate schema, 0
+iex> {:error, error} = Xema.validate schema, 0
 {:error, %Xema.ValidationError{
-  message: "Expected :boolean, got 0.",
   reason: %{type: :boolean, value: 0}
 }}
+iex> Exception.message(error)
+"Expected :boolean, got 0."
 iex> Xema.valid? schema, nil
 false
 ```
@@ -62,11 +64,12 @@ iex> Xema.validate schema, :foo
 :ok
 iex> Xema.valid? schema, "foo"
 false
-iex> Xema.validate schema, 0
+iex> {:error, error} = Xema.validate schema, 0
 {:error, %Xema.ValidationError{
-  message: "Expected :atom, got 0.",
   reason: %{type: :atom, value: 0}
 }}
+iex> Exception.message(error)
+"Expected :atom, got 0."
 iex> Xema.valid? schema, nil
 true
 iex> Xema.valid? schema, false
@@ -83,11 +86,12 @@ The string type is used for strings.
 iex> schema = Xema.new :string
 iex> Xema.validate schema, "José"
 :ok
-iex> Xema.validate schema, 42
+iex> {:error, error} = Xema.validate schema, 42
 {:error, %Xema.ValidationError{
-  message: "Expected :string, got 42.",
   reason: %{type: :string, value: 42}
 }}
+iex> Exception.message(error)
+"Expected :string, got 42."
 iex> Xema.valid? schema, "José"
 true
 iex> Xema.valid? schema, 42
@@ -101,20 +105,22 @@ keywords. For both keywords, the value must be a non-negative number.
 
 ```elixir
 iex> schema = Xema.new {:string, min_length: 2, max_length: 3}
-iex> Xema.validate schema, "a"
+iex> {:error, error} = Xema.validate schema, "a"
 {:error, %Xema.ValidationError{
-  message: ~s|Expected minimum length of 2, got "a".|,
   reason: %{value: "a", min_length: 2}
 }}
+iex> Exception.message(error)
+~s|Expected minimum length of 2, got "a".|
 iex> Xema.validate schema, "ab"
 :ok
 iex> Xema.validate schema, "abc"
 :ok
-iex> Xema.validate schema, "abcd"
+iex> {:error, error} = Xema.validate schema, "abcd"
 {:error, %Xema.ValidationError{
-  message: ~s|Expected maximum length of 3, got "abcd".|,
   reason: %{value: "abcd", max_length: 3}
 }}
+iex> Exception.message(error)
+~s|Expected maximum length of 3, got "abcd".|
 ```
 
 ### <a id="regex"></a> Regular Expression
@@ -126,11 +132,12 @@ expression.
 iex> schema = Xema.new {:string, pattern: ~r/[0-9]-[A-B]+/}
 iex> Xema.validate schema, "1-AB"
 :ok
-iex> Xema.validate schema, "foo"
+iex> {:error, error} = Xema.validate schema, "foo"
 {:error, %Xema.ValidationError{
-  message: ~s|Pattern ~r/[0-9]-[A-B]+/ does not match value "foo".|,
   reason: %{value: "foo", pattern: ~r/[0-9]-[A-B]+/}
 }}
+iex> Exception.message(error)
+~s|Pattern ~r/[0-9]-[A-B]+/ does not match value "foo".|
 ```
 
 The regular expression can also be a string.
@@ -139,11 +146,12 @@ The regular expression can also be a string.
 iex> schema = Xema.new {:string, pattern: "[0-9]-[A-B]+"}
 iex> Xema.validate schema, "1-AB"
 :ok
-iex> Xema.validate schema, "foo"
+iex> {:error, error} = Xema.validate schema, "foo"
 {:error, %Xema.ValidationError{
-  message: ~s|Pattern ~r/[0-9]-[A-B]+/ does not match value "foo".|,
   reason: %{value: "foo", pattern: ~r/[0-9]-[A-B]+/}
 }}
+iex> Exception.message(error)
+~s|Pattern ~r/[0-9]-[A-B]+/ does not match value "foo".|
 ```
 
 ### <a id="fmt"></a> Format
@@ -194,11 +202,12 @@ iex> Xema.validate schema, 42
 :ok
 iex> Xema.validate schema, 21.5
 :ok
-iex> Xema.validate schema, "foo"
+iex> {:error, error} = Xema.validate schema, "foo"
 {:error, %Xema.ValidationError{
-  message: ~s|Expected :number, got "foo".|,
   reason: %{type: :number, value: "foo"}
 }}
+iex> Exception.message(error)
+~s|Expected :number, got "foo".|
 ```
 
 The `integer` type is used for integral numbers.
@@ -206,21 +215,23 @@ The `integer` type is used for integral numbers.
 iex> schema = Xema.new :integer
 iex> Xema.validate schema, 42
 :ok
-iex> Xema.validate schema, 21.5
+iex> {:error, error} = Xema.validate schema, 21.5
 {:error, %Xema.ValidationError{
-  message: "Expected :integer, got 21.5.",
   reason: %{type: :integer, value: 21.5}
 }}
+iex> Exception.message(error)
+"Expected :integer, got 21.5."
 ```
 
 The `float` type is used for floating point numbers.
 ```elixir
 iex> schema = Xema.new :float
-iex> Xema.validate schema, 42
+iex> {:error, error} = Xema.validate schema, 42
 {:error, %Xema.ValidationError{
-  message: "Expected :float, got 42.",
   reason: %{type: :float, value: 42}
 }}
+iex> Exception.message(error)
+"Expected :float, got 42."
 iex> Xema.validate schema, 21.5
 :ok
 ```
@@ -236,11 +247,12 @@ Numbers can be restricted to a multiple of a given number, using the
 iex> schema = Xema.new {:number, multiple_of: 2}
 iex> Xema.validate schema, 8
 :ok
-iex> Xema.validate schema, 7
+iex> {:error, error} = Xema.validate schema, 7
 {:error, %Xema.ValidationError{
-  message: "Value 7 is not a multiple of 2.",
   reason: %{value: 7, multiple_of: 2}
 }}
+iex> Exception.message(error)
+"Value 7 is not a multiple of 2."
 iex> Xema.valid? schema, 8.0
 true
 ```
@@ -266,25 +278,28 @@ iex> schema = Xema.new {
 ...>   :float,
 ...>   minimum: 1.2, maximum: 1.4, exclusive_maximum: true
 ...> }
-iex> Xema.validate schema, 1.1
+iex> {:error, error} = Xema.validate schema, 1.1
 {:error, %Xema.ValidationError{
-  message: "Value 1.1 is less than minimum value of 1.2.",
   reason: %{value: 1.1, minimum: 1.2}
 }}
+iex> Exception.message(error)
+"Value 1.1 is less than minimum value of 1.2."
 iex> Xema.validate schema, 1.2
 :ok
 iex> Xema.valid? schema, 1.3
 true
-iex> Xema.validate schema, 1.4
+iex> {:error, error} = Xema.validate schema, 1.4
 {:error, %Xema.ValidationError{
-  message: "Value 1.4 equals exclusive maximum value of 1.4.",
   reason: %{value: 1.4, maximum: 1.4, exclusive_maximum: true}
 }}
-iex> Xema.validate schema, 1.5
+iex> Exception.message(error)
+"Value 1.4 equals exclusive maximum value of 1.4."
+iex> {:error, error} = Xema.validate schema, 1.5
 {:error, %Xema.ValidationError{
-  message: "Value 1.5 exceeds maximum value of 1.4.",
   reason: %{value: 1.5, maximum: 1.4, exclusive_maximum: true}
 }}
+iex> Exception.message(error)
+"Value 1.5 exceeds maximum value of 1.4."
 ```
 
 `JSON Schema Draft: 6/7`
@@ -296,25 +311,28 @@ value of the corresponding keyword `maximum` or `minimum`. The keyword
 
 ```elixir
 iex> schema = Xema.new {:float, minimum: 1.2, exclusive_maximum: 1.4}
-iex> Xema.validate schema, 1.1
+iex> {:error, error} = Xema.validate schema, 1.1
 {:error, %Xema.ValidationError{
-  message: "Value 1.1 is less than minimum value of 1.2.",
   reason: %{value: 1.1, minimum: 1.2}
 }}
+iex> Exception.message(error)
+"Value 1.1 is less than minimum value of 1.2."
 iex> Xema.validate schema, 1.2
 :ok
 iex> Xema.valid? schema, 1.3
 true
-iex> Xema.validate schema, 1.4
+iex> {:error, error} = Xema.validate schema, 1.4
 {:error, %Xema.ValidationError{
-  message: "Value 1.4 equals exclusive maximum value of 1.4.",
   reason: %{value: 1.4, exclusive_maximum: 1.4}
 }}
-iex> Xema.validate schema, 1.5
+iex> Exception.message(error)
+"Value 1.4 equals exclusive maximum value of 1.4."
+iex> {:error, error} = Xema.validate schema, 1.5
 {:error, %Xema.ValidationError{
-  message: "Value 1.5 exceeds maximum value of 1.4.",
   reason: %{value: 1.5, exclusive_maximum: 1.4}
 }}
+iex> Exception.message(error)
+"Value 1.5 exceeds maximum value of 1.4."
 ```
 
 ## <a id="list"></a> Type list
@@ -325,11 +343,12 @@ List are used for ordered elements, each element may be of a different type.
 iex> schema = Xema.new :list
 iex> Xema.valid? schema, [1, "two", 3.0]
 true
-iex> Xema.validate schema, 9
+iex> {:error, error} = Xema.validate schema, 9
 {:error, %Xema.ValidationError{
-  message: "Expected :list, got 9.",
   reason: %{type: :list, value: 9}
 }}
+iex> Exception.message(error)
+"Expected :list, got 9."
 ```
 
 ### <a id="items"></a> Items
@@ -340,11 +359,12 @@ schema.
 iex> schema = Xema.new {:list, items: :string}
 iex> Xema.valid? schema, ["a", "b", "abc"]
 true
-iex> Xema.validate schema, ["a", 1]
+iex> {:error, error} = Xema.validate schema, ["a", 1]
 {:error, %Xema.ValidationError{
-  message: "Expected :string, got 1, at [1].",
   reason: %{items: [{1, %{type: :string, value: 1}}]}
 }}
+iex> Exception.message(error)
+"Expected :string, got 1, at [1]."
 ```
 
 The next example shows how to add keywords to the items schema.
@@ -353,11 +373,12 @@ The next example shows how to add keywords to the items schema.
 iex> schema = Xema.new {:list, items: {:integer, minimum: 1, maximum: 10}}
 iex> Xema.validate schema, [1, 2, 3]
 :ok
-iex> Xema.validate schema, [3, 2, 1, 0]
+iex> {:error, error} = Xema.validate schema, [3, 2, 1, 0]
 {:error, %Xema.ValidationError{
-  message: "Value 0 is less than minimum value of 1, at [3].",
   reason: %{items: [{3, %{value: 0, minimum: 1}}]}
 }}
+iex> Exception.message(error)
+"Value 0 is less than minimum value of 1, at [3]."
 ```
 
 `items` can also be used to give each item a specific schema.
@@ -369,11 +390,12 @@ iex> schema = Xema.new {
 ...> }
 iex> Xema.valid? schema, [1, "hello"]
 true
-iex> Xema.validate schema, [1, "five"]
+iex> {:error, error} = Xema.validate schema, [1, "five"]
 {:error, %Xema.ValidationError{
-  message: ~s|Expected minimum length of 5, got "five", at [1].|,
   reason: %{items: [{1, %{value: "five", min_length: 5}}]}
 }}
+iex> Exception.message(error)
+~s|Expected minimum length of 5, got "five", at [1].|
 # It’s okay to not provide all of the items:
 iex> Xema.validate schema, [1]
 :ok
@@ -397,17 +419,14 @@ iex> Xema.validate schema, [1]
 :ok
 # It’s okay to not provide all of the items:
 # But, since additionalItems is false, we can’t provide extra items:
-iex> Xema.validate schema, [1, "hello", "foo"]
+iex> {:error, error} = Xema.validate schema, [1, "hello", "foo"]
 {:error, %Xema.ValidationError{
-  message: "Unexpected additional item, at [2].",
   reason: %{items: [{2, %{additional_items: false}}]}
 }}
-iex> Xema.validate schema, [1, "hello", "foo", "bar"]
+iex> Exception.message(error)
+"Unexpected additional item, at [2]."
+iex> {:error, error} = Xema.validate schema, [1, "hello", "foo", "bar"]
 {:error, %Xema.ValidationError{
-  message: """
-  Unexpected additional item, at [2].
-  Unexpected additional item, at [3].\
-  """,
   reason: %{
     items: [
       {2, %{additional_items: false}},
@@ -415,6 +434,11 @@ iex> Xema.validate schema, [1, "hello", "foo", "bar"]
     ]
   }
 }}
+iex> Exception.message(error)
+"""
+Unexpected additional item, at [2].
+Unexpected additional item, at [3].\
+"""
 ```
 
 The keyword can also contain a schema to specify the type of additional items.
@@ -426,11 +450,12 @@ iex> schema = Xema.new {
 ...> }
 iex> Xema.valid? schema, [1, "two", 3, 4]
 true
-iex> Xema.validate schema, [1, "two", 3, "four"]
+iex> {:error, error} = Xema.validate schema, [1, "two", 3, "four"]
 {:error, %Xema.ValidationError{
-  message: ~s|Expected :integer, got "four", at [3].|,
   reason: %{items: [{3, %{type: :integer, value: "four"}}]}
 }}
+iex> Exception.message(error)
+~s|Expected :integer, got "four", at [3].|
 ```
 
 ### <a id="list_length"></a> Length
@@ -440,20 +465,22 @@ keywords. The value of each keyword must be a non-negative number.
 
 ```elixir
 iex> schema = Xema.new {:list, min_items: 2, max_items: 3}
-iex> Xema.validate schema, [1]
+iex> {:error, error} = Xema.validate schema, [1]
 {:error, %Xema.ValidationError{
-  message: "Expected at least 2 items, got [1].",
   reason: %{value: [1], min_items: 2}
 }}
+iex> Exception.message(error)
+"Expected at least 2 items, got [1]."
 iex> Xema.validate schema, [1, 2]
 :ok
 iex> Xema.validate schema, [1, 2, 3]
 :ok
-iex> Xema.validate schema, [1, 2, 3, 4]
+iex> {:error, error} = Xema.validate schema, [1, 2, 3, 4]
 {:error, %Xema.ValidationError{
-  message: "Expected at most 3 items, got [1, 2, 3, 4].",
   reason: %{value: [1, 2, 3, 4], max_items: 3}
 }}
+iex> Exception.message(error)
+"Expected at most 3 items, got [1, 2, 3, 4]."
 ```
 
 ### <a id="unique"></a> Uniqueness
@@ -464,11 +491,12 @@ A schema can ensure that each of the items in an array is unique.
 iex> schema = Xema.new {:list, unique_items: true}
 iex> Xema.valid? schema, [1, 2, 3]
 true
-iex> Xema.validate schema, [1, 2, 3, 2, 1]
+iex> {:error, error} = Xema.validate schema, [1, 2, 3, 2, 1]
 {:error, %Xema.ValidationError{
-  message: "Expected unique items, got [1, 2, 3, 2, 1].",
   reason: %{value: [1, 2, 3, 2, 1], unique_items: true}
 }}
+iex> Exception.message(error)
+"Expected unique items, got [1, 2, 3, 2, 1]."
 ```
 
 ## <a id="tuple"></a> Type tuple
@@ -478,20 +506,22 @@ validation of tuples is similar to lists.
 
 ```elixir
 iex> schema = Xema.new {:tuple, min_items: 2, max_items: 3}
-iex> Xema.validate schema, {1}
+iex> {:error, error} = Xema.validate schema, {1}
 {:error, %Xema.ValidationError{
-  message: "Expected at least 2 items, got {1}.",
   reason: %{value: {1}, min_items: 2}
 }}
+iex> Exception.message(error)
+"Expected at least 2 items, got {1}."
 iex> Xema.validate schema, {1, 2}
 :ok
 iex> Xema.validate schema, {1, 2, 3}
 :ok
-iex> Xema.validate schema, {1, 2, 3, 4}
+iex> {:error, error} = Xema.validate schema, {1, 2, 3, 4}
 {:error, %Xema.ValidationError{
-  message: "Expected at most 3 items, got {1, 2, 3, 4}.",
   reason: %{value: {1, 2, 3, 4}, max_items: 3}
 }}
+iex> Exception.message(error)
+"Expected at most 3 items, got {1, 2, 3, 4}."
 ```
 
 ## <a id="map"></a> Type map
@@ -503,11 +533,12 @@ Elixir. Each of these pairs is conventionally referred to as a “property”.
 iex> schema = Xema.new :map
 iex> Xema.valid? schema, %{"foo" => "bar"}
 true
-iex> Xema.validate schema, "bar"
+iex> {:error, error} = Xema.validate schema, "bar"
 {:error, %Xema.ValidationError{
-  message: ~s|Expected :map, got "bar".|,
   reason: %{type: :map, value: "bar"}
 }}
+iex> Exception.message(error)
+~s|Expected :map, got "bar".|
 # Using non-strings as keys are also valid:
 iex> Xema.valid? schema, %{foo: "bar"}
 true
@@ -556,15 +587,16 @@ iex> schema = Xema.new {:map,
 ...> }
 iex> Xema.valid? schema, %{a: 5, b: "hello"}
 true
-iex> Xema.validate schema, %{a: 5, b: "ups"}
+iex> {:error, error} = Xema.validate schema, %{a: 5, b: "ups"}
 {:error, %Xema.ValidationError{
-  message: "Expected minimum length of 5, got \"ups\", at [:b].",
   reason: %{
     properties: %{
       b: %{value: "ups", min_length: 5}
     }
   }
 }}
+iex> Exception.message(error)
+"Expected minimum length of 5, got \"ups\", at [:b]."
 # Additinonal properties are allowed by default:
 iex> Xema.valid? schema, %{a: 5, b: "hello", add: :prop}
 true
@@ -580,11 +612,12 @@ keyword.
 iex> schema = Xema.new {:map, properties: %{foo: :string}, required: [:foo]}
 iex> Xema.validate schema, %{foo: "bar"}
 :ok
-iex> Xema.validate schema, %{bar: "foo"}
+iex> {:error, error} = Xema.validate schema, %{bar: "foo"}
 {:error, %Xema.ValidationError{
-  message: "Required properties are missing: [:foo].",
   reason: %{required: [:foo]}
 }}
+iex> Exception.message(error)
+"Required properties are missing: [:foo]."
 ```
 
 ### <a id="additional_properties"></a> Additional Properties
@@ -605,13 +638,14 @@ iex> schema = Xema.new {:map,
 ...> }
 iex> Xema.validate schema, %{foo: "bar"}
 :ok
-iex> Xema.validate schema, %{foo: "bar", bar: "foo"}
+iex> {:error, error} = Xema.validate schema, %{foo: "bar", bar: "foo"}
 {:error, %Xema.ValidationError{
-  message: "Expected only defined properties, got key [:bar].",
   reason: %{
     properties: %{bar: %{additional_properties: false}}
   }
 }}
+iex> Exception.message(error)
+"Expected only defined properties, got key [:bar]."
 ```
 
 `additional_properties` can also contain a schema to specify the type of
@@ -625,11 +659,12 @@ iex> schema = Xema.new {
 ...> }
 iex> Xema.valid? schema, %{foo: "foo", add: 1}
 true
-iex> Xema.validate schema, %{foo: "foo", add: "one"}
+iex> {:error, error} = Xema.validate schema, %{foo: "foo", add: "one"}
 {:error, %Xema.ValidationError{
-  message: ~s|Expected :integer, got "one", at [:add].|,
   reason: %{properties: %{add: %{type: :integer, value: "one"}}}
 }}
+iex> Exception.message(error)
+~s|Expected :integer, got "one", at [:add].|
 ```
 
 ### <a id="pattern_properties"></a> Pattern Properties
@@ -650,11 +685,12 @@ iex> Xema.valid? schema, %{"s_0" => "foo", "i_1" => 6}
 true
 iex> Xema.valid? schema, %{s_0: "foo", i_1: 6}
 true
-iex> Xema.validate schema, %{s_0: "foo", f_1: 6.6}
+iex> {:error, error} = Xema.validate schema, %{s_0: "foo", f_1: 6.6}
 {:error, %Xema.ValidationError{
-  message: "Expected only defined properties, got key [:f_1].",
   reason: %{properties: %{f_1: %{additional_properties: false}}}
 }}
+iex> Exception.message(error)
+"Expected only defined properties, got key [:f_1]."
 ```
 
 ### <a id="map_size"></a> Size
@@ -669,16 +705,18 @@ iex> schema = Xema.new {:map,
 ...> }
 iex> Xema.valid? schema, %{a: 1, b: 2}
 true
-iex> Xema.validate schema, %{}
+iex> {:error, error} = Xema.validate schema, %{}
 {:error, %Xema.ValidationError{
-  message: "Expected at least 2 properties, got %{}.",
   reason: %{min_properties: 2, value: %{}}
 }}
-iex> Xema.validate schema, %{a: 1, b: 2, c: 3, d: 4}
+iex> Exception.message(error)
+"Expected at least 2 properties, got %{}."
+iex> {:error, error} = Xema.validate schema, %{a: 1, b: 2, c: 3, d: 4}
 {:error, %Xema.ValidationError{
-  message: "Expected at most 3 properties, got %{a: 1, b: 2, c: 3, d: 4}.",
   reason: %{max_properties: 3, value: %{a: 1, b: 2, c: 3, d: 4}}
 }}
+iex> Exception.message(error)
+"Expected at most 3 properties, got %{a: 1, b: 2, c: 3, d: 4}."
 ```
 
 ### <a id="key_types"></a> Size
@@ -692,11 +730,12 @@ iex> schema = Xema.new {:map,
 ...> }
 iex> Xema.valid? schema, %{foo: 1}
 true
-iex> Xema.validate schema, %{"foo" => 1}
+iex> {:error, error} = Xema.validate schema, %{"foo" => 1}
 {:error, %Xema.ValidationError{
-  message: ~s|Expected only defined properties, got key [\"foo\"].|,
   reason: %{properties: %{"foo" => %{additional_properties: false}}}
 }}
+iex> Exception.message(error)
+~s|Expected only defined properties, got key [\"foo\"].|
 ```
 
 ### <a id="dependencies"></a> Dependencies
@@ -809,11 +848,12 @@ This keyword checks if a value is equals to the given `const`.
 iex> schema = Xema.new(const: 4711)
 iex> Xema.validate schema, 4711
 :ok
-iex> Xema.validate schema, 333
+iex> {:error, error} = Xema.validate schema, 333
 {:error, %Xema.ValidationError{
-  message: "Expected 4711, got 333.",
   reason: %{const: 4711, value: 333}
 }}
+iex> Exception.message(error)
+"Expected 4711, got 333."
 ```
 
 ## <a id="enum"></a> Enumerations
@@ -892,15 +932,16 @@ iex> defmodule Palindrome do
 iex>
 iex> Palindrome.validate(%{palindrome: "abba"})
 :ok
-iex> Palindrome.validate(%{palindrome: "beatles"})
+iex> {:error, error} = Palindrome.validate(%{palindrome: "beatles"})
 {:error, %Xema.ValidationError{
-  message: ~s|Validator fails with :no_palindrome for value "beatles", at [:palindrome].|,
   reason: %{
     properties: %{
       palindrome: %{validator: :no_palindrome, value: "beatles"}
     }
   }
 }}
+iex> Exception.message(error)
+~s|Validator fails with :no_palindrome for value "beatles", at [:palindrome].|
 ```
 
 ## <a id="combine"></a> Combine Schemas
@@ -969,18 +1010,20 @@ iex> schema = Xema.new {
 ...> }
 ...> Xema.validate schema, %{a: 1, c: -1}
 :ok
-iex> Xema.validate schema, %{b: 1, c: 1}
+iex> {:error, error} = Xema.validate schema, %{b: 1, c: 1}
 {:error, %Xema.ValidationError{
-  message: "Value 1 exceeds maximum value of -1, at [:c].",
   reason: %{properties: %{c: %{maximum: -1, value: 1}}}
 }}
+iex> Exception.message(error)
+"Value 1 exceeds maximum value of -1, at [:c]."
 iex> Xema.validate schema, %{d: -1}
 :ok
-iex> Xema.validate schema, %{d: 1}
+iex> {:error, error} = Xema.validate schema, %{d: 1}
 {:error, %Xema.ValidationError{
-  message: "Value 1 exceeds maximum value of -1, at [:d].",
   reason: %{properties: %{d: %{maximum: -1, value: 1}}}
 }}
+iex> Exception.message(error)
+"Value 1 exceeds maximum value of -1, at [:d]."
 ```
 
 ### <a id="without-def-ref"></a> Without `definitions` and `ref`
@@ -1037,23 +1080,19 @@ iex> schema = Xema.new {
 ...> }
 ...> Xema.validate schema, %{str: "foo"}
 :ok
-iex> Xema.validate schema, %{str: nil}
+iex> {:error, error} = Xema.validate schema, %{str: nil}
 {:error, %Xema.ValidationError{
-  message: "Expected :string, got nil, at [:str].",
   reason: %{properties: %{str: %{type: :string, value: nil}}}
 }}
+iex> Exception.message(error)
+"Expected :string, got nil, at [:str]."
 iex> Xema.validate schema, %{name: nil}
 :ok
 iex> Xema.validate schema, %{name: "Funny van Dannen"}
 :ok
-iex> Xema.validate schema, %{name: 66}
+iex> {:error, error} = Xema.validate schema, %{name: 66}
 {:error,
   %Xema.ValidationError{
-    message: """
-    No match of any schema, at [:name].
-      Expected nil, got 66, at [:name].
-      Expected :string, got 66, at [:name].\
-    """,
     reason: %{
       properties: %{
         name: %{any_of: [
@@ -1065,4 +1104,10 @@ iex> Xema.validate schema, %{name: 66}
     }
   }
 }
+iex> Exception.message(error)
+"""
+No match of any schema, at [:name].
+  Expected nil, got 66, at [:name].
+  Expected :string, got 66, at [:name].\
+"""
 ```

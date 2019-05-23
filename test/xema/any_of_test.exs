@@ -26,15 +26,8 @@ defmodule Xema.AnyOfTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      msg = """
-      No match of any schema.
-        Expected nil, got "foo".
-        Expected :integer, got "foo".\
-      """
-
       assert {:error,
               %ValidationError{
-                message: ^msg,
                 reason: %{
                   any_of: [
                     %{type: nil, value: "foo"},
@@ -42,7 +35,15 @@ defmodule Xema.AnyOfTest do
                   ],
                   value: "foo"
                 }
-              }} = validate(schema, "foo")
+              } = error} = validate(schema, "foo")
+
+      message = """
+      No match of any schema.
+        Expected nil, got "foo".
+        Expected :integer, got "foo".\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -76,60 +77,66 @@ defmodule Xema.AnyOfTest do
     end
 
     test "validate/2 with invalid string value", %{schema: schema} do
-      assert validate(schema, "foo") ==
-               {:error,
-                %Xema.ValidationError{
-                  message: """
-                  No match of any schema.
-                    Expected :map, got "foo".
-                    Expected :list, got "foo".\
-                  """,
-                  reason: %{
-                    any_of: [
-                      %{type: :map, value: "foo"},
-                      %{type: :list, value: "foo"}
-                    ],
-                    value: "foo"
-                  }
-                }}
+      assert {:error,
+              %Xema.ValidationError{
+                reason: %{
+                  any_of: [
+                    %{type: :map, value: "foo"},
+                    %{type: :list, value: "foo"}
+                  ],
+                  value: "foo"
+                }
+              } = error} = validate(schema, "foo")
+
+      message = """
+      No match of any schema.
+        Expected :map, got "foo".
+        Expected :list, got "foo".\
+      """
+
+      assert Exception.message(error) == message
     end
 
     test "validate/2 with invalid list value", %{schema: schema} do
-      assert validate(schema, ["foo"]) ==
-               {:error,
-                %ValidationError{
-                  message: """
-                  No match of any schema.
-                    Expected :map, got ["foo"].
-                    Expected :integer, got "foo", at [0].\
-                  """,
-                  reason: %{
-                    any_of: [
-                      %{type: :map, value: ["foo"]},
-                      %{items: [{0, %{type: :integer, value: "foo"}}]}
-                    ],
-                    value: ["foo"]
-                  }
-                }}
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  any_of: [
+                    %{type: :map, value: ["foo"]},
+                    %{items: [{0, %{type: :integer, value: "foo"}}]}
+                  ],
+                  value: ["foo"]
+                }
+              } = error} = validate(schema, ["foo"])
+
+      message = """
+      No match of any schema.
+        Expected :map, got ["foo"].
+        Expected :integer, got "foo", at [0].\
+      """
+
+      assert Exception.message(error) == message
     end
 
     test "validate/2 with invalid property value", %{schema: schema} do
-      assert validate(schema, %{foo: "foo"}) ==
-               {:error,
-                %Xema.ValidationError{
-                  message: """
-                  No match of any schema.
-                    Expected :integer, got "foo", at [:foo].
-                    Expected :list, got %{foo: "foo"}.\
-                  """,
-                  reason: %{
-                    any_of: [
-                      %{properties: %{foo: %{type: :integer, value: "foo"}}},
-                      %{type: :list, value: %{foo: "foo"}}
-                    ],
-                    value: %{foo: "foo"}
-                  }
-                }}
+      assert {:error,
+              %Xema.ValidationError{
+                reason: %{
+                  any_of: [
+                    %{properties: %{foo: %{type: :integer, value: "foo"}}},
+                    %{type: :list, value: %{foo: "foo"}}
+                  ],
+                  value: %{foo: "foo"}
+                }
+              } = error} = validate(schema, %{foo: "foo"})
+
+      message = """
+      No match of any schema.
+        Expected :integer, got "foo", at [:foo].
+        Expected :list, got %{foo: "foo"}.\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -152,26 +159,28 @@ defmodule Xema.AnyOfTest do
     end
 
     test "validate/2 with invalid property value", %{schema: schema} do
-      assert validate(schema, %{foo: %{bar: "foo"}}) ==
-               {:error,
-                %Xema.ValidationError{
-                  message: """
-                  No match of any schema, at [:foo].
-                    Expected :integer, got "foo", at [:foo, :bar].
-                    Expected :list, got %{bar: "foo"}, at [:foo].\
-                  """,
-                  reason: %{
-                    properties: %{
-                      foo: %{
-                        any_of: [
-                          %{properties: %{bar: %{type: :integer, value: "foo"}}},
-                          %{type: :list, value: %{bar: "foo"}}
-                        ],
-                        value: %{bar: "foo"}
-                      }
+      assert {:error,
+              %Xema.ValidationError{
+                reason: %{
+                  properties: %{
+                    foo: %{
+                      any_of: [
+                        %{properties: %{bar: %{type: :integer, value: "foo"}}},
+                        %{type: :list, value: %{bar: "foo"}}
+                      ],
+                      value: %{bar: "foo"}
                     }
                   }
-                }}
+                }
+              } = error} = validate(schema, %{foo: %{bar: "foo"}})
+
+      message = """
+      No match of any schema, at [:foo].
+        Expected :integer, got "foo", at [:foo, :bar].
+        Expected :list, got %{bar: "foo"}, at [:foo].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -197,38 +206,40 @@ defmodule Xema.AnyOfTest do
     end
 
     test "validate/2 with an invalid string", %{schema: schema} do
-      assert validate(schema, "foo") ==
-               {:error,
-                %Xema.ValidationError{
-                  message: """
-                  No match of any schema.
-                    No match of any schema.
-                      Expected :integer, got "foo".
-                      Expected :float, got "foo".
-                    No match of any schema.
-                      Expected :list, got "foo".
-                      Expected :map, got "foo".\
-                  """,
-                  reason: %{
-                    any_of: [
-                      %{
-                        any_of: [
-                          %{type: :integer, value: "foo"},
-                          %{type: :float, value: "foo"}
-                        ],
-                        value: "foo"
-                      },
-                      %{
-                        any_of: [
-                          %{type: :list, value: "foo"},
-                          %{type: :map, value: "foo"}
-                        ],
-                        value: "foo"
-                      }
-                    ],
-                    value: "foo"
-                  }
-                }}
+      assert {:error,
+              %Xema.ValidationError{
+                reason: %{
+                  any_of: [
+                    %{
+                      any_of: [
+                        %{type: :integer, value: "foo"},
+                        %{type: :float, value: "foo"}
+                      ],
+                      value: "foo"
+                    },
+                    %{
+                      any_of: [
+                        %{type: :list, value: "foo"},
+                        %{type: :map, value: "foo"}
+                      ],
+                      value: "foo"
+                    }
+                  ],
+                  value: "foo"
+                }
+              } = error} = validate(schema, "foo")
+
+      message = """
+      No match of any schema.
+        No match of any schema.
+          Expected :integer, got "foo".
+          Expected :float, got "foo".
+        No match of any schema.
+          Expected :list, got "foo".
+          Expected :map, got "foo".\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 end

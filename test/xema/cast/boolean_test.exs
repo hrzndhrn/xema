@@ -22,7 +22,6 @@ defmodule Xema.Cast.BooleanTest do
     test "from a string", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :boolean, got "true".|,
                 reason: %{
                   type: :boolean,
                   value: "true"
@@ -32,7 +31,7 @@ defmodule Xema.Cast.BooleanTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :boolean, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :boolean, value: data)}
 
         assert cast(schema, data) == expected
       end)

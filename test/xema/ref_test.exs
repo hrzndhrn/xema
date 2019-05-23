@@ -29,10 +29,11 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected only defined properties, got key [:bar].",
                  reason: %{properties: %{bar: %{additional_properties: false}}}
-               }
+               } = error
              } = validate(schema, %{bar: 1})
+
+      assert Exception.message(error) == "Expected only defined properties, got key [:bar]."
     end
 
     test "validate/2 with recursive valid data", %{schema: schema} do
@@ -42,7 +43,6 @@ defmodule Xema.RefTest do
     test "validate/2 with recursive invalid data", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Expected only defined properties, got key [:foo, :foo, :bar].",
                 reason: %{
                   properties: %{
                     foo: %{
@@ -54,7 +54,10 @@ defmodule Xema.RefTest do
                     }
                   }
                 }
-              }} = validate(schema, %{foo: %{foo: %{bar: 3}}})
+              } = error} = validate(schema, %{foo: %{foo: %{bar: 3}}})
+
+      assert Exception.message(error) ==
+               "Expected only defined properties, got key [:foo, :foo, :bar]."
     end
 
     test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
@@ -125,36 +128,39 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "42", at [:foo].|,
                  reason: %{properties: %{foo: %{type: :integer, value: "42"}}}
-               }
+               } = error
              } = validate(schema, %{foo: "42"})
 
+      assert Exception.message(error) == ~s|Expected :integer, got "42", at [:foo].|
+
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "42", at [:bar].|,
                  reason: %{properties: %{bar: %{type: :integer, value: "42"}}}
-               }
+               } = error
              } = validate(schema, %{bar: "42"})
 
-      msg = """
-      Expected :integer, got "42", at [:bar].
-      Expected :integer, got "21", at [:foo].\
-      """
+      assert Exception.message(error) == ~s|Expected :integer, got "42", at [:bar].|
 
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      bar: %{type: :integer, value: "42"},
                      foo: %{type: :integer, value: "21"}
                    }
                  }
-               }
+               } = error
              } = validate(schema, %{foo: "21", bar: "42"})
+
+      message = """
+      Expected :integer, got "42", at [:bar].
+      Expected :integer, got "21", at [:foo].\
+      """
+
+      assert Exception.message(error) == message
     end
 
     test "Ref.fetch!/3 returns schema for a valid ref", %{non_inline: schema} do
@@ -187,36 +193,39 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "42", at ["foo"].|,
                  reason: %{properties: %{"foo" => %{type: :integer, value: "42"}}}
-               }
+               } = error
              } = validate(schema, %{"foo" => "42"})
 
+      assert Exception.message(error) == ~s|Expected :integer, got "42", at ["foo"].|
+
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "42", at ["bar"].|,
                  reason: %{properties: %{"bar" => %{type: :integer, value: "42"}}}
-               }
+               } = error
              } = validate(schema, %{"bar" => "42"})
 
-      msg = """
-      Expected :integer, got "42", at ["bar"].
-      Expected :integer, got "21", at ["foo"].\
-      """
+      assert Exception.message(error) == ~s|Expected :integer, got "42", at ["bar"].|
 
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      "bar" => %{type: :integer, value: "42"},
                      "foo" => %{type: :integer, value: "21"}
                    }
                  }
-               }
+               } = error
              } = validate(schema, %{"foo" => "21", "bar" => "42"})
+
+      message = """
+      Expected :integer, got "42", at ["bar"].
+      Expected :integer, got "21", at ["foo"].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -419,23 +428,24 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with invalid values", %{schema: schema} do
-      msg = """
-      Value 1 exceeds maximum value of 0, at [:bar].
-      Value -1 is less than minimum value of 0, at [:foo].\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      bar: %{maximum: 0, value: 1},
                      foo: %{minimum: 0, value: -1}
                    }
                  }
-               }
+               } = error
              } = validate(schema, %{foo: -1, bar: 1})
+
+      message = """
+      Value 1 exceeds maximum value of 0, at [:bar].
+      Value -1 is less than minimum value of 0, at [:foo].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -463,23 +473,24 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with invalid values", %{schema: schema} do
-      msg = """
-      Value 1 exceeds maximum value of 0, at [:bar].
-      Value -1 is less than minimum value of 0, at [:foo].\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      bar: %{maximum: 0, value: 1},
                      foo: %{minimum: 0, value: -1}
                    }
                  }
-               }
+               } = error
              } = validate(schema, %{foo: -1, bar: 1})
+
+      message = """
+      Value 1 exceeds maximum value of 0, at [:bar].
+      Value -1 is less than minimum value of 0, at [:foo].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -509,10 +520,11 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value -21 is less than minimum value of 0, at [:foo].",
                  reason: %{properties: %{foo: %{minimum: 0, value: -21}}}
-               }
+               } = error
              } = validate(schema, %{foo: -21})
+
+      assert Exception.message(error) == "Value -21 is less than minimum value of 0, at [:foo]."
     end
 
     test "Ref.fetch!/3 return schema for a valid ref", %{non_inline: schema} do
@@ -556,10 +568,11 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value -42 is less than minimum value of 0.",
                  reason: %{minimum: 0, value: -42}
-               }
+               } = error
              } = validate(schema, -42)
+
+      assert Exception.message(error) == "Value -42 is less than minimum value of 0."
     end
   end
 
@@ -585,10 +598,11 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value -42 is less than minimum value of 0.",
                  reason: %{minimum: 0, value: -42}
-               }
+               } = error
              } = validate(schema, -42)
+
+      assert Exception.message(error) == "Value -42 is less than minimum value of 0."
     end
   end
 
@@ -614,10 +628,11 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "2", at [1].|,
                  reason: %{items: [{1, %{type: :integer, value: "2"}}]}
-               }
+               } = error
              } = validate(schema, [1, "2"])
+
+      assert Exception.message(error) == ~s|Expected :integer, got "2", at [1].|
     end
   end
 
@@ -643,10 +658,11 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected :string, got 2, at [1].",
                  reason: %{items: [{1, %{type: :string, value: 2}}]}
-               }
+               } = error
              } = validate(schema, [1, 2])
+
+      assert Exception.message(error) == "Expected :string, got 2, at [1]."
     end
   end
 
@@ -680,10 +696,11 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "1", at [:tilda_1].|,
                  reason: %{properties: %{tilda_1: %{type: :integer, value: "1"}}}
-               }
+               } = error
              } = validate(schema, %{tilda_1: "1"})
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1", at [:tilda_1].|
     end
 
     test "validate/2 tilda_2 with valid value", %{schema: schema} do
@@ -707,18 +724,8 @@ defmodule Xema.RefTest do
     end
 
     test "validate/2 with invalid values", %{schema: schema} do
-      msg = """
-      Expected :integer, got "1", at [:percent].
-      Expected :integer, got "1", at [:slash_1].
-      Expected :integer, got "1", at [:slash_2].
-      Expected :integer, got "1", at [:tilda_1].
-      Expected :integer, got "1", at [:tilda_2].
-      Expected :integer, got "1", at [:tilda_3].\
-      """
-
       assert {:error,
               %ValidationError{
-                message: ^msg,
                 reason: %{
                   properties: %{
                     percent: %{type: :integer, value: "1"},
@@ -729,7 +736,7 @@ defmodule Xema.RefTest do
                     tilda_3: %{type: :integer, value: "1"}
                   }
                 }
-              }} =
+              } = error} =
                validate(schema, %{
                  tilda_1: "1",
                  tilda_2: "1",
@@ -738,6 +745,17 @@ defmodule Xema.RefTest do
                  slash_2: "1",
                  percent: "1"
                })
+
+      message = """
+      Expected :integer, got "1", at [:percent].
+      Expected :integer, got "1", at [:slash_1].
+      Expected :integer, got "1", at [:slash_2].
+      Expected :integer, got "1", at [:tilda_1].
+      Expected :integer, got "1", at [:tilda_2].
+      Expected :integer, got "1", at [:tilda_3].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -839,13 +857,8 @@ defmodule Xema.RefTest do
         ]
       }
 
-      msg = """
-      Required properties are missing: [:nodes], at [:nodes, 0, :subtree, :nodes, 1, :subtree].\
-      """
-
       assert {:error,
               %ValidationError{
-                message: ^msg,
                 reason: %{
                   properties: %{
                     nodes: %{
@@ -873,7 +886,13 @@ defmodule Xema.RefTest do
                     }
                   }
                 }
-              }} = validate(schema, tree)
+              } = error} = validate(schema, tree)
+
+      message = """
+      Required properties are missing: [:nodes], at [:nodes, 0, :subtree, :nodes, 1, :subtree].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 

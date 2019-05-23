@@ -36,7 +36,6 @@ defmodule Xema.Cast.KeywordTest do
 
       assert {:error,
               %ValidationError{
-                message: "Expected :keyword, got %{foo: 42}.",
                 reason: %{
                   type: :keyword,
                   value: data
@@ -54,14 +53,14 @@ defmodule Xema.Cast.KeywordTest do
 
     test "from a map with string keys and unknown atom", %{schema: schema} do
       data = %{"xyz" => 55}
-      expected = {:error, CastError.exception(%{key: "xyz", path: [], to: :keyword})}
+      expected = {:error, CastError.exception(key: "xyz", path: [], to: :keyword)}
 
       assert cast(schema, data) == expected
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :keyword, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :keyword, value: data)}
 
         assert cast(schema, data) == expected
       end)
@@ -99,7 +98,7 @@ defmodule Xema.Cast.KeywordTest do
 
     test "from a map with string keys and unknown atom", %{schema: schema} do
       data = %{"xyz" => 55}
-      expected = {:error, CastError.exception(%{key: "xyz", path: [], to: :keyword})}
+      expected = {:error, CastError.exception(key: "xyz", path: [], to: :keyword)}
 
       assert cast(schema, data) == expected
     end
@@ -132,7 +131,7 @@ defmodule Xema.Cast.KeywordTest do
 
     test "from a keyword list with an invalid value", %{schema: schema} do
       data = [foo: [str: 5, num: "x"]]
-      expected = {:error, CastError.exception(%{path: [:foo, :num], to: :integer, value: "x"})}
+      expected = {:error, CastError.exception(path: [:foo, :num], to: :integer, value: "x")}
 
       assert cast(schema, data) == expected
     end
@@ -144,14 +143,14 @@ defmodule Xema.Cast.KeywordTest do
 
     test "from a map with string keys and an invalid value", %{schema: schema} do
       data = %{"foo" => %{"str" => 6, "num" => "z"}}
-      expected = {:error, CastError.exception(%{path: ["foo", "num"], to: :integer, value: "z"})}
+      expected = {:error, CastError.exception(path: ["foo", "num"], to: :integer, value: "z")}
 
       assert cast(schema, data) == expected
     end
 
     test "from a map with string keys and an unknown atom", %{schema: schema} do
       data = %{"foo" => %{"str" => 6, "xyz" => "z"}}
-      expected = {:error, CastError.exception(%{path: ["foo"], to: :keyword, key: "xyz"})}
+      expected = {:error, CastError.exception(path: ["foo"], to: :keyword, key: "xyz")}
 
       assert cast(schema, data) == expected
     end
@@ -163,7 +162,7 @@ defmodule Xema.Cast.KeywordTest do
 
     test "from a map with atom keys and an invalid value", %{schema: schema} do
       data = %{foo: %{str: 6, num: "z"}}
-      expected = {:error, CastError.exception(%{path: [:foo, :num], to: :integer, value: "z"})}
+      expected = {:error, CastError.exception(path: [:foo, :num], to: :integer, value: "z")}
 
       assert cast(schema, data) == expected
     end

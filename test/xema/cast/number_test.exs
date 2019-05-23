@@ -31,7 +31,6 @@ defmodule Xema.Cast.NumberTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :number, got "42".|,
                 reason: %{
                   type: :number,
                   value: ^data
@@ -46,7 +45,6 @@ defmodule Xema.Cast.NumberTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :number, got "42.24".|,
                 reason: %{
                   type: :number,
                   value: "42.24"
@@ -58,7 +56,7 @@ defmodule Xema.Cast.NumberTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :number, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :number, value: data)}
 
         assert cast(schema, data) == expected
       end)

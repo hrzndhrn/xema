@@ -18,6 +18,12 @@ defmodule Xema.Access do
   def get(data, [h]) when is_list(data) and is_integer(h), do: Enum.at(data, h)
   def get(data, [h | t]) when is_list(data) and is_integer(h), do: get(Enum.at(data, h), t)
 
+  def get(data, [h]) when is_tuple(data) and is_integer(h),
+    do: data |> Tuple.to_list() |> Enum.at(h)
+
+  def get(data, [h | t]) when is_tuple(data) and is_integer(h),
+    do: get(data |> Tuple.to_list() |> Enum.at(h), t)
+
   def get(data, [h]), do: Access.get(data, h)
   def get(data, [h | t]), do: get(Access.get(data, h), t)
 
@@ -27,7 +33,8 @@ defmodule Xema.Access do
   @spec fetch(Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
   def fetch(data, path) do
     with {:error, rest} <- do_fetch(data, path) do
-      {:error, PathError.exception(path: Enum.take(path, length(path) - length(rest)), term: data)}
+      {:error,
+       PathError.exception(path: Enum.take(path, length(path) - length(rest)), term: data)}
     end
   end
 

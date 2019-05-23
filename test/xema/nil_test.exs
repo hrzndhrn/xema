@@ -21,8 +21,10 @@ defmodule Xema.NilTest do
     test "validate/2 with non-nil value", %{schema: schema} do
       assert {
                :error,
-               %ValidationError{message: "Expected nil, got 1.", reason: %{type: nil, value: 1}}
+               %ValidationError{reason: %{type: nil, value: 1}} = error
              } = validate(schema, 1)
+
+      assert Exception.message(error) == "Expected nil, got 1."
     end
   end
 end

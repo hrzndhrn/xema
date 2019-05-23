@@ -49,7 +49,6 @@ defmodule Xema.Cast.TrueFalseTest do
         assert cast(schema, data) ==
                  {:error,
                   %ValidationError{
-                    message: "Schema always fails validation.",
                     reason: %{type: false}
                   }}
       end)

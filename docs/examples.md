@@ -33,14 +33,15 @@ true
 ...>   %{first_name: :james, last_name: "Brown", age: 42}
 ...> )
 false
-iex> Example.Basic.validate(
+iex> {:error, error} = Example.Basic.validate(
 ...>   :person,
 ...>   %{first_name: :james, last_name: "Brown", age: 42}
 ...> )
 {:error, %Xema.ValidationError{
-  message: "Expected :string, got :james, at [:first_name].",
   reason: %{properties: %{first_name: %{type: :string, value: :james}}}
 }}
+iex> Exception.message(error)
+"Expected :string, got :james, at [:first_name]."
 iex> Example.Basic.valid?("foo")
 true
 iex> Example.Basic.valid?(:foo)
@@ -69,21 +70,24 @@ iex> defmodule Example.Options do
 iex>
 iex> Example.Options.validate(foo: :bar, limit: 11, msg: "foo")
 :ok
-iex> Example.Options.validate(foo: :foo, limit: 11)
+iex> {:error, error} = Example.Options.validate(foo: :foo, limit: 11)
 {:error, %Xema.ValidationError{
-  message: "Value :foo is not defined in enum, at [:foo].",
   reason: %{properties: %{foo: %{enum: [:bar, :baz], value: :foo}}}
 }}
-iex> Example.Options.validate(foo: :bar)
+iex> Exception.message(error)
+"Value :foo is not defined in enum, at [:foo]."
+iex> {:error, error} = Example.Options.validate(foo: :bar)
 {:error, %Xema.ValidationError{
-  message: "Required properties are missing: [:limit].",
   reason: %{required: [:limit]}
 }}
-iex> Example.Options.validate(foo: :bar, limit: 11, message: "foo")
+iex> Exception.message(error)
+"Required properties are missing: [:limit]."
+iex> {:error, error} = Example.Options.validate(foo: :bar, limit: 11, message: "foo")
 {:error, %Xema.ValidationError{
-  message: "Expected only defined properties, got key [:message].",
   reason: %{properties: %{message: %{additional_properties: false}}}
 }}
+iex> Exception.message(error)
+"Expected only defined properties, got key [:message]."
 ```
 
 ## Custom validator
@@ -112,11 +116,12 @@ iex> defmodule Example.PaliSchema do
 true
 iex> Example.PaliSchema.valid?(:palindrome, "bike")
 false
-iex> Example.PaliSchema.validate(:palindrome, "bike")
+iex> {:error, error} = Example.PaliSchema.validate(:palindrome, "bike")
 {:error, %Xema.ValidationError{
-  message: ~s|Validator fails with :no_palindrome for value "bike".|,
   reason: %{validator: :no_palindrome, value: "bike"}
 }}
+iex> Exception.message(error)
+~s|Validator fails with :no_palindrome for value "bike".|
 ```
 
 A validator can also be specified as behaviour.
@@ -145,11 +150,12 @@ iex> defmodule Example.PaliSchemaB do
 true
 iex> Example.PaliSchemaB.valid?(:palindrome, "bike")
 false
-iex> Example.PaliSchemaB.validate(:palindrome, "bike")
+iex> {:error, error} = Example.PaliSchemaB.validate(:palindrome, "bike")
 {:error, %Xema.ValidationError{
-  message: ~s|Validator fails with :no_palindrome for value "bike".|,
   reason: %{validator: :no_palindrome, value: "bike"}
 }}
+iex> Exception.message(error)
+~s|Validator fails with :no_palindrome for value "bike".|
 ```
 
 The custom validator can also be a part of the schema module.
@@ -177,16 +183,18 @@ iex>   def check(%{from: from, to: to}) do
 ...>
 ...> Example.Range.validate(:range, %{from: 6, to: 8})
 :ok
-iex> Example.Range.validate(:range, %{from: 66, to: 8})
+iex> {:error, error} = Example.Range.validate(:range, %{from: 66, to: 8})
 {:error, %Xema.ValidationError{
-  message: "Validator fails with :from_greater_to for value %{from: 66, to: 8}.",
   reason: %{validator: :from_greater_to, value: %{from: 66, to: 8}}
 }}
-iex> Example.Range.validate(:range, %{from: 166, to: 118})
+iex> Exception.message(error)
+"Validator fails with :from_greater_to for value %{from: 66, to: 8}."
+iex> {:error, error} = Example.Range.validate(:range, %{from: 166, to: 118})
 {:error, %Xema.ValidationError{
-  message: "Value 118 exceeds maximum value of 100, at [:to].",
   reason: %{properties: %{to: %{maximum: 100, value: 118}}}
 }}
+iex> Exception.message(error)
+"Value 118 exceeds maximum value of 100, at [:to]."
 ```
 
 ## Cast JSON

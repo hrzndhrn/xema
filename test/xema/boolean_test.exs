@@ -42,10 +42,11 @@ defmodule Xema.BooleanTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :boolean, got "true".|,
                  reason: %{type: :boolean, value: "true"}
-               }
+               } = error
              } = validate(schema, "true")
+
+      assert ValidationError.message(error) == ~s|Expected :boolean, got "true".|
     end
   end
 end

@@ -24,7 +24,7 @@ defmodule Xema.Cast.DecimalTest do
 
     test "from an invalid string", %{schema: schema} do
       assert cast(schema, "4/5") ==
-               {:error, CastError.exception(%{path: [], to: Decimal, value: "4/5"})}
+               {:error, CastError.exception(path: [], to: Decimal, value: "4/5")}
     end
 
     test "from an integer", %{schema: schema} do
@@ -49,7 +49,7 @@ defmodule Xema.Cast.DecimalTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: Decimal, value: data})}
+        expected = {:error, CastError.exception(path: [], to: Decimal, value: data)}
 
         assert cast(schema, data) == expected
       end)

@@ -26,7 +26,6 @@ defmodule Xema.Cast.IntegerTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :integer, got "42".|,
                 reason: %{type: :integer, value: "42"}
               }} = validate(schema, data)
 
@@ -35,14 +34,14 @@ defmodule Xema.Cast.IntegerTest do
 
     test "from an invalid string", %{schema: schema} do
       data = "66.6"
-      expected = {:error, CastError.exception(%{path: [], to: :integer, value: "66.6"})}
+      expected = {:error, CastError.exception(path: [], to: :integer, value: "66.6")}
 
       assert cast(schema, data) == expected
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :integer, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :integer, value: data)}
 
         assert cast(schema, data) == expected
       end)

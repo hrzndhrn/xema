@@ -30,7 +30,6 @@ defmodule Xema.Cast.StructTest do
       assert cast(schema, data) ==
                {:error,
                 %ValidationError{
-                  message: "Expected :struct, got %{}.",
                   reason: %{type: :struct, value: %{}}
                 }}
     end
@@ -41,7 +40,6 @@ defmodule Xema.Cast.StructTest do
       assert cast(schema, data) ==
                {:error,
                 %ValidationError{
-                  message: "Expected :struct, got %{foo: 6}.",
                   reason: %{type: :struct, value: %{foo: 6}}
                 }}
     end
@@ -52,7 +50,6 @@ defmodule Xema.Cast.StructTest do
       assert cast(schema, data) ==
                {:error,
                 %Xema.ValidationError{
-                  message: "Expected :struct, got %{\"foo\" => 6}.",
                   reason: %{type: :struct, value: %{"foo" => 6}}
                 }}
     end
@@ -69,20 +66,20 @@ defmodule Xema.Cast.StructTest do
     test "from a keyword list", %{schema: schema} do
       data = [foo: 6]
 
-      assert cast(schema, data) ==
-               {:error,
-                %CastError{
-                  key: nil,
-                  message: "cannot cast [foo: 6] to :struct",
-                  path: [],
-                  to: :struct,
-                  value: [foo: 6]
-                }}
+      assert {:error,
+              %CastError{
+                key: nil,
+                path: [],
+                to: :struct,
+                value: [foo: 6]
+              } = error} = cast(schema, data)
+
+      assert Exception.message(error) == "cannot cast [foo: 6] to :struct"
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :struct, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :struct, value: data)}
         assert cast(schema, data) == expected
       end)
     end
@@ -115,15 +112,15 @@ defmodule Xema.Cast.StructTest do
     test "from a map with string keys and unknown atom", %{schema: schema} do
       data = %{"xyz" => 6}
 
-      assert cast(schema, data) ==
-               {:error,
-                %CastError{
-                  key: "xyz",
-                  message: ~s|cannot cast "xyz" to :struct key, the atom is unknown|,
-                  path: [],
-                  to: :struct,
-                  value: nil
-                }}
+      assert {:error,
+              %CastError{
+                key: "xyz",
+                path: [],
+                to: :struct,
+                value: nil
+              } = error} = cast(schema, data)
+
+      assert Exception.message(error) == ~s|cannot cast "xyz" to :struct key, the atom is unknown|
     end
 
     test "from a keyword list", %{schema: schema} do
@@ -138,7 +135,7 @@ defmodule Xema.Cast.StructTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: User, value: data})}
+        expected = {:error, CastError.exception(path: [], to: User, value: data)}
         assert cast(schema, data) == expected
       end)
     end
@@ -171,15 +168,15 @@ defmodule Xema.Cast.StructTest do
     test "from a map with string keys and unknown atom", %{schema: schema} do
       data = %{"xyz" => 6}
 
-      assert cast(schema, data) ==
-               {:error,
-                %Xema.CastError{
-                  key: "xyz",
-                  message: ~s|cannot cast "xyz" to :struct key, the atom is unknown|,
-                  path: [],
-                  to: :struct,
-                  value: nil
-                }}
+      assert {:error,
+              %Xema.CastError{
+                key: "xyz",
+                path: [],
+                to: :struct,
+                value: nil
+              } = error} = cast(schema, data)
+
+      assert Exception.message(error) == ~s|cannot cast "xyz" to :struct key, the atom is unknown|
     end
 
     test "from a keyword list", %{schema: schema} do
@@ -195,20 +192,20 @@ defmodule Xema.Cast.StructTest do
     test "from a keyword list with invalid values", %{schema: schema} do
       data = [name: 55, age: "Joe"]
 
-      assert cast(schema, data) ==
-               {:error,
-                %Xema.CastError{
-                  key: nil,
-                  message: "cannot cast \"Joe\" to :integer at [:age]",
-                  path: [:age],
-                  to: :integer,
-                  value: "Joe"
-                }}
+      assert {:error,
+              %Xema.CastError{
+                key: nil,
+                path: [:age],
+                to: :integer,
+                value: "Joe"
+              } = error} = cast(schema, data)
+
+      assert Exception.message(error) == "cannot cast \"Joe\" to :integer at [:age]"
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: User, value: data})}
+        expected = {:error, CastError.exception(path: [], to: User, value: data)}
         assert cast(schema, data) == expected
       end)
     end
