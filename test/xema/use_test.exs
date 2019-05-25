@@ -1,8 +1,6 @@
 defmodule Xema.UseTest do
   use ExUnit.Case, async: true
 
-  import AssertBlame
-
   alias Xema.ValidationError
 
   test "use Xema with multiple schema and option multi false raises error" do
@@ -181,13 +179,13 @@ defmodule Xema.UseTest do
     end
 
     test "validate!/2 raises a ValidationError for an invalid user" do
-      assert_blame ValidationError, fn ->
+      assert_raise ValidationError, fn ->
         Schema.validate!(:user, %{name: "", age: 21})
       end
     end
 
     test "validate!/2 raises a ValidationError for an invalid nums map" do
-      assert_blame ValidationError, fn ->
+      assert_raise ValidationError, fn ->
         Schema.validate!(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
       end
     end
@@ -197,7 +195,7 @@ defmodule Xema.UseTest do
     end
 
     test "validate!/1 raises a ValidationError for an invalid person" do
-      assert_blame ValidationError, fn ->
+      assert_raise ValidationError, fn ->
         Schema.validate!(age: -1)
       end
     end

@@ -3,7 +3,6 @@ defmodule Xema.Cast.DateTimeTest do
 
   alias Xema.CastError
 
-  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2]
 
   @set [:foo, 1, 1.0, [42], {:tuple}]
@@ -67,12 +66,12 @@ defmodule Xema.Cast.DateTimeTest do
     end
 
     test "from an invalid string", %{schema: schema} do
-      assert_blame CastError, fn -> cast!(schema, "today") end
+      assert_raise CastError, fn -> cast!(schema, "today") end
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert_blame CastError, fn -> cast!(schema, data) end
+        assert_raise CastError, fn -> cast!(schema, data) end
       end)
     end
 

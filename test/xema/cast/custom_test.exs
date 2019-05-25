@@ -1,8 +1,6 @@
 defmodule Xema.Cast.CustomTest do
   use ExUnit.Case, async: true
 
-  import AssertBlame
-
   alias Xema.{
     CastError,
     ValidationError
@@ -81,7 +79,7 @@ defmodule Xema.Cast.CustomTest do
       assert Exception.message(error) ==
                ~s|cannot cast "https://elixir-lang.org/docs.html" to URI|
 
-      assert_blame CastError, fn -> cast!(schema, data) end
+      assert_raise CastError, fn -> cast!(schema, data) end
     end
   end
 
