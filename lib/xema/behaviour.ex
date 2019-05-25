@@ -25,8 +25,8 @@ defmodule Xema.Behaviour do
   defmacro __using__(_opts) do
     quote do
       @behaviour Xema.Behaviour
-      alias Xema.Behaviour
       alias Xema.Access, as: XemaAccess
+      alias Xema.Behaviour
 
       @enforce_keys [:schema]
 
