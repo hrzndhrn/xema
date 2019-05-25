@@ -59,7 +59,7 @@ defmodule Xema.Access do
 
   defp do_fetch(data, [h | t]) when is_function(h), do: h.(:get, data, &do_fetch(&1, t))
 
-  defp do_fetch(nil, [_ | t]), do: do_fetch(nil, t)
+  defp do_fetch(nil, [_ | t]), do: do_fetch(:error, t)
 
   defp do_fetch(data, [h | t]) when is_list(data) and is_integer(h),
     do: do_fetch(Enum.at(data, h, :error), t)

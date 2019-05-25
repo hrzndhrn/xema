@@ -2,6 +2,7 @@ defmodule Xema.AccessTest do
   use ExUnit.Case
 
   import AssertBlame
+  import Access
 
   # The tests are all calling the functions in `Xema` that are delegate or call the funcitons
   # in `Xema.Access`.
@@ -26,7 +27,8 @@ defmodule Xema.AccessTest do
       72,
       [a: 1, b: 2]
     },
-    "list" => [?a, ?b, ?c]
+    "list" => [?a, ?b, ?c],
+    "null" => nil
   }
 
   @users_schema Xema.new(
@@ -42,10 +44,13 @@ defmodule Xema.AccessTest do
   describe "get2/" do
     test "returns a value for a valid path" do
       assert Xema.get(@data, ["users", 0, :age]) == 45
+      assert Xema.get(@data, ["users", at(0), :age]) == 45
       assert Xema.get(@data, ["users", -1, :age]) == 21
+      assert Xema.get(@data, ["tuple", 0]) == 72
       assert Xema.get(@data, ["tuple", 1, :a]) == 1
       assert Xema.get(@data, ["tuple", 1, 1]) == {:b, 2}
       assert Xema.get(@data, ["list", 1]) == ?b
+      assert Xema.get(@data, ["list", at(2)]) == ?c
     end
 
     test "returns nil for invalid path" do
@@ -80,14 +85,25 @@ defmodule Xema.AccessTest do
   describe "fetch/2" do
     test "returns a value for a valid path" do
       assert Xema.fetch(@data, ["users", 0, :age]) == {:ok, 45}
+      assert Xema.fetch(@data, ["users", at(0), :age]) == {:ok, 45}
       assert Xema.fetch(@data, ["users", -1, :age]) == {:ok, 21}
+      assert Xema.fetch(@data, ["tuple", 0]) == {:ok, 72}
       assert Xema.fetch(@data, ["tuple", 1, :a]) == {:ok, 1}
       assert Xema.fetch(@data, ["tuple", 1, 1]) == {:ok, {:b, 2}}
       assert Xema.fetch(@data, ["list", 1]) == {:ok, ?b}
+      assert Xema.fetch(@data, ["list", at(2)]) == {:ok, ?c}
+      assert Xema.fetch(@data, ["null"]) == {:ok, nil}
     end
 
     test "returns a error tuple for invalid path" do
-      assert {:error, %PathError{}} = Xema.fetch(@data, ["users", 0, :foo])
+      assert {:error, %PathError{} = error} = Xema.fetch(@data, ["users", 0, :foo])
+      assert Exception.message(error) =~ ~s|path ["users", 0, :foo] not found in:|
+
+      assert {:error, %PathError{} = error} = Xema.fetch(@data, ["null", :foo])
+      assert Exception.message(error) =~ ~s|path ["null", :foo] not found in:|
+
+      assert {:error, %PathError{} = error} = Xema.fetch(@data, ["null", :foo, :bar, :baz])
+      assert Exception.message(error) =~ ~s|path ["null", :foo] not found in:|
     end
 
     test "raises an ArgumentError for invalid list index" do
