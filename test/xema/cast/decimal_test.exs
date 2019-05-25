@@ -3,6 +3,7 @@ defmodule Xema.Cast.DecimalTest do
 
   alias Xema.CastError
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2]
 
   @set [:foo, [42], {:tuple}]
@@ -66,7 +67,7 @@ defmodule Xema.Cast.DecimalTest do
     end
 
     test "from an invalid string", %{schema: schema} do
-      assert_raise CastError, fn -> assert cast!(schema, "4/5") end
+      assert_blame CastError, fn -> assert cast!(schema, "4/5") end
     end
 
     test "from an integer", %{schema: schema} do
@@ -91,7 +92,7 @@ defmodule Xema.Cast.DecimalTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert_raise CastError, fn -> cast!(schema, data) end
+        assert_blame CastError, fn -> cast!(schema, data) end
       end)
     end
   end

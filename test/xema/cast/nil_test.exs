@@ -3,6 +3,7 @@ defmodule Xema.Cast.NilTest do
 
   alias Xema.CastError
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2]
 
   describe "nil schema" do
@@ -37,7 +38,7 @@ defmodule Xema.Cast.NilTest do
       Enum.each(set, fn data ->
         msg = "cannot cast #{inspect(data)} to nil"
 
-        assert_raise CastError, msg, fn ->
+        assert_blame CastError, msg, fn ->
           cast!(schema, data) == data
         end
       end)

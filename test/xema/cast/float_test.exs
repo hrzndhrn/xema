@@ -3,6 +3,7 @@ defmodule Xema.Cast.FloatTest do
 
   alias Xema.{CastError, ValidationError}
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
   @set [55, [55], [num: 55], :foo, %{}, {:tuplt}]
@@ -73,7 +74,7 @@ defmodule Xema.Cast.FloatTest do
       data = "66,6"
       msg = "cannot cast #{inspect(data)} to :float"
 
-      assert_raise CastError, msg, fn -> cast!(schema, data) end
+      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
@@ -86,7 +87,7 @@ defmodule Xema.Cast.FloatTest do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to :float"
 
-        assert_raise CastError, msg, fn -> cast!(schema, data) end
+        assert_blame CastError, msg, fn -> cast!(schema, data) end
       end)
     end
   end

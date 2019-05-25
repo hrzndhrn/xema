@@ -3,6 +3,7 @@ defmodule Xema.Cast.AtomTest do
 
   alias Xema.{CastError, ValidationError}
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
   @set [42, 1.0, [foo: 42], [42], %{}, {:tuple}]
@@ -73,7 +74,7 @@ defmodule Xema.Cast.AtomTest do
     test "from an invalid string", %{schema: schema} do
       msg = ~s|cannot cast "xyz" to :atom, the atom is unknown|
 
-      assert_raise CastError, msg, fn ->
+      assert_blame CastError, msg, fn ->
         cast!(schema, "xyz")
       end
     end
@@ -88,7 +89,7 @@ defmodule Xema.Cast.AtomTest do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to :atom"
 
-        assert_raise CastError, msg, fn -> cast!(schema, data) end
+        assert_blame CastError, msg, fn -> cast!(schema, data) end
       end)
     end
   end

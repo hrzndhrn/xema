@@ -1,6 +1,7 @@
 defmodule Xema.Cast.KeywordTest do
   use ExUnit.Case, async: true
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
   alias Xema.{CastError, ValidationError}
@@ -205,13 +206,13 @@ defmodule Xema.Cast.KeywordTest do
       data = %{"xyz" => 55}
       msg = ~s|cannot cast "xyz" to :keyword key, the atom is unknown|
 
-      assert_raise CastError, msg, fn -> cast!(schema, data) end
+      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to :keyword"
-        assert_raise CastError, msg, fn -> cast!(schema, data) end
+        assert_blame CastError, msg, fn -> cast!(schema, data) end
       end)
     end
 
@@ -252,7 +253,7 @@ defmodule Xema.Cast.KeywordTest do
       data = %{"xyz" => 55}
       msg = ~s|cannot cast "xyz" to :keyword key, the atom is unknown|
 
-      assert_raise CastError, msg, fn -> cast!(schema, data) end
+      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with atom keys", %{schema: schema} do
@@ -285,7 +286,7 @@ defmodule Xema.Cast.KeywordTest do
       data = [foo: [str: 5, num: "x"]]
       msg = ~s|cannot cast "x" to :integer at [:foo, :num]|
 
-      assert_raise CastError, msg, fn -> cast!(schema, data) end
+      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with string keys", %{schema: schema} do
@@ -296,14 +297,14 @@ defmodule Xema.Cast.KeywordTest do
       data = %{"foo" => %{"str" => 6, "num" => "z"}}
       msg = ~s|cannot cast "z" to :integer at ["foo", "num"]|
 
-      assert_raise CastError, msg, fn -> cast!(schema, data) end
+      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with string keys and an unknown atom", %{schema: schema} do
       data = %{"foo" => %{"str" => 6, "xyz" => "z"}}
       msg = ~s|cannot cast "xyz" to :keyword key at ["foo"], the atom is unknown|
 
-      assert_raise CastError, msg, fn -> cast!(schema, data) end
+      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a map with atom keys", %{schema: schema} do
@@ -314,7 +315,7 @@ defmodule Xema.Cast.KeywordTest do
       data = %{foo: %{str: 6, num: "z"}}
       msg = ~s|cannot cast "z" to :integer at [:foo, :num]|
 
-      assert_raise CastError, msg, fn -> cast!(schema, data) end
+      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
   end
 end
