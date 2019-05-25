@@ -673,22 +673,4 @@ defmodule Xema do
   defp key_to(:strings, atom) when is_atom(atom), do: to_string(atom)
 
   defp key_to(_, value), do: value
-
-  @doc """
-  TODO: doc `Xema.get/2`
-  """
-  @spec get(Access.t(), nonempty_list(term)) :: term
-  defdelegate get(data, path), to: Xema.Access
-
-  @doc """
-  TODO: doc `Xema.fetch/2`
-  """
-  @spec fetch(Access.t(), nonempty_list(term)) :: term
-  defdelegate fetch(data, path), to: Xema.Access
-
-  @doc """
-  TODO: doc `Xema.fetch!/2`
-  """
-  @spec fetch!(Access.t(), nonempty_list(term)) :: term
-  defdelegate fetch!(data, path), to: Xema.Access
 end

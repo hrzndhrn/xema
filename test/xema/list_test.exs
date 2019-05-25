@@ -1,6 +1,7 @@
 defmodule Xema.ListTest do
   use ExUnit.Case, async: true
 
+  import AssertBlame
   import Xema, only: [valid?: 2, validate: 2, validate!: 2]
 
   alias Xema.ValidationError
@@ -33,7 +34,7 @@ defmodule Xema.ListTest do
     test "validate!/2 with an invalid value", %{schema: schema} do
       msg = ~s|Expected :list, got "not an array".|
 
-      assert_raise ValidationError, msg, fn ->
+      assert_blame ValidationError, msg, fn ->
         validate!(schema, "not an array")
       end
     end

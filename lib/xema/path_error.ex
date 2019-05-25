@@ -9,7 +9,6 @@ defmodule Xema.PathError do
 
   @impl true
   def blame(exception, stacktrace) do
-    IO.inspect("blame")
     message = message(exception.path, exception.term)
     {%{exception | message: message}, stacktrace}
   end

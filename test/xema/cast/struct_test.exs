@@ -1,6 +1,7 @@
 defmodule Xema.Cast.StructTest do
   use ExUnit.Case, async: true
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2]
 
   alias Xema.ValidationError
@@ -224,13 +225,13 @@ defmodule Xema.Cast.StructTest do
 
     test "from an empty map", %{schema: schema} do
       data = %{}
-      assert_raise ValidationError, "Expected :struct, got %{}.", fn -> cast!(schema, data) end
+      assert_blame ValidationError, "Expected :struct, got %{}.", fn -> cast!(schema, data) end
     end
 
     test "from a map with atom keys", %{schema: schema} do
       data = %{foo: 6}
 
-      assert_raise ValidationError, "Expected :struct, got %{foo: 6}.", fn ->
+      assert_blame ValidationError, "Expected :struct, got %{foo: 6}.", fn ->
         cast!(schema, data) == data
       end
     end
@@ -238,7 +239,7 @@ defmodule Xema.Cast.StructTest do
     test "from a map with string keys", %{schema: schema} do
       data = %{"foo" => 6}
 
-      assert_raise ValidationError, ~s|Expected :struct, got %{"foo" => 6}.|, fn ->
+      assert_blame ValidationError, ~s|Expected :struct, got %{"foo" => 6}.|, fn ->
         cast!(schema, data) == data
       end
     end
@@ -258,7 +259,7 @@ defmodule Xema.Cast.StructTest do
       data = [foo: 6]
       msg = "cannot cast [foo: 6] to :struct"
 
-      assert_raise(CastError, msg, fn ->
+      assert_blame(CastError, msg, fn ->
         cast!(schema, data)
       end)
     end
@@ -267,7 +268,7 @@ defmodule Xema.Cast.StructTest do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to :struct"
 
-        assert_raise CastError, msg, fn ->
+        assert_blame CastError, msg, fn ->
           cast!(schema, data)
         end
       end)
@@ -304,7 +305,7 @@ defmodule Xema.Cast.StructTest do
       data = %{"xyz" => 6}
       msg = ~s|cannot cast "xyz" to :struct key, the atom is unknown|
 
-      assert_raise CastError, msg, fn ->
+      assert_blame CastError, msg, fn ->
         cast!(schema, data)
       end
     end
@@ -323,7 +324,7 @@ defmodule Xema.Cast.StructTest do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to Test.User"
 
-        assert_raise CastError, msg, fn ->
+        assert_blame CastError, msg, fn ->
           cast!(schema, data)
         end
       end)
@@ -362,7 +363,7 @@ defmodule Xema.Cast.StructTest do
       data = %{"xyz" => 6}
       msg = ~s|cannot cast "xyz" to :struct key, the atom is unknown|
 
-      assert_raise CastError, msg, fn ->
+      assert_blame CastError, msg, fn ->
         cast!(schema, data)
       end
     end
@@ -381,7 +382,7 @@ defmodule Xema.Cast.StructTest do
       data = [name: 55, age: "Joe"]
       msg = "cannot cast \"Joe\" to :integer at [:age]"
 
-      assert_raise CastError, msg, fn ->
+      assert_blame CastError, msg, fn ->
         cast!(schema, data)
       end
     end
@@ -390,7 +391,7 @@ defmodule Xema.Cast.StructTest do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to Test.User"
 
-        assert_raise CastError, msg, fn ->
+        assert_blame CastError, msg, fn ->
           cast!(schema, data)
         end
       end)

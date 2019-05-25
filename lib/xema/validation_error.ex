@@ -15,7 +15,7 @@ defmodule Xema.ValidationError do
 
   @impl true
   def blame(exception, stacktrace) do
-    message = message(exception.reason)
+    message = message(exception)
     {%{exception | message: message}, stacktrace}
   end
 

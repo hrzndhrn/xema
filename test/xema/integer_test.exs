@@ -1,6 +1,7 @@
 defmodule Xema.IntegerTest do
   use ExUnit.Case, async: true
 
+  import AssertBlame
   import Xema, only: [valid?: 2, validate: 2, validate!: 2]
 
   alias Xema.ValidationError
@@ -31,7 +32,7 @@ defmodule Xema.IntegerTest do
     test "validate!/2 with a float", %{schema: schema} do
       message = "Expected :integer, got 2.3."
 
-      assert_raise ValidationError, message, fn ->
+      assert_blame ValidationError, message, fn ->
         assert validate!(schema, 2.3)
       end
     end

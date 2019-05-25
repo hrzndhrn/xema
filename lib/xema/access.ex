@@ -34,7 +34,10 @@ defmodule Xema.Access do
   def fetch(data, path) do
     with {:error, rest} <- do_fetch(data, path) do
       {:error,
-       PathError.exception(path: Enum.take(path, length(path) - length(rest)), term: data)}
+       PathError.exception(
+         path: Enum.take(path, length(path) - length(rest)),
+         term: data
+       )}
     end
   end
 
@@ -58,10 +61,11 @@ defmodule Xema.Access do
 
   defp do_fetch(nil, [_ | t]), do: do_fetch(nil, t)
 
-  defp do_fetch(data, [h]) when is_list(data) and is_integer(h), do: Enum.at(data, h, :error)
-
   defp do_fetch(data, [h | t]) when is_list(data) and is_integer(h),
     do: do_fetch(Enum.at(data, h, :error), t)
+
+  defp do_fetch(data, [h | t]) when is_tuple(data) and is_integer(h),
+    do: do_fetch(data |> Tuple.to_list() |> Enum.at(h, :error), t)
 
   defp do_fetch(data, [h | t]), do: do_fetch(Access.get(data, h, :error), t)
 end

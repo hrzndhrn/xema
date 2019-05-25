@@ -1,6 +1,7 @@
 defmodule Xema.Cast.TrueFalseTest do
   use ExUnit.Case, async: true
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2]
 
   alias Xema.ValidationError
@@ -31,9 +32,9 @@ defmodule Xema.Cast.TrueFalseTest do
     end
 
     test "cast!/2 with an invalid type", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
+      assert_raise Protocol.UndefinedError, fn ->
         cast!(schema, ~r/.*/)
-      end)
+      end
     end
   end
 
@@ -60,16 +61,16 @@ defmodule Xema.Cast.TrueFalseTest do
 
     test "cast!/2", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert_raise(ValidationError, fn ->
+        assert_blame(ValidationError, fn ->
           cast!(schema, data) == data
         end)
       end)
     end
 
     test "cast!/2 with an invalid type", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
+      assert_raise Protocol.UndefinedError, fn ->
         cast!(schema, ~r/.*/)
-      end)
+      end
     end
   end
 end

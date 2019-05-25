@@ -26,6 +26,7 @@ defmodule Xema.Behaviour do
     quote do
       @behaviour Xema.Behaviour
       alias Xema.Behaviour
+      alias Xema.Access, as: XemaAccess
 
       @enforce_keys [:schema]
 
@@ -90,6 +91,55 @@ defmodule Xema.Behaviour do
       def validate!(xema, value) do
         with {:error, reason} <- validate(xema, value),
              do: raise(reason)
+      end
+
+      @doc """
+      TODO: doc `Xema.get/2`
+      """
+      @spec get(Access.t(), nonempty_list(term)) :: term
+      defdelegate get(data, path), to: XemaAccess
+
+      @doc """
+      TODO: doc `Xema.get/3`
+      """
+      @spec get(__MODULE__.t(), Access.t(), nonempty_list(term)) :: term
+      def get(schema, data, path) do
+        with :ok <- validate(schema, data) do
+          XemaAccess.get(data, path)
+        else
+          {:error, _} -> nil
+        end
+      end
+
+      @doc """
+      TODO: doc `Xema.fetch/2`
+      """
+      @spec fetch(Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
+      defdelegate fetch(data, path), to: XemaAccess
+
+      @doc """
+      TODO: doc `Xema.fetch/3`
+      """
+      @spec fetch(__MODULE__.t(), Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
+      def fetch(schema, data, path) do
+        with :ok <- validate(schema, data) do
+          XemaAccess.fetch(data, path)
+        end
+      end
+
+      @doc """
+      TODO: doc `Xema.fetch!/2`
+      """
+      @spec fetch!(Access.t(), nonempty_list(term)) :: term
+      defdelegate fetch!(data, path), to: XemaAccess
+
+      @doc """
+      TODO: doc `Xema.fetch!/3`
+      """
+      @spec fetch!(__MODULE__.t(), Access.t(), nonempty_list(term)) :: term
+      def fetch!(schema, data, path) do
+        validate!(schema, data)
+        fetch!(data, path)
       end
 
       # This function can be overwritten to transform the reason map of an error tuple.
