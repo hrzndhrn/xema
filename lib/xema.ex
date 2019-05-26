@@ -691,13 +691,13 @@ defmodule Xema do
 
   ## Examples
 
-  Getting data by a path.
+  Getting data by a `path`.
 
       iex> data = %{users: [%{name: "Mia", age: 24}, %{name: "Nick", age: 31}]}
       iex> Xema.get(data, [:users, 0, :name])
       "Mia"
 
-  Using a function as key.
+  Using a function as `key`.
 
       iex> data = %{users: [%{name: "Mia", age: 24}, %{name: "Nick", age: 31}]}
       iex> all = fn :get, data, next -> Enum.map(data, next) end
@@ -718,11 +718,10 @@ defmodule Xema do
       iex> Xema.get(data, [:unknown, 0, :age])
       nil
   """
-  @spec get(Access.t(), nonempty_list(term)) :: term
-  defdelegate get(data, path), to: XemaAccess
+  def get(data, path)
 
   @doc """
-  Gets a value from a valid nested structure.
+  Gets a value from a valid nested structure by the given `path`.
 
   Returns nil if the data is invalid according to the schema.
 
@@ -745,43 +744,65 @@ defmodule Xema do
       iex> Xema.get(schema, [%{name: :mia, age: 22}], [0, :name])
       nil
   """
-  @spec get(__MODULE__.t(), Access.t(), nonempty_list(term)) :: term
-  def get(schema, data, path) do
-    with :ok <- validate(schema, data) do
-      XemaAccess.get(data, path)
-    else
-      {:error, _} -> nil
-    end
-  end
+  def get(schema, data, path)
 
   @doc """
-  TODO: doc `Xema.fetch/2`
+  Fetches a value from a nested structure by the given `path`.
+
+  Works like `get/2` and returns `{:ok, value}` if the nested struct contains a
+  `value` under the given `path`. Otherwise, an error tuple is returned.
+
+  See `get/2` for more information for handle the `path`.
+
+  ## Examples
+
+      iex> Xema.fetch(%{xs: [:a, :b, :c]}, [:xs, 1])
+      {:ok, :b}
+      iex> {:error, error} = Xema.fetch(%{xs: [:a, :b, :c]}, [:unknown, 1])
+      {:error, %Xema.PathError{path: [:unknown], term: %{xs: [:a, :b, :c]}}}
+      iex> Exception.message(error)
+      "path [:unknown] not found in: %{xs: [:a, :b, :c]}"
   """
-  @spec fetch(Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
-  defdelegate fetch(data, path), to: XemaAccess
+  def fetch(data, path)
 
   @doc """
-  TODO: doc `Xema.fetch/3`
+  Fetches a value from a valid nested structure by the given `path`.
+
+  Works like `get/3` and returns `{:ok, value}` if the nested struct contains a
+  `value` under the given `path`. Otherwise, an error tuple is returned.
+
+  See `get/2` for more information for handle the `path`.
+
+  ## Examples
+
+      iex> schema = Xema.new(properties: %{xs: {:list, items: :atom}})
+      iex> Xema.fetch(schema, %{xs: [:a, :b, :c]}, [:xs, 1])
+      {:ok, :b}
+      iex> Xema.fetch(schema, %{xs: [:a, :b, 7]}, [:xs, 1])
+      {:error, %Xema.ValidationError{
+        reason: %{
+          properties: %{xs: %{items: [{2, %{type: :atom, value: 7}}]}}}
+      }}
   """
-  @spec fetch(__MODULE__.t(), Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
-  def fetch(schema, data, path) do
-    with :ok <- validate(schema, data) do
-      XemaAccess.fetch(data, path)
-    end
-  end
+  def fetch(schema, data, path)
 
   @doc """
-  TODO: doc `Xema.fetch!/2`
+  Fetches a value from a nested structure by the given `path`.
+
+  Works like `fetch/2` and returns a `value` if the nested struct contains a
+  `value` under the given `path`. Otherwise, an error is raised.
+
+  See `get/2` for more information for handle the `path`.
   """
-  @spec fetch!(Access.t(), nonempty_list(term)) :: term
-  defdelegate fetch!(data, path), to: XemaAccess
+  def fetch!(data, path)
 
   @doc """
-  TODO: doc `Xema.fetch!/3`
+  Fetches a value from a valid nested structure by the given `path`.
+
+  Works like `fetch!/2` and returns a `value` if the nested struct contains a
+  `value` under the given `path`. Otherwise, an error is raised.
+
+  See `get/2` for more information for handle the `path`.
   """
-  @spec fetch!(__MODULE__.t(), Access.t(), nonempty_list(term)) :: term
-  def fetch!(schema, data, path) do
-    validate!(schema, data)
-    fetch!(data, path)
-  end
+  def fetch!(schema, data, path)
 end

@@ -44,7 +44,9 @@ defmodule Xema.Access do
   def get(data, [head | tail]), do: get(Access.get(data, head), tail)
 
   @doc """
-  TODO: doc `Xema.Access.fetch/2`
+  Fetches a value from a nested structure.
+
+  Used by `Xema.fetch/2` and `Xema.fetch/3`.
   """
   @spec fetch(Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
   def fetch(data, path) do
@@ -58,7 +60,9 @@ defmodule Xema.Access do
   end
 
   @doc """
-  TODO: doc `Xema.Access.fetch!/2`
+  Fetches a value from a nested structure.
+
+  Used by `Xema.fetch!/2` and `Xema.fetch!/3`.
   """
   @spec fetch!(Access.t(), nonempty_list(term)) :: term
   def fetch!(data, path) do
