@@ -1,34 +1,50 @@
 defmodule Xema.Access do
   @moduledoc """
-  Key- and index-based access to data structures with and without validation against a schema.
+  Key- and index-based access to data structures.
   """
 
   alias Xema.PathError
 
   @doc """
-  TODO: doc `Xema.Access.get/2`
+  Gets a value from a nested structure.
+
+  Used by `Xema.get/2` and `Xema.get/3`.
   """
   @spec get(Access.t(), nonempty_list(term)) :: term
-  def get(data, [h]) when is_function(h), do: h.(:get, data, & &1)
-  def get(data, [h | t]) when is_function(h), do: h.(:get, data, &get(&1, t))
-
   def get(nil, [_]), do: nil
-  def get(nil, [_ | t]), do: get(nil, t)
 
-  def get(data, [h]) when is_list(data) and is_integer(h), do: Enum.at(data, h)
-  def get(data, [h | t]) when is_list(data) and is_integer(h), do: get(Enum.at(data, h), t)
+  def get(nil, [_ | tail]), do: get(nil, tail)
 
-  def get(data, [h]) when is_tuple(data) and is_integer(h),
-    do: data |> Tuple.to_list() |> Enum.at(h)
+  def get(data, [head])
+      when is_function(head),
+      do: head.(:get, data, & &1)
 
-  def get(data, [h | t]) when is_tuple(data) and is_integer(h),
-    do: get(data |> Tuple.to_list() |> Enum.at(h), t)
+  def get(data, [head | tail])
+      when is_function(head),
+      do: head.(:get, data, &get(&1, tail))
 
-  def get(data, [h]), do: Access.get(data, h)
-  def get(data, [h | t]), do: get(Access.get(data, h), t)
+  def get(data, [head])
+      when is_list(data) and is_integer(head),
+      do: Enum.at(data, head)
+
+  def get(data, [head | tail])
+      when is_list(data) and is_integer(head),
+      do: get(Enum.at(data, head), tail)
+
+  def get(data, [head])
+      when is_tuple(data) and is_integer(head),
+      do: data |> Tuple.to_list() |> Enum.at(head)
+
+  def get(data, [head | tail])
+      when is_tuple(data) and is_integer(head),
+      do: get(data |> Tuple.to_list() |> Enum.at(head), tail)
+
+  def get(data, [head]), do: Access.get(data, head)
+
+  def get(data, [head | tail]), do: get(Access.get(data, head), tail)
 
   @doc """
-  TODO: doc `Xema.Access.fetch/2
+  TODO: doc `Xema.Access.fetch/2`
   """
   @spec fetch(Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
   def fetch(data, path) do
@@ -42,7 +58,7 @@ defmodule Xema.Access do
   end
 
   @doc """
-  TODO: doc `Xema.Access.fetch!/2
+  TODO: doc `Xema.Access.fetch!/2`
   """
   @spec fetch!(Access.t(), nonempty_list(term)) :: term
   def fetch!(data, path) do
@@ -57,15 +73,19 @@ defmodule Xema.Access do
 
   defp do_fetch(data, []), do: {:ok, data}
 
-  defp do_fetch(data, [h | t]) when is_function(h), do: h.(:get, data, &do_fetch(&1, t))
+  defp do_fetch(nil, [_ | tail]), do: do_fetch(:error, tail)
 
-  defp do_fetch(nil, [_ | t]), do: do_fetch(:error, t)
+  defp do_fetch(data, [head | tail])
+       when is_function(head),
+       do: head.(:get, data, &do_fetch(&1, tail))
 
-  defp do_fetch(data, [h | t]) when is_list(data) and is_integer(h),
-    do: do_fetch(Enum.at(data, h, :error), t)
+  defp do_fetch(data, [head | tail])
+       when is_list(data) and is_integer(head),
+       do: do_fetch(Enum.at(data, head, :error), tail)
 
-  defp do_fetch(data, [h | t]) when is_tuple(data) and is_integer(h),
-    do: do_fetch(data |> Tuple.to_list() |> Enum.at(h, :error), t)
+  defp do_fetch(data, [head | tail])
+       when is_tuple(data) and is_integer(head),
+       do: do_fetch(data |> Tuple.to_list() |> Enum.at(head, :error), tail)
 
-  defp do_fetch(data, [h | t]), do: do_fetch(Access.get(data, h, :error), t)
+  defp do_fetch(data, [head | tail]), do: do_fetch(Access.get(data, head, :error), tail)
 end

@@ -673,4 +673,115 @@ defmodule Xema do
   defp key_to(:strings, atom) when is_atom(atom), do: to_string(atom)
 
   defp key_to(_, value), do: value
+
+  @doc """
+  Gets a value from a nested structure by the given `path`.
+
+  The function uses the `Access` module to traverse the structures according to
+  the given `keys` in the `path`, unless the key is a function.
+
+  If a key is a function, the function will be invoked passing three arguments:
+
+  + the operation (:get)
+  + the data to be accessed
+  + a function to be invoked next
+
+  This means `get/2` can be extended to provide custom lookups.  The downside
+  is that functions cannot be stored as keys in the accessed data structures.
+
+  ## Examples
+
+  Getting data by a path.
+
+      iex> data = %{users: [%{name: "Mia", age: 24}, %{name: "Nick", age: 31}]}
+      iex> Xema.get(data, [:users, 0, :name])
+      "Mia"
+
+  Using a function as key.
+
+      iex> data = %{users: [%{name: "Mia", age: 24}, %{name: "Nick", age: 31}]}
+      iex> all = fn :get, data, next -> Enum.map(data, next) end
+      iex> Xema.get(data, [:users, all, :age])
+      [24, 31]
+
+  The `Access` module already provides the function `all`. There are also some
+  other useful functions in this module.
+
+      iex> data = %{users: [%{name: "Mia", age: 24}, %{name: "Nick", age: 31}]}
+      iex> Xema.get(data, [:users, Access.filter(&(&1.age < 30)), :name])
+      ["Mia"]
+
+  In case any of the entries in the middle returns `nil`, `nil` will be returned as
+  per the `Access` module.
+
+      iex> data = %{users: [%{name: "Mia", age: 24}, %{name: "Nick", age: 31}]}
+      iex> Xema.get(data, [:unknown, 0, :age])
+      nil
+  """
+  @spec get(Access.t(), nonempty_list(term)) :: term
+  defdelegate get(data, path), to: XemaAccess
+
+  @doc """
+  Gets a value from a valid nested structure.
+
+  Returns nil if the data is invalid according to the schema.
+
+  See `get/2` for more information.
+
+  ## Examples
+
+      iex> schema =
+      ...>   Xema.new(
+      ...>     {:list,
+      ...>      items:
+      ...>        {:map,
+      ...>         properties: %{
+      ...>           name: :string,
+      ...>           age: {:integer, minimum: 0}
+      ...>         }}}
+      ...>   )
+      iex> Xema.get(schema, [%{name: "Mia", age: 22}], [0, :name])
+      "Mia"
+      iex> Xema.get(schema, [%{name: :mia, age: 22}], [0, :name])
+      nil
+  """
+  @spec get(__MODULE__.t(), Access.t(), nonempty_list(term)) :: term
+  def get(schema, data, path) do
+    with :ok <- validate(schema, data) do
+      XemaAccess.get(data, path)
+    else
+      {:error, _} -> nil
+    end
+  end
+
+  @doc """
+  TODO: doc `Xema.fetch/2`
+  """
+  @spec fetch(Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
+  defdelegate fetch(data, path), to: XemaAccess
+
+  @doc """
+  TODO: doc `Xema.fetch/3`
+  """
+  @spec fetch(__MODULE__.t(), Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
+  def fetch(schema, data, path) do
+    with :ok <- validate(schema, data) do
+      XemaAccess.fetch(data, path)
+    end
+  end
+
+  @doc """
+  TODO: doc `Xema.fetch!/2`
+  """
+  @spec fetch!(Access.t(), nonempty_list(term)) :: term
+  defdelegate fetch!(data, path), to: XemaAccess
+
+  @doc """
+  TODO: doc `Xema.fetch!/3`
+  """
+  @spec fetch!(__MODULE__.t(), Access.t(), nonempty_list(term)) :: term
+  def fetch!(schema, data, path) do
+    validate!(schema, data)
+    fetch!(data, path)
+  end
 end

@@ -63,7 +63,7 @@ defmodule Xema.Cast.TrueFalseTest do
         assert_raise ValidationError, fn ->
           cast!(schema, data) == data
         end
-        end)
+      end)
     end
 
     test "cast!/2 with an invalid type", %{schema: schema} do

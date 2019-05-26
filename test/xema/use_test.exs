@@ -21,13 +21,14 @@ defmodule Xema.UseTest do
     defmodule UserSchema do
       use Xema
 
-      xema :user,
-           map(
-             properties: %{
-               name: string(min_length: 1),
-               age: integer(minimum: 0)
-             }
-           )
+      xema :user do
+        map(
+          properties: %{
+            name: string(min_length: 1),
+            age: integer(minimum: 0)
+          }
+        )
+      end
     end
 
     test "valild?/2 returns true for a valied user" do

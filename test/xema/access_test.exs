@@ -46,6 +46,7 @@ defmodule Xema.AccessTest do
       assert Xema.get(@data, ["users", 0, :age]) == 45
       assert Xema.get(@data, ["users", at(0), :age]) == 45
       assert Xema.get(@data, ["users", -1, :age]) == 21
+      assert Xema.get(@data, ["users", all(), :age]) == [45, 21]
       assert Xema.get(@data, ["tuple", 0]) == 72
       assert Xema.get(@data, ["tuple", 1, :a]) == 1
       assert Xema.get(@data, ["tuple", 1, 1]) == {:b, 2}
@@ -60,6 +61,7 @@ defmodule Xema.AccessTest do
       assert Xema.get(@data, ["account", 0, :age]) == nil
       assert Xema.get(@data, [:user, 0, :age]) == nil
       assert Xema.get(@data, ["users", :foo, :age]) == nil
+      assert Xema.get(nil, ["users", :foo, :age]) == nil
     end
 
     test "raises an ArgumentError for invalid list index" do
@@ -104,6 +106,9 @@ defmodule Xema.AccessTest do
 
       assert {:error, %PathError{} = error} = Xema.fetch(@data, ["null", :foo, :bar, :baz])
       assert Exception.message(error) =~ ~s|path ["null", :foo] not found in:|
+
+      assert {:error, %PathError{} = error} = Xema.fetch(nil, ["null", :foo, :bar, :baz])
+      assert Exception.message(error) == ~s|path ["null"] not found in: nil|
     end
 
     test "raises an ArgumentError for invalid list index" do
