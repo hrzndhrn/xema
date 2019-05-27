@@ -3,6 +3,7 @@ defmodule Xema.AccessTest do
 
   import AssertBlame
   import Access
+  alias Xema.Access
 
   # The tests are all calling the functions in `Xema` that are delegate or call the funcitons
   # in `Xema.Access`.
@@ -28,7 +29,8 @@ defmodule Xema.AccessTest do
       [a: 1, b: 2]
     },
     "list" => [?a, ?b, ?c],
-    "null" => nil
+    "null" => nil,
+    "result" => :error
   }
 
   @users_schema Xema.new(
@@ -42,6 +44,7 @@ defmodule Xema.AccessTest do
                 )
 
   describe "get2/" do
+    @tag :get
     test "returns a value for a valid path" do
       assert Xema.get(@data, ["users", 0, :age]) == 45
       assert Xema.get(@data, ["users", at(0), :age]) == 45
@@ -54,6 +57,7 @@ defmodule Xema.AccessTest do
       assert Xema.get(@data, ["list", at(2)]) == ?c
     end
 
+    @tag :get
     test "returns nil for invalid path" do
       assert Xema.get(@data, ["users", 0, :foo]) == nil
       assert Xema.get(@data, [1, 0, :foo]) == nil
@@ -64,20 +68,24 @@ defmodule Xema.AccessTest do
       assert Xema.get(nil, ["users", :foo, :age]) == nil
     end
 
+    @tag :get
     test "raises an ArgumentError for invalid list index" do
       assert_raise ArgumentError, fn -> Xema.get(@data, ["users", "0", :age]) == nil end
     end
 
+    @tag :get
     test "returns a list with Access.all/0 in path" do
-      assert Xema.get(@data, ["users", Access.all(), :name]) == ["John", "Nick"]
+      assert Xema.get(@data, ["users", all(), :name]) == ["John", "Nick"]
     end
   end
 
   describe "get/3" do
+    @tag :get
     test "returns a value for a valid path" do
       assert Xema.get(@users_schema, @users, [0, :age]) == 45
     end
 
+    @tag :get
     test "returns nil for invalid data" do
       data = Enum.concat(@users, [%{name: "Tim", age: -3}])
       assert Xema.get(@users_schema, data, [0, :age]) == nil
@@ -93,8 +101,8 @@ defmodule Xema.AccessTest do
       assert Xema.fetch(@data, ["tuple", 1, :a]) == {:ok, 1}
       assert Xema.fetch(@data, ["tuple", 1, 1]) == {:ok, {:b, 2}}
       assert Xema.fetch(@data, ["list", 1]) == {:ok, ?b}
-      assert Xema.fetch(@data, ["list", at(2)]) == {:ok, ?c}
       assert Xema.fetch(@data, ["null"]) == {:ok, nil}
+      assert Xema.fetch(@data, ["result"]) == {:ok, :error}
     end
 
     test "returns a error tuple for invalid path" do
@@ -109,6 +117,11 @@ defmodule Xema.AccessTest do
 
       assert {:error, %PathError{} = error} = Xema.fetch(nil, ["null", :foo, :bar, :baz])
       assert Exception.message(error) == ~s|path ["null"] not found in: nil|
+
+      assert {:error, %PathError{} = error} = Xema.fetch(@data, ["list", 99])
+      assert Exception.message(error) =~ ~s|path ["list", 99] not found in:|
+
+      assert_raise ArgumentError, fn -> Xema.fetch(@data, ["list", at(99)]) end
     end
 
     test "raises an ArgumentError for invalid list index" do
