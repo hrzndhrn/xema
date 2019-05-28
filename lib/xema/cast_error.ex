@@ -30,7 +30,7 @@ defmodule Xema.CastError do
   @doc """
   Formats the error map to an error message.
   """
-  @spec format_error(error) :: String.t()
+  @spec format_error(Exception.t() | error) :: String.t()
   def format_error(%{path: [], to: :atom, value: value}) when is_binary(value) do
     "cannot cast #{inspect(value)} to :atom, the atom is unknown"
   end
