@@ -13,6 +13,10 @@
 + Add `xema/0` and `xema/1` macro.
 + Change return value of `Xema.validate/2` to `{:error, Exception.t}` in case
   of error.
++ Update `Xema.ValidationError`.
+  + `ValidationError.reason` contains the error map of the previous versions
+    with some changes.
+  + `ValidationError.message` contains an error message.
 
 
 ## 0.8.0 2019/03/10
