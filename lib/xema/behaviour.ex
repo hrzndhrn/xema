@@ -79,12 +79,12 @@ defmodule Xema.Behaviour do
       @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
       def validate(%{} = schema, value, opts) do
         with {:error, error} <- Validator.validate(schema, value, opts),
-             do: {:error, error |> on_error |> ValidationError.exception()}
+             do: {:error, on_error(error)}
       end
 
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
-      otherwise raises a `Xema.ValidationError`.
+      otherwise raises a `#{__MODULE__}.ValidationError`.
       """
       @spec validate!(__MODULE__.t() | Schema.t(), any) :: :ok
       def validate!(xema, value) do
@@ -93,7 +93,7 @@ defmodule Xema.Behaviour do
       end
 
       # This function can be overwritten to transform the reason map of an error tuple.
-      defp on_error(error), do: error
+      defp on_error(error), do: ValidationError.exception(reason: error)
       defoverridable on_error: 1
     end
   end

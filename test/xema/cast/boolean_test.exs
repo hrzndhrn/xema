@@ -3,6 +3,7 @@ defmodule Xema.Cast.BooleanTest do
 
   alias Xema.{CastError, ValidationError}
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
   @set [:foo, 1, 1.0, [42], [foo: 42], %{}, {:tuple}]
@@ -22,7 +23,6 @@ defmodule Xema.Cast.BooleanTest do
     test "from a string", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :boolean, got "true".|,
                 reason: %{
                   type: :boolean,
                   value: "true"
@@ -32,7 +32,7 @@ defmodule Xema.Cast.BooleanTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :boolean, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :boolean, value: data)}
 
         assert cast(schema, data) == expected
       end)
@@ -59,7 +59,7 @@ defmodule Xema.Cast.BooleanTest do
       data = "true"
       msg = "cannot cast #{inspect(data)} to :boolean"
 
-      assert_raise CastError, msg, fn -> cast!(schema, data) end
+      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
@@ -72,7 +72,7 @@ defmodule Xema.Cast.BooleanTest do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to :boolean"
 
-        assert_raise CastError, msg, fn -> cast!(schema, data) end
+        assert_blame CastError, msg, fn -> cast!(schema, data) end
       end)
     end
   end

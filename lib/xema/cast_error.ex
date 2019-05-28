@@ -17,28 +17,20 @@ defmodule Xema.CastError do
         }
 
   @impl true
-  def exception(%{path: path, to: to, value: value} = error) do
-    %CastError{
-      message: format_error(error),
-      to: to,
-      value: value,
-      path: path
-    }
-  end
+  def message(%{message: nil} = exception), do: format_error(exception)
 
-  def exception(%{path: path, to: to, key: key} = error) do
-    %CastError{
-      message: format_error(error),
-      to: to,
-      key: key,
-      path: path
-    }
+  def message(%{message: message}), do: message
+
+  @impl true
+  def blame(exception, stacktrace) do
+    message = message(exception)
+    {%{exception | message: message}, stacktrace}
   end
 
   @doc """
   Formats the error map to an error message.
   """
-  @spec format_error(error) :: String.t()
+  @spec format_error(Exception.t() | error) :: String.t()
   def format_error(%{path: [], to: :atom, value: value}) when is_binary(value) do
     "cannot cast #{inspect(value)} to :atom, the atom is unknown"
   end

@@ -61,12 +61,13 @@ defmodule Xema.AnyTest do
     test "validate/2 with a value that is not in the enum", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Value 2 is not defined in enum.",
                 reason: %{
                   value: 2,
                   enum: [1, 1.2, [1], "foo", :bar]
                 }
-              }} = validate(schema, 2)
+              } = error} = validate(schema, 2)
+
+      assert Exception.message(error) == "Value 2 is not defined in enum."
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -108,10 +109,11 @@ defmodule Xema.AnyTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 0 is less than minimum value of 2.",
                  reason: %{minimum: 2, value: 0}
-               }
+               } = error
              } = validate(schema, 0)
+
+      assert Exception.message(error) == "Value 0 is less than minimum value of 2."
     end
 
     test "validate/2 ignore non-numbers", %{schema: schema} do
@@ -137,10 +139,11 @@ defmodule Xema.AnyTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Value 3 is not a multiple of 2.",
                  reason: %{multiple_of: 2, value: 3}
-               }
+               } = error
              } = validate(schema, 3)
+
+      assert Exception.message(error) == "Value 3 is not a multiple of 2."
     end
 
     test "validate/2 ignore non-numbers", %{schema: schema} do
@@ -181,15 +184,17 @@ defmodule Xema.AnyTest do
     end
 
     test "object with property having schema false is invalid", %{schema: schema} do
-      msg = """
+      assert {
+               :error,
+               %ValidationError{reason: %{dependencies: %{bar: %{type: false}}}} = error
+             } = validate(schema, %{bar: 2})
+
+      message = """
       Dependencies for :bar failed.
         Schema always fails validation.\
       """
 
-      assert {
-               :error,
-               %ValidationError{message: ^msg, reason: %{dependencies: %{bar: %{type: false}}}}
-             } = validate(schema, %{bar: 2})
+      assert Exception.message(error) == message
     end
   end
 end

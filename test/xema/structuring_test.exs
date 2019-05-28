@@ -28,16 +28,9 @@ defmodule Xema.StructuringTest do
     end
 
     test "validate/2 with invalid data", %{schema: schema} do
-      msg = """
-      Value -1 is less than minimum value of 1, at [:a].
-      Value -2 is less than minimum value of 1, at [:b].
-      Value 3 exceeds maximum value of -1, at [:c].\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      a: %{minimum: 1, value: -1},
@@ -45,8 +38,16 @@ defmodule Xema.StructuringTest do
                      c: %{maximum: -1, value: 3}
                    }
                  }
-               }
+               } = error
              } = validate(schema, %{a: -1, b: -2, c: 3})
+
+      message = """
+      Value -1 is less than minimum value of 1, at [:a].
+      Value -2 is less than minimum value of 1, at [:b].
+      Value 3 exceeds maximum value of -1, at [:c].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 end

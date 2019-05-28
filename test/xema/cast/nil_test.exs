@@ -3,6 +3,7 @@ defmodule Xema.Cast.NilTest do
 
   alias Xema.CastError
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2]
 
   describe "nil schema" do
@@ -19,7 +20,7 @@ defmodule Xema.Cast.NilTest do
 
     test "cast/2 with invalid value", %{schema: schema, set: set} do
       Enum.each(set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: nil, value: data})}
+        expected = {:error, CastError.exception(path: [], to: nil, value: data)}
 
         assert cast(schema, data) == expected
       end)
@@ -37,7 +38,7 @@ defmodule Xema.Cast.NilTest do
       Enum.each(set, fn data ->
         msg = "cannot cast #{inspect(data)} to nil"
 
-        assert_raise CastError, msg, fn ->
+        assert_blame CastError, msg, fn ->
           cast!(schema, data) == data
         end
       end)

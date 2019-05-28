@@ -1,6 +1,7 @@
 defmodule Xema.Cast.TupleTest do
   use ExUnit.Case, async: true
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
   alias Xema.{CastError, ValidationError}
@@ -36,7 +37,6 @@ defmodule Xema.Cast.TupleTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :tuple, got [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}].|,
                 reason: %{type: :tuple, value: data}
               }} = validate(schema, data)
 
@@ -45,7 +45,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :tuple, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :tuple, value: data)}
 
         assert cast(schema, data) == expected
       end)
@@ -79,7 +79,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from a list with invalid value", %{schema: schema} do
       data = ["1", "2", "foo"]
-      expected = {:error, CastError.exception(%{path: [2], to: :integer, value: "foo"})}
+      expected = {:error, CastError.exception(path: [2], to: :integer, value: "foo")}
 
       assert cast(schema, data) == expected
     end
@@ -108,7 +108,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from a tuple with invalid value", %{schema: schema} do
       data = {"foo", 2}
-      expected = {:error, CastError.exception(%{path: [0], to: :integer, value: "foo"})}
+      expected = {:error, CastError.exception(path: [0], to: :integer, value: "foo")}
 
       assert cast(schema, data) == expected
     end
@@ -127,7 +127,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from a list with invalid value", %{schema: schema} do
       data = ["foo", 2]
-      expected = {:error, CastError.exception(%{path: [0], to: :integer, value: "foo"})}
+      expected = {:error, CastError.exception(path: [0], to: :integer, value: "foo")}
 
       assert cast(schema, data) == expected
     end
@@ -147,7 +147,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from invalid data", %{schema: schema} do
       data = [[[1, "1"], ["foo", 2]], [{"3", 3}]]
-      expected = {:error, CastError.exception(%{path: [0, 1, 0], to: :integer, value: "foo"})}
+      expected = {:error, CastError.exception(path: [0, 1, 0], to: :integer, value: "foo")}
 
       assert cast(schema, data) == expected
     end
@@ -184,7 +184,6 @@ defmodule Xema.Cast.TupleTest do
 
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :tuple, got [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}].|,
                 reason: %{type: :tuple, value: data}
               }} = validate(schema, data)
 
@@ -195,7 +194,7 @@ defmodule Xema.Cast.TupleTest do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to :tuple"
 
-        assert_raise CastError, msg, fn -> cast!(schema, data) end
+        assert_blame CastError, msg, fn -> cast!(schema, data) end
       end)
     end
 
@@ -228,7 +227,7 @@ defmodule Xema.Cast.TupleTest do
     test "from a tuple with invalid value", %{schema: schema} do
       msg = ~s|cannot cast "foo" to :integer at [2]|
 
-      assert_raise CastError, msg, fn -> cast!(schema, {"1", "2", "foo"}) end
+      assert_blame CastError, msg, fn -> cast!(schema, {"1", "2", "foo"}) end
     end
   end
 
@@ -255,7 +254,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from a tuple with invalid value", %{schema: schema} do
       msg = ~s|cannot cast "foo" to :integer at [0]|
-      assert_raise CastError, msg, fn -> cast!(schema, {"foo", 2}) end
+      assert_blame CastError, msg, fn -> cast!(schema, {"foo", 2}) end
     end
 
     test "from a list with casted values", %{schema: schema} do
@@ -272,7 +271,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from a list with invalid value", %{schema: schema} do
       msg = ~s|cannot cast "foo" to :integer at [0]|
-      assert_raise CastError, msg, fn -> cast!(schema, ["foo", 2]) end
+      assert_blame CastError, msg, fn -> cast!(schema, ["foo", 2]) end
     end
   end
 
@@ -290,7 +289,7 @@ defmodule Xema.Cast.TupleTest do
 
     test "from invalid data", %{schema: schema} do
       msg = ~s|cannot cast "foo" to :integer at [0, 1, 0]|
-      assert_raise CastError, msg, fn -> cast!(schema, [[[1, "1"], ["foo", 2]], [{"3", 3}]]) end
+      assert_blame CastError, msg, fn -> cast!(schema, [[[1, "1"], ["foo", 2]], [{"3", 3}]]) end
     end
   end
 end

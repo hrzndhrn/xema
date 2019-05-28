@@ -49,25 +49,20 @@ defmodule Xema.BooleanSchemaTest do
     end
 
     test "validate/2 returns always {:error, %{type: false}}", %{schema: schema} do
-      assert {:error,
-              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
-               validate(schema, true)
+      assert {:error, %ValidationError{reason: %{type: false}} = error} = validate(schema, true)
+      assert Exception.message(error) == "Schema always fails validation."
 
-      assert {:error,
-              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
-               validate(schema, 42)
+      assert {:error, %ValidationError{reason: %{type: false}} = error} = validate(schema, 42)
+      assert Exception.message(error) == "Schema always fails validation."
 
-      assert {:error,
-              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
-               validate(schema, "true")
+      assert {:error, %ValidationError{reason: %{type: false}} = error} = validate(schema, "true")
+      assert Exception.message(error) == "Schema always fails validation."
 
-      assert {:error,
-              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
-               validate(schema, [])
+      assert {:error, %ValidationError{reason: %{type: false}} = error} = validate(schema, [])
+      assert Exception.message(error) == "Schema always fails validation."
 
-      assert {:error,
-              %ValidationError{message: "Schema always fails validation.", reason: %{type: false}}} =
-               validate(schema, %{})
+      assert {:error, %ValidationError{reason: %{type: false}} = error} = validate(schema, %{})
+      assert Exception.message(error) == "Schema always fails validation."
     end
   end
 

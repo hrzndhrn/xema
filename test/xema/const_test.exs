@@ -21,12 +21,13 @@ defmodule Xema.ConstTest do
     test "validate/2 with an invalid value", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Expected 42, got 1.",
                 reason: %{
                   const: 42,
                   value: 1
                 }
-              }} = validate(schema, 1)
+              } = error} = validate(schema, 1)
+
+      assert Exception.message(error) == "Expected 42, got 1."
     end
   end
 
@@ -42,12 +43,13 @@ defmodule Xema.ConstTest do
     test "validate/2 with an invalid value", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: "Expected nil, got 55.",
                 reason: %{
                   const: nil,
                   value: 55
                 }
-              }} = validate(schema, 55)
+              } = error} = validate(schema, 55)
+
+      assert Exception.message(error) == "Expected nil, got 55."
     end
   end
 end

@@ -27,14 +27,14 @@ defmodule Xema.Cast.DateTimeTest do
 
     test "from an invalid string", %{schema: schema} do
       data = "today"
-      expected = {:error, CastError.exception(%{path: [], to: DateTime, value: "today"})}
+      expected = {:error, CastError.exception(path: [], to: DateTime, value: "today")}
 
       assert cast(schema, data) == expected
     end
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: DateTime, value: data})}
+        expected = {:error, CastError.exception(path: [], to: DateTime, value: data)}
 
         assert cast(schema, data) == expected
       end)

@@ -3,6 +3,7 @@ defmodule Xema.Cast.StringTest do
 
   alias Xema.CastError
 
+  import AssertBlame
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
   @set [[42], [foo: 42], %{}, {:tuple}]
@@ -33,7 +34,7 @@ defmodule Xema.Cast.StringTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        expected = {:error, CastError.exception(%{path: [], to: :string, value: data})}
+        expected = {:error, CastError.exception(path: [], to: :string, value: data)}
         assert cast(schema, data) == expected
       end)
     end
@@ -76,7 +77,7 @@ defmodule Xema.Cast.StringTest do
       Enum.each(@set, fn data ->
         msg = "cannot cast #{inspect(data)} to :string"
 
-        assert_raise CastError, msg, fn -> cast!(schema, data) end
+        assert_blame CastError, msg, fn -> cast!(schema, data) end
       end)
     end
   end

@@ -35,7 +35,7 @@ defmodule Xema.SchemaError do
 
   def exception(%ValidationError{} = error),
     do: %SchemaError{
-      message: "Can't build schema:\n#{error.message}",
+      message: "Can't build schema:\n#{Exception.message(error)}",
       reason: error.reason
     }
 end

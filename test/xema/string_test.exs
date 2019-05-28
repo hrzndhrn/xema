@@ -18,20 +18,22 @@ defmodule Xema.StringTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected :string, got 1.",
                  reason: %{type: :string, value: 1}
-               }
+               } = error
              } = validate(schema, 1)
+
+      assert Exception.message(error) == "Expected :string, got 1."
     end
 
     test "validate/2 with nil", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected :string, got nil.",
                  reason: %{type: :string, value: nil}
-               }
+               } = error
              } = validate(schema, nil)
+
+      assert Exception.message(error) == "Expected :string, got nil."
     end
 
     test "valid?/2 with a valid value", %{schema: schema} do
@@ -56,20 +58,22 @@ defmodule Xema.StringTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected minimum length of 3, got "f".|,
                  reason: %{min_length: 3, value: "f"}
-               }
+               } = error
              } = validate(schema, "f")
+
+      assert Exception.message(error) == ~s|Expected minimum length of 3, got "f".|
     end
 
     test "validate/2 with a too long string", %{schema: schema} do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected maximum length of 4, got "foobar".|,
                  reason: %{max_length: 4, value: "foobar"}
-               }
+               } = error
              } = validate(schema, "foobar")
+
+      assert Exception.message(error) == ~s|Expected maximum length of 4, got "foobar".|
     end
   end
 
@@ -86,10 +90,12 @@ defmodule Xema.StringTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Pattern ~r/^.+match.+$/ does not match value "a to a".|,
                  reason: %{value: "a to a", pattern: ~r/^.+match.+$/}
-               }
+               } = error
              } = validate(schema, "a to a")
+
+      assert Exception.message(error) ==
+               ~s|Pattern ~r/^.+match.+$/ does not match value "a to a".|
     end
   end
 
@@ -106,10 +112,12 @@ defmodule Xema.StringTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Pattern ~r/^.+match.+$/ does not match value "a to a".|,
                  reason: %{value: "a to a", pattern: ~r/^.+match.+$/}
-               }
+               } = error
              } = validate(schema, "a to a")
+
+      assert Exception.message(error) ==
+               ~s|Pattern ~r/^.+match.+$/ does not match value "a to a".|
     end
   end
 
@@ -126,10 +134,11 @@ defmodule Xema.StringTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Value "foo" is not defined in enum.|,
                  reason: %{enum: ["one", "two"], value: "foo"}
-               }
+               } = error
              } = assert(validate(schema, "foo"))
+
+      assert Exception.message(error) == ~s|Value "foo" is not defined in enum.|
     end
   end
 end

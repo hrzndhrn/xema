@@ -56,10 +56,11 @@ defmodule Xema.RefRemoteTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got \"1\".|,
                  reason: %{type: :integer, value: "1"}
-               }
+               } = error
              } = validate(schema, "1")
+
+      assert Exception.message(error) == ~s|Expected :integer, got \"1\".|
     end
   end
 
@@ -76,10 +77,11 @@ defmodule Xema.RefRemoteTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "1".|,
                  reason: %{type: :integer, value: "1"}
-               }
+               } = error
              } = validate(schema, "1")
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1".|
     end
   end
 
@@ -98,10 +100,11 @@ defmodule Xema.RefRemoteTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "1".|,
                  reason: %{type: :integer, value: "1"}
-               }
+               } = error
              } = validate(schema, "1")
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1".|
     end
 
     test "schema structure", %{schema: schema} do
@@ -128,10 +131,11 @@ defmodule Xema.RefRemoteTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "1".|,
                  reason: %{type: :integer, value: "1"}
-               }
+               } = error
              } = validate(schema, "1")
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1".|
     end
 
     test "schema structure", %{schema: schema} do
@@ -229,10 +233,11 @@ defmodule Xema.RefRemoteTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "1".|,
                  reason: %{type: :integer, value: "1"}
-               }
+               } = error
              } = validate(schema, "1")
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1".|
     end
   end
 
@@ -255,10 +260,11 @@ defmodule Xema.RefRemoteTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "1".|,
                  reason: %{type: :integer, value: "1"}
-               }
+               } = error
              } = validate(schema, "1")
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1".|
     end
 
     test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
@@ -317,13 +323,14 @@ defmodule Xema.RefRemoteTest do
     test "validate/2 with an invalid value", %{schema: schema} do
       assert {:error,
               %ValidationError{
-                message: ~s|Expected :integer, got "1", at [:list, 0].|,
                 reason: %{
                   properties: %{
                     list: %{items: [{0, %{type: :integer, value: "1"}}]}
                   }
                 }
-              }} = validate(schema, %{list: ["1"]})
+              } = error} = validate(schema, %{list: ["1"]})
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1", at [:list, 0].|
     end
 
     test "inline schema structure", %{schema: schema} do
@@ -362,16 +369,9 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      msg = """
-      No match of any schema, at [:name].
-        Expected nil, got 1, at [:name].
-        Expected :string, got 1, at [:name].\
-      """
-
       assert {
                :error,
                %ValidationError{
-                 message: ^msg,
                  reason: %{
                    properties: %{
                      name: %{
@@ -383,8 +383,16 @@ defmodule Xema.RefRemoteTest do
                      }
                    }
                  }
-               }
+               } = error
              } = validate(schema, %{name: 1})
+
+      message = """
+      No match of any schema, at [:name].
+        Expected nil, got 1, at [:name].
+        Expected :string, got 1, at [:name].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -432,15 +440,8 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "validate/2 with an invalid value", %{schema: schema} do
-      msg = """
-      No match of any schema, at [:name].
-        Expected nil, got 1, at [:name].
-        Expected :string, got 1, at [:name].\
-      """
-
       assert {:error,
               %ValidationError{
-                message: ^msg,
                 reason: %{
                   properties: %{
                     name: %{
@@ -452,7 +453,15 @@ defmodule Xema.RefRemoteTest do
                     }
                   }
                 }
-              }} = validate(schema, %{name: 1})
+              } = error} = validate(schema, %{name: 1})
+
+      message = """
+      No match of any schema, at [:name].
+        Expected nil, got 1, at [:name].
+        Expected :string, got 1, at [:name].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 
@@ -475,10 +484,11 @@ defmodule Xema.RefRemoteTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "1", at [:int].|,
                  reason: %{properties: %{int: %{type: :integer, value: "1"}}}
-               }
+               } = error
              } = validate(schema, %{int: "1"})
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1", at [:int].|
     end
   end
 
@@ -504,10 +514,11 @@ defmodule Xema.RefRemoteTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected :integer, got "1", at [:int].|,
                  reason: %{properties: %{int: %{type: :integer, value: "1"}}}
-               }
+               } = error
              } = validate(schema, %{int: "1"})
+
+      assert Exception.message(error) == ~s|Expected :integer, got "1", at [:int].|
     end
   end
 

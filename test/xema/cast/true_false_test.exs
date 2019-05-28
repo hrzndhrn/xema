@@ -31,9 +31,9 @@ defmodule Xema.Cast.TrueFalseTest do
     end
 
     test "cast!/2 with an invalid type", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
+      assert_raise Protocol.UndefinedError, fn ->
         cast!(schema, ~r/.*/)
-      end)
+      end
     end
   end
 
@@ -49,7 +49,6 @@ defmodule Xema.Cast.TrueFalseTest do
         assert cast(schema, data) ==
                  {:error,
                   %ValidationError{
-                    message: "Schema always fails validation.",
                     reason: %{type: false}
                   }}
       end)
@@ -61,16 +60,16 @@ defmodule Xema.Cast.TrueFalseTest do
 
     test "cast!/2", %{schema: schema} do
       Enum.each(@set, fn data ->
-        assert_raise(ValidationError, fn ->
+        assert_raise ValidationError, fn ->
           cast!(schema, data) == data
-        end)
+        end
       end)
     end
 
     test "cast!/2 with an invalid type", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
+      assert_raise Protocol.UndefinedError, fn ->
         cast!(schema, ~r/.*/)
-      end)
+      end
     end
   end
 end

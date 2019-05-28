@@ -18,10 +18,11 @@ defmodule Xema.MultiTypeTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected minimum length of 5, got "foo".|,
                  reason: %{min_length: 5, value: "foo"}
-               }
+               } = error
              } = validate(schema, "foo")
+
+      assert Exception.message(error) == ~s|Expected minimum length of 5, got "foo".|
     end
 
     test "with nil", %{schema: schema} do
@@ -32,10 +33,11 @@ defmodule Xema.MultiTypeTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected [:string, nil], got 42.",
                  reason: %{type: [:string, nil], value: 42}
-               }
+               } = error
              } = validate(schema, 42)
+
+      assert Exception.message(error) == "Expected [:string, nil], got 42."
     end
   end
 
@@ -56,10 +58,11 @@ defmodule Xema.MultiTypeTest do
       assert {
                :error,
                %ValidationError{
-                 message: ~s|Expected [:number, nil], got "foo", at [:foo].|,
                  reason: %{properties: %{foo: %{type: [:number, nil], value: "foo"}}}
-               }
+               } = error
              } = validate(schema, %{foo: "foo"})
+
+      assert Exception.message(error) == ~s|Expected [:number, nil], got "foo", at [:foo].|
     end
   end
 
@@ -80,10 +83,11 @@ defmodule Xema.MultiTypeTest do
       assert {
                :error,
                %ValidationError{
-                 message: "Expected [:string, nil], got 42.",
                  reason: %{type: [:string, nil], value: 42}
-               }
+               } = error
              } = validate(schema, 42)
+
+      assert Exception.message(error) == "Expected [:string, nil], got 42."
     end
   end
 end
