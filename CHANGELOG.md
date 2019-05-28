@@ -2,7 +2,18 @@
 
 ## 0.9.0 dev
 
-+ Add option `multi` to use multiple schema modules: `use Xeam, multi: true`.
+### New features
+
++ Add `Xema.cast/2`.
+
+### Breaking changes
+
++ Add option `multi` to use multiple schema modules: `use Xema, multi: true`.
++ Remove `xema/2` macro.
++ Add `xema/0` and `xema/1` macro.
++ Change return value of `Xema.validate/2` to `{:error, Exception.t}` in case
+  of error.
+
 
 ## 0.8.0 2019/03/10
 
