@@ -73,9 +73,20 @@ defmodule Xema.Builder do
     do: keywords |> Keyword.put(:module, module) |> strux()
 
   @doc """
-  Create a function with the `name` that returns the given `schema`.
+  Creates a `schema`.
   """
-  defmacro xema(name, schema) do
+  defmacro xema(do: schema) do
+    quote do
+      xema :default do
+        unquote(schema)
+      end
+    end
+  end
+
+  @doc """
+  Creates a `schema` with the given name.
+  """
+  defmacro xema(name, do: schema) do
     quote do
       if Module.get_attribute(__MODULE__, :multi) == nil do
         raise "Use `use Xema` to to use the `xema/2` macro."

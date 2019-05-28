@@ -293,14 +293,15 @@ defmodule Xema.Cast.CustomTest do
     defmodule UriSchema do
       use Xema
 
-      xema :uri,
-           map(
-             keys: :strings,
-             properties: %{
-               "uri" => strux(URI, caster: UriCaster)
-             },
-             additional_properties: false
-           )
+      xema do
+        map(
+          keys: :strings,
+          properties: %{
+            "uri" => strux(URI, caster: UriCaster)
+          },
+          additional_properties: false
+        )
+      end
     end
 
     test "valid?/1" do

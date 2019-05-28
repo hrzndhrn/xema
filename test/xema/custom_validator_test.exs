@@ -27,24 +27,26 @@ defmodule Xema.CustomValidatorTest do
   defmodule Schemas do
     use Xema, multi: true
 
-    xema :strings,
-         map(
-           properties: %{
-             short: string(max_length: 3),
-             long: string(min_length: 5),
-             palindrome: string(validator: {Palindrome, :check}),
-             three: string(validator: ThreeWords)
-           }
-         )
+    xema :strings do
+      map(
+        properties: %{
+          short: string(max_length: 3),
+          long: string(min_length: 5),
+          palindrome: string(validator: {Palindrome, :check}),
+          three: string(validator: ThreeWords)
+        }
+      )
+    end
 
-    xema :timespan,
-         map(
-           properties: %{
-             from: strux(NaiveDateTime),
-             to: strux(NaiveDateTime)
-           },
-           validator: &Schemas.timespan_validator/1
-         )
+    xema :timespan do
+      map(
+        properties: %{
+          from: strux(NaiveDateTime),
+          to: strux(NaiveDateTime)
+        },
+        validator: &Schemas.timespan_validator/1
+      )
+    end
 
     def timespan_validator(%{from: from, to: to}) do
       case NaiveDateTime.diff(from, to) < 0 do

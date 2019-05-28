@@ -10,9 +10,9 @@ defmodule Xema.UseTest do
       defmodule MultiError do
         use Xema
 
-        xema :int, integer()
+        xema :int, do: integer()
 
-        xema :str, string()
+        xema :str, do: string()
       end
     end
   end
@@ -21,13 +21,14 @@ defmodule Xema.UseTest do
     defmodule UserSchema do
       use Xema
 
-      xema :user,
-           map(
-             properties: %{
-               name: string(min_length: 1),
-               age: integer(minimum: 0)
-             }
-           )
+      xema :user do
+        map(
+          properties: %{
+            name: string(min_length: 1),
+            age: integer(minimum: 0)
+          }
+        )
+      end
     end
 
     test "valild?/2 returns true for a valied user" do
@@ -68,6 +69,29 @@ defmodule Xema.UseTest do
     end
   end
 
+  describe "module with one schema and xema/0" do
+    defmodule PersonSchema do
+      use Xema
+
+      xema do
+        map(
+          properties: %{
+            name: string(min_length: 1),
+            age: integer(minimum: 0)
+          }
+        )
+      end
+    end
+
+    test "valild?/1 returns true for a valied user" do
+      assert PersonSchema.valid?(%{name: "Nick", age: 24})
+    end
+
+    test "cast/1 returns casted data" do
+      assert PersonSchema.cast(%{name: "Nick", age: "42"}) == {:ok, %{age: 42, name: "Nick"}}
+    end
+  end
+
   describe "module with multiple schemas" do
     defmodule Schema do
       use Xema, multi: true
@@ -75,30 +99,33 @@ defmodule Xema.UseTest do
       @pos integer(minimum: 0)
       @neg integer(maximum: 0)
 
-      xema :user,
-           map(
-             properties: %{
-               name: string(min_length: 1),
-               age: @pos
-             }
-           )
+      xema :user do
+        map(
+          properties: %{
+            name: string(min_length: 1),
+            age: @pos
+          }
+        )
+      end
 
       @default true
-      xema :person,
-           keyword(
-             properties: %{
-               name: string(min_length: 1),
-               age: @pos
-             }
-           )
+      xema :person do
+        keyword(
+          properties: %{
+            name: string(min_length: 1),
+            age: @pos
+          }
+        )
+      end
 
-      xema :nums,
-           map(
-             properties: %{
-               pos: list(items: @pos),
-               neg: list(items: @neg)
-             }
-           )
+      xema :nums do
+        map(
+          properties: %{
+            pos: list(items: @pos),
+            neg: list(items: @neg)
+          }
+        )
+      end
     end
 
     test "valid?/2 returns true for a valid person" do
