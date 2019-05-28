@@ -13,7 +13,7 @@ defmodule Xema.BuilderTest do
         defmodule Foo do
           import Xema.Builder
 
-          xema :foo, integer()
+          xema :foo, do: integer()
         end
       end
     end

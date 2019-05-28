@@ -15,23 +15,24 @@ defmodule Xema.Cast.ExampleTest do
   defmodule UserSchema do
     use Xema
 
-    xema :user,
-         map(
-           keys: :atoms,
-           properties: %{
-             name: :string,
-             birthday: strux(Date),
-             favorites:
-               map(
-                 keys: :atoms,
-                 properties: %{
-                   fruits: list(items: atom(enum: [:apple, :orange, :banana])),
-                   uris: list(items: strux(URI, caster: UriCaster))
-                 }
-               )
-           },
-           additional_properties: false
-         )
+    xema do
+      map(
+        keys: :atoms,
+        properties: %{
+          name: :string,
+          birthday: strux(Date),
+          favorites:
+            map(
+              keys: :atoms,
+              properties: %{
+                fruits: list(items: atom(enum: [:apple, :orange, :banana])),
+                uris: list(items: strux(URI, caster: UriCaster))
+              }
+            )
+        },
+        additional_properties: false
+      )
+    end
   end
 
   test "cast/1" do

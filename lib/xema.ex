@@ -35,7 +35,8 @@ defmodule Xema do
       iex> defmodule SingleSchema do
       ...>   use Xema
       ...>
-      ...>   xema :num, number(minimum: 1)
+      ...>   # The name :num is optional.
+      ...>   xema :num, do: number(minimum: 1)
       ...> end
       iex>
       iex> SingleSchema.valid?(:num, 6)
@@ -62,21 +63,23 @@ defmodule Xema do
       ...>   @neg integer(maximum: 0)
       ...>
       ...>   @default true
-      ...>   xema :user,
-      ...>        map(
-      ...>          properties: %{
-      ...>            name: string(min_length: 1),
-      ...>            age: @pos
-      ...>          }
-      ...>        )
+      ...>   xema :user do
+      ...>     map(
+      ...>       properties: %{
+      ...>         name: string(min_length: 1),
+      ...>         age: @pos
+      ...>       }
+      ...>     )
+      ...>   end
       ...>
-      ...>   xema :nums,
-      ...>        map(
-      ...>          properties: %{
-      ...>            pos: list(items: @pos),
-      ...>            neg: list(items: @neg)
-      ...>          }
-      ...>        )
+      ...>   xema :nums do
+      ...>     map(
+      ...>       properties: %{
+      ...>         pos: list(items: @pos),
+      ...>         neg: list(items: @neg)
+      ...>       }
+      ...>     )
+      ...>   end
       ...> end
       iex>
       iex> Schema.valid?(:user, %{name: "John", age: 21})

@@ -29,7 +29,7 @@ With `use Xema` the functions are also available.
 iex> defmodule Int do
 ...>   use Xema
 ...>
-...>   xema :int, integer(minimum: 1)
+...>   xema do: integer(minimum: 1)
 ...> end
 iex>
 iex> Int.cast("6")
@@ -48,14 +48,15 @@ To convert map keys the schema has to specify the `keys` keyword.
 iex> defmodule MapSchema do
 ...>   use Xema
 ...>
-...>   xema :schema,
-...>        map(
-...>          keys: :atoms,
-...>          properties: %{
-...>            pos: integer(minimum: 0),
-...>            neg: integer(maximum: 0)
-...>          }
-...>        )
+...>   xema do
+...>     map(
+...>       keys: :atoms,
+...>       properties: %{
+...>         pos: integer(minimum: 0),
+...>         neg: integer(maximum: 0)
+...>       }
+...>     )
+...>   end
 ...> end
 iex>
 iex> MapSchema.cast(%{"pos" => "5", "neg" => "-5"})
@@ -77,15 +78,16 @@ iex> defmodule UrisSchema do
 ...>
 ...>   def caster(_), do: :error
 ...>
-...>   xema :uris,
-...>        map(
-...>          keys: :atoms,
-...>          properties: %{
-...>            uris: list(
-...>              items: strux(URI, caster: &UrisSchema.caster/1)
-...>            )
-...>          }
-...>        )
+...>   xema do
+...>     map(
+...>       keys: :atoms,
+...>       properties: %{
+...>         uris: list(
+...>           items: strux(URI, caster: &UrisSchema.caster/1)
+...>         )
+...>       }
+...>     )
+...>   end
 ...> end
 iex> UrisSchema.cast(%{uris: ["https://hexdocs.pm/elixir/Kernel.html"]})
 {:ok, %{uris: [URI.parse("https://hexdocs.pm/elixir/Kernel.html")]}}
@@ -110,13 +112,14 @@ iex>
 iex> defmodule UriSchema do
 ...>   use Xema
 ...>
-...>   xema :uri,
-...>        map(
-...>          keys: :strings,
-...>          properties: %{
-...>            "uri" => strux(URI, caster: UriCaster)
-...>          }
-...>        )
+...>   xema do
+...>     map(
+...>       keys: :strings,
+...>       properties: %{
+...>         "uri" => strux(URI, caster: UriCaster)
+...>       }
+...>     )
+...>   end
 ...> end
 iex>
 iex> UriSchema.cast(%{uri: "https://elixir-lang.org/docs.html"})

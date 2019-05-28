@@ -10,17 +10,18 @@ A minimal example.
 iex> defmodule Example.Basic do
 ...>   use Xema, multi: true
 ...>
-...>   xema :person,
-...>        map(
-...>          properties: %{
-...>            first_name: :string,
-...>            last_name: :string,
-...>            age: {:integer, minimum: 0}
-...>          }
-...>        )
+...>   xema :person do
+...>     map(
+...>       properties: %{
+...>         first_name: :string,
+...>         last_name: :string,
+...>         age: {:integer, minimum: 0}
+...>       }
+...>     )
+...>   end
 ...>
 ...>   @default true
-...>   xema :foo, :string
+...>   xema :foo, do: :string
 ...> end
 iex>
 iex> Example.Basic.valid?(
@@ -56,16 +57,17 @@ An example to check opts.
 iex> defmodule Example.Options do
 ...>   use Xema
 ...>
-...>   xema :opts,
-...>        keyword(
-...>          properties: %{
-...>            foo: atom(enum: [:bar, :baz]),
-...>            limit: integer(minimum: 0),
-...>            msg: :string
-...>          },
-...>          required: [:foo, :limit],
-...>          additional_properties: false
-...>        )
+...>   xema do
+...>     keyword(
+...>       properties: %{
+...>         foo: atom(enum: [:bar, :baz]),
+...>         limit: integer(minimum: 0),
+...>         msg: :string
+...>       },
+...>       required: [:foo, :limit],
+...>       additional_properties: false
+...>     )
+...>   end
 ...> end
 iex>
 iex> Example.Options.validate(foo: :bar, limit: 11, msg: "foo")
@@ -108,8 +110,9 @@ iex>
 iex> defmodule Example.PaliSchema do
 ...>   use Xema
 ...>
-...>   xema :palindrome,
-...>        string(validator: {Example.Palindrome, :check})
+...>   xema :palindrome do
+...>     string(validator: {Example.Palindrome, :check})
+...>   end
 ...> end
 ...>
 ...> Example.PaliSchema.valid?(:palindrome, "racecar")
@@ -142,8 +145,9 @@ iex>
 iex> defmodule Example.PaliSchemaB do
 ...>   use Xema
 ...>
-...>   xema :palindrome,
-...>        string(validator: Example.PalindromeB)
+...>   xema :palindrome do
+...>     string(validator: Example.PalindromeB)
+...>   end
 ...> end
 ...>
 ...> Example.PaliSchemaB.valid?(:palindrome, "racecar")
@@ -164,14 +168,15 @@ The custom validator can also be a part of the schema module.
 iex> defmodule Example.Range do
 ...>   use Xema
 ...>
-...>   xema :range,
-...>        map(
-...>          properties: %{
-...>            from: integer(minimum: 0),
-...>            to: integer(maximum: 100)
-...>          },
-...>          validator: &Example.Range.check/1
-...>        )
+...>   xema :range do
+...>     map(
+...>       properties: %{
+...>         from: integer(minimum: 0),
+...>         to: integer(maximum: 100)
+...>       },
+...>       validator: &Example.Range.check/1
+...>     )
+...>   end
 iex>
 iex>   def check(%{from: from, to: to}) do
 ...>     case from < to do
@@ -228,23 +233,24 @@ iex>
 iex> defmodule UserSchema do
 ...>   use Xema
 ...>
-...>   xema :user,
-...>        map(
-...>          keys: :atoms,
-...>          properties: %{
-...>            name: :string,
-...>            birthday: strux(Date),
-...>            favorites:
-...>              map(
-...>                keys: :atoms,
-...>                properties: %{
-...>                  fruits: list(items: atom(enum: [:apple, :orange, :banana])),
-...>                  uris: list(items: strux(URI, caster: CasterUri))
-...>                }
-...>              )
-...>          },
-...>          additional_properties: false
-...>       )
+...>   xema :user do
+...>     map(
+...>       keys: :atoms,
+...>       properties: %{
+...>         name: :string,
+...>         birthday: strux(Date),
+...>         favorites:
+...>           map(
+...>             keys: :atoms,
+...>             properties: %{
+...>               fruits: list(items: atom(enum: [:apple, :orange, :banana])),
+...>               uris: list(items: strux(URI, caster: CasterUri))
+...>             }
+...>           )
+...>       },
+...>       additional_properties: false
+...>     )
+...>   end
 ...> end
 iex>
 iex> {:ok, json} =
