@@ -25,7 +25,6 @@ defmodule Xema.Behaviour do
   defmacro __using__(_opts) do
     quote do
       @behaviour Xema.Behaviour
-      alias Xema.Access, as: XemaAccess
       alias Xema.Behaviour
 
       @enforce_keys [:schema]
@@ -91,55 +90,6 @@ defmodule Xema.Behaviour do
       def validate!(xema, value) do
         with {:error, reason} <- validate(xema, value),
              do: raise(reason)
-      end
-
-      @doc """
-      Gets a value from a nested structure by the given path.
-      """
-      @spec get(Access.t(), nonempty_list(term)) :: term
-      defdelegate get(data, path), to: XemaAccess
-
-      @doc """
-      Gets a value from a valid nested structure by the given path.
-      """
-      @spec get(__MODULE__.t(), Access.t(), nonempty_list(term)) :: term
-      def get(schema, data, path) do
-        with :ok <- validate(schema, data) do
-          XemaAccess.get(data, path)
-        else
-          {:error, _} -> nil
-        end
-      end
-
-      @doc """
-      Fetches a value from a nested structure by the given path.
-      """
-      @spec fetch(Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
-      defdelegate fetch(data, path), to: XemaAccess
-
-      @doc """
-      Fetches a value from a valid nested structure by the given path.
-      """
-      @spec fetch(__MODULE__.t(), Access.t(), nonempty_list(term)) :: {:ok, term} | {:error, term}
-      def fetch(schema, data, path) do
-        with :ok <- validate(schema, data) do
-          XemaAccess.fetch(data, path)
-        end
-      end
-
-      @doc """
-      Fetches a value from a nested structure by the given path.
-      """
-      @spec fetch!(Access.t(), nonempty_list(term)) :: term
-      defdelegate fetch!(data, path), to: XemaAccess
-
-      @doc """
-      Fetches a value from a valid nested structure by the given path.
-      """
-      @spec fetch!(__MODULE__.t(), Access.t(), nonempty_list(term)) :: term
-      def fetch!(schema, data, path) do
-        validate!(schema, data)
-        fetch!(data, path)
       end
 
       # This function can be overwritten to transform the reason map of an error tuple.
