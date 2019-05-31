@@ -5,6 +5,8 @@ defmodule FormatTest do
 
   alias Xema.ValidationError
 
+  doctest Xema.Format
+
   describe "validation of date-time strings" do
     setup do
       %{schema: Xema.new(format: :date_time)}

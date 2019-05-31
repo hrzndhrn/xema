@@ -300,10 +300,6 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, %{num: "77"}) == {:ok, %{num: 77}}
     end
 
-    test "with a valid value from a keyword list", %{schema: schema} do
-      assert cast(schema, num: "77") == {:ok, %{num: 77}}
-    end
-
     test "with an invalid value", %{schema: schema} do
       data = %{num: "77."}
       expected = {:error, CastError.exception(path: [:num], to: :integer, value: "77.")}
@@ -580,24 +576,6 @@ defmodule Xema.Cast.MapTest do
 
     test "with a valid value", %{schema: schema} do
       assert cast!(schema, %{num: "77"}) == %{num: 77}
-    end
-
-    test "with a valid value from a keyword list", %{schema: schema} do
-      assert cast!(schema, num: "77") == %{num: 77}
-    end
-
-    test "with an invalid value", %{schema: schema} do
-      data = %{num: "77."}
-      msg = ~s|cannot cast "77." to :integer at [:num]|
-
-      assert_blame CastError, msg, fn -> cast!(schema, data) end
-    end
-
-    test "with an invalid value from a keyword list", %{schema: schema} do
-      data = [num: "77."]
-      msg = ~s|cannot cast "77." to :integer at [:num]|
-
-      assert_blame CastError, msg, fn -> cast!(schema, data) end
     end
   end
 end

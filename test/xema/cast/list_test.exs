@@ -6,7 +6,7 @@ defmodule Xema.Cast.ListTest do
 
   alias Xema.{CastError, ValidationError}
 
-  @set [:atom, "str", 1.1, 1, %{}, [a: 1]]
+  @set [:atom, "str", 1.1, 1, %{}]
 
   #
   # Xema.cast/2
@@ -43,6 +43,12 @@ defmodule Xema.Cast.ListTest do
                 }
               }} = validate(schema, data)
 
+      assert cast(schema, data) == {:ok, expected}
+    end
+
+    test "form a keyword list", %{schema: schema} do
+      data = [foo: 1]
+      expected = [{:foo, 1}]
       assert cast(schema, data) == {:ok, expected}
     end
 

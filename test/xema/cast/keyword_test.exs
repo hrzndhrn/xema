@@ -6,7 +6,7 @@ defmodule Xema.Cast.KeywordTest do
 
   alias Xema.{CastError, ValidationError}
 
-  @set [:atom, "str", 1.1, 1, [4], {:tuple}]
+  @set [:atom, "str", 1.1, 1, {:tuple}]
 
   #
   # Xema.cast/2
@@ -55,6 +55,13 @@ defmodule Xema.Cast.KeywordTest do
     test "from a map with string keys and unknown atom", %{schema: schema} do
       data = %{"xyz" => 55}
       expected = {:error, CastError.exception(key: "xyz", path: [], to: :keyword)}
+
+      assert cast(schema, data) == expected
+    end
+
+    test "from a list", %{schema: schema} do
+      data = [4]
+      expected = {:error, %ValidationError{reason: %{type: :keyword, value: [4]}}}
 
       assert cast(schema, data) == expected
     end
@@ -170,7 +177,7 @@ defmodule Xema.Cast.KeywordTest do
   end
 
   #
-  # Xema.cast/2
+  # Xema.cast!/2
   #
 
   describe "cast!/2 with a minimal keyword schema" do
@@ -207,6 +214,12 @@ defmodule Xema.Cast.KeywordTest do
       msg = ~s|cannot cast "xyz" to :keyword key, the atom is unknown|
 
       assert_blame CastError, msg, fn -> cast!(schema, data) end
+    end
+
+    test "from a list", %{schema: schema} do
+      assert_raise ValidationError, "Expected :keyword, got [4].", fn ->
+        cast!(schema, [4])
+      end
     end
 
     test "from an invalid type", %{schema: schema} do

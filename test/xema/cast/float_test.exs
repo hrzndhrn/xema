@@ -6,7 +6,7 @@ defmodule Xema.Cast.FloatTest do
   import AssertBlame
   import Xema, only: [cast: 2, cast!: 2, validate: 2]
 
-  @set [55, [55], [num: 55], :foo, %{}, {:tuplt}]
+  @set [[55], [num: 55], :foo, %{}, {:tuplt}]
 
   describe "cast/2 with a minimal integer schema" do
     setup do
@@ -19,6 +19,10 @@ defmodule Xema.Cast.FloatTest do
       data = 42.0
       assert validate(schema, data) == :ok
       assert cast(schema, data) == {:ok, data}
+    end
+
+    test "from an integer", %{schema: schema} do
+      assert cast(schema, 55) == {:ok, 55.0}
     end
 
     test "from a string", %{schema: schema} do
