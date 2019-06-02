@@ -43,8 +43,16 @@ defmodule Xema.CastError do
     "cannot cast #{inspect(key)} to #{inspect(to)} key at #{inspect(path)}, the atom is unknown"
   end
 
+  def format_error(%{path: [], to: to, value: value}) when is_list(to) do
+    "cannot cast #{inspect(value)} to any of #{inspect(to)}"
+  end
+
   def format_error(%{path: [], to: to, value: value}) do
     "cannot cast #{inspect(value)} to #{inspect(to)}"
+  end
+
+  def format_error(%{path: path, to: to, value: value}) when is_list(to) do
+    "cannot cast #{inspect(value)} to any of #{inspect(to)} at #{inspect(path)}"
   end
 
   def format_error(%{path: path, to: to, value: value}) do

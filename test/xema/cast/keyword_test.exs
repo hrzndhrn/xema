@@ -99,6 +99,7 @@ defmodule Xema.Cast.KeywordTest do
       assert cast(schema, str: 5, num: "6") == {:ok, [str: "5", num: 6]}
     end
 
+    @tag :only
     test "from a map with string keys", %{schema: schema} do
       assert {:ok, cast} = cast(schema, %{"foo" => 42, "str" => 6, "num" => "4"})
       assert Keyword.equal?(cast, foo: 42, str: "6", num: 4)

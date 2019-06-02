@@ -1,7 +1,7 @@
 defmodule Xema.AnyOfTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [validate: 2]
+  import Xema, only: [validate: 2, valid?: 2]
 
   alias Xema.ValidationError
 
@@ -240,6 +240,21 @@ defmodule Xema.AnyOfTest do
       """
 
       assert Exception.message(error) == message
+    end
+  end
+
+  describe "keyword any_of with with multiple types" do
+    setup do
+      %{
+        schema: Xema.new(any_of: [:integer, :string, nil])
+      }
+    end
+
+    test "validate", %{schema: schema} do
+      assert valid?(schema, 5)
+      assert valid?(schema, "five")
+      assert valid?(schema, nil)
+      refute valid?(schema, [6])
     end
   end
 end

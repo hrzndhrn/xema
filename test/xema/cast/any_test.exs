@@ -7,7 +7,7 @@ defmodule Xema.Cast.AnyTest do
     setup do
       %{
         schema: Xema.new(:any),
-        set: [:atom, "str", 1.1, 1, [], %{}, {:a, "a"}, {:tuple}]
+        set: [:atom, "str", 1.1, 1, [], %{}, {:a, "a"}, {:tuple}, ~r/.*/]
       }
     end
 
@@ -17,19 +17,9 @@ defmodule Xema.Cast.AnyTest do
       end)
     end
 
-    test "cast/2 with an invalid type", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
-    end
-
     test "cast!/2", %{schema: schema, set: set} do
       Enum.each(set, fn data ->
         assert cast!(schema, data) == data
-      end)
-    end
-
-    test "cast!/2 with an invalid type", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast!(schema, ~r/.*/)
       end)
     end
   end
