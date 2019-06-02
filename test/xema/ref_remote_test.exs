@@ -8,8 +8,7 @@ defmodule Xema.RefRemoteTest do
   alias Xema.SchemaError
 
   test "http server" do
-    assert %{body: body} =
-             HTTPoison.get!("http://localhost:1234/folder/folderInteger.exon")
+    assert %{body: body} = HTTPoison.get!("http://localhost:1234/folder/folderInteger.exon")
 
     assert body == File.read!("test/support/remote/folder/folderInteger.exon")
   end
@@ -38,8 +37,7 @@ defmodule Xema.RefRemoteTest do
 
   describe "invalid remote ref" do
     test "404" do
-      expected =
-        "Remote schema 'http://localhost:1234/not-found.exon' not found."
+      expected = "Remote schema 'http://localhost:1234/not-found.exon' not found."
 
       assert_raise SchemaError, expected, fn ->
         Xema.new({:ref, "http://localhost:1234/not-found.exon"})
@@ -78,10 +76,7 @@ defmodule Xema.RefRemoteTest do
   describe "fragment within remote ref" do
     setup do
       %{
-        schema:
-          Xema.new(
-            {:ref, "http://localhost:1234/sub_schemas.exon#/definitions/int"}
-          )
+        schema: Xema.new({:ref, "http://localhost:1234/sub_schemas.exon#/definitions/int"})
       }
     end
 
@@ -134,8 +129,7 @@ defmodule Xema.RefRemoteTest do
                },
                schema: %Schema{
                  ref: %Ref{
-                   pointer:
-                     "http://localhost:1234/sub_schemas.exon#/definitions/int",
+                   pointer: "http://localhost:1234/sub_schemas.exon#/definitions/int",
                    uri: %URI{
                      authority: "localhost:1234",
                      fragment: "/definitions/int",
@@ -201,11 +195,7 @@ defmodule Xema.RefRemoteTest do
   describe "ref within remote ref" do
     setup do
       %{
-        schema:
-          Xema.new(
-            {:ref,
-             "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"}
-          )
+        schema: Xema.new({:ref, "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"})
       }
     end
 
@@ -223,8 +213,7 @@ defmodule Xema.RefRemoteTest do
       %{
         schema:
           Xema.new(
-            {:ref,
-             "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"},
+            {:ref, "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"},
             inline: false
           )
       }
@@ -437,8 +426,7 @@ defmodule Xema.RefRemoteTest do
   describe "remote ref in remote ref (non-inline)" do
     setup do
       %{
-        schema:
-          Xema.new({:ref, "http://localhost:1234/obj_int.exon"}, inline: false)
+        schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"}, inline: false)
       }
     end
 

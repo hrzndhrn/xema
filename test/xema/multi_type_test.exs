@@ -41,8 +41,7 @@ defmodule Xema.MultiTypeTest do
 
     test "with a string", %{schema: schema} do
       assert validate(schema, %{foo: "foo"}) ==
-               {:error,
-                %{properties: %{foo: %{type: [:number, nil], value: "foo"}}}}
+               {:error, %{properties: %{foo: %{type: [:number, nil], value: "foo"}}}}
     end
   end
 

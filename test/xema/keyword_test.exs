@@ -127,8 +127,7 @@ defmodule Xema.KeywordTest do
         schema:
           Xema.new({
             :keyword,
-            properties: %{foo: {:string, min_length: 3}},
-            additional_properties: :integer
+            properties: %{foo: {:string, min_length: 3}}, additional_properties: :integer
           })
       }
     end
@@ -162,8 +161,7 @@ defmodule Xema.KeywordTest do
   describe "keyword schema with required property" do
     setup do
       %{
-        schema:
-          Xema.new({:keyword, properties: %{foo: :number}, required: [:foo]})
+        schema: Xema.new({:keyword, properties: %{foo: :number}, required: [:foo]})
       }
     end
 
@@ -186,8 +184,7 @@ defmodule Xema.KeywordTest do
         schema:
           Xema.new({
             :keyword,
-            properties: %{a: :number, b: :number, c: :number},
-            required: [:a, :b, :c]
+            properties: %{a: :number, b: :number, c: :number}, required: [:a, :b, :c]
           })
       }
     end

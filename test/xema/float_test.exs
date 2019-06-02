@@ -63,10 +63,7 @@ defmodule Xema.FloatTest do
         schema:
           Xema.new({
             :float,
-            minimum: 2,
-            maximum: 4,
-            exclusive_minimum: true,
-            exclusive_maximum: true
+            minimum: 2, maximum: 4, exclusive_minimum: true, exclusive_maximum: true
           })
       }
     end

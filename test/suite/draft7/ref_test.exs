@@ -38,10 +38,7 @@ defmodule Draft7.RefTest do
   describe "relative pointer ref to object" do
     setup do
       %{
-        schema:
-          Xema.new(
-            properties: %{bar: {:ref, "#/properties/foo"}, foo: :integer}
-          )
+        schema: Xema.new(properties: %{bar: {:ref, "#/properties/foo"}, foo: :integer})
       }
     end
 

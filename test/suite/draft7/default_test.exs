@@ -22,10 +22,7 @@ defmodule Draft7.DefaultTest do
   describe "invalid string value for default" do
     setup do
       %{
-        schema:
-          Xema.new(
-            properties: %{bar: {:string, [default: "bad", min_length: 4]}}
-          )
+        schema: Xema.new(properties: %{bar: {:string, [default: "bad", min_length: 4]}})
       }
     end
 

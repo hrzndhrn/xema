@@ -47,10 +47,7 @@ defmodule Draft7.PatternPropertiesTest do
   describe "multiple simultaneous patternProperties are validated" do
     setup do
       %{
-        schema:
-          Xema.new(
-            pattern_properties: %{"a*" => :integer, "aaa*" => [maximum: 20]}
-          )
+        schema: Xema.new(pattern_properties: %{"a*" => :integer, "aaa*" => [maximum: 20]})
       }
     end
 
@@ -88,10 +85,7 @@ defmodule Draft7.PatternPropertiesTest do
   describe "regexes are not anchored by default and are case sensitive" do
     setup do
       %{
-        schema:
-          Xema.new(
-            pattern_properties: %{"X_" => :string, "[0-9]{2,}" => :boolean}
-          )
+        schema: Xema.new(pattern_properties: %{"X_" => :string, "[0-9]{2,}" => :boolean})
       }
     end
 

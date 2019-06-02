@@ -61,10 +61,7 @@ defmodule Xema.NumberTest do
         schema:
           Xema.new({
             :number,
-            minimum: 2,
-            maximum: 4,
-            exclusive_minimum: true,
-            exclusive_maximum: true
+            minimum: 2, maximum: 4, exclusive_minimum: true, exclusive_maximum: true
           })
       }
     end

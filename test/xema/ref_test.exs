@@ -161,12 +161,10 @@ defmodule Xema.RefTest do
 
     test "validate/2 with invalid data", %{schema: schema} do
       assert validate(schema, %{"foo" => "42"}) ==
-               {:error,
-                %{properties: %{"foo" => %{type: :integer, value: "42"}}}}
+               {:error, %{properties: %{"foo" => %{type: :integer, value: "42"}}}}
 
       assert validate(schema, %{"bar" => "42"}) ==
-               {:error,
-                %{properties: %{"bar" => %{type: :integer, value: "42"}}}}
+               {:error, %{properties: %{"bar" => %{type: :integer, value: "42"}}}}
 
       assert validate(schema, %{"foo" => "21", "bar" => "42"}) ==
                {:error,
@@ -592,8 +590,7 @@ defmodule Xema.RefTest do
 
     test "validate/2 tilda_1 with invalid value", %{schema: schema} do
       assert validate(schema, %{tilda_1: "1"}) ==
-               {:error,
-                %{properties: %{tilda_1: %{type: :integer, value: "1"}}}}
+               {:error, %{properties: %{tilda_1: %{type: :integer, value: "1"}}}}
     end
 
     test "validate/2 tilda_2 with valid value", %{schema: schema} do

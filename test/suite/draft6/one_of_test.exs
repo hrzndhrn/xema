@@ -32,8 +32,7 @@ defmodule Draft6.OneOfTest do
   describe "oneOf with base schema" do
     setup do
       %{
-        schema:
-          Xema.new({:string, [one_of: [[min_length: 2], [max_length: 4]]]})
+        schema: Xema.new({:string, [one_of: [[min_length: 2], [max_length: 4]]]})
       }
     end
 
