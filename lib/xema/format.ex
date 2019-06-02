@@ -63,11 +63,10 @@ defmodule Xema.Format do
 
   ## Examples
 
-      iex> Format.is?(:email, "foo@bar.net")
-      iex> true
-      iex> Format.is?(:email, "foo.bar.net")
-      iex> false
-
+      iex> Xema.Format.is?(:email, "foo@bar.net")
+      true
+      iex> Xema.Format.is?(:email, "foo.bar.net")
+      false
   """
   @spec is?(format, String.t()) :: boolean
   for fmt <- @formats do
@@ -155,6 +154,17 @@ defmodule Xema.Format do
 
   The regular expression was taken from
   [https://emailregex.com/](https://emailregex.com/).
+
+  ## Examples
+
+      iex> import Xema.Format
+      iex>
+      iex> email?("marin.musterman@germany.net")
+      true
+      iex> email?("Otto.Normalverbraucher")
+      false
+      iex> email?("Otto.Normal@Verbraucher.NET")
+      true
   """
   # credo:disable-for-previous-line
   @email ~r<
@@ -175,6 +185,19 @@ defmodule Xema.Format do
 
   This function returns `true` if the value is a valid IPv4 address, IPv6
   address, or a valid hostname, `false` otherwise.
+
+  ## Examples
+
+      iex> import Xema.Format
+      iex>
+      iex> host?("127.0.0.1")
+      true
+      iex> host?("localhost")
+      true
+      iex> host?("elixirforum.com")
+      true
+      iex> host?("go go go")
+      false
   """
   @spec host?(String.t()) :: boolean
   def host?(string) when is_binary(string),
