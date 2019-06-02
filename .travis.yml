@@ -2,15 +2,29 @@ language: elixir
 
 elixir:
   - 1.7.4
-  - 1.8.1
+  - 1.8.2
 
 otp_release:
-  - 21.2
+  - 20.3
+  - 21.3
+  - 22.0
 
-env:
-  global:
-    - MIX_ENV=test
+before_script:
+  - mix do deps.get, deps.compile
+  - MIX_ENV=test mix compile --warnings-as-errors
+  - travis_wait mix dialyzer --plt
 
 script:
-  - mix do deps.get, deps.compile, coveralls.travis
+  - if [[ "$TRAVIS_ELIXIR_VERSION" == "1.8"* ]]; then mix format --check-formatted ;fi
   - mix credo --strict
+  - mix coveralls.travis
+  - mix dialyzer --halt-exit-status
+
+sudo: required
+
+dist: trusty
+
+cache:
+  directories:
+    - deps
+    - test/support/plts
