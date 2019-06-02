@@ -1,5 +1,9 @@
 # Changelog
 
+## O.8.1 2019/06/02
+
++ Fix email format checker.
+
 ## 0.8.0 2019/03/10
 
 + Inline references in schemas by default. Increased performance of reference
