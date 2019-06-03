@@ -33,7 +33,8 @@ defmodule Xema.Cast.AllOfTest do
     end
 
     test "from a float", %{schema: schema} do
-      assert cast(schema, 5.5) == {:ok, "5.5"}
+      assert {:error, %ValidationError{} = error} = cast(schema, 5.5)
+      assert error.reason.value == "5.5"
     end
 
     test "from an empty list", %{schema: schema} do
@@ -57,8 +58,7 @@ defmodule Xema.Cast.AllOfTest do
     end
 
     test "from a map", %{schema: schema} do
-      assert {:error, %ValidationError{} = error} = cast(schema, %{a: 1, b: "2"})
-      assert error.reason.value == %{a: "1", b: 2}
+      assert cast(schema, %{a: 1, b: "2"}) == {:ok, %{a: "1", b: 2}}
     end
 
     test "from a map with an invalid value", %{schema: schema} do
@@ -68,8 +68,7 @@ defmodule Xema.Cast.AllOfTest do
     end
 
     test "from a keyword list", %{schema: schema} do
-      assert {:error, %ValidationError{} = error} = cast(schema, a: 1, b: "2")
-      assert error.reason.value == [a: "1", b: 2]
+      assert cast(schema, a: 1, b: "2") == {:ok, [a: "1", b: 2]}
     end
   end
 
@@ -88,19 +87,23 @@ defmodule Xema.Cast.AllOfTest do
     end
 
     test "from a map with an integer", %{schema: schema} do
-      assert cast(schema, %{a: 1}) == {:ok, %{a: 1}}
+      assert {:error, %ValidationError{} = error} = cast(schema, %{a: 1})
+      assert error.reason.value == %{a: 1}
     end
 
     test "from a map with an integer string", %{schema: schema} do
-      assert cast(schema, %{a: "2"}) == {:ok, %{a: 2}}
+      assert {:error, %ValidationError{} = error} = cast(schema, %{a: "2"})
+      assert error.reason.value == %{a: 2}
     end
 
     test "from a map with a string", %{schema: schema} do
-      assert cast(schema, %{a: "three"}) == {:ok, %{a: "three"}}
+      assert {:error, %ValidationError{} = error} = cast(schema, %{a: "three"})
+      assert error.reason.value == %{a: "three"}
     end
 
     test "from a map with a nil", %{schema: schema} do
-      assert cast(schema, %{a: nil}) == {:ok, %{a: nil}}
+      assert {:error, %ValidationError{} = error} = cast(schema, %{a: nil})
+      assert error.reason.value == %{a: nil}
     end
 
     test "from a map with an empty list", %{schema: schema} do

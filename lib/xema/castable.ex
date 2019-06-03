@@ -56,7 +56,7 @@ defmodule Xema.Castable.Helper do
   end
 
   def module(module) do
-    unless module == nil, do: module, else: :struct
+    if module == nil, do: :struct, else: module
   end
 
   def check_keyword(list, to) do

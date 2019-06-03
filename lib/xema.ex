@@ -570,7 +570,8 @@ defmodule Xema do
   end
 
   defp do_cast!(schemas, value, path) when is_list(schemas) do
-    Enum.reduce_while(schemas, :error, fn schema, acc ->
+    schemas
+    |> Enum.reduce_while(:error, fn schema, acc ->
       try do
         {:halt, {:ok, do_cast!(schema, value, path)}}
       catch
@@ -634,7 +635,8 @@ defmodule Xema do
         Castable.cast(value, schema)
 
       schemas ->
-        Enum.reduce_while(schemas, :error, fn schema, acc ->
+        schemas
+        |> Enum.reduce_while(:error, fn schema, acc ->
           case Castable.cast(value, schema) do
             {:ok, _} = result -> {:halt, result}
             _ -> {:cont, acc}
@@ -702,6 +704,7 @@ defmodule Xema do
     end)
   end
 
+  @spec get_properties(Schema.t()) :: map
   defp get_properties(schema) do
     schema
     |> get_combiner()
@@ -713,6 +716,7 @@ defmodule Xema do
     end)
   end
 
+  @spec get_items(Schema.t()) :: list
   defp get_items(schema) do
     schema
     |> get_combiner()
@@ -725,6 +729,7 @@ defmodule Xema do
     |> Enum.reverse()
   end
 
+  @spec get_combiner(Schema.t()) :: [Schema.t()]
   defp get_combiner(%Schema{} = schema) do
     [[schema], schema.any_of || [], schema.all_of || [], schema.one_of || []]
     |> Enum.concat()
