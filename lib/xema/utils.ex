@@ -9,10 +9,12 @@ defmodule Xema.Utils do
 
   ## Examples
 
-        iex> _ = :my_atom
-        iex> Xema.Utils.to_existing_atom("my_atom")
+        iex> import Xema.Utils
+        iex> to_existing_atom(:my_atom)
         :my_atom
-        iex> Xema.Utils.to_existing_atom("not_existing_atom")
+        iex> to_existing_atom("my_atom")
+        :my_atom
+        iex> to_existing_atom("not_existing_atom")
         nil
   """
   @spec to_existing_atom(String.t() | atom) :: atom | nil

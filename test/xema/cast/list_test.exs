@@ -25,6 +25,7 @@ defmodule Xema.Cast.ListTest do
       assert cast(schema, data) == {:ok, data}
     end
 
+    @tag :only
     test "from a list", %{schema: schema} do
       data = [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}]
       assert validate(schema, data) == :ok

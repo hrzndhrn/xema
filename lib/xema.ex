@@ -550,7 +550,6 @@ defmodule Xema do
   @spec do_cast!(Schema.t(), term, list) :: {:ok, term} | {:error, term}
   defp do_cast!(%Schema{} = schema, value, path)
        when is_list(value) or is_tuple(value) or is_map(value) do
-    IO.inspect("start cast_values!", label: :info)
     value = cast_values!(schema, value, path)
 
     with {:ok, cast} <- castable_cast(schema, value) do
@@ -562,8 +561,6 @@ defmodule Xema do
   end
 
   defp do_cast!(%Schema{} = schema, value, path) do
-    IO.inspect(value, label: :value)
-
     with {:ok, cast} <- castable_cast(schema, value) do
       cast
     else
@@ -626,24 +623,17 @@ defmodule Xema do
        do: caster.cast(value)
 
   defp do_castable_cast(schema, value) do
-    IO.inspect(value, label: :do_castable_cast)
-
     schema
     |> get_combiner()
-    |> IO.inspect(label: :combiner)
     |> Enum.filter(fn schema -> schema.type != :any end)
-    |> IO.inspect(label: :schemas)
     |> case do
       [] ->
         {:ok, value}
 
       [schema] ->
         Castable.cast(value, schema)
-            |> IO.inspect(label: :result)
 
       schemas ->
-        IO.inspect("schemas", label: :info)
-
         Enum.reduce_while(schemas, :error, fn schema, acc ->
           case Castable.cast(value, schema) do
             {:ok, _} = result -> {:halt, result}
@@ -662,13 +652,25 @@ defmodule Xema do
   end
 
   @spec cast_values!(Schema.t(), term, list) :: term
-  defp cast_values!(schema, data, path) when is_list(data) do
+  defp cast_values!(schema, tuple, path) when is_tuple(tuple),
+    do:
+      schema
+      |> cast_values!(Tuple.to_list(tuple), path)
+      |> List.to_tuple()
+
+  defp cast_values!(schema, %module{} = struct, path),
+    do:
+      schema
+      |> cast_values!(Map.from_struct(struct), path)
+      |> to_struct(module)
+
+  defp cast_values!(%Schema{keys: keys} = schema, data, path) when is_list(data) do
     case Keyword.keyword?(data) do
       true ->
         properties = get_properties(schema)
 
         Enum.map(data, fn {key, value} ->
-          {key, do_cast!(Map.get(properties, key_to(:atom, key)), value, [key | path])}
+          {key, do_cast!(Map.get(properties, key_to(keys, key)), value, [key | path])}
         end)
 
       false ->
@@ -691,142 +693,48 @@ defmodule Xema do
     end
   end
 
-  defp cast_values!(schema, %module{} = struct, path), do:
-    struct!(module, cast_values!(schema, Map.from_struct(struct), path))
-
   defp cast_values!(%Schema{keys: keys, type: type} = schema, data, path) when is_map(data) do
-    IO.inspect(data, label: :cast_values_map)
     properties = get_properties(schema)
-    IO.inspect(properties, label: :properties)
     keys = if type == :keyword, do: :atoms, else: keys
 
-    case Enum.empty?(properties) do
-      true ->
-        # TODO: check keys to cast just keys
-        case keys do
-          :atoms ->
-            :todo_no_props_atoms
-
-          :strings ->
-            :todo_no_props_strings
-
-          _ ->
-            data
-        end
-
-      false ->
-        Enum.into(data, %{}, fn {key, value} ->
-          key = key_to(keys, key)
-          # {key, do_cast!(Map.get(properties, to_existing_atom(key)), value, [key | path])}
-          value = do_cast!(Map.get(properties, key), value, [key | path])
-          {key, value}
-        end)
-    end
+    Enum.into(data, %{}, fn {key, value} ->
+      {key, do_cast!(Map.get(properties, key_to(keys, key)), value, [key | path])}
+    end)
   end
 
-  defp get_properties(schema, deep \\ true)
-
-  defp get_properties(schema, true) do
+  defp get_properties(schema) do
     schema
     |> get_combiner()
-    |> Enum.map(fn schema -> get_properties(schema, false) end)
-    |> Enum.reduce(%{}, fn props, acc ->
-      Map.merge(acc, props, fn
+    |> Enum.reduce(%{}, fn schema, acc ->
+      Map.merge(acc, schema.properties || %{}, fn
         _key, a, b when is_list(a) -> Enum.concat(a, [b])
         _key, a, b -> [a, b]
       end)
     end)
   end
 
-  defp get_properties(%Schema{properties: nil}, false), do: %{}
-
-  defp get_properties(%Schema{properties: properties}, false), do: properties
-
-  defp get_items(schema, deep \\ true)
-
-  defp get_items(schema, true) do
+  defp get_items(schema) do
     schema
     |> get_combiner()
-    |> Enum.map(fn schema -> get_items(schema, false) end)
+    |> Enum.reduce([], fn schema, acc ->
+      case schema.items do
+        nil -> acc
+        items -> [items | acc]
+      end
+    end)
+    |> Enum.reverse()
   end
-
-  defp get_items(%Schema{items: nil}, false), do: []
-
-  defp get_items(%Schema{items: items}, false), do: items
 
   defp get_combiner(%Schema{} = schema) do
     [[schema], schema.any_of || [], schema.all_of || [], schema.one_of || []]
     |> Enum.concat()
   end
 
-  defp cast_values!(%Schema{properties: nil}, data, _) when is_map(data), do: data
+  defp key_to(:atoms, key) when is_binary(key), do: to_existing_atom(key)
 
-  defp cast_values!(%Schema{properties: _} = schema, %module{} = data, path) do
-    fields = cast_values!(schema, Map.from_struct(data), path)
-    struct(module, fields)
-  end
+  defp key_to(:strings, key) when is_atom(key), do: to_string(key)
 
-  defp cast_values!(%Schema{properties: properties, type: :keyword}, data, path)
-       when is_map(data),
-       do:
-         Enum.into(data, %{}, fn {key, value} ->
-           {key, do_cast!(Map.get(properties, to_existing_atom(key)), value, [key | path])}
-         end)
+  defp key_to(_, key), do: key
 
-  defp cast_values!(%Schema{properties: properties, keys: keys}, data, path) when is_map(data),
-    do:
-      Enum.into(data, %{}, fn {key, value} ->
-        {key, do_cast!(Map.get(properties, key_to(keys, key)), value, [key | path])}
-      end)
-
-  defp cast_values!(%Schema{properties: properties, keys: keys}, data, path)
-       when is_list(data) and is_map(properties) do
-    case Keyword.keyword?(data) do
-      true ->
-        Enum.map(data, fn {key, value} ->
-          {key, do_cast!(Map.get(properties, key_to(keys, key)), value, [key | path])}
-        end)
-
-      false ->
-        data
-    end
-  end
-
-  defp cast_values!(%Schema{items: nil}, tuple, _path) when is_tuple(tuple), do: tuple
-
-  defp cast_values!(%Schema{items: nil}, list, _path) when is_list(list), do: list
-
-  defp cast_values!(%Schema{items: items}, list, path) when is_list(list) and is_list(items),
-    do:
-      list
-      |> Enum.with_index()
-      |> Enum.map(fn {value, index} ->
-        case Enum.at(items, index) do
-          nil ->
-            value
-
-          schema ->
-            do_cast!(schema, value, [index | path])
-        end
-      end)
-
-  defp cast_values!(%Schema{items: items}, list, path) when is_list(list),
-    do:
-      list
-      |> Enum.with_index()
-      |> Enum.map(fn {value, index} ->
-        do_cast!(items, value, [index | path])
-      end)
-
-  defp cast_values!(schema, tuple, path) when is_tuple(tuple),
-    do:
-      schema
-      |> cast_values!(Tuple.to_list(tuple), path)
-      |> List.to_tuple()
-
-  defp key_to(:atoms, str) when is_binary(str), do: to_existing_atom(str)
-
-  defp key_to(:strings, atom) when is_atom(atom), do: to_string(atom)
-
-  defp key_to(_, value), do: value
+  defp to_struct(data, module), do: struct!(module, data)
 end

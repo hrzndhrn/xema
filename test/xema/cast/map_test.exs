@@ -80,6 +80,7 @@ defmodule Xema.Cast.MapTest do
       }
     end
 
+    @tag :only
     test "from a map with atom keys", %{schema: schema} do
       assert cast(schema, %{abc: 55, zzz: "z"}) ==
                {:ok, %{"abc" => 55, "zzz" => "z"}}
@@ -209,6 +210,7 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, %{bla: 42, foo: 11}) == {:ok, %{"bla" => "42", "foo" => 11}}
     end
 
+    @tag :only
     test "from a keyword list", %{schema: schema} do
       assert cast(schema, bla: 6, foo: 11) == {:ok, %{"bla" => "6", "foo" => 11}}
     end
