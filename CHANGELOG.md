@@ -18,6 +18,9 @@
     with some changes.
   + `ValidationError.message` contains an error message.
 
+## O.8.1 2019/06/02
+
++ Fix email format checker.
 
 ## 0.8.0 2019/03/10
 
