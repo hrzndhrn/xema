@@ -105,4 +105,22 @@ defmodule Xema.Cast.AnyOfTest do
                "cannot cast [] to any of [:integer, :string, nil] at [:a]"
     end
   end
+
+  describe "cast/2 with any_of schema with items" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            any_of: [
+              [items: :integer],
+              [items: :string]
+            ]
+          )
+      }
+    end
+
+    test "from a list of integers", %{schema: schema} do
+      assert cast(schema, [1, 2, 3]) == {:ok, [1, 2, 3]}
+    end
+  end
 end
