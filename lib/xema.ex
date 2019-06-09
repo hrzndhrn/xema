@@ -569,26 +569,7 @@ defmodule Xema do
     end
   end
 
-  defp do_cast!(schemas, value, opts, path) when is_list(schemas) do
-    schemas
-    |> Enum.reduce_while(:error, fn schema, acc ->
-      try do
-        {:halt, {:ok, do_cast!(schema, value, opts, path)}}
-      catch
-        {:error, _} -> {:cont, acc}
-      end
-    end)
-    |> case do
-      {:ok, cast} ->
-        cast
-
-      :error ->
-        types = Enum.map(schemas, fn schema -> schema.type end)
-        throw({:error, %{to: types, value: value, path: path}})
-    end
-  end
-
-  defp do_cast!(nil, value, _, _), do: value
+  defp do_cast!(nil, value, _opts, _path), do: value
 
   @spec castable_cast(Schema.t(), term) :: {:ok, term} | {:error, term}
   defp castable_cast(%Schema{} = schema, value) do
@@ -624,32 +605,30 @@ defmodule Xema do
        do: caster.cast(value)
 
   defp do_castable_cast(schema, value) do
-    schema
-    |> get_combiner()
-    |> Enum.filter(fn schema -> schema.type != :any end)
-    |> case do
-      [] ->
-        {:ok, value}
+    with {:ok, value} <- Castable.cast(value, schema) do
+      schema
+      |> get_combiner()
+      |> case do
+        [] ->
+          {:ok, value}
 
-      [schema] ->
-        Castable.cast(value, schema)
+        schemas ->
+          schemas
+          |> Enum.reduce_while(:error, fn schema, acc ->
+            case Castable.cast(value, schema) do
+              {:ok, _} = result -> {:halt, result}
+              _ -> {:cont, acc}
+            end
+          end)
+          |> case do
+            :error ->
+              to = Enum.map(schemas, fn schema -> schema.type end)
+              {:error, %{to: to, value: value}}
 
-      schemas ->
-        schemas
-        |> Enum.reduce_while(:error, fn schema, acc ->
-          case Castable.cast(value, schema) do
-            {:ok, _} = result -> {:halt, result}
-            _ -> {:cont, acc}
+            result ->
+              result
           end
-        end)
-        |> case do
-          :error ->
-            to = Enum.map(schemas, fn schema -> schema.type end)
-            {:error, %{to: to, value: value}}
-
-          result ->
-            result
-        end
+      end
     end
   end
 
@@ -669,74 +648,70 @@ defmodule Xema do
   defp cast_values!(%Schema{keys: keys} = schema, data, opts, path) when is_list(data) do
     case Keyword.keyword?(data) do
       true ->
-        properties = get_properties(schema)
+        properties = Map.get(schema, :properties) || %{}
+        additional_properties = Map.get(schema, :additional_properties)
 
-        Enum.map(data, fn {key, value} ->
-          {key, do_cast!(Map.get(properties, key_to(keys, key)), value, opts, [key | path])}
-        end)
+        data =
+          Enum.map(data, fn {key, value} ->
+            property = Map.get(properties, key_to(keys, key), additional_properties)
+            {key, do_cast!(property, value, opts, [key | path])}
+          end)
+
+        cast_combiner(schema, data, opts, path)
 
       false ->
-        case get_items(schema) do
-          [] ->
+        case Map.get(schema, :items) do
+          nil ->
             data
 
-          [%Schema{} = items] ->
+          %Schema{} = items ->
             data
             |> Enum.with_index()
             |> Enum.map(fn {item, index} -> do_cast!(items, item, opts, [index | path]) end)
 
-          [items] ->
+          items ->
+            additional_items = Map.get(schema, :additional_items)
+
             data
             |> Enum.with_index()
             |> Enum.map(fn {item, index} ->
-              do_cast!(Enum.at(items, index), item, opts, [index | path])
+              do_cast!(Enum.at(items, index, additional_items), item, opts, [index | path])
             end)
-
-          schemas ->
-            IO.inspect(schemas)
-            :todo
         end
     end
   end
 
   defp cast_values!(%Schema{keys: keys, type: type} = schema, data, opts, path)
        when is_map(data) do
-    properties = get_properties(schema)
+    properties = Map.get(schema, :properties) || %{}
+    additional_properties = Map.get(schema, :additional_properties)
     keys = if type == :keyword, do: :atoms, else: keys
 
-    Enum.into(data, %{}, fn {key, value} ->
-      {key, do_cast!(Map.get(properties, key_to(keys, key)), value, opts, [key | path])}
-    end)
-  end
-
-  @spec get_properties(Schema.t()) :: map
-  defp get_properties(schema) do
-    schema
-    |> get_combiner()
-    |> Enum.reduce(%{}, fn schema, acc ->
-      Map.merge(acc, schema.properties || %{}, fn
-        _key, a, b when is_list(a) -> Enum.concat(a, [b])
-        _key, a, b -> [a, b]
+    data =
+      Enum.into(data, %{}, fn {key, value} ->
+        schema = Map.get(properties, key_to(keys, key), additional_properties)
+        {key, do_cast!(schema, value, opts, [key | path])}
       end)
-    end)
+
+    cast_combiner(schema, data, opts, path)
   end
 
-  @spec get_items(Schema.t()) :: list
-  defp get_items(schema) do
+  defp cast_combiner(schema, data, opts, path) do
     schema
     |> get_combiner()
-    |> Enum.reduce([], fn schema, acc ->
-      case schema.items do
-        nil -> acc
-        items -> [items | acc]
+    |> Enum.reverse()
+    |> Enum.reduce(data, fn schema, acc ->
+      try do
+        do_cast!(schema, acc, opts, path)
+      catch
+        _ -> acc
       end
     end)
-    |> Enum.reverse()
   end
 
   @spec get_combiner(Schema.t()) :: [Schema.t()]
   defp get_combiner(%Schema{} = schema) do
-    [[schema], schema.any_of || [], schema.all_of || [], schema.one_of || []]
+    [schema.any_of || [], schema.all_of || [], schema.one_of || []]
     |> Enum.concat()
   end
 

@@ -7,7 +7,7 @@ defmodule Xema.Cast.AnyTest do
     setup do
       %{
         schema: Xema.new(:any),
-        set: [:atom, "str", 1.1, 1, [], %{}, {:a, "a"}, {:tuple}, ~r/.*/]
+        set: [:atom, "str", 1.1, 1, [], %{}, {:a, "a"}, {:tuple}]
       }
     end
 
@@ -21,6 +21,10 @@ defmodule Xema.Cast.AnyTest do
       Enum.each(set, fn data ->
         assert cast!(schema, data) == data
       end)
+    end
+
+    test "from a type without protocol implementation", %{schema: schema} do
+      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
     end
   end
 end

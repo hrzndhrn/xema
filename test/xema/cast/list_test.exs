@@ -25,7 +25,6 @@ defmodule Xema.Cast.ListTest do
       assert cast(schema, data) == {:ok, data}
     end
 
-    @tag :only
     test "from a list", %{schema: schema} do
       data = [:foo, 42, "bar", 1.1, [1, 2], {:a, "a"}]
       assert validate(schema, data) == :ok
@@ -91,6 +90,23 @@ defmodule Xema.Cast.ListTest do
       expected = {:error, CastError.exception(path: [2], to: :integer, value: "foo")}
 
       assert cast(schema, data) == expected
+    end
+  end
+
+  describe "cast/2 with tuple schema and additional items schema" do
+    setup do
+      %{
+        schema: Xema.new({:list, items: [:string], additional_items: :integer})
+      }
+    end
+
+    test "from a list with a valid addition item", %{schema: schema} do
+      assert cast(schema, [5, "6"]) == {:ok, ["5", 6]}
+    end
+
+    test "from a list with an invalid addition item", %{schema: schema} do
+      assert cast(schema, [5, "six"]) ==
+               {:error, %CastError{key: nil, message: nil, path: [1], to: :integer, value: "six"}}
     end
   end
 

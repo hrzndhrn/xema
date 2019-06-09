@@ -33,7 +33,6 @@ defmodule Xema.Cast.CustomTest do
       }
     end
 
-    @tag :only
     test "from an URI", %{schema: schema} do
       data = URI.parse("https://elixir-lang.org/docs.html")
 
