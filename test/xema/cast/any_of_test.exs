@@ -57,9 +57,7 @@ defmodule Xema.Cast.AnyOfTest do
     end
 
     test "from a map with an invalid value", %{schema: schema} do
-      assert {:error, error} = cast(schema, %{a: 1, b: 1.5})
-      assert error == %Xema.CastError{path: [:b], to: :integer, value: 1.5}
-      assert Exception.message(error) == "cannot cast 1.5 to :integer at [:b]"
+      assert cast(schema, %{a: 1, b: 1.5}) == {:ok, %{a: "1", b: 1.5}}
     end
 
     test "from a keyword list", %{schema: schema} do
@@ -99,10 +97,27 @@ defmodule Xema.Cast.AnyOfTest do
 
     test "from a map with an empty list", %{schema: schema} do
       assert {:error, error} = cast(schema, %{a: []})
-      assert error == %CastError{path: [:a], to: [:integer, :string, nil], value: []}
 
-      assert Exception.message(error) ==
-               "cannot cast [] to any of [:integer, :string, nil] at [:a]"
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{
+                 any_of: [
+                   %{properties: %{a: %{type: :integer, value: []}}},
+                   %{properties: %{a: %{type: :string, value: []}}},
+                   %{properties: %{a: %{type: nil, value: []}}}
+                 ],
+                 value: %{a: []}
+               }
+             }
+
+      message = """
+      No match of any schema.
+        Expected :integer, got [], at [:a].
+        Expected :string, got [], at [:a].
+        Expected nil, got [], at [:a].\
+      """
+
+      assert Exception.message(error) == message
     end
   end
 end

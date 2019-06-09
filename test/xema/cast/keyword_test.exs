@@ -149,7 +149,6 @@ defmodule Xema.Cast.KeywordTest do
                {:ok, [foo: [str: "6", num: 8]]}
     end
 
-    @tag :only
     test "from a map with string keys and an invalid value", %{schema: schema} do
       data = %{"foo" => %{"str" => 6, "num" => "z"}}
       expected = {:error, CastError.exception(path: ["foo", "num"], to: :integer, value: "z")}

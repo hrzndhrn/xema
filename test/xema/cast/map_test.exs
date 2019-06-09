@@ -80,7 +80,6 @@ defmodule Xema.Cast.MapTest do
       }
     end
 
-    @tag :only
     test "from a map with atom keys", %{schema: schema} do
       assert cast(schema, %{abc: 55, zzz: "z"}) ==
                {:ok, %{"abc" => 55, "zzz" => "z"}}
@@ -160,6 +159,39 @@ defmodule Xema.Cast.MapTest do
     end
   end
 
+  describe "cast/2 with a map schema and additional properties" do
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :map,
+            keys: :atoms,
+            properties: %{
+              str: :string
+            },
+            additional_properties: :integer
+          })
+      }
+    end
+
+    test "from a map without an additional property", %{schema: schema} do
+      assert cast(schema, %{str: 5}) == {:ok, %{str: "5"}}
+    end
+
+    test "from a map with an additional property", %{schema: schema} do
+      assert cast(schema, %{str: "foo", a: "5"}) == {:ok, %{str: "foo", a: 5}}
+    end
+
+    test "from a keyword list with an additional property", %{schema: schema} do
+      assert cast(schema, str: "foo", a: "5") == {:ok, %{str: "foo", a: 5}}
+    end
+
+    test "from a map with an invalid additional property", %{schema: schema} do
+      assert cast(schema, %{str: "foo", a: "x"}) ==
+               {:error, %CastError{key: nil, message: nil, path: [:a], to: :integer, value: "x"}}
+    end
+  end
+
   describe "cast/2 with a map schema, [keys: :strings] and properties" do
     setup do
       %{
@@ -210,7 +242,6 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, %{bla: 42, foo: 11}) == {:ok, %{"bla" => "42", "foo" => 11}}
     end
 
-    @tag :only
     test "from a keyword list", %{schema: schema} do
       assert cast(schema, bla: 6, foo: 11) == {:ok, %{"bla" => "6", "foo" => 11}}
     end
