@@ -12,7 +12,7 @@ defmodule Xema.Validator do
 
   @compile {
     :inline,
-    get_type: 1, struct?: 1, struct?: 2, type?: 2, types: 2, validate_by: 4
+    do_validate: 3, get_type: 1, struct?: 1, struct?: 2, type?: 2, types: 2, validate_by: 4
   }
 
   @type result :: :ok | {:error, map}
@@ -64,70 +64,30 @@ defmodule Xema.Validator do
 
   defp do_validate(%Schema{type: false}, _, _), do: {:error, %{type: false}}
 
-  defp do_validate(%Schema{} = schema, value, opts) do
-    case schema do
-      %{type: list} when is_list(list) ->
-        with {:ok, type} <- types(schema, value),
-             :ok <- do_validate(%{schema | type: type}, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
+  defp do_validate(%Schema{type: types} = schema, value, opts) when is_list(types) do
+    with {:ok, type} <- types(schema, value),
+         :ok <- validate_by(:default, schema, value, opts),
+         :ok <- validate_by(type, schema, value, opts),
+         :ok <- custom_validator(schema, value),
+         do: :ok
+  end
 
-      %{type: :any, ref: nil} ->
-        with type <- get_type(value),
-             :ok <- validate_by(:default, schema, value, opts),
-             :ok <- validate_by(type, schema, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
+  defp do_validate(%Schema{type: :any, ref: nil} = schema, value, opts) do
+    with type <- get_type(value),
+         :ok <- validate_by(:default, schema, value, opts),
+         :ok <- validate_by(type, schema, value, opts),
+         :ok <- custom_validator(schema, value),
+         do: :ok
+  end
 
-      %{type: :any, ref: ref} ->
-        Ref.validate(ref, value, opts)
+  defp do_validate(%Schema{type: :any, ref: ref}, value, opts), do: Ref.validate(ref, value, opts)
 
-      %{type: :string} ->
-        with :ok <- type(schema, value),
-             :ok <- validate_by(:default, schema, value, opts),
-             :ok <- validate_by(:string, schema, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
-
-      %{type: :list} ->
-        with :ok <- type(schema, value),
-             :ok <- validate_by(:list, schema, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
-
-      %{type: :tuple} ->
-        with :ok <- type(schema, value),
-             :ok <- validate_by(:list, schema, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
-
-      %{type: :struct} ->
-        with :ok <- type(schema, value),
-             :ok <- validate_by(:struct, schema, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
-
-      %{type: :map} ->
-        with :ok <- type(schema, value),
-             :ok <- validate_by(:map, schema, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
-
-      %{type: :keyword} ->
-        with :ok <- type(schema, value),
-             :ok <- validate_by(:keyword, schema, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
-
-      %{type: :atom} ->
-        with :ok <- type(schema, value),
-             :ok <- validate_by(:default, schema, value, opts),
-             :ok <- custom_validator(schema, value),
-             do: :ok
-
-      %{type: type} when is_atom(type) ->
-        validate_by(type, schema, value, opts)
-    end
+  defp do_validate(%Schema{type: type} = schema, value, opts) do
+    with :ok <- type(schema, value),
+         :ok <- validate_by(:default, schema, value, opts),
+         :ok <- validate_by(type, schema, value, opts),
+         :ok <- custom_validator(schema, value),
+         do: :ok
   end
 
   defp do_validate(%{schema: schema}, value, opts),
@@ -216,8 +176,7 @@ defmodule Xema.Validator do
     do: validate_by(:number, schema, value, opts)
 
   defp validate_by(:number, schema, value, opts) do
-    with :ok <- type(schema, value),
-         :ok <- minimum(schema, value),
+    with :ok <- minimum(schema, value),
          :ok <- maximum(schema, value),
          :ok <- exclusive_maximum(schema, value),
          :ok <- exclusive_minimum(schema, value),

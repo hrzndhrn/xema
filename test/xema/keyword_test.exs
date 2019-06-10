@@ -563,6 +563,46 @@ defmodule Xema.KeywordTest do
     end
   end
 
+  describe "keyword schema with if then else" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:keyword,
+             if: [properties: %{a: :integer}],
+             then: [properties: %{b: :string}],
+             else: [properties: %{b: :integer}]}
+          )
+      }
+    end
+
+    test "validate/2 with a valid keyword list and then branch", %{schema: schema} do
+      assert validate(schema, a: 1, b: "2") == :ok
+    end
+
+    test "validate/2 with a valid keyword list and else branch", %{schema: schema} do
+      assert validate(schema, a: "1", b: 2) == :ok
+    end
+
+    test "validate/2 with an invalid keyword list", %{schema: schema} do
+      assert {:error, error} = validate(schema, a: "1", b: "2")
+
+      assert error == %ValidationError{
+               message: nil,
+               reason: %{
+                 else: %{properties: %{b: %{type: :integer, value: "2"}}}
+               }
+             }
+
+      message = """
+      Schema for else does not match.
+        Expected :integer, got "2", at [:b].\
+      """
+
+      assert Exception.message(error) == message
+    end
+  end
+
   describe "validate/2 property names" do
     setup do
       %{

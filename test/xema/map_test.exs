@@ -884,4 +884,40 @@ defmodule Xema.MapTest do
       assert Exception.message(error) == message
     end
   end
+
+  describe "map schema with one_of" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:map,
+             properties: %{
+               a: :integer,
+               b: :string
+             },
+             additional_properties: false,
+             one_of: [
+               [required: [:a]],
+               [required: [:b]]
+             ]}
+          )
+      }
+    end
+
+    test "validate with valid data", %{schema: schema} do
+      assert validate(schema, %{a: 5}) == :ok
+      assert validate(schema, %{b: "b"}) == :ok
+    end
+
+    test "validate with an invalid map", %{schema: schema} do
+      assert {:error, error} = validate(schema, %{a: 5, b: "b"})
+
+      assert error == %ValidationError{
+               message: nil,
+               reason: %{one_of: {:ok, [0, 1]}, value: %{a: 5, b: "b"}}
+             }
+
+      assert Exception.message(error) == "More as one schema matches (indexes: [0, 1])."
+    end
+  end
 end
