@@ -168,10 +168,7 @@ defmodule Xema.OneOfTest do
       }
     end
 
-    @tag :only
     test "validate/2 with an invalid map", %{schema: schema} do
-      IO.inspect(schema)
-
       assert validate(schema, %{a: 5, b: 6}) ==
                {:error,
                 %ValidationError{

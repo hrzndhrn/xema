@@ -1,9 +1,9 @@
 defmodule Xema.Cast.DeleteTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [cast: 2, cast: 3, validate: 2]
+  import Xema, only: [cast: 3]
 
-  alias Xema.{CastError, ValidationError}
+  alias Xema.ValidationError
 
   @opts [additional_properties: :delete]
 
@@ -151,12 +151,13 @@ defmodule Xema.Cast.DeleteTest do
       }
     end
 
-    test "validate", %{schema: schema} do
-      assert validate(schema, %{a: 5, b: 7}) == :error
-    end
-
     test "converts the given properties", %{schema: schema} do
-      assert cast(schema, %{a: "1", b: "2"}, @opts) == {:ok, []}
+      assert {:error, error} = cast(schema, %{a: "1", b: "2"}, @opts)
+
+      assert error == %ValidationError{
+               message: nil,
+               reason: %{one_of: {:ok, [0, 1]}, value: %{a: 1, b: 2}}
+             }
     end
 
     test "deletes additional properties", %{schema: schema} do
@@ -165,6 +166,48 @@ defmodule Xema.Cast.DeleteTest do
 
     test "deletes additional properties from a keyword list", %{schema: schema} do
       assert cast(schema, [a: "1", x: "2"], @opts) == {:ok, %{a: 1}}
+    end
+  end
+
+  describe "cast/3 with pattern properties" do
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :map,
+            pattern_properties: %{
+              ~r/^s_/ => :string,
+              ~r/^i_/ => :number
+            },
+            additional_properties: false
+          })
+      }
+    end
+
+    test "deletes additional properties", %{schema: schema} do
+      assert cast(schema, %{s_1: "str", i_1: 5, f_1: 5.5}, @opts) == {:ok, %{s_1: "str", i_1: 5}}
+    end
+  end
+
+  describe "cast/3 with pattern properties and properties" do
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :map,
+            properties: %{
+              s_1: :string
+            },
+            pattern_properties: %{
+              ~r/^i_/ => :number
+            },
+            additional_properties: false
+          })
+      }
+    end
+
+    test "deletes additional properties", %{schema: schema} do
+      assert cast(schema, %{s_1: "str", i_1: 5, f_1: 5.5}, @opts) == {:ok, %{}}
     end
   end
 end

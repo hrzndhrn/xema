@@ -202,7 +202,7 @@ defmodule Xema do
   def init({:ref, pointer}), do: init({:any, ref: pointer})
 
   def init(data) do
-    # SchemaValidator.validate!(data)
+    SchemaValidator.validate!(data)
     schema(data)
   end
 
@@ -648,15 +648,18 @@ defmodule Xema do
   defp cast_values!(%Schema{keys: keys} = schema, data, opts, path) when is_list(data) do
     case Keyword.keyword?(data) do
       true ->
-        properties = Map.get(schema, :properties) || %{}
+        properties = Map.get(schema, :properties)
+        pattern_properties = Map.get(schema, :pattern_properties)
 
         # additional_properties false will be ignored
         additional_properties = Map.get(schema, :additional_properties) || nil
 
         data =
           Enum.map(data, fn {key, value} ->
-            property = Map.get(properties, key_to(keys, key), additional_properties)
-            {key, do_cast!(property, value, opts, [key | path])}
+            schema =
+              get_schema(properties, pattern_properties, additional_properties, key_to(keys, key))
+
+            {key, do_cast!(schema, value, opts, [key | path])}
           end)
 
         data = delete_additional_properties(schema, data, opts)
@@ -687,7 +690,8 @@ defmodule Xema do
 
   defp cast_values!(%Schema{keys: keys, type: type} = schema, data, opts, path)
        when is_map(data) do
-    properties = Map.get(schema, :properties) || %{}
+    properties = Map.get(schema, :properties)
+    pattern_properties = Map.get(schema, :pattern_properties)
     keys = if type == :keyword, do: :atoms, else: keys
 
     # additional_properties false will be ignored
@@ -695,7 +699,9 @@ defmodule Xema do
 
     data =
       Enum.into(data, %{}, fn {key, value} ->
-        schema = Map.get(properties, key_to(keys, key), additional_properties)
+        schema =
+          get_schema(properties, pattern_properties, additional_properties, key_to(keys, key))
+
         {key, do_cast!(schema, value, opts, [key | path])}
       end)
 
@@ -704,13 +710,30 @@ defmodule Xema do
     cast_combiner(schema, data, opts, path)
   end
 
+  defp get_schema(nil, nil, additional_properties, _key), do: additional_properties
+
+  defp get_schema(properties, nil, additional_properties, key),
+    do: Map.get(properties, key, additional_properties)
+
+  defp get_schema(nil, pattern_properties, additional_properties, key) do
+    Enum.find_value(pattern_properties, additional_properties, fn {regex, schema} ->
+      with true <- Regex.match?(regex, to_string(key)), do: schema
+    end)
+  end
+
+  defp get_schema(properties, pattern_properties, additional_properties, key) do
+    get_schema(properties, nil, additional_properties, key) ||
+      get_schema(nil, pattern_properties, additional_properties, key)
+  end
+
   defp delete_additional_properties(schema, data, opts) do
     case {Keyword.get(opts, :additional_properties), Map.get(schema, :additional_properties)} do
       {:delete, false} ->
-        keys = schema |> Map.get(:properties, %{}) |> Map.keys()
+        keys = Map.keys(Map.get(schema, :properties) || %{})
+        patterns = Map.keys(Map.get(schema, :pattern_properties) || %{})
 
         Enum.reduce(data, data, fn {key, _}, acc ->
-          case key in keys do
+          case key?(key, keys, patterns) do
             true ->
               acc
 
@@ -727,6 +750,13 @@ defmodule Xema do
   defp delete(data, key) when is_list(data), do: Keyword.delete(data, key)
 
   defp delete(data, key) when is_map(data), do: Map.delete(data, key)
+
+  defp key?(key, keys, []), do: key in keys
+
+  defp key?(key, [], patterns),
+    do: Enum.find_value(patterns, false, fn regex -> Regex.match?(regex, to_string(key)) end)
+
+  defp key?(key, keys, patterns), do: key?(key, keys, []) && key?(key, [], patterns)
 
   defp cast_combiner(schema, data, opts, path) do
     schema
