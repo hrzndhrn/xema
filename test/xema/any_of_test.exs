@@ -257,4 +257,46 @@ defmodule Xema.AnyOfTest do
       refute valid?(schema, [6])
     end
   end
+
+  describe "keyword any_of for a list schema" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:list,
+             any_of: [
+               [items: :integer],
+               [items: :string]
+             ]}
+          )
+      }
+    end
+
+    test "validate with valid list", %{schema: schema} do
+      assert validate(schema, [1, 2]) == :ok
+    end
+
+    test "validate with an invalid value", %{schema: schema} do
+      assert {:error, error} = validate(schema, [1, "2"])
+
+      assert error == %ValidationError{
+               message: nil,
+               reason: %{
+                 any_of: [
+                   %{items: [{1, %{type: :integer, value: "2"}}]},
+                   %{items: [{0, %{type: :string, value: 1}}]}
+                 ],
+                 value: [1, "2"]
+               }
+             }
+
+      message = """
+      No match of any schema.
+        Expected :integer, got "2", at [1].
+        Expected :string, got 1, at [0].\
+      """
+
+      assert Exception.message(error) == message
+    end
+  end
 end

@@ -165,6 +165,36 @@ defmodule Xema.AnyTest do
     end
   end
 
+  describe "any schema with keyword items" do
+    setup do
+      %{
+        schema: Xema.new(items: :string)
+      }
+    end
+
+    test "ignores items keyword for non list values", %{schema: schema} do
+      assert validate(schema, 55) == :ok
+    end
+
+    test "validate with valid list", %{schema: schema} do
+      assert validate(schema, ["foo", "bar"]) == :ok
+    end
+
+    test "validate with invalid list", %{schema: schema} do
+      assert validate(schema, [5, 6]) ==
+               {:error,
+                %ValidationError{
+                  message: nil,
+                  reason: %{
+                    items: [
+                      {0, %{type: :string, value: 5}},
+                      {1, %{type: :string, value: 6}}
+                    ]
+                  }
+                }}
+    end
+  end
+
   describe "dependencies with boolean subschemas:" do
     setup do
       %{
