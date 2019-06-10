@@ -18,6 +18,11 @@
     with some changes.
   + `ValidationError.message` contains an error message.
 
+### Bugfixes
+
++ Fixes in `Xema.Validator`. In some cases the validators `any_of`, `one_of`,
+`all_of`, `enum`, `not`, `const`, and `if-then-else` was be ignored.
+
 ## O.8.1 2019/06/02
 
 + Fix email format checker.
