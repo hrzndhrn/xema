@@ -46,6 +46,7 @@ defmodule Xema.MultiTypeTest do
       %{schema: Xema.new(properties: %{foo: [:number, nil]})}
     end
 
+    @tag :only
     test "with a number", %{schema: schema} do
       assert validate(schema, %{foo: 42}) == :ok
     end
