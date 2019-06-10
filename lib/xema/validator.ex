@@ -112,10 +112,6 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp validate_by(nil, _schema, nil, _opts), do: :ok
-
-  defp validate_by(nil, schema, value, _opts),
-    do: {:error, %{value: value, type: schema.type}}
 
   defp validate_by(:tuple, schema, value, opts),
     do: validate_by(:list, schema, value, opts)
@@ -162,13 +158,6 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp validate_by(:boolean, schema, value, _opts) do
-    case is_boolean(value) do
-      true -> :ok
-      false -> {:error, %{value: value, type: schema.type}}
-    end
-  end
-
   defp validate_by(:integer, schema, value, opts),
     do: validate_by(:number, schema, value, opts)
 
@@ -185,7 +174,11 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp validate_by(:atom, _, _, _), do: :ok
+  defp validate_by(:boolean, _schema, _value, _opts), do: :ok
+
+  defp validate_by(nil, _schema, _value, _opts), do: :ok
+
+  defp validate_by(:atom, _schema, _value, _opts), do: :ok
 
   #
   # Schema type handling
