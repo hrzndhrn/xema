@@ -611,4 +611,69 @@ defmodule Xema.Cast.MapTest do
       assert cast!(schema, %{num: "77"}) == %{num: 77}
     end
   end
+
+  describe "cast/3 with pattern properties" do
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :map,
+            pattern_properties: %{
+              ~r/^s_/ => :string,
+              ~r/^i_/ => :number
+            }
+          })
+      }
+    end
+
+    test "from a map", %{schema: schema} do
+      assert cast(schema, %{s_1: 5, i_1: "5"}) == {:ok, %{s_1: "5", i_1: 5}}
+    end
+
+    test "from an invalid map", %{schema: schema} do
+      assert {:error, error} = cast(schema, %{s_1: 5, i_1: []})
+
+      assert error == %CastError{
+               key: nil,
+               message: nil,
+               path: [:i_1],
+               to: :number,
+               value: []
+             }
+    end
+  end
+
+  describe "cast/3 with pattern properties and properties" do
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :map,
+            properties: %{
+              s_1: :string
+            },
+            pattern_properties: %{
+              ~r/^s_/ => :string,
+              ~r/^i_/ => :number
+            }
+          })
+      }
+    end
+
+    test "from a map", %{schema: schema} do
+      assert cast(schema, %{s_1: 5, i_1: "5"}) == {:ok, %{s_1: "5", i_1: 5}}
+    end
+
+    test "from an invalid map", %{schema: schema} do
+      assert {:error, error} = cast(schema, %{s_1: 5, i_1: []})
+
+      assert error == %CastError{
+               key: nil,
+               message: nil,
+               path: [:i_1],
+               to: :number,
+               value: []
+             }
+    end
+  end
 end

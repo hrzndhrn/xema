@@ -148,4 +148,33 @@ defmodule Xema.OneOfTest do
                })
     end
   end
+
+  describe "one_of required" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:map,
+             properties: %{
+               a: :integer,
+               b: :integer
+             },
+             additional_properties: false,
+             one_of: [
+               [required: [:a]],
+               [required: [:b]]
+             ]}
+          )
+      }
+    end
+
+    test "validate/2 with an invalid map", %{schema: schema} do
+      assert validate(schema, %{a: 5, b: 6}) ==
+               {:error,
+                %ValidationError{
+                  message: nil,
+                  reason: %{one_of: {:ok, [0, 1]}, value: %{a: 5, b: 6}}
+                }}
+    end
+  end
 end
