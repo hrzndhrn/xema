@@ -112,7 +112,6 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-
   defp validate_by(:tuple, schema, value, opts),
     do: validate_by(:list, schema, value, opts)
 
