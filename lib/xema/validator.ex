@@ -64,10 +64,11 @@ defmodule Xema.Validator do
 
   defp do_validate(%Schema{type: false}, _, _), do: {:error, %{type: false}}
 
-  defp do_validate(%Schema{} = schema, value, opts) do
+  defp do_validate(%Schema{type: type} = schema, value, opts) do
     case schema do
       %{type: list} when is_list(list) ->
         with {:ok, type} <- types(schema, value),
+             :ok <- validate_by(:default, schema, value, opts),
              :ok <- do_validate(%{schema | type: type}, value, opts),
              :ok <- custom_validator(schema, value),
              do: :ok
@@ -91,30 +92,35 @@ defmodule Xema.Validator do
 
       %{type: :list} ->
         with :ok <- type(schema, value),
+             :ok <- validate_by(:default, schema, value, opts),
              :ok <- validate_by(:list, schema, value, opts),
              :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :tuple} ->
         with :ok <- type(schema, value),
+             :ok <- validate_by(:default, schema, value, opts),
              :ok <- validate_by(:list, schema, value, opts),
              :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :struct} ->
         with :ok <- type(schema, value),
+             :ok <- validate_by(:default, schema, value, opts),
              :ok <- validate_by(:struct, schema, value, opts),
              :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :map} ->
         with :ok <- type(schema, value),
+             :ok <- validate_by(:default, schema, value, opts),
              :ok <- validate_by(:map, schema, value, opts),
              :ok <- custom_validator(schema, value),
              do: :ok
 
       %{type: :keyword} ->
         with :ok <- type(schema, value),
+             :ok <- validate_by(:default, schema, value, opts),
              :ok <- validate_by(:keyword, schema, value, opts),
              :ok <- custom_validator(schema, value),
              do: :ok
@@ -126,7 +132,10 @@ defmodule Xema.Validator do
              do: :ok
 
       %{type: type} when is_atom(type) ->
-        validate_by(type, schema, value, opts)
+        with :ok <- validate_by(type, schema, value, opts),
+             :ok <- validate_by(:default, schema, value, opts),
+             :ok <- custom_validator(schema, value),
+             do: :ok
     end
   end
 

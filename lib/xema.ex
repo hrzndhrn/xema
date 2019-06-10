@@ -202,7 +202,7 @@ defmodule Xema do
   def init({:ref, pointer}), do: init({:any, ref: pointer})
 
   def init(data) do
-    SchemaValidator.validate!(data)
+    # SchemaValidator.validate!(data)
     schema(data)
   end
 
@@ -649,13 +649,17 @@ defmodule Xema do
     case Keyword.keyword?(data) do
       true ->
         properties = Map.get(schema, :properties) || %{}
-        additional_properties = Map.get(schema, :additional_properties)
+
+        # additional_properties false will be ignored
+        additional_properties = Map.get(schema, :additional_properties) || nil
 
         data =
           Enum.map(data, fn {key, value} ->
             property = Map.get(properties, key_to(keys, key), additional_properties)
             {key, do_cast!(property, value, opts, [key | path])}
           end)
+
+        data = delete_additional_properties(schema, data, opts)
 
         cast_combiner(schema, data, opts, path)
 
@@ -684,8 +688,10 @@ defmodule Xema do
   defp cast_values!(%Schema{keys: keys, type: type} = schema, data, opts, path)
        when is_map(data) do
     properties = Map.get(schema, :properties) || %{}
-    additional_properties = Map.get(schema, :additional_properties)
     keys = if type == :keyword, do: :atoms, else: keys
+
+    # additional_properties false will be ignored
+    additional_properties = Map.get(schema, :additional_properties) || nil
 
     data =
       Enum.into(data, %{}, fn {key, value} ->
@@ -693,8 +699,34 @@ defmodule Xema do
         {key, do_cast!(schema, value, opts, [key | path])}
       end)
 
+    data = delete_additional_properties(schema, data, opts)
+
     cast_combiner(schema, data, opts, path)
   end
+
+  defp delete_additional_properties(schema, data, opts) do
+    case {Keyword.get(opts, :additional_properties), Map.get(schema, :additional_properties)} do
+      {:delete, false} ->
+        keys = schema |> Map.get(:properties, %{}) |> Map.keys()
+
+        Enum.reduce(data, data, fn {key, _}, acc ->
+          case key in keys do
+            true ->
+              acc
+
+            false ->
+              delete(acc, key)
+          end
+        end)
+
+      _ ->
+        data
+    end
+  end
+
+  defp delete(data, key) when is_list(data), do: Keyword.delete(data, key)
+
+  defp delete(data, key) when is_map(data), do: Map.delete(data, key)
 
   defp cast_combiner(schema, data, opts, path) do
     schema
