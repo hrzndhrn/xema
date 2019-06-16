@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0 dev
+## 0.9.0 2019/06/16
 
 ### New features
 
