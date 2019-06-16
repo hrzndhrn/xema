@@ -52,7 +52,9 @@ defimpl Xema.Castable, for: BitString do
   end
 
   def cast(str, :struct, Decimal, _schema) do
-    {:ok, Decimal.new(str)}
+    # silence the xref warning
+    decimal = Decimal
+    {:ok, decimal.new(str)}
   rescue
     _ -> {:error, %{to: Decimal, value: str}}
   end
@@ -123,7 +125,11 @@ end
 defimpl Xema.Castable, for: Float do
   use Xema.Castable.Helper
 
-  def cast(float, :struct, Decimal, _schema), do: {:ok, Decimal.from_float(float)}
+  def cast(float, :struct, Decimal, _schema) do
+    # silence the xref warning
+    decimal = Decimal
+    {:ok, decimal.from_float(float)}
+  end
 
   def cast(float, type, module, _schema) do
     case type do
@@ -148,7 +154,11 @@ end
 defimpl Xema.Castable, for: Integer do
   use Xema.Castable.Helper
 
-  def cast(int, :struct, Decimal, _schema), do: {:ok, Decimal.new(int)}
+  def cast(int, :struct, Decimal, _schema) do
+    # silence the xref warning
+    decimal = Decimal
+    {:ok, decimal.new(int)}
+  end
 
   def cast(int, type, module, _schema) do
     case type do
