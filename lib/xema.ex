@@ -495,7 +495,8 @@ defmodule Xema do
   defp nested_source(val), do: val
 
   @doc """
-  Converts the given data using the specified schema. Returns the converted data or an exception.
+  Converts the given data using the specified schema. Returns the converted data
+  or an exception.
   """
   @spec cast!(Xema.t(), term) :: term
   def cast!(xema, value, opts \\ []) do
@@ -526,6 +527,94 @@ defmodule Xema do
       iex> Xema.cast(schema, "0")
       {:error, %Xema.ValidationError{
         reason: %{minimum: 1, value: 0}
+      }}
+
+  ## Multiple types
+
+  If for a value multiple types are defined the function used the result of the
+  first successful conversion.
+
+  ## Examples
+
+      iex> schema = Xema.new([:integer, :string, nil])
+      iex> Xema.cast(schema, 5)
+      {:ok, 5}
+      iex> Xema.cast(schema, 5.5)
+      {:ok, "5.5"}
+      iex> Xema.cast(schema, "5")
+      {:ok, 5}
+      iex> Xema.cast(schema, "five")
+      {:ok, "five"}
+      iex> Xema.cast(schema, nil)
+      {:ok, nil}
+      iex> Xema.cast(schema, [5])
+      {:error,
+        %Xema.CastError{path: [], to: [:integer, :string, nil], value: [5]}
+      }
+
+  ## Cast with `any_of`, `all_of`, and `one_of`
+
+  Schemas in a combiner will be cast independently one by one in reverse order.
+  No `CasteError`s will be raised for this schemata.
+
+  ## Examples
+
+      iex> schema = Xema.new(any_of: [
+      ...>   [properties: %{a: :integer}],
+      ...>   [properties: %{a: :string}]
+      ...> ])
+      iex> Xema.cast(schema, %{a: 5})
+      {:ok, %{a: 5}}
+      iex> Xema.cast(schema, %{a: 5.5})
+      {:ok, %{a: "5.5"}}
+      iex> Xema.cast(schema, %{a: "5"})
+      {:ok, %{a: 5}}
+      iex> Xema.cast(schema, %{a: "five"})
+      {:ok, %{a: "five"}}
+      iex> Xema.cast(schema, %{a: [5]})
+      {:error,
+        %Xema.ValidationError{
+          reason: %{
+            any_of: [
+              %{properties: %{a: %{type: :integer, value: [5]}}},
+              %{properties: %{a: %{type: :string, value: [5]}}}
+            ],
+            value: %{a: [5]}
+          }
+        }
+      }
+
+  ## Options
+
+  With the option `additional_properties: :delete` additional properties will be
+  deleted on cast. Additional properties will be deleted in schemas with
+  `additional_properties: false`.
+
+  ## Examples
+
+      iex> schema = Xema.new(
+      ...>   properties: %{
+      ...>     a: [
+      ...>       properties: %{
+      ...>         foo: :integer
+      ...>       },
+      ...>       additional_properties: false
+      ...>     ],
+      ...>     b: [
+      ...>       properties: %{
+      ...>         foo: :integer
+      ...>       }
+      ...>     ]
+      ...>   }
+      ...> )
+      iex>
+      iex> Xema.cast(schema, %{
+      ...>   a: %{foo: "6", bar: "7"},
+      ...>   b: %{foo: "6", bar: "7"},
+      ...> }, additional_properties: :delete)
+      {:ok, %{
+        a: %{foo: 6},
+        b: %{foo: 6, bar: "7"}
       }}
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}

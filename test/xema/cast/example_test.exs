@@ -35,69 +35,121 @@ defmodule Xema.Cast.ExampleTest do
     end
   end
 
-  test "cast/1" do
-    assert UserSchema.cast(%{
-             "name" => "Nick",
-             "birthday" => ~D|2000-04-17|,
-             "favorites" => %{
-               "fruits" => ~w(apple banana),
-               "uris" => ["https://elixir-lang.org/"]
-             }
-           }) ==
-             {:ok,
-              %{
-                birthday: ~D[2000-04-17],
-                favorites: %{
-                  fruits: [:apple, :banana],
-                  uris: [
-                    %URI{
-                      authority: "elixir-lang.org",
-                      fragment: nil,
-                      host: "elixir-lang.org",
-                      path: "/",
-                      port: 443,
-                      query: nil,
-                      scheme: "https",
-                      userinfo: nil
-                    }
-                  ]
-                },
-                name: "Nick"
-              }}
+  defmodule Person do
+    use Xema
+
+    xema do
+      map(
+        keys: :atoms,
+        properties: %{
+          name: string(),
+          age: integer(minimum: 0),
+          fav: atom(enum: [:erlan, :elixir, :js, :rust, :go])
+        }
+      )
+    end
+
+    def new(args), do: cast!(args)
   end
 
-  test "cast/1 from json" do
-    {:ok, json} =
-      %{
-        "name" => "Nick",
-        "birthday" => ~D|2000-04-17|,
-        "favorites" => %{
-          "fruits" => ~w(apple banana),
-          "uris" => ["https://elixir-lang.org/"]
-        }
-      }
-      |> UserSchema.cast!()
-      |> Jason.encode()
+  describe "user" do
+    test "cast/1" do
+      assert UserSchema.cast(%{
+               "name" => "Nick",
+               "birthday" => ~D|2000-04-17|,
+               "favorites" => %{
+                 "fruits" => ~w(apple banana),
+                 "uris" => ["https://elixir-lang.org/"]
+               }
+             }) ==
+               {:ok,
+                %{
+                  birthday: ~D[2000-04-17],
+                  favorites: %{
+                    fruits: [:apple, :banana],
+                    uris: [
+                      %URI{
+                        authority: "elixir-lang.org",
+                        fragment: nil,
+                        host: "elixir-lang.org",
+                        path: "/",
+                        port: 443,
+                        query: nil,
+                        scheme: "https",
+                        userinfo: nil
+                      }
+                    ]
+                  },
+                  name: "Nick"
+                }}
+    end
 
-    assert json |> Jason.decode!() |> UserSchema.cast!() ==
-             %{
-               birthday: ~D[2000-04-17],
-               favorites: %{
-                 fruits: [:apple, :banana],
-                 uris: [
-                   %URI{
-                     authority: "elixir-lang.org",
-                     fragment: nil,
-                     host: "elixir-lang.org",
-                     path: "/",
-                     port: 443,
-                     query: nil,
-                     scheme: "https",
-                     userinfo: nil
-                   }
-                 ]
-               },
-               name: "Nick"
+    test "cast/1 from json" do
+      {:ok, json} =
+        %{
+          "name" => "Nick",
+          "birthday" => ~D|2000-04-17|,
+          "favorites" => %{
+            "fruits" => ~w(apple banana),
+            "uris" => ["https://elixir-lang.org/"]
+          }
+        }
+        |> UserSchema.cast!()
+        |> Jason.encode()
+
+      assert json |> Jason.decode!() |> UserSchema.cast!() ==
+               %{
+                 birthday: ~D[2000-04-17],
+                 favorites: %{
+                   fruits: [:apple, :banana],
+                   uris: [
+                     %URI{
+                       authority: "elixir-lang.org",
+                       fragment: nil,
+                       host: "elixir-lang.org",
+                       path: "/",
+                       port: 443,
+                       query: nil,
+                       scheme: "https",
+                       userinfo: nil
+                     }
+                   ]
+                 },
+                 name: "Nick"
+               }
+    end
+  end
+
+  describe "person" do
+    test "new/1" do
+      assert Person.new(name: "Joe", age: 24, fav: :elixir) == %{
+               age: 24,
+               fav: :elixir,
+               name: "Joe"
              }
+    end
+
+    test "cast/1" do
+      assert person = Person.new(name: "Joe", age: 24, fav: :elixir)
+
+      assert json = person |> Jason.encode!() |> Jason.decode!()
+      assert json == %{
+               "age" => 24,
+               "fav" => "elixir",
+               "name" => "Joe"
+             }
+
+      assert Person.cast(json) == {:ok, %{age: 24, fav: :elixir, name: "Joe"}}
+    end
+
+    test "validate/1" do
+      assert {:error, error} = Person.validate(6)
+      assert {:error, error} = Person.validate(%{name: 42, age: -1, fav: :php})
+      assert Exception.message(error) == """
+      Value -1 is less than minimum value of 0, at [:age].
+      Value :php is not defined in enum, at [:fav].
+      Expected :string, got 42, at [:name].\
+      """
+    end
   end
 end
