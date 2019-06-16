@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.1 2019/06/16
+
++ Silence warnings for `Decimal`.
+
 ## 0.9.0 2019/06/16
 
 ### New features
