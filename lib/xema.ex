@@ -500,9 +500,10 @@ defmodule Xema do
   """
   @spec cast!(Xema.t(), term) :: term
   def cast!(xema, value, opts \\ []) do
-    with {:ok, cast} <- cast(xema, value, opts) do
-      cast
-    else
+    case cast(xema, value, opts) do
+      {:ok, cast} ->
+        cast
+
       {:error, exception} ->
         raise exception
     end
@@ -641,18 +642,20 @@ defmodule Xema do
        when is_list(value) or is_tuple(value) or is_map(value) do
     value = cast_values!(schema, value, opts, path)
 
-    with {:ok, cast} <- castable_cast(schema, value) do
-      cast
-    else
+    case castable_cast(schema, value) do
+      {:ok, cast} ->
+        cast
+
       {:error, reason} ->
         throw({:error, Map.put(reason, :path, path)})
     end
   end
 
   defp do_cast!(%Schema{} = schema, value, _opts, path) do
-    with {:ok, cast} <- castable_cast(schema, value) do
-      cast
-    else
+    case castable_cast(schema, value) do
+      {:ok, cast} ->
+        cast
+
       {:error, reason} ->
         throw({:error, Map.put(reason, :path, path)})
     end

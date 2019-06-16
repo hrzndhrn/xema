@@ -133,6 +133,7 @@ defmodule Xema.Cast.ExampleTest do
       assert person = Person.new(name: "Joe", age: 24, fav: :elixir)
 
       assert json = person |> Jason.encode!() |> Jason.decode!()
+
       assert json == %{
                "age" => 24,
                "fav" => "elixir",
@@ -145,11 +146,12 @@ defmodule Xema.Cast.ExampleTest do
     test "validate/1" do
       assert {:error, error} = Person.validate(6)
       assert {:error, error} = Person.validate(%{name: 42, age: -1, fav: :php})
+
       assert Exception.message(error) == """
-      Value -1 is less than minimum value of 0, at [:age].
-      Value :php is not defined in enum, at [:fav].
-      Expected :string, got 42, at [:name].\
-      """
+             Value -1 is less than minimum value of 0, at [:age].
+             Value :php is not defined in enum, at [:fav].
+             Expected :string, got 42, at [:name].\
+             """
     end
   end
 end
