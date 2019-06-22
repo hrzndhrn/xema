@@ -12,21 +12,11 @@ defmodule Xema.Builder do
       false
   """
 
-  @funs ~w(
-    any
-    atom
-    boolean
-    float
-    integer
-    keyword
-    list
-    map
-    number
-    string
-    tuple
-  )a
+  @types Xema.Schema.types()
 
-  Enum.each(@funs, fn fun ->
+  @types
+  |> Enum.filter(fn x -> x not in [nil, true, false, :struct] end)
+  |> Enum.each(fn fun ->
     @doc """
     Returns a tuple of `:#{fun}` and the given keyword list.
 
@@ -72,6 +62,23 @@ defmodule Xema.Builder do
   def strux(module, keywords) when is_atom(module),
     do: keywords |> Keyword.put(:module, module) |> strux()
 
+  defp xema_struct({:__block__, _context, fields}) do
+    properties =
+      Enum.into(fields, %{}, fn {:field, _, [name, type, keywords]} ->
+        {name, {type, keywords}}
+      end)
+
+    Macro.escape({:struct, [properties: properties, keys: :atoms]})
+  end
+
+  defp xema_struct(data), do: data
+
+  @doc false
+  def add_new_module({:struct, keywords}, module),
+    do: {:struct, Keyword.put_new(keywords, :module, module)}
+
+  def add_new_module(schema, _module), do: schema
+
   @doc """
   Creates a `schema`.
   """
@@ -87,6 +94,8 @@ defmodule Xema.Builder do
   Creates a `schema` with the given name.
   """
   defmacro xema(name, do: schema) do
+    schema = xema_struct(schema)
+
     quote do
       if Module.get_attribute(__MODULE__, :multi) == nil do
         raise "Use `use Xema` to to use the `xema/2` macro."
@@ -101,7 +110,7 @@ defmodule Xema.Builder do
       Module.put_attribute(
         __MODULE__,
         :xemas,
-        {unquote(name), Xema.new(unquote(schema))}
+        {unquote(name), Xema.new(add_new_module(unquote(schema), __MODULE__))}
       )
 
       def valid?(unquote(name), data),
@@ -118,6 +127,9 @@ defmodule Xema.Builder do
 
       def cast!(unquote(name), data),
         do: Xema.cast!(@xemas[unquote(name)], data)
+
+      def xema(unquote(name)),
+        do: @xemas[unquote(name)]
 
       if Module.get_attribute(__MODULE__, :default) || !@multi do
         Module.put_attribute(__MODULE__, :default, false)
@@ -136,6 +148,9 @@ defmodule Xema.Builder do
 
         def cast!(data),
           do: Xema.cast!(@xemas[unquote(name)], data)
+
+        def xema(),
+          do: @xemas[unquote(name)]
       end
     end
   end

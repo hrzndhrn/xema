@@ -1,7 +1,7 @@
 defmodule Xema.UseTest do
   use ExUnit.Case, async: true
 
-  alias Xema.ValidationError
+  alias Xema.{Schema, ValidationError}
 
   test "use Xema with multiple schema and option multi false raises error" do
     message = "Use `use Xema, multi: true` to setup multiple schema in a module."
@@ -235,6 +235,95 @@ defmodule Xema.UseTest do
     test "cast!/2 returns casted data" do
       assert Schema.cast!(:nums, %{pos: [1, "2"], neg: [-5, "-4"]}) ==
                %{neg: [-5, -4], pos: [1, 2]}
+    end
+  end
+
+  describe "struct schema with strux" do
+    defmodule UserStrux do
+      use Xema
+
+      defstruct [:name, :age]
+
+      xema do
+        strux(
+          module: UserStrux,
+          properties: %{
+            name: string(min_length: 1),
+            age: integer(minimum: 0)
+          }
+        )
+      end
+    end
+
+    test "cast!/1" do
+      assert UserStrux.cast!(name: "Nick", age: 21) == %UserStrux{name: "Nick", age: 21}
+    end
+
+    test "xema/0" do
+      assert UserStrux.xema() == %Xema{
+               refs: %{},
+               schema: %Schema{
+                 module: Xema.UseTest.UserStrux,
+                 properties: %{
+                   age: %Schema{minimum: 0, type: :integer},
+                   name: %Schema{min_length: 1, type: :string}
+                 },
+                 type: :struct
+               }
+             }
+    end
+  end
+
+  describe "struct schema with fields" do
+    defmodule UserStruct do
+      use Xema
+
+      defstruct [:name, :age]
+
+      xema do
+        field :name, :string, min_length: 1
+        field :age, [:integer, nil], minimum: 0
+      end
+    end
+
+    test "xema/0" do
+      assert UserStruct.xema() == %Xema{
+               refs: %{},
+               schema: %Schema{
+                 module: Xema.UseTest.UserStruct,
+                 properties: %{
+                   age: %Schema{minimum: 0, type: [:integer, nil]},
+                   name: %Schema{min_length: 1, type: :string}
+                 },
+                 type: :struct,
+                 keys: :atoms
+               }
+             }
+    end
+
+    test "cast!/1" do
+      assert UserStruct.cast!(name: "Nick", age: 21) == %UserStruct{name: "Nick", age: 21}
+
+      assert UserStruct.cast!(%{"name" => "Nick", "age" => "21"}) == %UserStruct{
+               name: "Nick",
+               age: 21
+             }
+
+      assert UserStruct.cast!(name: "Nick") == %UserStruct{age: nil, name: "Nick"}
+    end
+
+    test "cast/1 with invalid data" do
+      assert {:error, error} = UserStruct.cast(name: "", age: -1)
+
+      assert Exception.message(error) == """
+             Value -1 is less than minimum value of 0, at [:age].
+             Expected minimum length of 1, got "", at [:name].\
+             """
+    end
+
+    test "validate/1" do
+      assert {:error, error} = UserStruct.validate(%UserStruct{name: "Nix", age: -1})
+      assert Exception.message(error) == "Value -1 is less than minimum value of 0, at [:age]."
     end
   end
 end

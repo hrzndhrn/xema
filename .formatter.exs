@@ -1,4 +1,4 @@
-locals_without_parens = [xema: 2]
+locals_without_parens = [xema: 2, field: 3]
 
 [
   inputs: ["mix.exs", ".dialyzer_ignore.exs", "{config,lib,test,bench}/**/*.{ex,exs}"],
