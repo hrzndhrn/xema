@@ -62,23 +62,6 @@ defmodule Xema.Builder do
   def strux(module, keywords) when is_atom(module),
     do: keywords |> Keyword.put(:module, module) |> strux()
 
-  defp xema_struct({:__block__, _context, fields}) do
-    properties =
-      Enum.into(fields, %{}, fn {:field, _, [name, type, keywords]} ->
-        {name, {type, keywords}}
-      end)
-
-    Macro.escape({:struct, [properties: properties, keys: :atoms]})
-  end
-
-  defp xema_struct(data), do: data
-
-  @doc false
-  def add_new_module({:struct, keywords}, module),
-    do: {:struct, Keyword.put_new(keywords, :module, module)}
-
-  def add_new_module(schema, _module), do: schema
-
   @doc """
   Creates a `schema`.
   """
@@ -154,4 +137,53 @@ defmodule Xema.Builder do
       end
     end
   end
+
+  defp xema_struct({:__block__, _context, data}) do
+    data =
+      Enum.group_by(data, fn
+        {name, _, _} when name == :field -> name
+        _ -> :rest
+      end)
+      |> Map.put_new(:fields, [])
+      |> Map.put_new(:rest, nil)
+
+    quote do
+      unquote(data.rest)
+
+      {:struct,
+       [
+         properties: Map.new(unquote(Enum.map(data.field, &xema_field/1))),
+         keys: :atoms
+       ]
+      }
+    end
+  end
+
+  defp xema_struct({:field, _context, _args} = data) do
+    quote do
+      {:struct,
+       [
+         properties: Map.new([unquote(xema_field(data))]),
+         keys: :atoms
+       ]}
+    end
+  end
+
+  defp xema_struct(data), do: data
+
+  defp xema_field({:field, _context, [name | _]} = field) do
+    quote do
+      {unquote(name), unquote(field)}
+    end
+  end
+
+  def field(_name, type, keywords), do: {type, keywords}
+
+  def field(_name, type), do: type
+
+  @doc false
+  def add_new_module({:struct, keywords}, module),
+    do: {:struct, Keyword.put_new(keywords, :module, module)}
+
+  def add_new_module(schema, _module), do: schema
 end

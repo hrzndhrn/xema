@@ -274,10 +274,43 @@ defmodule Xema.UseTest do
     end
   end
 
+  describe "struct schema with one field and without keywords" do
+    defmodule OneFieldWithoutKeywords do
+      use Xema
+
+      defstruct [:age]
+
+      xema do
+        field :age, :integer
+      end
+    end
+
+    test "cast!/1" do
+      assert OneFieldWithoutKeywords.cast!(%{"age" => "5"}) == %OneFieldWithoutKeywords{age: 5}
+    end
+  end
+
+  describe "struct schema with one field and with keywords" do
+    defmodule OneFieldWithKeywords do
+      use Xema
+
+      defstruct [:age]
+
+      xema do
+        field :age, :integer, minimum: 0
+      end
+    end
+
+    test "cast!/1" do
+      assert OneFieldWithKeywords.cast!(%{"age" => "5"}) == %OneFieldWithKeywords{age: 5}
+    end
+  end
+
   describe "struct schema with fields" do
     defmodule UserStruct do
       use Xema
 
+      @enforce_keys [:age]
       defstruct [:name, :age]
 
       xema do
@@ -301,6 +334,7 @@ defmodule Xema.UseTest do
              }
     end
 
+    @tag :only
     test "cast!/1" do
       assert UserStruct.cast!(name: "Nick", age: 21) == %UserStruct{name: "Nick", age: 21}
 
@@ -309,7 +343,6 @@ defmodule Xema.UseTest do
                age: 21
              }
 
-      assert UserStruct.cast!(name: "Nick") == %UserStruct{age: nil, name: "Nick"}
     end
 
     test "cast/1 with invalid data" do
@@ -319,6 +352,12 @@ defmodule Xema.UseTest do
              Value -1 is less than minimum value of 0, at [:age].
              Expected minimum length of 1, got "", at [:name].\
              """
+    end
+
+    test "cast/1 with missing age" do
+      assert {:error, %ArgumentError{} = error} = UserStruct.cast(name: "Nick")
+      assert Exception.message(error) =~
+        "ust also be given when building struct Xema.UseTest.UserStruct: [:age]"
     end
 
     test "validate/1" do
