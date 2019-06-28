@@ -335,7 +335,6 @@ defmodule Xema.UseTest do
                name: "Nick",
                age: 21
              }
-
     end
 
     test "cast/1 with invalid data" do
@@ -349,8 +348,9 @@ defmodule Xema.UseTest do
 
     test "cast/1 with missing age" do
       assert {:error, %ArgumentError{} = error} = UserStruct.cast(name: "Nick")
+
       assert Exception.message(error) =~
-        "ust also be given when building struct Xema.UseTest.UserStruct: [:age]"
+               "ust also be given when building struct Xema.UseTest.UserStruct: [:age]"
     end
 
     test "validate/1" do

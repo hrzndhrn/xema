@@ -96,6 +96,18 @@ defmodule Xema.Builder do
         {unquote(name), Xema.new(add_new_module(unquote(schema), __MODULE__))}
       )
 
+      unquote(xema_funs(:by_name, name))
+
+      if Module.get_attribute(__MODULE__, :default) || !@multi do
+        Module.put_attribute(__MODULE__, :default, false)
+
+        unquote(xema_funs(:default, name))
+      end
+    end
+  end
+
+  defp xema_funs(:by_name, name) do
+    quote do
       def valid?(unquote(name), data),
         do: Xema.valid?(@xemas[unquote(name)], data)
 
@@ -113,34 +125,35 @@ defmodule Xema.Builder do
 
       def xema(unquote(name)),
         do: @xemas[unquote(name)]
+    end
+  end
 
-      if Module.get_attribute(__MODULE__, :default) || !@multi do
-        Module.put_attribute(__MODULE__, :default, false)
+  defp xema_funs(:default, name) do
+    quote do
+      def valid?(data),
+        do: Xema.valid?(@xemas[unquote(name)], data)
 
-        def valid?(data),
-          do: Xema.valid?(@xemas[unquote(name)], data)
+      def validate(data),
+        do: Xema.validate(@xemas[unquote(name)], data)
 
-        def validate(data),
-          do: Xema.validate(@xemas[unquote(name)], data)
+      def validate!(data),
+        do: Xema.validate!(@xemas[unquote(name)], data)
 
-        def validate!(data),
-          do: Xema.validate!(@xemas[unquote(name)], data)
+      def cast(data),
+        do: Xema.cast(@xemas[unquote(name)], data)
 
-        def cast(data),
-          do: Xema.cast(@xemas[unquote(name)], data)
+      def cast!(data),
+        do: Xema.cast!(@xemas[unquote(name)], data)
 
-        def cast!(data),
-          do: Xema.cast!(@xemas[unquote(name)], data)
-
-        def xema(),
-          do: @xemas[unquote(name)]
-      end
+      def xema,
+        do: @xemas[unquote(name)]
     end
   end
 
   defp xema_struct({:__block__, _context, data}) do
     data =
-      Enum.group_by(data, fn
+      data
+      |> Enum.group_by(fn
         {name, _, _} when name == :field -> name
         _ -> :rest
       end)
@@ -156,8 +169,7 @@ defmodule Xema.Builder do
        [
          properties: Map.new(unquote(Enum.map(data.field, &xema_field/1))),
          keys: :atoms
-       ]
-      }
+       ]}
     end
   end
 
