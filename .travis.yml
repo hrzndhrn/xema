@@ -3,6 +3,7 @@ language: elixir
 elixir:
   - 1.7.4
   - 1.8.2
+  - 1.9.0
 
 otp_release:
   - 20.3
@@ -15,7 +16,7 @@ before_script:
   - travis_wait mix dialyzer --plt
 
 script:
-  - if [[ "$TRAVIS_ELIXIR_VERSION" == "1.8"* ]]; then mix format --check-formatted ;fi
+  - if [[ "$TRAVIS_ELIXIR_VERSION" != "1.7"* ]]; then mix format --check-formatted ;fi
   - mix credo --strict
   - mix coveralls.travis
   - mix dialyzer --halt-exit-status
