@@ -278,8 +278,6 @@ defmodule Xema.UseTest do
     defmodule OneFieldWithoutKeywords do
       use Xema
 
-      defstruct [:age]
-
       xema do
         field :age, :integer
       end
@@ -294,8 +292,6 @@ defmodule Xema.UseTest do
     defmodule OneFieldWithKeywords do
       use Xema
 
-      defstruct [:age]
-
       xema do
         field :age, :integer, minimum: 0
       end
@@ -309,9 +305,6 @@ defmodule Xema.UseTest do
   describe "struct schema with fields" do
     defmodule UserStruct do
       use Xema
-
-      @enforce_keys [:age]
-      defstruct [:name, :age]
 
       xema do
         field :name, :string, min_length: 1

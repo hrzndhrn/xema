@@ -144,11 +144,13 @@ defmodule Xema.Builder do
         {name, _, _} when name == :field -> name
         _ -> :rest
       end)
-      |> Map.put_new(:fields, [])
+      |> Map.put_new(:field, [])
       |> Map.put_new(:rest, nil)
 
     quote do
       unquote(data.rest)
+
+      defstruct unquote(Enum.map(data.field, &xema_field_name/1))
 
       {:struct,
        [
@@ -161,6 +163,8 @@ defmodule Xema.Builder do
 
   defp xema_struct({:field, _context, _args} = data) do
     quote do
+      defstruct [unquote(xema_field_name(data))]
+
       {:struct,
        [
          properties: Map.new([unquote(xema_field(data))]),
@@ -174,6 +178,12 @@ defmodule Xema.Builder do
   defp xema_field({:field, _context, [name | _]} = field) do
     quote do
       {unquote(name), unquote(field)}
+    end
+  end
+
+  defp xema_field_name({:field, _context, [name | _]}) do
+    quote do
+      unquote(name)
     end
   end
 
