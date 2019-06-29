@@ -309,6 +309,7 @@ defmodule Xema.UseTest do
       xema do
         field :name, :string, min_length: 1
         field :age, [:integer, nil], minimum: 0
+        required [:age]
       end
     end
 
@@ -321,13 +322,13 @@ defmodule Xema.UseTest do
                    age: %Schema{minimum: 0, type: [:integer, nil]},
                    name: %Schema{min_length: 1, type: :string}
                  },
+                 required: MapSet.new([:age]),
                  type: :struct,
                  keys: :atoms
                }
              }
     end
 
-    @tag :only
     test "cast!/1" do
       assert UserStruct.cast!(name: "Nick", age: 21) == %UserStruct{name: "Nick", age: 21}
 
@@ -346,6 +347,7 @@ defmodule Xema.UseTest do
              """
     end
 
+    @tag :only
     test "cast/1 with missing age" do
       assert {:error, %ArgumentError{} = error} = UserStruct.cast(name: "Nick")
 
@@ -356,6 +358,29 @@ defmodule Xema.UseTest do
     test "validate/1" do
       assert {:error, error} = UserStruct.validate(%UserStruct{name: "Nix", age: -1})
       assert Exception.message(error) == "Value -1 is less than minimum value of 0, at [:age]."
+    end
+  end
+
+  describe "xema/0" do
+    test "raise ArgumentError for multiple required functions" do
+      code =
+        quote do
+          defmodule MultiRequired do
+            use Xema
+
+            xema do
+              field :foo, :integer, minimum: 0
+              required [:foo]
+              required [:foo]
+            end
+          end
+        end
+
+      message = "the required function can only be called once per xema"
+
+      assert_raise ArgumentError, message, fn ->
+        Code.eval_quoted(code)
+      end
     end
   end
 end

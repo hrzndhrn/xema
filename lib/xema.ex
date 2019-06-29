@@ -700,6 +700,7 @@ defmodule Xema do
     with {:ok, value} <- Castable.cast(value, schema) do
       schema
       |> get_combiner()
+      |> IO.inspect(label: :do_castable_cast)
       |> case do
         [] ->
           {:ok, value}
@@ -737,49 +738,6 @@ defmodule Xema do
       |> cast_values!(Map.from_struct(struct), opts, path)
       |> to_struct(module)
 
-  defp cast_values!(%Schema{keys: keys} = schema, data, opts, path) when is_list(data) do
-    case Keyword.keyword?(data) do
-      true ->
-        properties = Map.get(schema, :properties)
-        pattern_properties = Map.get(schema, :pattern_properties)
-
-        # additional_properties false will be ignored
-        additional_properties = Map.get(schema, :additional_properties) || nil
-
-        data =
-          Enum.map(data, fn {key, value} ->
-            schema =
-              get_schema(properties, pattern_properties, additional_properties, key_to(keys, key))
-
-            {key, do_cast!(schema, value, opts, [key | path])}
-          end)
-
-        data = delete_additional_properties(schema, data, opts)
-
-        cast_combiner(schema, data, opts, path)
-
-      false ->
-        case Map.get(schema, :items) do
-          nil ->
-            data
-
-          %Schema{} = items ->
-            data
-            |> Enum.with_index()
-            |> Enum.map(fn {item, index} -> do_cast!(items, item, opts, [index | path]) end)
-
-          items ->
-            additional_items = Map.get(schema, :additional_items)
-
-            data
-            |> Enum.with_index()
-            |> Enum.map(fn {item, index} ->
-              do_cast!(Enum.at(items, index, additional_items), item, opts, [index | path])
-            end)
-        end
-    end
-  end
-
   defp cast_values!(%Schema{keys: keys, type: type} = schema, data, opts, path)
        when is_map(data) do
     properties = Map.get(schema, :properties)
@@ -787,7 +745,11 @@ defmodule Xema do
     keys = if type == :keyword, do: :atoms, else: keys
 
     # additional_properties false will be ignored
-    additional_properties = Map.get(schema, :additional_properties) || nil
+    additional_properties =
+      case Map.get(schema, :additional_properties) do
+        false -> nil
+        value -> value
+      end
 
     data =
       Enum.into(data, %{}, fn {key, value} ->
@@ -800,6 +762,71 @@ defmodule Xema do
     data = delete_additional_properties(schema, data, opts)
 
     cast_combiner(schema, data, opts, path)
+  end
+
+  defp cast_values!(%Schema{} = schema, data, opts, path) when is_list(data) do
+    case Keyword.keyword?(data) do
+      true -> cast_values_keyword!(schema, data, opts, path)
+      false -> cast_values_list!(schema, data, opts, path)
+    end
+  end
+
+  defp cast_values_keyword!(%Schema{keys: keys} = schema, data, opts, path) do
+    properties = Map.get(schema, :properties)
+    required = Map.get(schema, :required) || []
+    pattern_properties = Map.get(schema, :pattern_properties)
+
+    # additional_properties false will be ignored
+    additional_properties =
+      case Map.get(schema, :additional_properties) do
+        false -> nil
+        value -> value
+      end
+
+    data =
+      Enum.map(data, fn {key, value} ->
+        schema =
+          get_schema(properties, pattern_properties, additional_properties, key_to(keys, key))
+
+        {key, do_cast!(schema, value, opts, [key | path])}
+      end)
+
+    IO.inspect(data)
+
+    missing =
+      Enum.reduce(required, [], fn required_item, acc ->
+        case Keyword.has_key?(data, required_item) do
+          true -> acc
+          false -> [required_item | acc]
+        end
+      end)
+
+    IO.inspect(missing, label: :missing)
+
+    data = delete_additional_properties(schema, data, opts)
+
+    cast_combiner(schema, data, opts, path)
+  end
+
+  defp cast_values_list!(%Schema{} = schema, data, opts, path) do
+    case Map.get(schema, :items) do
+      nil ->
+        data
+
+      %Schema{} = items ->
+        data
+        |> Enum.with_index()
+        |> Enum.map(fn {item, index} -> do_cast!(items, item, opts, [index | path]) end)
+
+      items ->
+        additional_items = Map.get(schema, :additional_items)
+
+        data
+        |> Enum.with_index()
+        |> Enum.map(fn {item, index} ->
+          do_cast!(Enum.at(items, index, additional_items), item, opts, [index | path])
+        end)
+    end
   end
 
   defp get_schema(nil, nil, additional_properties, _key), do: additional_properties
@@ -851,13 +878,16 @@ defmodule Xema do
   defp key?(key, keys, patterns), do: key?(key, keys, []) && key?(key, [], patterns)
 
   defp cast_combiner(schema, data, opts, path) do
+    IO.inspect(data, label: :cast_combiner)
     schema
     |> get_combiner()
+    |> IO.inspect(label: :combiner)
     |> Enum.reverse()
     |> Enum.reduce(data, fn schema, acc ->
       try do
         do_cast!(schema, acc, opts, path)
       catch
+        # TODO: first cast wins. raise error if no cast is successful
         _ -> acc
       end
     end)

@@ -154,10 +154,11 @@ defmodule Xema.Builder do
     data =
       data
       |> Enum.group_by(fn
-        {name, _, _} when name == :field -> name
+        {name, _, _} when name in [:required, :field] -> name
         _ -> :rest
       end)
       |> Map.put_new(:field, [])
+      |> Map.put_new(:required, nil)
       |> Map.put_new(:rest, nil)
 
     quote do
@@ -169,7 +170,8 @@ defmodule Xema.Builder do
        [
          properties: Map.new(unquote(Enum.map(data.field, &xema_field/1))),
          keys: :atoms
-       ]}
+       ]
+       |> Keyword.merge(unquote(xema_required(data.required)))}
     end
   end
 
@@ -202,6 +204,22 @@ defmodule Xema.Builder do
   def field(_name, type, keywords), do: {type, keywords}
 
   def field(_name, type), do: type
+
+  defp xema_required([required]) do
+    quote do
+      unquote(required)
+    end
+  end
+
+  defp xema_required(nil) do
+    quote do: []
+  end
+
+  defp xema_required(_) do
+    raise ArgumentError, "the required function can only be called once per xema"
+  end
+
+  def required(fields), do: [required: fields]
 
   @doc false
   def add_new_module({:struct, keywords}, module),
