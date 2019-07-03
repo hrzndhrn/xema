@@ -634,7 +634,7 @@ defmodule Xema do
            to: Map.get(reason, :to),
            key: Map.get(reason, :key),
            value: Map.get(reason, :value),
-           path: Enum.reverse(reason.path),
+           path: Map.get(reason, :path),
            error: Map.get(reason, :error)
          )}
     end
@@ -661,14 +661,14 @@ defmodule Xema do
       cast_combiner(schema, cast, opts, path)
     else
       {:error, reason} ->
-        {:error, Map.put_new(reason, :path, path)}
+        {:error, Map.put_new(reason, :path, Enum.reverse(path))}
     end
   end
 
   defp do_cast(%Schema{} = schema, value, opts, path) do
     case castable_cast(schema, value) do
       {:ok, cast} -> cast_combiner(schema, cast, opts, path)
-      {:error, reason} -> {:error, Map.put(reason, :path, path)}
+      {:error, reason} -> {:error, Map.put(reason, :path, Enum.reverse(path))}
     end
   end
 
@@ -877,7 +877,7 @@ defmodule Xema do
     schemas
     |> Enum.reverse()
     |> Enum.reduce({data, []}, fn schema, {data, errors} ->
-      case do_cast(schema, data, opts, path) do
+      case do_cast(schema, data, opts, []) do
         {:ok, cast} -> {cast, errors}
         {:error, error} -> {data, [error | errors]}
       end
@@ -891,7 +891,7 @@ defmodule Xema do
          %{
            to: errors,
            value: data,
-           path: path
+           path: Enum.reverse(path)
          }}
     end
   end

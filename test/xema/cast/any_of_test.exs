@@ -178,19 +178,19 @@ defmodule Xema.Cast.AnyOfTest do
       assert error == %CastError{
                path: [:foo],
                to: [
-                 %{path: [:foo], to: :integer, value: []},
-                 %{path: [:foo], to: :string, value: []},
-                 %{path: [:foo], to: nil, value: []}
+                 %{path: [], to: :integer, value: []},
+                 %{path: [], to: :string, value: []},
+                 %{path: [], to: nil, value: []}
                ],
                value: []
              }
 
       assert Exception.message(error) ==
                """
-               cannot cast [] to any of at [:foo]:
-                 cannot cast [] to :integer at [:foo]
-                 cannot cast [] to :string at [:foo]
-                 cannot cast [] to nil at [:foo]\
+               cannot cast [] at [:foo] to any of:
+                 cannot cast [] to :integer
+                 cannot cast [] to :string
+                 cannot cast [] to nil\
                """
     end
   end
@@ -223,24 +223,74 @@ defmodule Xema.Cast.AnyOfTest do
       assert error == %CastError{
                path: [:foo],
                to: [
-                 %{path: [:a, :foo], to: :integer, value: []},
-                 %{path: [:a, :foo], to: :string, value: []},
-                 %{path: [:a, :foo], to: nil, value: []}
+                 %{path: [:a], to: :integer, value: []},
+                 %{path: [:a], to: :string, value: []},
+                 %{path: [:a], to: nil, value: []}
                ],
                value: %{a: []}
              }
 
       assert Exception.message(error) ==
                """
-               cannot cast %{a: []} to any of at [:foo]:
-                 cannot cast [] to :integer at [:a, :foo]
-                 cannot cast [] to :string at [:a, :foo]
-                 cannot cast [] to nil at [:a, :foo]\
+               cannot cast %{a: []} at [:foo] to any of:
+                 cannot cast [] to :integer at [:a]
+                 cannot cast [] to :string at [:a]
+                 cannot cast [] to nil at [:a]\
                """
     end
   end
 
   describe "cast/2 with a bigger schema" do
-    test "from data causing a deep nested cast error"
+    setup do
+      %{
+        schema:
+          Xema.new(
+            properties: %{
+              bar: [
+                properties: %{
+                  bas: [
+                    any_of: [
+                      [
+                        properties: %{baz: [any_of: [:integer, nil]]}
+                      ],
+                      [
+                        properties: %{bax: [any_of: [:integer, nil]]}
+                      ]
+                    ]
+                  ]
+                }
+              ],
+              foo: [
+                any_of: [
+                  [properties: %{faa: :integer}],
+                  [properties: %{faa: nil}]
+                ]
+              ]
+            }
+          )
+      }
+    end
+
+    test "from valid data", %{schema: schema} do
+      assert cast(schema, %{foo: %{faa: "1"}, bar: %{bas: %{baz: "2", bax: "3"}}}) ==
+               {:ok, %{foo: %{faa: 1}, bar: %{bas: %{bax: 3, baz: 2}}}}
+    end
+
+    @tag :only
+    test "from data causing a deep nested cast error", %{schema: schema} do
+      assert {:error, error} =
+               cast(schema, %{foo: %{faa: "one"}, bar: %{bas: %{baz: "two", bax: "three"}}})
+
+      assert Exception.message(error) ==
+               """
+               cannot cast %{bax: "three", baz: "two"} at [:bar, :bas] to any of:
+                 cannot cast "two" at [:baz] to any of:
+                   cannot cast "two" to :integer
+                   cannot cast "two" to nil
+                 cannot cast "three" at [:bax] to any of:
+                   cannot cast "three" to :integer
+                   cannot cast "three" to nil\
+               """
+    end
   end
 end

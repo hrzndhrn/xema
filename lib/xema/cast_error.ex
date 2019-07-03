@@ -38,6 +38,7 @@ defmodule Xema.CastError do
   def format_error(error) do
     error
     |> traverse_error()
+    |> List.flatten()
     |> Enum.join("\n")
   end
 
@@ -67,8 +68,8 @@ defmodule Xema.CastError do
     if Enum.all?(to, &is_atom/1) do
       ["cannot cast #{inspect(value)} to any of #{inspect(to)}" <> at_path(path)]
     else
-      errors = to |> Enum.map(fn error -> format_error(error) end) |> indent()
-      ["cannot cast #{inspect(value)} to any of" <> at_path(path) <> ":" | errors]
+      errors = to |> Enum.map(fn error -> traverse_error(error) end) |> indent()
+      ["cannot cast #{inspect(value)}" <> at_path(path) <> " to any of:" | errors]
     end
   end
 
@@ -80,5 +81,7 @@ defmodule Xema.CastError do
 
   defp at_path(path), do: " at #{inspect(path)}"
 
-  defp indent(list), do: Enum.map(list, fn str -> @indent <> str end)
+  defp indent(list) when is_list(list), do: Enum.map(list, &indent/1)
+
+  defp indent(str), do: @indent <> str
 end
