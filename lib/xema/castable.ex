@@ -232,7 +232,7 @@ defimpl Xema.Castable, for: List do
 
           module ->
             case Keyword.keyword?(list) do
-              true -> {:ok, struct!(module, list)}
+              true -> to_struct(module, list)
               false -> {:error, %{to: module, value: list}}
             end
         end
@@ -258,13 +258,12 @@ defimpl Xema.Castable, for: Map do
   def cast(map, :struct, nil, _schem), do: {:ok, map}
 
   def cast(map, :struct, module, _schema) do
-    with {:ok, fields} <- fields(map) do
-      {:ok, struct!(module, fields)}
-    end
+    with {:ok, fields} <- fields(map), do: to_struct(module, fields)
   end
 
   def cast(map, :keyword, _module, _schema) do
-    Enum.reduce_while(map, {:ok, []}, fn {key, value}, {:ok, acc} ->
+    map
+    |> Enum.reduce_while({:ok, []}, fn {key, value}, {:ok, acc} ->
       case cast_key(key, :atoms) do
         {:ok, key} ->
           {:cont, {:ok, [{key, value} | acc]}}
@@ -273,6 +272,10 @@ defimpl Xema.Castable, for: Map do
           {:halt, {:error, %{to: :keyword, key: key}}}
       end
     end)
+    |> case do
+      {:ok, list} -> {:ok, Enum.reverse(list)}
+      error -> error
+    end
   end
 
   def cast(map, :map, _module, %Schema{keys: keys}) do

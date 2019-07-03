@@ -38,22 +38,7 @@ defmodule Xema.Cast.CustomTest do
 
       assert validate(schema, data) == :ok
 
-      assert cast(schema, data) ==
-               {:error,
-                %Protocol.UndefinedError{
-                  description: "",
-                  protocol: Xema.Castable,
-                  value: %URI{
-                    authority: "elixir-lang.org",
-                    fragment: nil,
-                    host: "elixir-lang.org",
-                    path: "/docs.html",
-                    port: 443,
-                    query: nil,
-                    scheme: "https",
-                    userinfo: nil
-                  }
-                }}
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, data) end
     end
 
     test "from a string", %{schema: schema} do
@@ -126,7 +111,7 @@ defmodule Xema.Cast.CustomTest do
     end
 
     test "from an integer", %{schema: schema} do
-      assert {:error, %FunctionClauseError{}} = cast(schema, 5)
+      assert_raise FunctionClauseError, fn -> cast(schema, 5) end
     end
 
     test "from a float", %{schema: schema} do

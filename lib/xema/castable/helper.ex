@@ -68,6 +68,16 @@ defmodule Xema.Castable.Helper do
   def cast_key(value, _),
     do: {:ok, value}
 
+  def to_struct(module, values) do
+    {:ok, struct!(module, values)}
+  rescue
+    error in KeyError ->
+      {:error, %{to: module, key: error.key, value: values}}
+
+    error in ArgumentError ->
+      {:error, %{to: module, value: values, error: error}}
+  end
+
   def fields(map) do
     Enum.reduce_while(map, {:ok, %{}}, fn {key, value}, {:ok, acc} ->
       case cast_key(key, :atoms) do

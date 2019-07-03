@@ -40,6 +40,7 @@ defmodule Xema.Cast.IntegerTest do
       assert cast(schema, data) == expected
     end
 
+    @tag :only
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
         expected = {:error, CastError.exception(path: [], to: :integer, value: data)}
@@ -49,7 +50,7 @@ defmodule Xema.Cast.IntegerTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, ~r/.*/) end
     end
   end
 

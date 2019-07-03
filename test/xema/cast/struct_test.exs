@@ -61,7 +61,7 @@ defmodule Xema.Cast.StructTest do
     end
 
     test "from a struct without castable implementation", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, %Person{name: "Joe", age: 42})
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, %Person{name: "Joe", age: 42}) end
     end
 
     test "from a keyword list", %{schema: schema} do
@@ -97,7 +97,7 @@ defmodule Xema.Cast.StructTest do
     end
 
     test "from a struct without castable implementation", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, %Person{name: "Joe", age: 42})
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, %Person{name: "Joe", age: 42}) end
     end
 
     test "from a map with atom keys", %{schema: schema} do
@@ -153,7 +153,7 @@ defmodule Xema.Cast.StructTest do
     end
 
     test "from a struct without castable implementation", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, %Person{name: "Joe", age: 42})
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, %Person{name: "Joe", age: 42}) end
     end
 
     test "from a map with atom keys", %{schema: schema} do

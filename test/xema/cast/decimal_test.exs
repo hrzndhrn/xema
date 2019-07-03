@@ -36,11 +36,17 @@ defmodule Xema.Cast.DecimalTest do
     end
 
     test "raises an error for a map", %{schema: schema} do
-      assert {:error, %KeyError{}} = cast(schema, %{foo: 55})
+      assert {:error, error} = cast(schema, %{foo: 55})
+
+      assert Exception.message(error) ==
+               "cannot cast %{foo: 55} to Decimal, key :foo not found in Decimal"
     end
 
     test "raises an error for a keyword list", %{schema: schema} do
-      assert {:error, %KeyError{}} = cast(schema, foo: 55)
+      assert {:error, error} = cast(schema, foo: 55)
+
+      assert Exception.message(error) ==
+               "cannot cast [foo: 55] to Decimal, key :foo not found in Decimal"
     end
 
     test "return a Decimal<0> for an empty map", %{schema: schema} do
@@ -78,11 +84,11 @@ defmodule Xema.Cast.DecimalTest do
     end
 
     test "raises an error for a map", %{schema: schema} do
-      assert_raise KeyError, fn -> cast!(schema, %{foo: 55}) end
+      assert_raise CastError, fn -> cast!(schema, %{foo: 55}) end
     end
 
     test "raises an error for a keyword list", %{schema: schema} do
-      assert_raise KeyError, fn -> cast!(schema, foo: 55) end
+      assert_raise CastError, fn -> cast!(schema, foo: 55) end
     end
 
     test "return a Decimal<0> for an empty map", %{schema: schema} do

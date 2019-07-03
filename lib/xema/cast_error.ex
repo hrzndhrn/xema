@@ -3,18 +3,22 @@ defmodule Xema.CastError do
   Raised when a cast fails.
   """
 
-  defexception [:message, :path, :to, :value, :key]
+  defexception [:message, :path, :to, :value, :key, :error]
 
   alias Xema.CastError
 
   @type t :: %CastError{}
 
   @type error :: %{
-          to: atom,
-          value: term,
-          key: String.t(),
-          path: [atom | integer | String.t()]
+          message: String.t() | nil,
+          to: atom | nil,
+          value: term | nil,
+          key: String.t() | atom | nil,
+          path: [atom | integer | String.t()] | nil,
+          error: struct | nil
         }
+
+  @indent "  "
 
   @impl true
   def message(%{message: nil} = exception), do: format_error(exception)
@@ -31,31 +35,50 @@ defmodule Xema.CastError do
   Formats the error map to an error message.
   """
   @spec format_error(Exception.t() | error) :: String.t()
-  def format_error(%{path: [], to: :atom, value: value}) when is_binary(value) do
-    "cannot cast #{inspect(value)} to :atom, the atom is unknown"
+  def format_error(error) do
+    error
+    |> traverse_error()
+    |> Enum.join("\n")
   end
 
-  def format_error(%{path: [], to: to, key: key}) when is_binary(key) do
-    "cannot cast #{inspect(key)} to #{inspect(to)} key, the atom is unknown"
+  defp traverse_error(%{path: path, to: to, error: error, value: value}) when not is_nil(error) do
+    ["cannot cast #{inspect(value)} to #{inspect(to)}, " <> error.message <> at_path(path)]
   end
 
-  def format_error(%{path: path, to: to, key: key}) when is_binary(key) do
-    "cannot cast #{inspect(key)} to #{inspect(to)} key at #{inspect(path)}, the atom is unknown"
+  defp traverse_error(%{path: path, to: :atom, value: value}) when is_binary(value) do
+    ["cannot cast #{inspect(value)} to :atom, the atom is unknown" <> at_path(path)]
   end
 
-  def format_error(%{path: [], to: to, value: value}) when is_list(to) do
-    "cannot cast #{inspect(value)} to any of #{inspect(to)}"
+  defp traverse_error(%{path: path, to: to, key: key}) when is_binary(key) do
+    [
+      "cannot cast #{inspect(key)} to #{inspect(to)} key" <>
+        at_path(path) <> ", the atom is unknown"
+    ]
   end
 
-  def format_error(%{path: [], to: to, value: value}) do
-    "cannot cast #{inspect(value)} to #{inspect(to)}"
+  defp traverse_error(%{path: path, to: to, key: key, value: value}) when not is_nil(key) do
+    [
+      "cannot cast #{inspect(value)} to #{inspect(to)}, " <>
+        "key #{inspect(key)} not found in #{inspect(to)}" <> at_path(path)
+    ]
   end
 
-  def format_error(%{path: path, to: to, value: value}) when is_list(to) do
-    "cannot cast #{inspect(value)} to any of #{inspect(to)} at #{inspect(path)}"
+  defp traverse_error(%{path: path, to: to, value: value}) when is_list(to) do
+    if Enum.all?(to, &is_atom/1) do
+      ["cannot cast #{inspect(value)} to any of #{inspect(to)}" <> at_path(path)]
+    else
+      errors = to |> Enum.map(fn error -> format_error(error) end) |> indent()
+      ["cannot cast #{inspect(value)} to any of" <> at_path(path) <> ":" | errors]
+    end
   end
 
-  def format_error(%{path: path, to: to, value: value}) do
-    "cannot cast #{inspect(value)} to #{inspect(to)} at #{inspect(path)}"
+  defp traverse_error(%{path: path, to: to, value: value}) do
+    ["cannot cast #{inspect(value)} to #{inspect(to)}" <> at_path(path)]
   end
+
+  defp at_path([]), do: ""
+
+  defp at_path(path), do: " at #{inspect(path)}"
+
+  defp indent(list), do: Enum.map(list, fn str -> @indent <> str end)
 end
