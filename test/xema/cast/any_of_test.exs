@@ -24,10 +24,7 @@ defmodule Xema.Cast.AnyOfTest do
       assert cast(schema, "nine") == {:ok, "nine"}
     end
 
-    @tag :only
     test "from a nil", %{schema: schema} do
-      IO.inspect("===")
-      IO.inspect(schema)
       assert cast(schema, nil) == {:ok, nil}
     end
 
@@ -98,9 +95,7 @@ defmodule Xema.Cast.AnyOfTest do
       }
     end
 
-    @tag :only
     test "from a map with an integer", %{schema: schema} do
-      IO.inspect("===")
       assert cast(schema, %{a: 1}) == {:ok, %{a: 1}}
     end
 
@@ -281,7 +276,6 @@ defmodule Xema.Cast.AnyOfTest do
                {:ok, %{foo: %{faa: 1}, bar: %{bas: %{bax: 3, baz: 2}}}}
     end
 
-    @tag :only
     test "from data causing a deep nested cast error", %{schema: schema} do
       assert {:error, error} =
                cast(schema, %{foo: %{faa: "one"}, bar: %{bas: %{baz: "two", bax: "three"}}})
