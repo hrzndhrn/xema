@@ -21,7 +21,7 @@ defmodule Xema.Cast.TrueFalseTest do
     end
 
     test "cast/2 with an invalid type", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, ~r/.*/) end
     end
 
     test "cast!/2", %{schema: schema} do
@@ -55,7 +55,7 @@ defmodule Xema.Cast.TrueFalseTest do
     end
 
     test "cast/2 with an invalid type", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, ~r/.*/) end
     end
 
     test "cast!/2", %{schema: schema} do
