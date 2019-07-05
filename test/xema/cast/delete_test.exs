@@ -26,7 +26,6 @@ defmodule Xema.Cast.DeleteTest do
       assert cast(schema, %{a: "1", b: "2"}, @opts) == {:ok, %{a: 1, b: 2}}
     end
 
-    @tag :only
     test "deletes additional properties", %{schema: schema} do
       assert cast(schema, %{a: "1", x: "2"}, @opts) == {:ok, %{a: 1}}
     end
@@ -83,7 +82,6 @@ defmodule Xema.Cast.DeleteTest do
       }
     end
 
-    @tag :only
     test "converts the given properties", %{schema: schema} do
       assert cast(schema, %{a: "1", b: "2"}, @opts) == {:ok, [a: 1, b: 2]}
     end

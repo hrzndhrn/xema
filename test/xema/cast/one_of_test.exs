@@ -113,7 +113,6 @@ defmodule Xema.Cast.OneOfTest do
       assert cast(schema, %{a: nil}) == {:ok, %{a: nil}}
     end
 
-    @tag :only
     test "from a map with an empty list", %{schema: schema} do
       assert {:error, error} = cast(schema, %{a: []})
 

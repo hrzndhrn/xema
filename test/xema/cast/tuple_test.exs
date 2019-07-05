@@ -282,7 +282,6 @@ defmodule Xema.Cast.TupleTest do
       }
     end
 
-    @tag :only
     test "from valid data", %{schema: schema} do
       assert cast!(schema, [[[1, "1"], ["2", 2]], [{"3", 3}]]) ==
                {{{1, "1"}, {2, "2"}}, {{3, "3"}}}

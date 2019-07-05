@@ -77,7 +77,6 @@ defmodule Xema.Cast.AllOfTest do
       assert cast(schema, %{a: 1, b: "2"}) == {:ok, %{a: "1", b: 2}}
     end
 
-    @tag :only
     test "from a map with an invalid value", %{schema: schema} do
       assert {:error, error} = cast(schema, %{a: 1, b: 1.5})
 
