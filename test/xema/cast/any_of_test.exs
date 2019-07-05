@@ -276,7 +276,6 @@ defmodule Xema.Cast.AnyOfTest do
                {:ok, %{foo: %{faa: 1}, bar: %{bas: %{bax: 3, baz: 2}}}}
     end
 
-    @tag :only
     test "from data causing a deep nested cast error", %{schema: schema} do
       assert {:error, error} =
                cast(schema, %{foo: %{faa: "one"}, bar: %{bas: %{baz: "two", bax: "three"}}})

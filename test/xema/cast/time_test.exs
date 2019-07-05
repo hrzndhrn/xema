@@ -55,7 +55,6 @@ defmodule Xema.Cast.TimeTest do
              }
     end
 
-    @tag :only
     test "raises an error for a map", %{schema: schema} do
       assert {:error, error} = cast(schema, %{foo: 55})
 

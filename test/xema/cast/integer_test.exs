@@ -40,7 +40,6 @@ defmodule Xema.Cast.IntegerTest do
       assert cast(schema, data) == expected
     end
 
-    @tag :only
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
         expected = {:error, CastError.exception(path: [], to: :integer, value: data)}
