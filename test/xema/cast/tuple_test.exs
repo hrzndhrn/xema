@@ -52,7 +52,7 @@ defmodule Xema.Cast.TupleTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, ~r/.*/) end
     end
   end
 
@@ -282,6 +282,7 @@ defmodule Xema.Cast.TupleTest do
       }
     end
 
+    @tag :only
     test "from valid data", %{schema: schema} do
       assert cast!(schema, [[[1, "1"], ["2", 2]], [{"3", 3}]]) ==
                {{{1, "1"}, {2, "2"}}, {{3, "3"}}}

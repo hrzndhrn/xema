@@ -40,7 +40,7 @@ defmodule Xema.Cast.StringTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, ~r/.*/) end
     end
   end
 

@@ -333,6 +333,7 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, %{num: "77"}) == {:ok, %{num: 77}}
     end
 
+    @tag :only
     test "with an invalid value", %{schema: schema} do
       data = %{num: "77."}
       expected = {:error, CastError.exception(path: [:num], to: :integer, value: "77.")}
@@ -630,6 +631,7 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, %{s_1: 5, i_1: "5"}) == {:ok, %{s_1: "5", i_1: 5}}
     end
 
+    @tag :only
     test "from an invalid map", %{schema: schema} do
       assert {:error, error} = cast(schema, %{s_1: 5, i_1: []})
 

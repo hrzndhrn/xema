@@ -75,7 +75,7 @@ defmodule Xema.Cast.KeywordTest do
     end
 
     test "from a type without protocol implementation", %{schema: schema} do
-      assert {:error, %Protocol.UndefinedError{}} = cast(schema, ~r/.*/)
+      assert_raise Protocol.UndefinedError, fn -> cast(schema, ~r/.*/) end
     end
   end
 
@@ -92,7 +92,9 @@ defmodule Xema.Cast.KeywordTest do
     test "from a keyword list", %{schema: schema} do
       data = [foo: 42, str: "foo"]
       assert validate(schema, data) == :ok
-      assert cast(schema, data) == {:ok, data}
+      assert {:ok, casted} = cast(schema, data)
+      assert Keyword.get(casted, :foo) == 42
+      assert Keyword.get(casted, :str) == "foo"
     end
 
     test "from a keyword list with castable values", %{schema: schema} do
@@ -145,8 +147,9 @@ defmodule Xema.Cast.KeywordTest do
     end
 
     test "from a map with string keys", %{schema: schema} do
-      assert cast(schema, %{"foo" => %{"str" => 6, "num" => "8"}}) ==
-               {:ok, [foo: [str: "6", num: 8]]}
+      assert {:ok, [foo: data]} = cast(schema, %{"foo" => %{"str" => 6, "num" => "8"}})
+      assert Keyword.get(data, :str) == "6"
+      assert Keyword.get(data, :num) == 8
     end
 
     test "from a map with string keys and an invalid value", %{schema: schema} do
@@ -164,8 +167,9 @@ defmodule Xema.Cast.KeywordTest do
     end
 
     test "from a map with atom keys", %{schema: schema} do
-      assert cast(schema, %{"foo" => %{str: 16, num: "18"}}) ==
-               {:ok, [foo: [str: "16", num: 18]]}
+      assert {:ok, [foo: data]} = cast(schema, %{"foo" => %{str: 16, num: "18"}})
+      assert Keyword.get(data, :str) == "16"
+      assert Keyword.get(data, :num) == 18
     end
 
     test "from a map with atom keys and an invalid value", %{schema: schema} do
@@ -303,7 +307,9 @@ defmodule Xema.Cast.KeywordTest do
     end
 
     test "from a map with string keys", %{schema: schema} do
-      assert cast!(schema, %{"foo" => %{"str" => 6, "num" => "8"}}) == [foo: [str: "6", num: 8]]
+      assert [foo: data] = cast!(schema, %{"foo" => %{"str" => 6, "num" => "8"}})
+      assert Keyword.get(data, :str) == "6"
+      assert Keyword.get(data, :num) == 8
     end
 
     test "from a map with string keys and an invalid value", %{schema: schema} do
@@ -321,7 +327,9 @@ defmodule Xema.Cast.KeywordTest do
     end
 
     test "from a map with atom keys", %{schema: schema} do
-      assert cast!(schema, %{"foo" => %{str: 16, num: "18"}}) == [foo: [str: "16", num: 18]]
+      assert [foo: data] = cast!(schema, %{"foo" => %{str: 16, num: "18"}})
+      assert Keyword.get(data, :str) == "16"
+      assert Keyword.get(data, :num) == 18
     end
 
     test "from a map with atom keys and an invalid value", %{schema: schema} do

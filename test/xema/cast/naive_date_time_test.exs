@@ -41,15 +41,25 @@ defmodule Xema.Cast.NaiveDateTimeTest do
     end
 
     test "raises an error for a keyword list", %{schema: schema} do
-      assert {:error, %KeyError{}} = cast(schema, foo: 55)
+      assert {:error, error} = cast(schema, foo: 55)
+
+      assert Exception.message(error) ==
+               "cannot cast [foo: 55] to NaiveDateTime, key :foo not found in NaiveDateTime"
     end
 
     test "raises an error for a map", %{schema: schema} do
-      assert {:error, %KeyError{}} = cast(schema, %{foo: 55})
+      assert {:error, error} = cast(schema, %{foo: 55})
+
+      assert Exception.message(error) ==
+               "cannot cast %{foo: 55} to NaiveDateTime, key :foo not found in NaiveDateTime"
     end
 
     test "raises an error for an empty map", %{schema: schema} do
-      assert {:error, %ArgumentError{}} = cast(schema, %{})
+      assert {:error, error} = cast(schema, %{})
+
+      assert Exception.message(error) ==
+               "cannot cast %{} to NaiveDateTime, the following keys must also be given when " <>
+                 "building struct NaiveDateTime: [:year, :month, :day, :hour, :minute, :second]"
     end
   end
 
@@ -76,15 +86,15 @@ defmodule Xema.Cast.NaiveDateTimeTest do
     end
 
     test "raises an error for a keyword list", %{schema: schema} do
-      assert_raise KeyError, fn -> cast!(schema, foo: 55) end
+      assert_raise CastError, fn -> cast!(schema, foo: 55) end
     end
 
     test "raises an error for a map", %{schema: schema} do
-      assert_raise KeyError, fn -> cast!(schema, %{foo: 55}) end
+      assert_raise CastError, fn -> cast!(schema, %{foo: 55}) end
     end
 
     test "raises an error for an empty map", %{schema: schema} do
-      assert_raise ArgumentError, fn -> cast!(schema, %{}) end
+      assert_raise CastError, fn -> cast!(schema, %{}) end
     end
   end
 end

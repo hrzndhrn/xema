@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0 dev
+
++ Refactor `Xema.cast` with an improvement of the error messages.
+
 ## 0.9.1 2019/06/16
 
 + Silence warnings for `Decimal`.

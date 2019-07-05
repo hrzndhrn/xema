@@ -145,8 +145,8 @@ defmodule Xema.CustomValidatorTest do
                 reason: %{properties: %{to: %{value: to, module: NaiveDateTime}}}
               } = error} = Schemas.validate(:timespan, %{from: from, to: to})
 
-      assert Exception.message(error) ==
-               "Expected NaiveDateTime, got #DateTime<2015-01-23 23:50:07Z>, at [:to]."
+      assert Exception.message(error) =~
+               ~r/Expected.NaiveDateTime,.got.*2015-01-23.23:50:07.*,.at..:to../
     end
   end
 end

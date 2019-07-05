@@ -34,8 +34,24 @@ defmodule Xema.Cast.OneOfTest do
 
     test "from an empty list", %{schema: schema} do
       assert {:error, error} = cast(schema, [])
-      assert error == %CastError{path: [], to: [:integer, :string, nil], value: []}
-      assert Exception.message(error) == "cannot cast [] to any of [:integer, :string, nil]"
+
+      assert error == %CastError{
+               path: [],
+               to: [
+                 %{path: [], to: :integer, value: []},
+                 %{path: [], to: :string, value: []},
+                 %{path: [], to: nil, value: []}
+               ],
+               value: []
+             }
+
+      assert Exception.message(error) ==
+               """
+               cannot cast [] to any of:
+                 cannot cast [] to :integer
+                 cannot cast [] to :string
+                 cannot cast [] to nil\
+               """
     end
   end
 
@@ -97,29 +113,29 @@ defmodule Xema.Cast.OneOfTest do
       assert cast(schema, %{a: nil}) == {:ok, %{a: nil}}
     end
 
+    @tag :only
     test "from a map with an empty list", %{schema: schema} do
       assert {:error, error} = cast(schema, %{a: []})
 
       assert error ==
-               %ValidationError{
+               %Xema.CastError{
+                 error: nil,
+                 key: nil,
                  message: nil,
-                 reason: %{
-                   one_of:
-                     {:error,
-                      [
-                        %{properties: %{a: %{type: :integer, value: []}}},
-                        %{properties: %{a: %{type: :string, value: []}}},
-                        %{properties: %{a: %{type: nil, value: []}}}
-                      ]},
-                   value: %{a: []}
-                 }
+                 path: [],
+                 to: [
+                   %{path: [:a], to: :integer, value: []},
+                   %{path: [:a], to: :string, value: []},
+                   %{path: [:a], to: nil, value: []}
+                 ],
+                 value: %{a: []}
                }
 
       message = """
-      No match of any schema.
-        Expected :integer, got [], at [:a].
-        Expected :string, got [], at [:a].
-        Expected nil, got [], at [:a].\
+      cannot cast %{a: []} to any of:
+        cannot cast [] to :integer at [:a]
+        cannot cast [] to :string at [:a]
+        cannot cast [] to nil at [:a]\
       """
 
       assert Exception.message(error) == message

@@ -3,10 +3,12 @@ defmodule Xema.ValidationError do
   Raised when a validation fails.
   """
 
+  defexception [:message, :reason]
+
   @type path :: [atom | integer | String.t()]
   @type opts :: [] | [path: path]
 
-  defexception [:message, :reason]
+  @indent "  "
 
   @impl true
   def message(%{message: nil} = exception), do: format_error(exception.reason)
@@ -396,5 +398,5 @@ defmodule Xema.ValidationError do
 
   defp at_path(path), do: ", at #{inspect(path)}."
 
-  defp indent(list), do: Enum.map(list, fn str -> "  #{str}" end)
+  defp indent(list), do: Enum.map(list, fn str -> "#{@indent}#{str}" end)
 end
