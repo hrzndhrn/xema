@@ -201,9 +201,49 @@ defmodule Xema.Builder do
     end
   end
 
-  def field(_name, type, keywords), do: {type, keywords}
+  @doc """
+  Specifies a field. This function will be used inside `xema/0`.
 
-  def field(_name, type), do: type
+  ## Examples
+
+      iex> defmodule User do
+      ...>   use Xema
+      ...>
+      ...>   xema do
+      ...>     field :name, :string, min_length: 1
+      ...>   end
+      ...> end
+      ...>
+      iex> %{"name" => "Tim"} |> User.cast!() |> Map.from_struct()
+      %{name: "Tim"}
+  """
+  def field(name, type, opts \\ [])
+
+  def field(field, type, opts) do
+    field
+    |> check_field_type!(type)
+    |> case do
+      {:module, module} -> module.xema()
+      {:type, type} -> {type, opts}
+    end
+  end
+
+  defp check_field_type!(field, types) when is_list(types) do
+    Enum.each(types, fn type -> check_field_type!(field, type) end)
+    {:type, types}
+  end
+
+  defp check_field_type!(_field, type) when type in @types, do: {:type, type}
+
+  defp check_field_type!(field, module) when is_atom(module) do
+    case function_exported?(module, :xema, 0) do
+      true -> {:module, module}
+      false -> raise ArgumentError, "invalid type #{inspect(module)} for field #{inspect(field)}"
+    end
+  end
+
+  defp check_field_type!(field, type),
+    do: raise(ArgumentError, "invalid type #{inspect(type)} for field #{inspect(field)}")
 
   defp xema_required([required]) do
     quote do
@@ -219,6 +259,24 @@ defmodule Xema.Builder do
     raise ArgumentError, "the required function can only be called once per xema"
   end
 
+  @doc """
+  Sets the list of required fields.  Specifies a field. This function will be
+  used inside `xema/0`.
+
+  ## Examples
+
+      iex> defmodule Person do
+      ...>   use Xema
+      ...>
+      ...>   xema do
+      ...>     field :name, :string, min_length: 1
+      ...>     required [:name]
+      ...>   end
+      ...> end
+      ...>
+      iex> %{"name" => "Tim"} |> Person.cast!() |> Map.from_struct()
+      %{name: "Tim"}
+  """
   def required(fields), do: [required: fields]
 
   @doc false

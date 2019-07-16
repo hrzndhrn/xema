@@ -32,7 +32,8 @@ defmodule Xema.ErrorHandlingTest do
         Expected :ref, got :string, at [1, :properties, :pos, 0].
         Expected :string, got %{min_length: 10}, at [1, :properties, :pos, 1].
         Expected :keyword, got {:string, %{min_length: 10}}, at [1, :properties, :pos].
-        Expected :struct, got {:string, %{min_length: 10}}, at [1, :properties, :pos].\
+        Expected :struct, got {:string, %{min_length: 10}}, at [1, :properties, :pos].
+        Expected :atom, got {:string, %{min_length: 10}}, at [1, :properties, :pos].\
       """
 
       reason = %{
@@ -54,7 +55,8 @@ defmodule Xema.ErrorHandlingTest do
                          ]
                        },
                        %{type: :keyword, value: {:string, %{min_length: 10}}},
-                       %{type: :struct, value: {:string, %{min_length: 10}}}
+                       %{type: :struct, value: {:string, %{min_length: 10}}},
+                       %{type: :atom, value: {:string, %{min_length: 10}}}
                      ],
                      value: {:string, %{min_length: 10}}
                    }

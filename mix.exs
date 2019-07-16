@@ -58,14 +58,14 @@ defmodule Xema.Mixfile do
 
   defp deps do
     [
-      {:benchee, "~> 1.0", only: :dev},
+      {:benchee, "~> 1.0", only: :dev, runtime: false},
       {:cowboy, "~> 2.4", only: :test},
-      {:credo, "~> 1.1", only: [:dev, :test]},
+      {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:decimal, "~> 1.7", optional: true},
       {:dialyxir, "~> 1.0.0-rc.4", only: :dev, runtime: false},
+      {:elixir_uuid, "~> 1.2", only: [:dev, :test]},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
-      {:inch_ex, "~> 2.0", only: [:dev, :test]},
       {:jason, "~> 1.1", only: [:dev, :test]},
       {:httpoison, "~> 1.2", only: :test}
     ]

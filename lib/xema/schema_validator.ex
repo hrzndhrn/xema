@@ -173,7 +173,8 @@ defmodule Xema.SchemaValidator do
               %Schema{ref: %Ref{pointer: "#/definitions/types"}},
               %Schema{ref: %Ref{pointer: "#/definitions/ref"}},
               %Schema{ref: %Ref{pointer: "#/definitions/keywords"}},
-              %Schema{module: Xema, type: :struct}
+              %Schema{module: Xema, type: :struct},
+              %Schema{type: :atom}
             ]
           },
           "#/definitions/schemas" => %Schema{

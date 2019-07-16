@@ -266,7 +266,11 @@ defimpl Xema.Castable, for: Map do
     |> Enum.reduce_while({:ok, []}, fn {key, value}, {:ok, acc} ->
       case cast_key(key, :atoms) do
         {:ok, key} ->
-          {:cont, {:ok, [{key, value} | acc]}}
+          if Keyword.has_key?(acc, key) do
+            {:halt, {:error, %{to: :keyword, key: {:ambiguous, key}}}}
+          else
+            {:cont, {:ok, [{key, value} | acc]}}
+          end
 
         :error ->
           {:halt, {:error, %{to: :keyword, key: key}}}
@@ -282,7 +286,11 @@ defimpl Xema.Castable, for: Map do
     Enum.reduce_while(map, {:ok, %{}}, fn {key, value}, {:ok, acc} ->
       case cast_key(key, keys) do
         {:ok, key} ->
-          {:cont, {:ok, Map.put(acc, key, value)}}
+          if Map.has_key?(acc, key) do
+            {:halt, {:error, %{to: :keyword, key: {:ambiguous, key}}}}
+          else
+            {:cont, {:ok, Map.put(acc, key, value)}}
+          end
 
         :error ->
           {:halt, {:error, %{to: :map, key: key}}}

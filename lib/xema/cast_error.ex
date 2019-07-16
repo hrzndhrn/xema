@@ -3,19 +3,20 @@ defmodule Xema.CastError do
   Raised when a cast fails.
   """
 
-  defexception [:message, :path, :to, :value, :key, :error]
+  defexception [:message, :path, :required, :to, :value, :key, :error]
 
   alias Xema.CastError
 
   @type t :: %CastError{}
 
   @type error :: %{
-          message: String.t() | nil,
-          to: atom | nil,
-          value: term | nil,
+          error: struct | nil,
           key: String.t() | atom | nil,
+          message: String.t() | nil,
           path: [atom | integer | String.t()] | nil,
-          error: struct | nil
+          required: [atom] | nil,
+          to: atom | nil,
+          value: term | nil
         }
 
   @indent "  "
@@ -50,6 +51,13 @@ defmodule Xema.CastError do
     ["cannot cast #{inspect(value)} to :atom, the atom is unknown" <> at_path(path)]
   end
 
+  defp traverse_error(%{path: path, to: to, key: {:ambiguous, key}}) do
+    [
+      "cannot cast #{to_string(key)} to #{inspect(to)} key" <>
+        at_path(path) <> ", the key is ambiguous"
+    ]
+  end
+
   defp traverse_error(%{path: path, to: to, key: key}) when is_binary(key) do
     [
       "cannot cast #{inspect(key)} to #{inspect(to)} key" <>
@@ -71,6 +79,14 @@ defmodule Xema.CastError do
       errors = to |> Enum.map(fn error -> traverse_error(error) end) |> indent()
       ["cannot cast #{inspect(value)}" <> at_path(path) <> " to any of:" | errors]
     end
+  end
+
+  defp traverse_error(%{path: path, to: to, value: value, required: required})
+       when not is_nil(required) do
+    [
+      "cannot cast #{inspect(value)} to #{inspect(to)}" <>
+        "#{at_path(path)} missing required keys #{inspect(required)}"
+    ]
   end
 
   defp traverse_error(%{path: path, to: to, value: value}) do

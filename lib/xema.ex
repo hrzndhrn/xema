@@ -105,6 +105,7 @@ defmodule Xema do
 
   use Xema.Behaviour
 
+  import Xema.Castable.Helper, only: [cast_key: 2]
   import Xema.Utils, only: [to_existing_atom: 1]
 
   alias Xema.{
@@ -232,57 +233,57 @@ defmodule Xema do
   # Creates a schema from an atom.
   # This function will be just called for nested schemas.
   @spec schema(Schema.type(), keyword) :: Schema.t()
-  defp schema(value, opts)
-       when is_atom(value),
-       do: schema({value, []}, opts)
+  defp schema(value, opts) when is_atom(value) do
+    case function_exported?(value, :xema, 0) do
+      true -> value.xema().schema
+      false -> schema({value, []}, opts)
+    end
+  end
 
   # Creates a bool schema. Keywords and opts will be ignored.
-  @spec schema({Schema.type() | [Schema.type()], keyword}, keyword) ::
-          Schema.t()
+  @spec schema({Schema.type() | [Schema.type()], keyword}, keyword) :: Schema.t()
   defp schema({bool, _}, _) when is_boolean(bool), do: Schema.new(type: bool)
 
   # Creates a schema for a reference.
   defp schema({:ref, keywords}, _), do: schema({:any, [{:ref, keywords}]})
 
-  defp schema({type, keywords}, _),
-    do:
-      keywords
-      |> Keyword.put(:type, type)
-      |> update()
-      |> Schema.new()
+  defp schema({type, keywords}, _) do
+    keywords
+    |> Keyword.put(:type, type)
+    |> update()
+    |> Schema.new()
+  end
 
   # This function creates the schema tree.
   @spec update(keyword) :: keyword
-  defp update(keywords),
-    do:
-      keywords
-      |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
-      |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
-      |> Keyword.update(:all_of, nil, &schemas/1)
-      |> Keyword.update(:any_of, nil, &schemas/1)
-      |> Keyword.update(:contains, nil, &schema/1)
-      |> Keyword.update(:dependencies, nil, &dependencies/1)
-      |> Keyword.update(:else, nil, &schema/1)
-      |> Keyword.update(:if, nil, &schema/1)
-      |> Keyword.update(:items, nil, &items/1)
-      |> Keyword.update(:not, nil, &schema/1)
-      |> Keyword.update(:one_of, nil, &schemas/1)
-      |> Keyword.update(:pattern_properties, nil, &schemas/1)
-      |> Keyword.update(:properties, nil, &schemas/1)
-      |> Keyword.update(:property_names, nil, &schema/1)
-      |> Keyword.update(:definitions, nil, &schemas/1)
-      |> Keyword.update(:required, nil, &MapSet.new/1)
-      |> Keyword.update(:then, nil, &schema/1)
-      |> update_allow()
-      |> update_data()
+  defp update(keywords) do
+    keywords
+    |> Keyword.update(:additional_items, nil, &bool_or_schema/1)
+    |> Keyword.update(:additional_properties, nil, &bool_or_schema/1)
+    |> Keyword.update(:all_of, nil, &schemas/1)
+    |> Keyword.update(:any_of, nil, &schemas/1)
+    |> Keyword.update(:contains, nil, &schema/1)
+    |> Keyword.update(:dependencies, nil, &dependencies/1)
+    |> Keyword.update(:else, nil, &schema/1)
+    |> Keyword.update(:if, nil, &schema/1)
+    |> Keyword.update(:items, nil, &items/1)
+    |> Keyword.update(:not, nil, &schema/1)
+    |> Keyword.update(:one_of, nil, &schemas/1)
+    |> Keyword.update(:pattern_properties, nil, &schemas/1)
+    |> Keyword.update(:properties, nil, &schemas/1)
+    |> Keyword.update(:property_names, nil, &schema/1)
+    |> Keyword.update(:definitions, nil, &schemas/1)
+    |> Keyword.update(:required, nil, &MapSet.new/1)
+    |> Keyword.update(:then, nil, &schema/1)
+    |> update_allow()
+    |> update_data()
+  end
 
   @spec schemas(list) :: list
-  defp schemas(list) when is_list(list),
-    do: Enum.map(list, fn schema -> schema(schema) end)
+  defp schemas(list) when is_list(list), do: Enum.map(list, fn schema -> schema(schema) end)
 
   @spec schemas(map) :: map
-  defp schemas(map) when is_map(map),
-    do: map_values(map, &schema/1)
+  defp schemas(map) when is_map(map), do: map_values(map, &schema/1)
 
   @spec dependencies(map) :: map
   defp dependencies(map),
@@ -631,26 +632,14 @@ defmodule Xema do
       {:error, reason} ->
         {:error,
          CastError.exception(
-           to: Map.get(reason, :to),
+           error: Map.get(reason, :error),
            key: Map.get(reason, :key),
-           value: Map.get(reason, :value),
            path: Map.get(reason, :path),
-           error: Map.get(reason, :error)
+           required: Map.get(reason, :required),
+           to: Map.get(reason, :to),
+           value: Map.get(reason, :value)
          )}
     end
-
-    # rescue
-    #  error ->
-    #    {:error, error}
-    # catch
-    #  {:error, reason} ->
-    #    {:error,
-    #     CastError.exception(
-    #       to: Map.get(reason, :to),
-    #       key: Map.get(reason, :key),
-    #       value: Map.get(reason, :value),
-    #       path: Enum.reverse(reason.path)
-    #     )}
   end
 
   @spec do_cast(Schema.t(), term, keyword, list) :: {:ok, term} | {:error, term}
@@ -729,68 +718,97 @@ defmodule Xema do
     end
   end
 
-  defp cast_values(%Schema{keys: keys, type: type} = schema, data, opts, path)
+  defp cast_values(
+         %Schema{
+           type: type,
+           keys: keys,
+           properties: properties,
+           pattern_properties: pattern_properties,
+           additional_properties: additional_properties
+         } = schema,
+         data,
+         opts,
+         path
+       )
        when is_map(data) do
-    properties = Map.get(schema, :properties)
-    pattern_properties = Map.get(schema, :pattern_properties)
     keys = if type == :keyword, do: :atoms, else: keys
 
-    # additional_properties false will be ignored
-    additional_properties =
-      case Map.get(schema, :additional_properties) do
-        false -> nil
-        value -> value
+    with :ok <- check_required(schema, data, path) do
+      data
+      |> Enum.reduce_while([], fn {key, value}, acc ->
+        schema =
+          get_properties_schema(
+            properties,
+            pattern_properties,
+            additional_properties,
+            key_to(keys, key)
+          )
+
+        case do_cast(schema, value, opts, [key | path]) do
+          {:ok, cast} -> {:cont, [{key, cast} | acc]}
+          {:error, _} = error -> {:halt, error}
+        end
+      end)
+      |> case do
+        {:error, _} = error ->
+          error
+
+        values ->
+          {:ok,
+           values
+           |> delete_additional_properties(schema, opts)
+           |> Enum.into(%{})
+           |> add_defaults(schema, opts)}
       end
-
-    data
-    |> Enum.reduce_while([], fn {key, value}, acc ->
-      schema =
-        get_schema(properties, pattern_properties, additional_properties, key_to(keys, key))
-
-      case do_cast(schema, value, opts, [key | path]) do
-        {:ok, cast} -> {:cont, [{key, cast} | acc]}
-        {:error, _} = error -> {:halt, error}
-      end
-    end)
-    |> case do
-      {:error, _} = error ->
-        error
-
-      values ->
-        {:ok, schema |> delete_additional_properties(values, opts) |> Enum.into(%{})}
     end
   end
 
-  defp cast_values_keyword(%Schema{keys: keys} = schema, data, opts, path) when is_list(data) do
-    properties = Map.get(schema, :properties)
-    pattern_properties = Map.get(schema, :pattern_properties)
+  @spec cast_values_keyword(Schema.t(), term, keyword, list) :: term
+  defp cast_values_keyword(
+         %Schema{
+           keys: keys,
+           properties: properties,
+           pattern_properties: pattern_properties,
+           additional_properties: additional_properties
+         } = schema,
+         data,
+         opts,
+         path
+       )
+       when is_list(data) do
+    with :ok <- check_required(schema, data, path) do
+      data
+      |> Enum.reduce_while([], fn {key, value}, acc ->
+        schema =
+          get_properties_schema(
+            properties,
+            pattern_properties,
+            additional_properties,
+            key_to(keys, key)
+          )
 
-    # additional_properties false will be ignored
-    additional_properties = Map.get(schema, :additional_properties) || nil
+        case do_cast(schema, value, opts, [key | path]) do
+          {:ok, cast} -> {:cont, [{key, cast} | acc]}
+          {:error, _} = error -> {:halt, error}
+        end
+      end)
+      |> case do
+        {:error, _} = error ->
+          error
 
-    data
-    |> Enum.reduce_while([], fn {key, value}, acc ->
-      schema =
-        get_schema(properties, pattern_properties, additional_properties, key_to(keys, key))
-
-      case do_cast(schema, value, opts, [key | path]) do
-        {:ok, cast} -> {:cont, [{key, cast} | acc]}
-        {:error, _} = error -> {:halt, error}
+        values ->
+          {:ok,
+           values
+           |> delete_additional_properties(schema, opts)
+           |> add_defaults(schema, opts)
+           |> Enum.reverse()}
       end
-    end)
-    |> case do
-      {:error, _} = error ->
-        error
-
-      values ->
-        {:ok, schema |> delete_additional_properties(values, opts) |> Enum.reverse()}
     end
   end
 
-  defp cast_values_list(%Schema{} = schema, data, opts, path) when is_list(data) do
-    schema
-    |> Map.get(:items)
-    |> case do
+  @spec cast_values_list(Schema.t(), term, keyword, list) :: term
+  defp cast_values_list(%Schema{items: items} = schema, data, opts, path) when is_list(data) do
+    case items do
       nil ->
         {:ok, data}
 
@@ -828,23 +846,67 @@ defmodule Xema do
     end
   end
 
-  defp get_schema(nil, nil, additional_properties, _key), do: additional_properties
+  @spec check_required(Schema.t(), term, list) :: :ok | {:error, [String.t()] | [:atom]}
+  defp check_required(%Schema{required: nil}, _data, _path), do: :ok
 
-  defp get_schema(properties, nil, additional_properties, key),
+  defp check_required(
+         %Schema{type: type, module: module, keys: keys, required: required},
+         data,
+         path
+       ) do
+    with {:error, keys} <- do_check_required(required, data, keys) do
+      to = if module == nil, do: type, else: module
+      {:error, %{to: to, value: data, required: keys, path: path}}
+    end
+  end
+
+  defp do_check_required(required, data, keys_type) do
+    keys =
+      data
+      |> keys()
+      |> cast_keys(keys_type)
+      |> MapSet.new()
+
+    required
+    |> MapSet.difference(keys)
+    |> MapSet.to_list()
+    |> case do
+      [] -> :ok
+      keys -> {:error, keys}
+    end
+  end
+
+  @spec cast_keys([String.t()] | [atom], :strings | :atoms) :: [String.t()] | [atom]
+  defp cast_keys(keys, keys_type) do
+    Enum.map(keys, fn key ->
+      case cast_key(key, keys_type) do
+        :error -> key
+        {:ok, cast} -> cast
+      end
+    end)
+  end
+
+  # additional_properties false will be ignored
+  defp get_properties_schema(properties, pattern_properties, false, key),
+    do: get_properties_schema(properties, pattern_properties, nil, key)
+
+  defp get_properties_schema(nil, nil, additional_properties, _key), do: additional_properties
+
+  defp get_properties_schema(properties, nil, additional_properties, key),
     do: Map.get(properties, key, additional_properties)
 
-  defp get_schema(nil, pattern_properties, additional_properties, key) do
+  defp get_properties_schema(nil, pattern_properties, additional_properties, key) do
     Enum.find_value(pattern_properties, additional_properties, fn {regex, schema} ->
       with true <- Regex.match?(regex, to_string(key)), do: schema
     end)
   end
 
-  defp get_schema(properties, pattern_properties, additional_properties, key) do
-    get_schema(properties, nil, additional_properties, key) ||
-      get_schema(nil, pattern_properties, additional_properties, key)
+  defp get_properties_schema(properties, pattern_properties, additional_properties, key) do
+    get_properties_schema(properties, nil, additional_properties, key) ||
+      get_properties_schema(nil, pattern_properties, additional_properties, key)
   end
 
-  defp delete_additional_properties(%Schema{additional_properties: false} = schema, data, opts) do
+  defp delete_additional_properties(data, %Schema{additional_properties: false} = schema, opts) do
     case Keyword.get(opts, :additional_properties) do
       :delete ->
         keys = Map.keys(Map.get(schema, :properties) || %{})
@@ -856,7 +918,57 @@ defmodule Xema do
     end
   end
 
-  defp delete_additional_properties(_schema, data, _opts), do: data
+  defp delete_additional_properties(data, _schema, _opts), do: data
+
+  defp add_defaults(data, schema, _opts) do
+    schema
+    |> get_defaults()
+    |> merge_defaults(data)
+  end
+
+  defp get_defaults(%Schema{properties: nil}), do: %{}
+
+  defp get_defaults(%Schema{properties: properties}) do
+    Enum.reduce(properties, %{}, fn
+      {_key, %Schema{default: nil}}, acc ->
+        acc
+
+      {key, %Schema{default: default}}, acc ->
+        Map.put(acc, key, get_default(default))
+    end)
+  end
+
+  defp get_default(fun) when is_function(fun), do: apply(fun, [])
+
+  defp get_default({mod, fun})
+       when is_atom(mod) and is_atom(fun),
+       do: apply(mod, fun, [])
+
+  defp get_default({mod, fun, arg})
+       when is_atom(mod) and is_atom(fun) and is_list(arg),
+       do: apply(mod, fun, arg)
+
+  defp get_default(value), do: value
+
+  defp merge_defaults(defaults, data) when defaults == %{}, do: data
+
+  defp merge_defaults(defaults, data) when is_map(data) do
+    Enum.reduce(defaults, data, fn {key, value}, acc ->
+      case {Map.get(acc, key), Map.get(acc, to_string(key))} do
+        {nil, nil} -> Map.put(acc, key, value)
+        _ -> acc
+      end
+    end)
+  end
+
+  defp merge_defaults(defaults, data) when is_list(data) do
+    Enum.reduce(defaults, data, fn {key, value}, acc ->
+      case Keyword.get(data, key) do
+        nil -> Keyword.put(acc, key, value)
+        _ -> acc
+      end
+    end)
+  end
 
   defp key?(key, keys, []), do: key in keys
 
@@ -897,14 +1009,16 @@ defmodule Xema do
   end
 
   @spec get_combiner(Schema.t()) :: [Schema.t()]
-  defp get_combiner(%Schema{} = schema) do
-    [schema.any_of || [], schema.all_of || [], schema.one_of || []]
-    |> Enum.concat()
-  end
+  defp get_combiner(%Schema{} = schema),
+    do: Enum.concat([schema.any_of || [], schema.all_of || [], schema.one_of || []])
 
   defp key_to(:atoms, key) when is_binary(key), do: to_existing_atom(key)
 
   defp key_to(:strings, key) when is_atom(key), do: to_string(key)
 
   defp key_to(_, key) when is_binary(key) or is_atom(key), do: key
+
+  defp keys(data) when is_map(data), do: Map.keys(data)
+
+  defp keys(data) when is_list(data), do: Keyword.keys(data)
 end

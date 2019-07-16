@@ -1,7 +1,7 @@
 defmodule Xema.UseTest do
   use ExUnit.Case, async: true
 
-  alias Xema.{Schema, ValidationError}
+  alias Xema.{CastError, Schema, ValidationError}
 
   test "use Xema with multiple schema and option multi false raises error" do
     message = "Use `use Xema, multi: true` to setup multiple schema in a module."
@@ -347,12 +347,65 @@ defmodule Xema.UseTest do
              """
     end
 
-    @tag :only
     test "cast/1 with missing age" do
-      assert {:error, %ArgumentError{} = error} = UserStruct.cast(name: "Nick")
+      assert {:error, error} = UserStruct.cast(name: "Nick")
 
-      assert Exception.message(error) =~
-               "ust also be given when building struct Xema.UseTest.UserStruct: [:age]"
+      assert error ==
+               %CastError{
+                 path: [],
+                 required: [:age],
+                 to: Xema.UseTest.UserStruct,
+                 value: [name: "Nick"]
+               }
+
+      assert Exception.message(error) ==
+               ~s|cannot cast [name: "Nick"] to Xema.UseTest.UserStruct| <>
+                 ~s| missing required keys [:age]|
+    end
+
+    test "cast/1 from a map with missing age" do
+      assert {:error, error} = UserStruct.cast(%{name: "Nick"})
+
+      assert error ==
+               %CastError{
+                 path: [],
+                 required: [:age],
+                 to: Xema.UseTest.UserStruct,
+                 value: %{name: "Nick"}
+               }
+
+      assert Exception.message(error) ==
+               ~s|cannot cast %{name: "Nick"} to Xema.UseTest.UserStruct| <>
+                 ~s| missing required keys [:age]|
+    end
+
+    test "cast/1 from a map with string keys and missing age" do
+      assert {:error, error} = UserStruct.cast(%{"name" => "Nick"})
+
+      assert error ==
+               %CastError{
+                 path: [],
+                 required: [:age],
+                 to: Xema.UseTest.UserStruct,
+                 value: %{"name" => "Nick"}
+               }
+
+      assert Exception.message(error) ==
+               ~s|cannot cast %{"name" => "Nick"} to Xema.UseTest.UserStruct| <>
+                 ~s| missing required keys [:age]|
+    end
+
+    @tag :only
+    test "cast/1 from a map with string keys, missing age and an unknown property" do
+      assert {:error, error} = UserStruct.cast(%{"name" => "Nick", "xyz" => 5})
+
+      assert error ==
+               %CastError{
+                 path: [],
+                 required: [:age],
+                 to: Xema.UseTest.UserStruct,
+                 value: %{"name" => "Nick", "xyz" => 5}
+               }
     end
 
     test "validate/1" do
@@ -362,7 +415,7 @@ defmodule Xema.UseTest do
   end
 
   describe "xema/0" do
-    test "raise ArgumentError for multiple required functions" do
+    test "raises ArgumentError for multiple required functions" do
       code =
         quote do
           defmodule MultiRequired do
@@ -377,6 +430,44 @@ defmodule Xema.UseTest do
         end
 
       message = "the required function can only be called once per xema"
+
+      assert_raise ArgumentError, message, fn ->
+        Code.eval_quoted(code)
+      end
+    end
+
+    test "raises ArgumentError for invalid type in field" do
+      code =
+        quote do
+          defmodule MultiRequired do
+            use Xema
+
+            xema do
+              field :foo, :bar, minimum: 0
+            end
+          end
+        end
+
+      message = "invalid type :bar for field :foo"
+
+      assert_raise ArgumentError, message, fn ->
+        Code.eval_quoted(code)
+      end
+    end
+
+    test "raises ArgumentError for invalid argument in field" do
+      code =
+        quote do
+          defmodule MultiRequired do
+            use Xema
+
+            xema do
+              field :foo, "bar", minimum: 0
+            end
+          end
+        end
+
+      message = ~s|invalid type "bar" for field :foo|
 
       assert_raise ArgumentError, message, fn ->
         Code.eval_quoted(code)
