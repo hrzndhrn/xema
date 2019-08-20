@@ -1060,7 +1060,7 @@ defmodule Xema do
   def ensure_behaviour!(name) when is_atom(name) do
     case behaviour?(name) do
       true -> name
-      false -> raise SchemaError, message: "Module #{inspect(name)} is not a Xema behaviour"
+      false -> raise SchemaError, "Module #{inspect(name)} is not a Xema behaviour"
     end
   end
 
@@ -1069,7 +1069,7 @@ defmodule Xema do
     module =
       case Code.ensure_compiled(name) do
         {:module, module} -> module
-        {:error, _} -> raise SchemaError, message: "Module #{inspect(name)} not compiled"
+        {:error, _} -> raise SchemaError, "Module #{inspect(name)} not compiled"
       end
 
     function_exported?(module, :xema, 0)

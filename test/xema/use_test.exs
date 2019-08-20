@@ -1,7 +1,7 @@
 defmodule Xema.UseTest do
   use ExUnit.Case, async: true
 
-  alias Xema.{CastError, Schema, ValidationError}
+  alias Xema.{CastError, Schema, SchemaError, ValidationError}
 
   test "use Xema with multiple schema and option multi false raises error" do
     message = "Use `use Xema, multi: true` to setup multiple schema in a module."
@@ -474,5 +474,48 @@ defmodule Xema.UseTest do
         Code.eval_quoted(code)
       end
     end
-  end
+
+    @tag :only
+    test "raises SchemaError for missing module" do
+      code =
+        quote do
+          defmodule MissingBehaviour do
+            use Xema
+
+            xema do
+              field :foo, Foo
+            end
+          end
+        end
+
+      message = "Module Foo not compiled"
+
+      assert_raise SchemaError, message, fn ->
+        Code.eval_quoted(code)
+      end
+    end
+    @tag :only
+    test "raises SchemaError for invalid module" do
+      code =
+        quote do
+          defmodule Bad do
+            # empty
+          end
+
+          defmodule BadBehaviour do
+            use Xema
+
+            xema do
+              field :grants, :list, items: Bad, default: []
+            end
+          end
+        end
+
+      message = "Module Bad is not a Xema behaviour"
+
+      assert_raise SchemaError, message, fn ->
+        Code.eval_quoted(code)
+      end
+    end
+    end
 end
