@@ -12,6 +12,8 @@ defmodule Xema.Builder do
       false
   """
 
+  alias Xema.{CastError, ValidationError}
+
   @types Xema.Schema.types()
 
   @types
@@ -67,7 +69,7 @@ defmodule Xema.Builder do
   """
   defmacro xema(do: schema) do
     quote do
-      xema :default do
+      xema :__xema_default__ do
         unquote(schema)
       end
     end
@@ -80,13 +82,18 @@ defmodule Xema.Builder do
     schema = xema_struct(schema)
 
     quote do
-      if Module.get_attribute(__MODULE__, :multi) == nil do
-        raise "Use `use Xema` to to use the `xema/2` macro."
-      end
-
       Module.register_attribute(__MODULE__, :xemas, accumulate: true)
 
-      if !@multi && length(@xemas) > 0 do
+      multi = Module.get_attribute(__MODULE__, :multi)
+
+      default = Module.get_attribute(__MODULE__, :default)
+      Module.put_attribute(__MODULE__, :default, false)
+
+      if multi == nil do
+        raise "Use `use Xema` to use the `xema/2` macro."
+      end
+
+      if !multi && length(@xemas) > 0 do
         raise "Use `use Xema, multi: true` to setup multiple schema in a module."
       end
 
@@ -96,13 +103,75 @@ defmodule Xema.Builder do
         {unquote(name), Xema.new(add_new_module(unquote(schema), __MODULE__))}
       )
 
-      unquote(xema_funs(:by_name, name))
+      if multi do
+        if length(@xemas) == 1 do
+          unquote(xema_funs(:header))
+        end
 
-      if Module.get_attribute(__MODULE__, :default) || !@multi do
-        Module.put_attribute(__MODULE__, :default, false)
+        if default do
+          unquote(xema_funs(:default, name))
+        end
 
-        unquote(xema_funs(:default, name))
+        unquote(xema_funs(:by_name, name))
+      else
+        if unquote(name) == :__xema_default__ do
+          unquote(xema_funs(:single, name))
+        else
+          unquote(xema_funs(:header))
+          unquote(xema_funs(:default, name))
+          unquote(xema_funs(:by_name, name))
+        end
       end
+    end
+  end
+
+  defp xema_funs(:header) do
+    quote do
+      @doc """
+      Returns true if the specified `data` is valid against the schema
+      defined under `name`, otherwise false.
+      """
+      @spec valid?(atom, term) :: boolean
+      def valid?(name \\ :default, data)
+
+      @doc """
+      Validates the given `data` against the schema defined under `name`.
+
+      Returns `:ok` for valid data, otherwise an `:error` tuple.
+      """
+      @spec validate(atom, term) :: :ok | {:error, ValidationError.t()}
+      def validate(name \\ :default, data)
+
+      @doc """
+      Validates the given `data` against the schema defined under `name`.
+
+      Returns `:ok` for valid data, otherwise a `Xema.ValidationError` is
+      raised.
+      """
+      @spec validate!(atom, term) :: :ok
+      def validate!(name \\ :default, data)
+
+      @doc """
+      Converts the given `data` according to the schema defined under `name`.
+
+      Returns an `:ok` tuple with the converted data for valid `data`, otherwise
+      an `:error` tuple is returned.
+      """
+      @spec cast(atom, term) ::
+              {:ok, term} | {:error, ValidationError.t() | CastError.t()}
+      def cast(name \\ :default, data)
+
+      @doc """
+      Converts the given `data` according to the schema defined under `name`.
+
+      Returns converted data for valid `data`, otherwise a `Xema.CastError` or
+      `Xema.ValidationError` is raised.
+      """
+      @spec cast!(atom, term) :: {:ok, term}
+      def cast!(name \\ :default, data)
+
+      @doc false
+      def xema(name \\ :default)
     end
   end
 
@@ -123,6 +192,7 @@ defmodule Xema.Builder do
       def cast!(unquote(name), data),
         do: Xema.cast!(@xemas[unquote(name)], data)
 
+      @doc false
       def xema(unquote(name)),
         do: @xemas[unquote(name)]
     end
@@ -130,21 +200,77 @@ defmodule Xema.Builder do
 
   defp xema_funs(:default, name) do
     quote do
+      def valid?(:default, data),
+        do: Xema.valid?(@xemas[unquote(name)], data)
+
+      def validate(:default, data),
+        do: Xema.validate(@xemas[unquote(name)], data)
+
+      def validate!(:default, data),
+        do: Xema.validate!(@xemas[unquote(name)], data)
+
+      def cast(:default, data),
+        do: Xema.cast(@xemas[unquote(name)], data)
+
+      def cast!(:default, data),
+        do: Xema.cast!(@xemas[unquote(name)], data)
+
+      @doc false
+      def xema(:default),
+        do: @xemas[unquote(name)]
+    end
+  end
+
+  defp xema_funs(:single, name) do
+    quote do
+      @doc """
+      Returns true if the given `data` valid against the defined schema,
+      otherwise false.
+      """
+      @spec valid?(term) :: boolean
       def valid?(data),
         do: Xema.valid?(@xemas[unquote(name)], data)
 
+      @doc """
+      Validates the given `data` against the defined schema.
+
+      Returns `:ok` for valid data, otherwise an `:error` tuple.
+      """
+      @spec validate(term) :: :ok | {:error, ValidationError.t()}
       def validate(data),
         do: Xema.validate(@xemas[unquote(name)], data)
 
+      @doc """
+      Validates the given `data` against the defined schema.
+
+      Returns `:ok` for valid data, otherwise a `Xema.ValidationError` is
+      raised.
+      """
+      @spec validate!(term) :: :ok
       def validate!(data),
         do: Xema.validate!(@xemas[unquote(name)], data)
 
+      @doc """
+      Converts the given `data` according to the defined schema.
+
+      Returns an `:ok` tuple with the converted data for valid `data`, otherwise
+      an `:error` tuple is returned.
+      """
+      @spec cast(term) :: {:ok, term} | {:error, ValidationError.t() | CastError.t()}
       def cast(data),
         do: Xema.cast(@xemas[unquote(name)], data)
 
+      @doc """
+      Converts the given `data` according to the defined schema.
+
+      Returns converted data for valid `data`, otherwise a `Xeam.CastError` or
+      `Xema.ValidationError` is raised.
+      """
+      @spec cast!(term) :: term
       def cast!(data),
         do: Xema.cast!(@xemas[unquote(name)], data)
 
+      @doc false
       def xema,
         do: @xemas[unquote(name)]
     end
@@ -201,6 +327,7 @@ defmodule Xema.Builder do
     end
   end
 
+  # TODO: doc arguments
   @doc """
   Specifies a field. This function will be used inside `xema/0`.
 
@@ -217,13 +344,15 @@ defmodule Xema.Builder do
       iex> %{"name" => "Tim"} |> User.cast!() |> Map.from_struct()
       %{name: "Tim"}
   """
+  # TODO: add spec
   def field(name, type, opts \\ [])
 
   def field(field, type, opts) do
     field
     |> check_field_type!(type)
     |> case do
-      {:module, module} -> module.xema()
+      {:xema, module} -> module.xema()
+      {:module, module} -> {:struct, Keyword.put(opts, :module, module)}
       {:type, type} -> {type, opts}
     end
   end
@@ -235,10 +364,10 @@ defmodule Xema.Builder do
 
   defp check_field_type!(_field, type) when type in @types, do: {:type, type}
 
-  defp check_field_type!(field, module) when is_atom(module) do
-    case function_exported?(module, :xema, 0) do
-      true -> {:module, module}
-      false -> raise ArgumentError, "invalid type #{inspect(module)} for field #{inspect(field)}"
+  defp check_field_type!(_field, module) when is_atom(module) do
+    case Xema.behaviour?(module) do
+      true -> {:xema, module}
+      false -> {:module, module}
     end
   end
 
@@ -277,6 +406,7 @@ defmodule Xema.Builder do
       iex> %{"name" => "Tim"} |> Person.cast!() |> Map.from_struct()
       %{name: "Tim"}
   """
+  @spec required([atom]) :: term
   def required(fields), do: [required: fields]
 
   @doc false

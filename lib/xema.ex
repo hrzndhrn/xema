@@ -14,6 +14,7 @@ defmodule Xema do
   + `__MODULE__.validate!/2`
   + `__MODULE__.cast/2`
   + `__MODULE__.cast!/2`
+  + `__MODULE__.xema/1`
 
   The macro `xema/2` supports the construction of a schema. After that
   the schema is available via the functions above.
@@ -25,6 +26,7 @@ defmodule Xema do
   + `__MODULE__.validate!/1`
   + `__MODULE__.cast/1`
   + `__MODULE__.cast!/1`
+  + `__MODULE__.xema/0`
 
   The functions with arity 1 are also available for single schema modules.
 
@@ -101,6 +103,34 @@ defmodule Xema do
       iex> Schema.valid?(:nums, %{neg: [1, 2, 3]})
       false
       ```
+
+  Struct schema module:
+
+      TODO: struct example
+      iex> defmodule StructA do
+      ...>   use Xema
+      ...>
+      ...>   xema do
+      ...>     field :foo, :integer, minimum: 0
+      ...>   end
+      ...> end
+      ...>
+      ...> defmodule StructB do
+      ...>   use Xema
+      ...>
+      ...>   xema do
+      ...>     field :a, :string, min_length: 3
+      ...>     field :b, StructA
+      ...>     required [:a]
+      ...>   end
+      ...> end
+      ...>
+      ...> data = StructB.cast!(a: "abc", b: %{foo: 5})
+      ...> data.a
+      "abc"
+      iex> Map.from_struct(data.b)
+      %{foo: 5}
+
   """
 
   use Xema.Behaviour
@@ -113,6 +143,7 @@ defmodule Xema do
     CastError,
     Ref,
     Schema,
+    SchemaError,
     SchemaValidator,
     ValidationError
   }
@@ -230,14 +261,17 @@ defmodule Xema do
     end
   end
 
-  # Creates a schema from an atom.
+  # Creates a schema from an atom type.
   # This function will be just called for nested schemas.
   @spec schema(Schema.type(), keyword) :: Schema.t()
-  defp schema(value, opts) when is_atom(value) do
-    case function_exported?(value, :xema, 0) do
-      true -> value.xema().schema
-      false -> schema({value, []}, opts)
-    end
+  defp schema(value, opts) when value in @types do
+    schema({value, []}, opts)
+  end
+
+  # Creates a schema from a `Xema` module.
+  @spec schema(atom, keyword) :: Schema.t()
+  defp schema(value, _opts) when is_atom(value) do
+    ensure_behaviour!(value).xema().schema
   end
 
   # Creates a bool schema. Keywords and opts will be ignored.
@@ -1021,4 +1055,23 @@ defmodule Xema do
   defp keys(data) when is_map(data), do: Map.keys(data)
 
   defp keys(data) when is_list(data), do: Keyword.keys(data)
+
+  @doc false
+  def ensure_behaviour!(name) when is_atom(name) do
+    case behaviour?(name) do
+      true -> name
+      false -> raise SchemaError, message: "Module #{inspect(name)} is not a Xema behaviour"
+    end
+  end
+
+  @doc false
+  def behaviour?(name) when is_atom(name) do
+    module =
+      case Code.ensure_compiled(name) do
+        {:module, module} -> module
+        {:error, _} -> raise SchemaError, message: "Module #{inspect(name)} not compiled"
+      end
+
+    function_exported?(module, :xema, 0)
+  end
 end

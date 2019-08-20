@@ -31,6 +31,7 @@ defmodule Xema.UseTest do
       end
     end
 
+    @tag :only
     test "valild?/2 returns true for a valied user" do
       assert UserSchema.valid?(:user, %{name: "Nick", age: 24})
     end
@@ -443,12 +444,12 @@ defmodule Xema.UseTest do
             use Xema
 
             xema do
-              field :foo, :bar, minimum: 0
+              field :foo, %{}, minimum: 0
             end
           end
         end
 
-      message = "invalid type :bar for field :foo"
+      message = "invalid type %{} for field :foo"
 
       assert_raise ArgumentError, message, fn ->
         Code.eval_quoted(code)

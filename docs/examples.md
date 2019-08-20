@@ -287,3 +287,10 @@ iex> json |> Jason.decode!() |> UserSchema.cast!()
   name: "Nick"
 }
 ```
+
+## Struct
+
+TODO: example
+
+```elixir
+```

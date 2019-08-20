@@ -6,4 +6,4 @@ specification.
 
 Xema allows you to annotate and validate elixir data structures.
 
-Xema is in early beta. If you try it and has an issue, report them.
+Xema is in beta. If you try it and has an issue, report them.

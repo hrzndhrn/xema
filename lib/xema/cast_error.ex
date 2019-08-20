@@ -3,13 +3,12 @@ defmodule Xema.CastError do
   Raised when a cast fails.
   """
 
-  defexception [:message, :path, :required, :to, :value, :key, :error]
-
   alias Xema.CastError
 
-  @type t :: %CastError{}
+  defexception [:message, :path, :required, :to, :value, :key, :error]
 
-  @type error :: %{
+  # TODO
+  @type t :: %CastError{
           error: struct | nil,
           key: String.t() | atom | nil,
           message: String.t() | nil,
@@ -35,7 +34,7 @@ defmodule Xema.CastError do
   @doc """
   Formats the error map to an error message.
   """
-  @spec format_error(Exception.t() | error) :: String.t()
+  @spec format_error(CastError.t()) :: String.t()
   def format_error(error) do
     error
     |> traverse_error()

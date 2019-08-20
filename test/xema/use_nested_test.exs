@@ -5,6 +5,17 @@ defmodule Xema.UseNestedTest do
     def uuid4, do: "da6dc006-f8de-465d-bc6b-97ba4727f183"
   end
 
+  defmodule UnixTimestamp do
+    @behaviour Xema.Caster
+
+    @impl true
+    def cast(timestamp) when is_integer(timestamp), do: {:ok, DateTime.from_unix!(timestamp)}
+
+    def cast(%DateTime{} = timestamp), do: timestamp
+
+    def cast(_), do: :error
+  end
+
   defmodule Location do
     use Xema
 
@@ -43,8 +54,6 @@ defmodule Xema.UseNestedTest do
   defmodule User do
     use Xema
 
-    alias Fake
-
     @regex_uuid ~r/^[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}$/
 
     xema do
@@ -54,6 +63,7 @@ defmodule Xema.UseNestedTest do
       field :location, Location
       field :grants, :list, items: Grant, default: []
       field :settings, KeyValue
+      field :updated, DateTime, caster: UnixTimestamp, allow: nil
       required [:age]
     end
   end
@@ -123,6 +133,8 @@ defmodule Xema.UseNestedTest do
     end
 
     test "returns %User{} for valid map with atom keys" do
+      unix_timestamp = 1_422_057_007
+
       data = %{
         name: "Fred",
         age: 66,
@@ -130,7 +142,8 @@ defmodule Xema.UseNestedTest do
         grants: [
           %{op: "foo", permissions: ["create"]},
           %{op: "bar", permissions: ["read", "delete"]}
-        ]
+        ],
+        updated: unix_timestamp
       }
 
       expected = %User{
@@ -145,7 +158,8 @@ defmodule Xema.UseNestedTest do
           country: nil
         },
         name: "Fred",
-        settings: %{}
+        settings: %{},
+        updated: DateTime.from_unix!(unix_timestamp)
       }
 
       assert User.cast(data) == {:ok, expected}
