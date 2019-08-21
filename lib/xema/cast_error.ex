@@ -5,8 +5,6 @@ defmodule Xema.CastError do
 
   defexception [:message, :path, :to, :value, :key, :error]
 
-  alias Xema.CastError
-
   @type t :: %__MODULE__{}
 
   @type error :: %{
