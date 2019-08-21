@@ -494,6 +494,7 @@ defmodule Xema.UseTest do
         Code.eval_quoted(code)
       end
     end
+
     @tag :only
     test "raises SchemaError for invalid module" do
       code =
@@ -517,5 +518,5 @@ defmodule Xema.UseTest do
         Code.eval_quoted(code)
       end
     end
-    end
+  end
 end

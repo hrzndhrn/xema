@@ -106,7 +106,6 @@ defmodule Xema do
 
   Struct schema module:
 
-      TODO: struct example
       iex> defmodule StructA do
       ...>   use Xema
       ...>
@@ -131,6 +130,7 @@ defmodule Xema do
       iex> Map.from_struct(data.b)
       %{foo: 5}
 
+  For more examples to construct schemas see "[Examples](examples.html)".
   """
 
   use Xema.Behaviour
@@ -208,8 +208,7 @@ defmodule Xema do
   More examples can be found on page
   [Usage](https://hexdocs.pm/xema/usage.html#content).
   """
-  @spec new(Schema.t() | Schema.type() | tuple | atom | keyword, keyword) ::
-          Xema.t()
+  @spec new(Schema.t() | Schema.type() | tuple | atom | keyword, keyword) :: Xema.t()
   def new(data, opts)
 
   # The implementation of `init`.
@@ -243,7 +242,6 @@ defmodule Xema do
   defp schema(type, opts \\ [])
 
   # Extracts the schema form a `%Xema{}` struct.
-  # This function will be just called for nested schemas.
   @spec schema(Xema.t(), keyword) :: Schema.t()
   defp schema(%Xema{schema: schema}, _), do: schema
 
@@ -262,14 +260,12 @@ defmodule Xema do
   end
 
   # Creates a schema from an atom type.
-  # This function will be just called for nested schemas.
-  @spec schema(Schema.type(), keyword) :: Schema.t()
+  @spec schema(atom, keyword) :: Schema.t()
   defp schema(value, opts) when value in @types do
     schema({value, []}, opts)
   end
 
   # Creates a schema from a `Xema` module.
-  @spec schema(atom, keyword) :: Schema.t()
   defp schema(value, _opts) when is_atom(value) do
     ensure_behaviour!(value).xema().schema
   end

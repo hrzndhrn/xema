@@ -12,7 +12,7 @@ defmodule Xema.Builder do
       false
   """
 
-  alias Xema.{CastError, ValidationError}
+  alias Xema.{CastError, Schema, ValidationError}
 
   @types Xema.Schema.types()
 
@@ -327,9 +327,15 @@ defmodule Xema.Builder do
     end
   end
 
-  # TODO: doc arguments
   @doc """
   Specifies a field. This function will be used inside `xema/0`.
+
+  Arguments:
+
+  + `name`: the name of the field.
+  + `type`: the type of the field. The `type` can also be a `struct` or another
+     schema.
+  + `opts`: the rules for the field.
 
   ## Examples
 
@@ -343,12 +349,15 @@ defmodule Xema.Builder do
       ...>
       iex> %{"name" => "Tim"} |> User.cast!() |> Map.from_struct()
       %{name: "Tim"}
+
+  For more examples see "[Examples: Struct](examples.html#struct)".
   """
-  # TODO: add spec
+  @spec field(atom, Schema.type() | module, keyword) ::
+          {:xema, Xema.t()} | {:module, module} | {:type, atom}
   def field(name, type, opts \\ [])
 
-  def field(field, type, opts) do
-    field
+  def field(name, type, opts) do
+    name
     |> check_field_type!(type)
     |> case do
       {:xema, module} -> module.xema()
