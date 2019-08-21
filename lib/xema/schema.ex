@@ -71,25 +71,25 @@ defmodule Xema.Schema do
   * `validator` a custom validator. This can be a function, a tuple with
     module and function name, or a `Xema.Validator` behaviour.
   """
-  @type t :: %Schema{
+  @type t :: %__MODULE__{
           additional_items: Xema.t() | Schema.t() | boolean | nil,
           additional_properties: map | boolean | nil,
           all_of: [Schema.t()] | nil,
           any_of: [Schema.t()] | nil,
-          caster: function | module | {module, atom} | {module, atom, arity} | list,
+          caster: function | module | {module, atom} | {module, atom, arity} | list | nil,
           comment: String.t() | nil,
           const: any,
           content_encoding: String.t() | nil,
           content_media_type: String.t() | nil,
           contains: Xema.t() | Schema.t() | nil,
-          data: map,
+          data: map | nil,
           default: any,
-          definitions: map,
+          definitions: map | nil,
           dependencies: list | map | nil,
           description: String.t() | nil,
           else: Xema.t() | Schema.t() | nil,
           enum: list | nil,
-          examples: [any],
+          examples: [any] | nil,
           exclusive_maximum: boolean | number | nil,
           exclusive_minimum: boolean | number | nil,
           format: atom | nil,
@@ -120,7 +120,7 @@ defmodule Xema.Schema do
           title: String.t() | nil,
           type: type | [type],
           unique_items: boolean | nil,
-          validator: function | module | {module, atom} | {module, atom, arity} | list
+          validator: function | module | {module, atom} | {module, atom, arity} | list | nil
         }
 
   defstruct [
