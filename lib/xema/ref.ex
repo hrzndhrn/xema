@@ -11,7 +11,7 @@ defmodule Xema.Ref do
   @typedoc """
   A reference contains a `pointer` and an optional `uri`.
   """
-  @type t :: %Xema.Ref{
+  @type t :: %__MODULE__{
           pointer: String.t(),
           uri: URI.t() | nil
         }

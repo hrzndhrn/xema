@@ -7,7 +7,7 @@ defmodule Xema.CastError do
 
   alias Xema.CastError
 
-  @type t :: %CastError{}
+  @type t :: %__MODULE__{}
 
   @type error :: %{
           message: String.t() | nil,
