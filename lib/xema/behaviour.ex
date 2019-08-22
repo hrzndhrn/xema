@@ -111,7 +111,6 @@ defmodule Xema.Behaviour do
   end
 
   @doc false
-  @spec update_refs(struct, keyword) :: struct
   def update_refs(xema, opts) do
     refs_map =
       xema.refs
