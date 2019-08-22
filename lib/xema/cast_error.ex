@@ -7,6 +7,8 @@ defmodule Xema.CastError do
 
   defexception [:message, :path, :required, :to, :value, :key, :error]
 
+  @type t :: %__MODULE__{}
+
   @type t :: %CastError{
           error: struct | nil,
           key: String.t() | atom | nil,
