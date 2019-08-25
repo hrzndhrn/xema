@@ -3,10 +3,9 @@ defmodule Xema.Schema do
   This module contains the struct for the keywords of a schema.
   """
 
-  alias Xema.Ref
-  alias Xema.Schema
-  alias Xema.SchemaError
-  alias Xema.Utils
+  alias Xema.{Behaviour, Ref, Schema, SchemaError, Utils}
+
+  @type xema :: struct
 
   @typedoc """
   The struct contains the keywords for a schema.
@@ -72,7 +71,7 @@ defmodule Xema.Schema do
     module and function name, or a `Xema.Validator` behaviour.
   """
   @type t :: %__MODULE__{
-          additional_items: Xema.t() | Schema.t() | boolean | nil,
+          additional_items: Behaviour.t() | Schema.t() | boolean | nil,
           additional_properties: map | boolean | nil,
           all_of: [Schema.t()] | nil,
           any_of: [Schema.t()] | nil,
@@ -81,21 +80,21 @@ defmodule Xema.Schema do
           const: any,
           content_encoding: String.t() | nil,
           content_media_type: String.t() | nil,
-          contains: Xema.t() | Schema.t() | nil,
+          contains: Behaviour.t() | Schema.t() | nil,
           data: map | nil,
           default: any,
           definitions: map | nil,
           dependencies: list | map | nil,
           description: String.t() | nil,
-          else: Xema.t() | Schema.t() | nil,
+          else: Behaviour.t() | Schema.t() | nil,
           enum: list | nil,
           examples: [any] | nil,
           exclusive_maximum: boolean | number | nil,
           exclusive_minimum: boolean | number | nil,
           format: atom | nil,
           id: String.t() | nil,
-          if: Xema.t() | Schema.t() | nil,
-          items: list | Xema.t() | Schema.t() | nil,
+          if: Behaviour.t() | Schema.t() | nil,
+          items: list | Behaviour.t() | Schema.t() | nil,
           keys: atom | nil,
           max_items: pos_integer | nil,
           max_length: pos_integer | nil,
@@ -112,11 +111,11 @@ defmodule Xema.Schema do
           pattern: Regex.t() | nil,
           pattern_properties: map | nil,
           properties: map | nil,
-          property_names: Xema.t() | Schema.t() | nil,
+          property_names: Behaviour.t() | Schema.t() | nil,
           ref: Ref.t() | nil,
           required: MapSet.t() | nil,
           schema: String.t() | nil,
-          then: Xema.t() | Schema.t() | nil,
+          then: Behaviour.t() | Schema.t() | nil,
           title: String.t() | nil,
           type: type | [type],
           unique_items: boolean | nil,
