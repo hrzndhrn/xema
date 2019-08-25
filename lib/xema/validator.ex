@@ -58,7 +58,7 @@ defmodule Xema.Validator do
         |> Keyword.put_new(:master, xema)
       )
 
-  @spec do_validate(Behaviour.t() | Xema.Schema.t(), any, keyword) :: result
+  @spec do_validate(Behaviour.t() | Schema.t(), any, keyword) :: result
   defp do_validate(%Schema{type: true}, _, _), do: :ok
 
   defp do_validate(%Schema{type: false}, _, _), do: {:error, %{type: false}}
