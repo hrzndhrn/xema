@@ -70,7 +70,7 @@ defmodule Xema.Behaviour do
       Returns `true` if the `value` is a valid value against the given `schema`;
       otherwise returns `false`.
       """
-      @spec valid?(__MODULE__.t()|Schema.t()|integer, any) :: boolean
+      @spec valid?(__MODULE__.t() | Schema.t() | integer, any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok
 
       @doc """
