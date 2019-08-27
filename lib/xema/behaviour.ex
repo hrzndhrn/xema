@@ -14,6 +14,11 @@ defmodule Xema.Behaviour do
     Validator
   }
 
+  @typedoc """
+  The schema containter.
+  """
+  @type t :: struct
+
   @inline_default true
 
   @doc """

@@ -4,6 +4,10 @@
 
 + Refactor `Xema.cast` with an improvement of the error messages.
 
+## 0.9.3 2019/08/25
+
++ Fix specs.
+
 ## 0.9.2 2019/08/21
 
 + Update specs.
