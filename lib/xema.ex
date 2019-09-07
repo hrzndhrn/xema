@@ -102,7 +102,6 @@ defmodule Xema do
       true
       iex> Schema.valid?(:nums, %{neg: [1, 2, 3]})
       false
-      ```
 
   Struct schema module:
 
