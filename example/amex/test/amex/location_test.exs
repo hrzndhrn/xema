@@ -1,4 +1,4 @@
-defmodule Xema.MapTest do
+defmodule Xema.LocationTest do
   use ExUnit.Case
 
   alias Amex.Location

@@ -5,8 +5,8 @@ defmodule Amex.Grant do
   @permissions [:create, :read, :update, :delete]
 
   xema do
-    field(:op, :atom, enum: @ops)
-    field(:permissions, :list, items: {:atom, enum: @permissions})
-    required([:op, :permissions])
+    field :op, :atom, enum: @ops
+    field :permissions, :list, items: {:atom, enum: @permissions}
+    required [:op, :permissions]
   end
 end
