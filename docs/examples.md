@@ -287,3 +287,137 @@ iex> json |> Jason.decode!() |> UserSchema.cast!()
   name: "Nick"
 }
 ```
+
+## Struct
+
+This example combines some schemas in a schema for a struct.
+
+The first schema describes a key-value map with a string key and a value of type
+number or string.
+
+```elixir
+defmodule ExApp.KeyValue do
+  use Xema
+
+  xema do
+    map(
+      keys: :strings,
+      additional_properties: [:number, :string],
+      property_names: [pattern: ~r/^[a-z][a-z_]*$/],
+      default: %{}
+    )
+  end
+end
+```
+
+This schema is used as follows:
+
+```elixir
+assert KeyValue.valid?(%{"str" => "Foo", "num" => 5})
+assert KeyValue.cast(str: "Foo", num: 5) == {:ok, %{"str" => "Foo", "num" => 5}}
+```
+
+The next schema is a simple struct schema.
+
+```elixir
+defmodule ExApp.Location do
+  use Xema
+
+  xema do
+    field :city, [:string, nil]
+    field :country, [:string, nil], min_length: 1
+  end
+end
+```
+
+With a cast, a `Location` struct is returned.
+
+```elixir
+assert Location.cast(city: "Berlin") == {:ok, %Location{city: "Berlin", country: nil}}
+```
+
+The `Grant` schema comes with two required fields.
+
+```elixir
+defmodule ExApp.Grant do
+  use Xema
+
+  @ops [:foo, :bar, :baz]
+  @permissions [:create, :read, :update, :delete]
+
+  xema do
+    field :op, :atom, enum: @ops
+    field :permissions, :list, items: {:atom, enum: @permissions}
+    required [:op, :permissions]
+  end
+end
+```
+
+The example contains also a `Caster` for unix timestamps.
+
+```elixir
+defmodule ExApp.UnixTimestamp do
+  @behaviour Xema.Caster
+
+  @impl true
+  def cast(timestamp) when is_integer(timestamp), do: {:ok, DateTime.from_unix!(timestamp)}
+
+  def cast(%DateTime{} = timestamp), do: timestamp
+
+  def cast(_), do: :error
+end
+```
+
+All schemas above are use in the `User` schema.
+
+```elixir
+defmodule ExApp.User do
+  use Xema
+
+  alias ExApp.{Grant, KeyValue, Location, UnixTimestamp}
+
+  @regex_uuid ~r/^[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}$/
+
+  xema do
+    field :id, :string, default: {UUID, :uuid4}, pattern: @regex_uuid
+    field :name, :string, min_length: 1
+    field :age, [:integer, nil], minimum: 0
+    field :location, Location
+    field :grants, :list, items: Grant, default: []
+    field :settings, KeyValue
+    field :created, DateTime, caster: UnixTimestamp
+    field :updated, DateTime, caster: UnixTimestamp, allow: nil
+    required [:age]
+  end
+end
+```
+
+This module used also `UUID` to set a default for the field `id`.
+
+A call of `User.cast!`
+
+```elixir
+ExApp.User.cast!(
+  name: "Nick",
+  age: 21,
+  location: [city: "Dortmud", country: "Germany"],
+  grants: [%{op: :bar, permissions: [:read, :update]}],
+  settings: [foo: 44, bar: "baz"],
+  created: 1_567_922_779
+)
+```
+
+returns a `User` struct
+
+```elixir
+%ExApp.User{
+  age: 21,
+  created: ~U[2019-09-08 06:06:19Z],
+  grants: [%ExApp.Grant{op: :bar, permissions: [:read, :update]}],
+  id: "c5166552-25f5-43fe-91de-969344fd67d6",
+  location: %ExApp.Location{city: "Dortmud", country: "Germany"},
+  name: "Nick",
+  settings: %{"bar" => "baz", "foo" => 44},
+  updated: nil
+}
+```

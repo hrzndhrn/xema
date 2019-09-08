@@ -13,7 +13,7 @@ Xema allows you to annotate and validate elixir data structures.
 If you search for a real JSON Schema validator give
 [JsonXema](https://github.com/hrzndhrn/json_xema) a try.
 
-Xema is in early beta. If you try it and has an issue, report them.
+Xema is in beta. If you try it and has an issue, report them.
 
 ## Installation
 

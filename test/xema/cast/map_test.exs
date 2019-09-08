@@ -37,6 +37,18 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, data) == {:ok, data}
     end
 
+    test "from a map with mixed keys", %{schema: schema} do
+      data = %{"bla" => "foo", foo: "bla"}
+      assert validate(schema, data) == :ok
+      assert cast(schema, data) == {:ok, data}
+    end
+
+    test "from a map with the same key as string and atom", %{schema: schema} do
+      data = %{"foo" => "bla", foo: "bla"}
+      assert validate(schema, data) == :ok
+      assert cast(schema, data) == {:ok, data}
+    end
+
     test "from a keyword list", %{schema: schema} do
       assert cast(schema, foo: 6) == {:ok, %{foo: 6}}
     end
@@ -70,6 +82,17 @@ defmodule Xema.Cast.MapTest do
 
     test "from a keyword list", %{schema: schema} do
       assert cast(schema, foo: 6) == {:ok, %{foo: 6}}
+    end
+
+    test "from a map with mixed keys", %{schema: schema} do
+      data = %{"bla" => "foo", foo: "bla"}
+      assert cast(schema, data) == {:ok, %{:foo => "bla", :bla => "foo"}}
+    end
+
+    test "from a map with the same key as string and atom", %{schema: schema} do
+      data = %{"foo" => "bar", foo: "baz"}
+      assert {:error, error} = cast(schema, data)
+      assert Exception.message(error) == "cannot cast foo to :keyword key, the key is ambiguous"
     end
   end
 

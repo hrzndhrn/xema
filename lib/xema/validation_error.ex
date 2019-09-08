@@ -3,7 +3,14 @@ defmodule Xema.ValidationError do
   Raised when a validation fails.
   """
 
+  alias Xema.ValidationError
+
   defexception [:message, :reason]
+
+  @type t :: %ValidationError{
+          message: String.t() | nil,
+          reason: map
+        }
 
   @type path :: [atom | integer | String.t()]
   @type opts :: [] | [path: path]

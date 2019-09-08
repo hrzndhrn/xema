@@ -1,8 +1,9 @@
 # Changelog
 
-## 0.10.0 dev
+## 0.10.0 2019/10/8
 
 + Refactor `Xema.cast` with an improvement of the error messages.
++ Add macro `field` and `required` for struct schemas.
 
 ## 0.9.3 2019/08/25
 

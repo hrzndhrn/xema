@@ -1,7 +1,7 @@
 defmodule Xema.UseTest do
   use ExUnit.Case, async: true
 
-  alias Xema.ValidationError
+  alias Xema.{CastError, Schema, SchemaError, ValidationError}
 
   test "use Xema with multiple schema and option multi false raises error" do
     message = "Use `use Xema, multi: true` to setup multiple schema in a module."
@@ -31,6 +31,7 @@ defmodule Xema.UseTest do
       end
     end
 
+    @tag :only
     test "valild?/2 returns true for a valied user" do
       assert UserSchema.valid?(:user, %{name: "Nick", age: 24})
     end
@@ -235,6 +236,287 @@ defmodule Xema.UseTest do
     test "cast!/2 returns casted data" do
       assert Schema.cast!(:nums, %{pos: [1, "2"], neg: [-5, "-4"]}) ==
                %{neg: [-5, -4], pos: [1, 2]}
+    end
+  end
+
+  describe "struct schema with strux" do
+    defmodule UserStrux do
+      use Xema
+
+      defstruct [:name, :age]
+
+      xema do
+        strux(
+          module: UserStrux,
+          properties: %{
+            name: string(min_length: 1),
+            age: integer(minimum: 0)
+          }
+        )
+      end
+    end
+
+    test "cast!/1" do
+      assert UserStrux.cast!(name: "Nick", age: 21) == %UserStrux{name: "Nick", age: 21}
+    end
+
+    test "xema/0" do
+      assert UserStrux.xema() == %Xema{
+               refs: %{},
+               schema: %Schema{
+                 module: Xema.UseTest.UserStrux,
+                 properties: %{
+                   age: %Schema{minimum: 0, type: :integer},
+                   name: %Schema{min_length: 1, type: :string}
+                 },
+                 type: :struct
+               }
+             }
+    end
+  end
+
+  describe "struct schema with one field and without keywords" do
+    defmodule OneFieldWithoutKeywords do
+      use Xema
+
+      xema do
+        field :age, :integer
+      end
+    end
+
+    test "cast!/1" do
+      assert OneFieldWithoutKeywords.cast!(%{"age" => "5"}) == %OneFieldWithoutKeywords{age: 5}
+    end
+  end
+
+  describe "struct schema with one field and with keywords" do
+    defmodule OneFieldWithKeywords do
+      use Xema
+
+      xema do
+        field :age, :integer, minimum: 0
+      end
+    end
+
+    test "cast!/1" do
+      assert OneFieldWithKeywords.cast!(%{"age" => "5"}) == %OneFieldWithKeywords{age: 5}
+    end
+  end
+
+  describe "struct schema with fields" do
+    defmodule UserStruct do
+      use Xema
+
+      xema do
+        field :name, :string, min_length: 1
+        field :age, [:integer, nil], minimum: 0
+        required [:age]
+      end
+    end
+
+    test "xema/0" do
+      assert UserStruct.xema() == %Xema{
+               refs: %{},
+               schema: %Schema{
+                 module: Xema.UseTest.UserStruct,
+                 properties: %{
+                   age: %Schema{minimum: 0, type: [:integer, nil]},
+                   name: %Schema{min_length: 1, type: :string}
+                 },
+                 required: MapSet.new([:age]),
+                 type: :struct,
+                 keys: :atoms
+               }
+             }
+    end
+
+    test "cast!/1" do
+      assert UserStruct.cast!(name: "Nick", age: 21) == %UserStruct{name: "Nick", age: 21}
+
+      assert UserStruct.cast!(%{"name" => "Nick", "age" => "21"}) == %UserStruct{
+               name: "Nick",
+               age: 21
+             }
+    end
+
+    test "cast/1 with invalid data" do
+      assert {:error, error} = UserStruct.cast(name: "", age: -1)
+
+      assert Exception.message(error) == """
+             Value -1 is less than minimum value of 0, at [:age].
+             Expected minimum length of 1, got "", at [:name].\
+             """
+    end
+
+    test "cast/1 with missing age" do
+      assert {:error, error} = UserStruct.cast(name: "Nick")
+
+      assert error ==
+               %CastError{
+                 path: [],
+                 required: [:age],
+                 to: Xema.UseTest.UserStruct,
+                 value: [name: "Nick"]
+               }
+
+      assert Exception.message(error) ==
+               ~s|cannot cast [name: "Nick"] to Xema.UseTest.UserStruct| <>
+                 ~s| missing required keys [:age]|
+    end
+
+    test "cast/1 from a map with missing age" do
+      assert {:error, error} = UserStruct.cast(%{name: "Nick"})
+
+      assert error ==
+               %CastError{
+                 path: [],
+                 required: [:age],
+                 to: Xema.UseTest.UserStruct,
+                 value: %{name: "Nick"}
+               }
+
+      assert Exception.message(error) ==
+               ~s|cannot cast %{name: "Nick"} to Xema.UseTest.UserStruct| <>
+                 ~s| missing required keys [:age]|
+    end
+
+    test "cast/1 from a map with string keys and missing age" do
+      assert {:error, error} = UserStruct.cast(%{"name" => "Nick"})
+
+      assert error ==
+               %CastError{
+                 path: [],
+                 required: [:age],
+                 to: Xema.UseTest.UserStruct,
+                 value: %{"name" => "Nick"}
+               }
+
+      assert Exception.message(error) ==
+               ~s|cannot cast %{"name" => "Nick"} to Xema.UseTest.UserStruct| <>
+                 ~s| missing required keys [:age]|
+    end
+
+    @tag :only
+    test "cast/1 from a map with string keys, missing age and an unknown property" do
+      assert {:error, error} = UserStruct.cast(%{"name" => "Nick", "xyz" => 5})
+
+      assert error ==
+               %CastError{
+                 path: [],
+                 required: [:age],
+                 to: Xema.UseTest.UserStruct,
+                 value: %{"name" => "Nick", "xyz" => 5}
+               }
+    end
+
+    test "validate/1" do
+      assert {:error, error} = UserStruct.validate(%UserStruct{name: "Nix", age: -1})
+      assert Exception.message(error) == "Value -1 is less than minimum value of 0, at [:age]."
+    end
+  end
+
+  describe "xema/0" do
+    test "raises ArgumentError for multiple required functions" do
+      code =
+        quote do
+          defmodule MultiRequired do
+            use Xema
+
+            xema do
+              field :foo, :integer, minimum: 0
+              required [:foo]
+              required [:foo]
+            end
+          end
+        end
+
+      message = "the required function can only be called once per xema"
+
+      assert_raise ArgumentError, message, fn ->
+        Code.eval_quoted(code)
+      end
+    end
+
+    test "raises ArgumentError for invalid type in field" do
+      code =
+        quote do
+          defmodule MultiRequired do
+            use Xema
+
+            xema do
+              field :foo, %{}, minimum: 0
+            end
+          end
+        end
+
+      message = "invalid type %{} for field :foo"
+
+      assert_raise ArgumentError, message, fn ->
+        Code.eval_quoted(code)
+      end
+    end
+
+    test "raises ArgumentError for invalid argument in field" do
+      code =
+        quote do
+          defmodule MultiRequired do
+            use Xema
+
+            xema do
+              field :foo, "bar", minimum: 0
+            end
+          end
+        end
+
+      message = ~s|invalid type "bar" for field :foo|
+
+      assert_raise ArgumentError, message, fn ->
+        Code.eval_quoted(code)
+      end
+    end
+
+    @tag :only
+    test "raises SchemaError for missing module" do
+      code =
+        quote do
+          defmodule MissingBehaviour do
+            use Xema
+
+            xema do
+              field :foo, Foo
+            end
+          end
+        end
+
+      message = "Module Foo not compiled"
+
+      assert_raise SchemaError, message, fn ->
+        Code.eval_quoted(code)
+      end
+    end
+
+    @tag :only
+    test "raises SchemaError for invalid module" do
+      code =
+        quote do
+          defmodule Bad do
+            # empty
+          end
+
+          defmodule BadBehaviour do
+            use Xema
+
+            xema do
+              field :grants, :list, items: Bad, default: []
+            end
+          end
+        end
+
+      message = "Module Bad is not a Xema behaviour"
+
+      assert_raise SchemaError, message, fn ->
+        Code.eval_quoted(code)
+      end
     end
   end
 end
