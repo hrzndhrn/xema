@@ -23,7 +23,8 @@ defmodule Xema.Mixfile do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.travis": :test,
-        "coveralls.html": :test
+        "coveralls.html": :test,
+        "gen.test_suite": :test
       ],
 
       # Docs
