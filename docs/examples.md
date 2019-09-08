@@ -374,7 +374,7 @@ All schemas above are use in the `User` schema.
 defmodule ExApp.User do
   use Xema
 
-  alias Amex.{Grant, KeyValue, Location, UnixTimestamp}
+  alias ExApp.{Grant, KeyValue, Location, UnixTimestamp}
 
   @regex_uuid ~r/^[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}$/
 
