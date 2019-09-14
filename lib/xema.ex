@@ -140,6 +140,7 @@ defmodule Xema do
   alias Xema.{
     Castable,
     CastError,
+    JsonSchema,
     Ref,
     Schema,
     SchemaError,
@@ -236,6 +237,17 @@ defmodule Xema do
     SchemaValidator.validate!(data)
     schema(data)
   end
+
+  @doc """
+  Creates a `Xema` from a JSON Schema.
+
+  ## Examples
+
+      iex> ~s|{"type": "string"}| |> Jason.decode!() |> Xema.from_json_schema()
+      %Xema{refs: %{}, schema: %Xema.Schema{type: :string}}
+  """
+  @spec from_json_schema(atom | map) :: __MODULE__.t()
+  def from_json_schema(json_schema), do: json_schema |> JsonSchema.to_xema() |> new()
 
   # This function creates a schema from the given data.
   defp schema(type, opts \\ [])
