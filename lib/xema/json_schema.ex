@@ -25,7 +25,6 @@ defmodule Xema.JsonSchema do
 
   @schema_map ~w(
     definitions
-    dependencies
     pattern_properties
     properties
   )a
@@ -38,7 +37,6 @@ defmodule Xema.JsonSchema do
       true -> type
       false -> {type, schema(json)}
     end
-    |> IO.inspect(label: :src)
   end
 
   def to_xema(json) when is_boolean(json), do: json
@@ -73,6 +71,15 @@ defmodule Xema.JsonSchema do
 
   defp rule(:format, value) do
     {:format, value |> ConvCase.to_snake_case() |> String.to_existing_atom()}
+  end
+
+  defp rule(:dependencies, value) do
+    value = Enum.into(value, %{}, fn
+      {key, value} when is_map(value) -> {key, to_xema(value)}
+      {key, value} -> {key, value}
+    end)
+
+    {:dependencies, value}
   end
 
   defp rule(key, value) when key in @schema_map do

@@ -17,7 +17,6 @@ defmodule Mix.Tasks.Gen.TestSuite do
     idn-email.json
     content.json
   ) ++ ~w(
-    dependencies.json
     definitions.json
     ref.json
     refRemote.json
