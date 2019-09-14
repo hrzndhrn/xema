@@ -1,0 +1,20 @@
+defmodule <%= @module %> do
+  use ExUnit.Case
+
+  import Xema, only: [valid?: 2]
+  <%= for %{"description" => desc, "schema" => schema, "tests" => tests} <- @test_cases do %>
+  describe "<%= desc %>" do
+    setup do
+      %{schema: Xema.from_json_schema(
+        <%= inspect schema %>
+      )}
+    end
+
+    <%= for %{"description" => description, "data" => data, "valid" => valid} <- tests do %>
+      test "<%= description %>", %{schema: schema} do
+        <%= if valid do %>assert<% else %>refute<% end %> valid?(schema, <%= inspect data %>)
+      end
+    <% end %>
+  end
+  <% end %>
+end
