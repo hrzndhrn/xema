@@ -177,4 +177,17 @@ defmodule Xema.OneOfTest do
                 }}
     end
   end
+
+  describe "one_of type or minimum" do
+    setup do
+      %{schema: Xema.new(one_of: [:integer, [minimum: 2]])}
+    end
+
+    test "with an invalid value", %{schema: schema} do
+      assert validate(schema, 3) ==  {:error,
+             %Xema.ValidationError{
+               reason: %{one_of: {:ok, [0, 1]}, value: 3}
+             }}
+    end
+  end
 end
