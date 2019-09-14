@@ -3,9 +3,32 @@ defmodule Xema.JsonSchema do
   Converts a JSON Schema to Xema source.
   """
 
-  alias Xema.Schema
-
   @type json_schema :: true | false | map
+  @schema ~w(
+    additional_items
+    additional_properties
+    property_names
+    not
+    if
+    then
+    else
+    contains
+    items
+  )a
+
+  @schemas ~w(
+    all_of
+    any_of
+    one_of
+    items
+  )a
+
+  @schema_map ~w(
+    definitions
+    dependencies
+    pattern_properties
+    properties
+  )a
 
   @spec to_xema(json_schema :: json_schema) :: atom | tuple
   def to_xema(json) when is_map(json) do
@@ -15,16 +38,27 @@ defmodule Xema.JsonSchema do
       true -> type
       false -> {type, schema(json)}
     end
+    |> IO.inspect(label: :src)
   end
+
+  def to_xema(json) when is_boolean(json), do: json
 
   defp type(map) do
     {type, map} = Map.pop(map, "type", :any)
     {type_to_atom(type), map}
   end
 
+  defp type_to_atom(list) when is_list(list), do: Enum.map(list, &type_to_atom/1)
+
   defp type_to_atom("object"), do: :map
 
-  defp type_to_atom(type), do: String.to_existing_atom(type)
+  defp type_to_atom("array"), do: :list
+
+  defp type_to_atom("null"), do: nil
+
+  defp type_to_atom(type) when is_binary(type), do: String.to_existing_atom(type)
+
+  defp type_to_atom(type), do: type
 
   defp schema(json), do: json |> Enum.map(&rule/1) |> Keyword.new()
 
@@ -35,9 +69,22 @@ defmodule Xema.JsonSchema do
     |> rule(value)
   end
 
-  defp rule(:properties, value) do
-    value = Enum.into(value, %{}, fn {key, property} -> {key, to_xema(property)} end)
-    {:properties, value}
+  defp rule(:"$ref", value), do: {:ref, value}
+
+  defp rule(:format, value) do
+    {:format, value |> ConvCase.to_snake_case() |> String.to_existing_atom()}
+  end
+
+  defp rule(key, value) when key in @schema_map do
+    {key, Enum.into(value, %{}, fn {key, value} -> {key, to_xema(value)} end)}
+  end
+
+  defp rule(key, value) when key in @schemas and is_list(value) do
+    {key, Enum.map(value, &to_xema/1)}
+  end
+
+  defp rule(key, value) when key in @schema do
+    {key, to_xema(value)}
   end
 
   defp rule(key, value), do: {key, value}
