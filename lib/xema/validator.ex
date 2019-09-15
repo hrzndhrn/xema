@@ -317,7 +317,9 @@ defmodule Xema.Validator do
 
   defp enum(%{enum: enum}, value) when is_float(value) do
     case Enum.member?(enum, value) do
-      true -> :ok
+      true ->
+        :ok
+
       false ->
         case zero_terminated_float?(value) && Enum.member?(enum, trunc(value)) do
           true -> :ok

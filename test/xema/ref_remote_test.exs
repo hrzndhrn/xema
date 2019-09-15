@@ -3,6 +3,7 @@ defmodule Xema.RefRemoteTest do
 
   import Xema, only: [valid?: 2, validate: 2]
 
+  alias Test.{FileLoader, RemoteLoaderExon}
   alias Xema.{Ref, Schema, SchemaError, ValidationError}
 
   test "http server" do
@@ -18,7 +19,7 @@ defmodule Xema.RefRemoteTest do
           "undefined function invalid/0"
 
       assert_raise CompileError, expected, fn ->
-        Xema.new({:ref, "http://localhost:1234/compile-error.exon"})
+        Xema.new({:ref, "http://localhost:1234/compile-error.exon"}, loader: RemoteLoaderExon)
       end
     end
 
@@ -28,7 +29,7 @@ defmodule Xema.RefRemoteTest do
           "keyword argument must be followed by space after: a:"
 
       assert_raise SyntaxError, expected, fn ->
-        Xema.new({:ref, "http://localhost:1234/syntax-error.exon"})
+        Xema.new({:ref, "http://localhost:1234/syntax-error.exon"}, loader: RemoteLoaderExon)
       end
     end
   end
@@ -38,14 +39,14 @@ defmodule Xema.RefRemoteTest do
       expected = "Remote schema 'http://localhost:1234/not-found.exon' not found."
 
       assert_raise SchemaError, expected, fn ->
-        Xema.new({:ref, "http://localhost:1234/not-found.exon"})
+        Xema.new({:ref, "http://localhost:1234/not-found.exon"}, loader: RemoteLoaderExon)
       end
     end
   end
 
   describe "remote ref" do
     setup do
-      %{schema: Xema.new({:ref, "http://localhost:1234/integer.exon#"})}
+      %{schema: Xema.new({:ref, "http://localhost:1234/integer.exon#"}, loader: RemoteLoaderExon)}
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -66,7 +67,7 @@ defmodule Xema.RefRemoteTest do
 
   describe "file ref" do
     setup do
-      %{schema: Xema.new({:ref, "integer.exon"}, loader: Test.FileLoader)}
+      %{schema: Xema.new({:ref, "integer.exon"}, loader: FileLoader)}
     end
 
     test "validate/2 with a valid value", %{schema: schema} do
@@ -88,7 +89,10 @@ defmodule Xema.RefRemoteTest do
   describe "fragment within remote ref" do
     setup do
       %{
-        schema: Xema.new({:ref, "http://localhost:1234/sub_schemas.exon#/definitions/int"})
+        schema:
+          Xema.new({:ref, "http://localhost:1234/sub_schemas.exon#/definitions/int"},
+            loader: RemoteLoaderExon
+          )
       }
     end
 
@@ -118,7 +122,8 @@ defmodule Xema.RefRemoteTest do
         schema:
           Xema.new(
             {:ref, "http://localhost:1234/sub_schemas.exon#/definitions/int"},
-            inline: false
+            inline: false,
+            loader: RemoteLoaderExon
           )
       }
     end
@@ -177,17 +182,20 @@ defmodule Xema.RefRemoteTest do
       msg = "Ref #/definitions/invalid not found."
 
       assert_raise SchemaError, msg, fn ->
-        Xema.new({
-          :ref,
-          "http://localhost:1234/sub_schemas.exon#/definitions/invalid"
-        })
+        Xema.new(
+          {
+            :ref,
+            "http://localhost:1234/sub_schemas.exon#/definitions/invalid"
+          },
+          loader: RemoteLoaderExon
+        )
       end
     end
   end
 
   describe "ref inside of a remote schema" do
     setup do
-      %{schema: Xema.new({:ref, "http://localhost:1234/inside.exon"})}
+      %{schema: Xema.new({:ref, "http://localhost:1234/inside.exon"}, loader: RemoteLoaderExon)}
     end
 
     test "with valid data", %{schema: schema} do
@@ -204,7 +212,8 @@ defmodule Xema.RefRemoteTest do
       %{
         schema:
           Xema.new({:ref, "http://localhost:1234/inside.exon"},
-            inline: false
+            inline: false,
+            loader: RemoteLoaderExon
           )
       }
     end
@@ -221,7 +230,10 @@ defmodule Xema.RefRemoteTest do
   describe "ref within remote ref" do
     setup do
       %{
-        schema: Xema.new({:ref, "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"})
+        schema:
+          Xema.new({:ref, "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"},
+            loader: RemoteLoaderExon
+          )
       }
     end
 
@@ -247,7 +259,8 @@ defmodule Xema.RefRemoteTest do
         schema:
           Xema.new(
             {:ref, "http://localhost:1234/sub_schemas.exon#/definitions/refToInt"},
-            inline: false
+            inline: false,
+            loader: RemoteLoaderExon
           )
       }
     end
@@ -311,8 +324,8 @@ defmodule Xema.RefRemoteTest do
       }
 
       %{
-        schema: Xema.new(data),
-        non_inline: Xema.new(data, inline: false)
+        schema: Xema.new(data, loader: RemoteLoaderExon),
+        non_inline: Xema.new(data, inline: false, loader: RemoteLoaderExon)
       }
     end
 
@@ -353,13 +366,16 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new({
-            :map,
-            id: "http://localhost:1234/object",
-            properties: %{
-              name: {:ref, "xema_name.exon#/definitions/or_nil"}
-            }
-          })
+          Xema.new(
+            {
+              :map,
+              id: "http://localhost:1234/object",
+              properties: %{
+                name: {:ref, "xema_name.exon#/definitions/or_nil"}
+              }
+            },
+            loader: RemoteLoaderExon
+          )
       }
     end
 
@@ -400,13 +416,16 @@ defmodule Xema.RefRemoteTest do
     setup do
       %{
         schema:
-          Xema.new({
-            :map,
-            id: "http://localhost:1234",
-            properties: %{
-              name: {:ref, "xema_name.exon#/definitions/or_nil"}
-            }
-          })
+          Xema.new(
+            {
+              :map,
+              id: "http://localhost:1234",
+              properties: %{
+                name: {:ref, "xema_name.exon#/definitions/or_nil"}
+              }
+            },
+            loader: RemoteLoaderExon
+          )
       }
     end
 
@@ -468,7 +487,7 @@ defmodule Xema.RefRemoteTest do
   describe "remote ref in remote ref" do
     setup do
       %{
-        schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"})
+        schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"}, loader: RemoteLoaderExon)
       }
     end
 
@@ -495,7 +514,11 @@ defmodule Xema.RefRemoteTest do
   describe "remote ref in remote ref (non-inline)" do
     setup do
       %{
-        schema: Xema.new({:ref, "http://localhost:1234/obj_int.exon"}, inline: false)
+        schema:
+          Xema.new({:ref, "http://localhost:1234/obj_int.exon"},
+            inline: false,
+            loader: RemoteLoaderExon
+          )
       }
     end
 
@@ -527,7 +550,7 @@ defmodule Xema.RefRemoteTest do
       %{
         schema:
           Xema.new({:ref, "http://localhost:1234/obj_list_int.exon"},
-            loader: Test.FileLoader
+            loader: FileLoader
           )
       }
     end
@@ -561,7 +584,7 @@ defmodule Xema.RefRemoteTest do
       %{
         schema:
           Xema.new({:ref, "http://localhost:1234/obj_list_int.exon"},
-            loader: Test.FileLoader,
+            loader: FileLoader,
             inline: false
           )
       }
@@ -587,7 +610,7 @@ defmodule Xema.RefRemoteTest do
 
   describe "circular remote ref" do
     setup do
-      %{schema: Xema.new({:ref, "http://localhost:1234/b_in_a.exon"})}
+      %{schema: Xema.new({:ref, "http://localhost:1234/b_in_a.exon"}, loader: RemoteLoaderExon)}
     end
 
     test "check schema", %{schema: schema} do

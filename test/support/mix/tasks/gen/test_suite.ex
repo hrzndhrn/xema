@@ -17,16 +17,19 @@ defmodule Mix.Tasks.Gen.TestSuite do
     idn-email.json
     content.json
   ) ++ ~w(
-    definitions.json
-    ref.json
     refRemote.json
   )
+
   @exclude_test_case [
-    "escaped pointer ref"
+    # unsupported feature
+    "escaped pointer ref",
+    # will be supported soon
+    "Location-independent identifier with absolute URI",
+    "Location-independent identifier with base URI change in subschema"
   ]
 
   def run(_) do
-    IO.puts("Generate JSON Schema test suite:")
+    IO.puts("Generate JSON Schema test suite.")
 
     case File.dir?(@test_suite_path) do
       true ->

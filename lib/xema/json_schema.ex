@@ -62,22 +62,22 @@ defmodule Xema.JsonSchema do
 
   defp rule({key, value}) when is_binary(key) do
     key
+    |> String.trim_leading("$")
     |> ConvCase.to_snake_case()
     |> String.to_existing_atom()
     |> rule(value)
   end
-
-  defp rule(:"$ref", value), do: {:ref, value}
 
   defp rule(:format, value) do
     {:format, value |> ConvCase.to_snake_case() |> String.to_existing_atom()}
   end
 
   defp rule(:dependencies, value) do
-    value = Enum.into(value, %{}, fn
-      {key, value} when is_map(value) -> {key, to_xema(value)}
-      {key, value} -> {key, value}
-    end)
+    value =
+      Enum.into(value, %{}, fn
+        {key, value} when is_map(value) -> {key, to_xema(value)}
+        {key, value} -> {key, value}
+      end)
 
     {:dependencies, value}
   end

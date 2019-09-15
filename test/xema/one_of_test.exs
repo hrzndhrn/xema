@@ -184,10 +184,11 @@ defmodule Xema.OneOfTest do
     end
 
     test "with an invalid value", %{schema: schema} do
-      assert validate(schema, 3) ==  {:error,
-             %Xema.ValidationError{
-               reason: %{one_of: {:ok, [0, 1]}, value: 3}
-             }}
+      assert validate(schema, 3) ==
+               {:error,
+                %Xema.ValidationError{
+                  reason: %{one_of: {:ok, [0, 1]}, value: 3}
+                }}
     end
   end
 end
