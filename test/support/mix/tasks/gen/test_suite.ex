@@ -11,7 +11,6 @@ defmodule Mix.Tasks.Gen.TestSuite do
     "draft2019-08",
     # Unsupported optional features
     "ecmascript-regex.json",
-    "json-pointer.json",
     "zeroTerminatedFloats.json",
     "iri.json",
     "iri-reference.json",
