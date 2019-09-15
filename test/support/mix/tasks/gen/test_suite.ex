@@ -5,24 +5,26 @@ defmodule Mix.Tasks.Gen.TestSuite do
   @test_suite_path "JSON-Schema-Test-Suite"
   @test_path "test/json_schema_test_suite"
   @template File.read!("test/support/test.eex")
-  @exclude ~w(
-    draft3
-    draft2019-08
-    ecmascript-regex.json
-    json-pointer.json
-    zeroTerminatedFloats.json
-    iri.json
-    iri-reference.json
-    idn-hostname.json
-    idn-email.json
-    content.json
-  ) ++ ~w(
-    refRemote.json
-  )
+  @exclude [
+    # Unsupported JSON Schema versions
+    "draft3",
+    "draft2019-08",
+    # Unsupported optional features
+    "ecmascript-regex.json",
+    "json-pointer.json",
+    "zeroTerminatedFloats.json",
+    "iri.json",
+    "iri-reference.json",
+    "idn-hostname.json",
+    "idn-email.json",
+    "content.json"
+  ]
 
   @exclude_test_case [
-    # unsupported feature
+    # Unsupported feature. This test defines sub-schema outside `definitions`.
     "escaped pointer ref",
+    "fragment within remote ref",
+    "ref within remote ref",
     # will be supported soon
     "Location-independent identifier with absolute URI",
     "Location-independent identifier with base URI change in subschema"
