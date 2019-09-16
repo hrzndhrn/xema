@@ -132,8 +132,7 @@ defmodule Mix.Tasks.Gen.TestSuite do
       end
 
     test_cases
-
-    Enum.any?(fn
+    |> Enum.any?(fn
       %{"description" => ^description} -> true
       _ -> false
     end)
