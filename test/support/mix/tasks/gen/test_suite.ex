@@ -1,4 +1,8 @@
 defmodule Mix.Tasks.Gen.TestSuite do
+  @moduledoc """
+  This mix task generates tests form the JSON Schema test suite.
+  """
+
   use Mix.Task
 
   @url "https://github.com/json-schema-org/JSON-Schema-Test-Suite"
@@ -100,9 +104,8 @@ defmodule Mix.Tasks.Gen.TestSuite do
       |> Enum.filter(fn test_case -> test_case["description"] not in @exclude_test_case end)
       |> update_descriptions()
 
-    EEx.eval_string(@template,
-      assigns: [module: module_name(file_name), test_cases: test_cases]
-    )
+    @template
+    |> EEx.eval_string(assigns: [module: module_name(file_name), test_cases: test_cases])
     |> Code.format_string!()
   end
 
@@ -114,7 +117,8 @@ defmodule Mix.Tasks.Gen.TestSuite do
   end
 
   defp update_descriptions(test_cases) do
-    Enum.reduce(test_cases, [], fn test_case, acc ->
+    test_cases
+    |> Enum.reduce([], fn test_case, acc ->
       [update_description(test_case, acc, 0) | acc]
     end)
     |> Enum.reverse()
@@ -127,7 +131,9 @@ defmodule Mix.Tasks.Gen.TestSuite do
         n -> ~s|#{test_case["description"]} (#{n})|
       end
 
-    Enum.any?(test_cases, fn
+    test_cases
+
+    Enum.any?(fn
       %{"description" => ^description} -> true
       _ -> false
     end)
