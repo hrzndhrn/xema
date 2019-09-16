@@ -4,6 +4,7 @@ defmodule Xema.JsonSchema do
   """
 
   @type json_schema :: true | false | map
+
   @schema ~w(
     additional_items
     additional_properties
