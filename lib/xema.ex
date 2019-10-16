@@ -238,6 +238,7 @@ defmodule Xema do
     schema(data)
   end
 
+  # TODO: more docs. All additional schema keys must be existing atoms
   @doc """
   Creates a `Xema` from a JSON Schema.
 
@@ -248,7 +249,7 @@ defmodule Xema do
   """
   @spec from_json_schema(atom | map, keyword) :: __MODULE__.t()
   def from_json_schema(json_schema, opts \\ []) do
-    json_schema |> JsonSchema.to_xema() |> new(opts)
+    json_schema |> JsonSchema.to_xema(opts) |> new(opts)
   end
 
   # This function creates a schema from the given data.

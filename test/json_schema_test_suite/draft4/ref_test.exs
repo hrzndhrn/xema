@@ -70,6 +70,48 @@ defmodule JsonSchemaTestSuite.Draft4.Ref do
     end
   end
 
+  describe "escaped pointer ref" do
+    setup do
+      %{
+        schema:
+          Xema.from_json_schema(%{
+            "percent%field" => %{"type" => "integer"},
+            "properties" => %{
+              "percent" => %{"$ref" => "#/percent%25field"},
+              "slash" => %{"$ref" => "#/slash~1field"},
+              "tilda" => %{"$ref" => "#/tilda~0field"}
+            },
+            "slash/field" => %{"type" => "integer"},
+            "tilda~field" => %{"type" => "integer"}
+          })
+      }
+    end
+
+    test "slash invalid", %{schema: schema} do
+      refute valid?(schema, %{"slash" => "aoeu"})
+    end
+
+    test "tilda invalid", %{schema: schema} do
+      refute valid?(schema, %{"tilda" => "aoeu"})
+    end
+
+    test "percent invalid", %{schema: schema} do
+      refute valid?(schema, %{"percent" => "aoeu"})
+    end
+
+    test "slash valid", %{schema: schema} do
+      assert valid?(schema, %{"slash" => 123})
+    end
+
+    test "tilda valid", %{schema: schema} do
+      assert valid?(schema, %{"tilda" => 123})
+    end
+
+    test "percent valid", %{schema: schema} do
+      assert valid?(schema, %{"percent" => 123})
+    end
+  end
+
   describe "nested refs" do
     setup do
       %{

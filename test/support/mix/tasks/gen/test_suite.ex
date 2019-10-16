@@ -14,21 +14,18 @@ defmodule Mix.Tasks.Gen.TestSuite do
     "draft3",
     "draft2019-08",
     # Unsupported optional features
+    "content.json",
     "ecmascript-regex.json",
     "zeroTerminatedFloats.json",
-    "iri.json",
-    "iri-reference.json",
-    "idn-hostname.json",
+    # Unsupported semantic formats
     "idn-email.json",
-    "content.json"
+    "idn-hostname.json",
+    "iri.json",
+    "iri-reference.json"
   ]
 
   @exclude_test_case [
-    # Unsupported feature. This test defines sub-schema outside `definitions`.
-    "escaped pointer ref",
-    "fragment within remote ref",
-    "ref within remote ref",
-    # will be supported soon
+    # will be fixed soon
     "Location-independent identifier with absolute URI",
     "Location-independent identifier with base URI change in subschema"
   ]

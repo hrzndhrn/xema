@@ -27,7 +27,6 @@ defmodule Xema.JsonSchemaTest do
     assert xema(json_schema) == :map
   end
 
-  @tag :only
   test "converts properties" do
     json_schema = """
     {
@@ -39,6 +38,40 @@ defmodule Xema.JsonSchemaTest do
     """
 
     assert xema(json_schema) == {:map, properties: %{"number" => :number}}
+  end
+
+  test "none schema" do
+    # make the atoms existing
+    [:a, :b, :c]
+
+    json_schema = """
+    {"a": {"b": {"c": "none"}}}
+    """
+
+    assert xema(json_schema) == {:any, [a: [b: [c: "none"]]]}
+  end
+
+  test "nested schema" do
+    # make the atoms existing
+    [:a, :b, :c]
+
+    json_schema = """
+    {"a": {"b": {"c": {"type": "number", "minimum": 5}}}}
+    """
+
+    assert xema(json_schema) == {:any, [a: [b: [c: {:number, [minimum: 5]}]]]}
+  end
+
+  test "missing key" do
+    json_schema = """
+    {"xyz": {"b": {"c": {"type": "number", "minimum": 5}}}}
+    """
+
+    message = "All additional schema keys must be existing atoms. Missing atom for xyz"
+
+    assert_raise Xema.SchemaError, message, fn ->
+      xema(json_schema)
+    end
   end
 
   defp xema(json_schema), do: json_schema |> Jason.decode!() |> to_xema()

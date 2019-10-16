@@ -17,6 +17,40 @@ defmodule JsonSchemaTestSuite.Draft6.RefRemote do
     end
   end
 
+  describe "fragment within remote ref" do
+    setup do
+      %{
+        schema:
+          Xema.from_json_schema(%{"$ref" => "http://localhost:1234/subSchemas.json#/integer"})
+      }
+    end
+
+    test "remote fragment valid", %{schema: schema} do
+      assert valid?(schema, 1)
+    end
+
+    test "remote fragment invalid", %{schema: schema} do
+      refute valid?(schema, "a")
+    end
+  end
+
+  describe "ref within remote ref" do
+    setup do
+      %{
+        schema:
+          Xema.from_json_schema(%{"$ref" => "http://localhost:1234/subSchemas.json#/refToInteger"})
+      }
+    end
+
+    test "ref within ref valid", %{schema: schema} do
+      assert valid?(schema, 1)
+    end
+
+    test "ref within ref invalid", %{schema: schema} do
+      refute valid?(schema, "a")
+    end
+  end
+
   describe "base URI change" do
     setup do
       %{

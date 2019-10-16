@@ -64,6 +64,7 @@ defmodule Xema.SchemaTest do
   end
 
   test "keywords/0" do
-    assert Schema.keywords() == %Schema{} |> Map.keys() |> List.delete(:data)
+    assert Schema.keywords() ==
+             %Schema{} |> Map.keys() |> List.delete(:data) |> List.delete(:__struct__)
   end
 end
