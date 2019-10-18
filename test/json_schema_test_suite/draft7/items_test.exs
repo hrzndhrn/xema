@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Items do
+defmodule JsonSchemaTestSuite.Draft7.ItemsTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "a schema given for items" do
     setup do
-      %{schema: Xema.from_json_schema(%{"items" => %{"type" => "integer"}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"items" => %{"type" => "integer"}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "valid items", %{schema: schema} do
@@ -29,7 +35,10 @@ defmodule JsonSchemaTestSuite.Draft7.Items do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{"items" => [%{"type" => "integer"}, %{"type" => "string"}]})
+          Xema.from_json_schema(
+            %{"items" => [%{"type" => "integer"}, %{"type" => "string"}]},
+            draft: "draft7"
+          )
       }
     end
 
@@ -60,7 +69,13 @@ defmodule JsonSchemaTestSuite.Draft7.Items do
 
   describe "items with boolean schema (true)" do
     setup do
-      %{schema: Xema.from_json_schema(%{"items" => true})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"items" => true},
+            draft: "draft7"
+          )
+      }
     end
 
     test "any array is valid", %{schema: schema} do
@@ -74,7 +89,13 @@ defmodule JsonSchemaTestSuite.Draft7.Items do
 
   describe "items with boolean schema (false)" do
     setup do
-      %{schema: Xema.from_json_schema(%{"items" => false})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"items" => false},
+            draft: "draft7"
+          )
+      }
     end
 
     test "any non-empty array is invalid", %{schema: schema} do
@@ -88,7 +109,13 @@ defmodule JsonSchemaTestSuite.Draft7.Items do
 
   describe "items with boolean schemas" do
     setup do
-      %{schema: Xema.from_json_schema(%{"items" => [true, false]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"items" => [true, false]},
+            draft: "draft7"
+          )
+      }
     end
 
     test "array with one item is valid", %{schema: schema} do
@@ -108,26 +135,29 @@ defmodule JsonSchemaTestSuite.Draft7.Items do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "additionalItems" => false,
-            "definitions" => %{
-              "item" => %{
-                "additionalItems" => false,
-                "items" => [
-                  %{"$ref" => "#/definitions/sub-item"},
-                  %{"$ref" => "#/definitions/sub-item"}
-                ],
-                "type" => "array"
+          Xema.from_json_schema(
+            %{
+              "additionalItems" => false,
+              "definitions" => %{
+                "item" => %{
+                  "additionalItems" => false,
+                  "items" => [
+                    %{"$ref" => "#/definitions/sub-item"},
+                    %{"$ref" => "#/definitions/sub-item"}
+                  ],
+                  "type" => "array"
+                },
+                "sub-item" => %{"required" => ["foo"], "type" => "object"}
               },
-              "sub-item" => %{"required" => ["foo"], "type" => "object"}
+              "items" => [
+                %{"$ref" => "#/definitions/item"},
+                %{"$ref" => "#/definitions/item"},
+                %{"$ref" => "#/definitions/item"}
+              ],
+              "type" => "array"
             },
-            "items" => [
-              %{"$ref" => "#/definitions/item"},
-              %{"$ref" => "#/definitions/item"},
-              %{"$ref" => "#/definitions/item"}
-            ],
-            "type" => "array"
-          })
+            draft: "draft7"
+          )
       }
     end
 
@@ -181,16 +211,19 @@ defmodule JsonSchemaTestSuite.Draft7.Items do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "items" => %{
+          Xema.from_json_schema(
+            %{
               "items" => %{
-                "items" => %{"items" => %{"type" => "number"}, "type" => "array"},
+                "items" => %{
+                  "items" => %{"items" => %{"type" => "number"}, "type" => "array"},
+                  "type" => "array"
+                },
                 "type" => "array"
               },
               "type" => "array"
             },
-            "type" => "array"
-          })
+            draft: "draft7"
+          )
       }
     end
 

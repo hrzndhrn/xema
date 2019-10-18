@@ -4,7 +4,7 @@ defmodule Xema.JsonSchema.Validator do
   # JSON Schemas.
 
   @type json_schema_uri :: String.t()
-  @type draft_num :: 4 | 6 | 7
+  @type draft :: String.t()
 
   @draft04 Xema.new(
              {:map,
@@ -298,29 +298,47 @@ defmodule Xema.JsonSchema.Validator do
 
   @doc """
   This function validates schemas against:
-  + http://json-schema.org/draft-04/schema#
-  + http://json-schema.org/draft-06/schema#
-  + http://json-schema.org/draft-07/schema#
+  + draft4: http://json-schema.org/draft-04/schema#
+  + draft6: http://json-schema.org/draft-06/schema#
+  + draft7: http://json-schema.org/draft-07/schema#
+
+  The function expected the URI as string or the name of the draft.
+
+  ## Examples
+
+      iex> Xema.JsonSchema.Validator.validate("draft7", %{"type" => "integer"})
+      :ok
+
+      iex> uri = "http://json-schema.org/draft-07/schema#"
+      iex> Xema.JsonSchema.Validator.validate(uri, %{"type" => "integer"})
+      :ok
+      iex> Xema.JsonSchema.Validator.validate(uri, %{"minimum" => "55"})
+      {:error, %Xema.ValidationError{
+        reason: %{properties: %{"minimum" => %{type: :number, value: "55"}}}
+      }}
+
+      iex> Xema.JsonSchema.Validator.validate("foo", %{"type" => "integer"})
+      {:error, :unknown}
   """
-  @spec validate(json_schema_uri() | draft_num(), any) ::
+  @spec validate(json_schema_uri() | draft(), any) ::
           Xema.Validator.result() | {:error, :unknown}
   def validate("http://json-schema.org/draft-04/schema#", value),
     do: Xema.validate(@draft04, value)
 
-  def validate(4, value),
+  def validate("draft4", value),
     do: Xema.validate(@draft04, value)
 
   def validate("http://json-schema.org/draft-06/schema#", value),
     do: Xema.validate(@draft06, value)
 
-  def validate(6, value),
+  def validate("draft6", value),
     do: Xema.validate(@draft06, value)
 
   def validate("http://json-schema.org/draft-07/schema#", value),
     do: Xema.validate(@draft07, value)
 
-  def validate(7, value),
+  def validate("draft7", value),
     do: Xema.validate(@draft07, value)
 
-  def validate(uri, _value), do: {:error, :unknown}
+  def validate(_, _), do: {:error, :unknown}
 end

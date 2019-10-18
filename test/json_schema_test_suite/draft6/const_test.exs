@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft6.Const do
+defmodule JsonSchemaTestSuite.Draft6.ConstTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "const validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"const" => 2})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"const" => 2},
+            draft: "draft6"
+          )
+      }
     end
 
     test "same value is valid", %{schema: schema} do
@@ -23,7 +29,13 @@ defmodule JsonSchemaTestSuite.Draft6.Const do
 
   describe "const with object" do
     setup do
-      %{schema: Xema.from_json_schema(%{"const" => %{"baz" => "bax", "foo" => "bar"}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"const" => %{"baz" => "bax", "foo" => "bar"}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "same object is valid", %{schema: schema} do
@@ -45,7 +57,13 @@ defmodule JsonSchemaTestSuite.Draft6.Const do
 
   describe "const with array" do
     setup do
-      %{schema: Xema.from_json_schema(%{"const" => [%{"foo" => "bar"}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"const" => [%{"foo" => "bar"}]},
+            draft: "draft6"
+          )
+      }
     end
 
     test "same array is valid", %{schema: schema} do
@@ -63,7 +81,13 @@ defmodule JsonSchemaTestSuite.Draft6.Const do
 
   describe "const with null" do
     setup do
-      %{schema: Xema.from_json_schema(%{"const" => nil})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"const" => nil},
+            draft: "draft6"
+          )
+      }
     end
 
     test "null is valid", %{schema: schema} do
@@ -77,7 +101,13 @@ defmodule JsonSchemaTestSuite.Draft6.Const do
 
   describe "const with false does not match 0" do
     setup do
-      %{schema: Xema.from_json_schema(%{"const" => false})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"const" => false},
+            draft: "draft6"
+          )
+      }
     end
 
     test "false is valid", %{schema: schema} do
@@ -95,7 +125,13 @@ defmodule JsonSchemaTestSuite.Draft6.Const do
 
   describe "const with true does not match 1" do
     setup do
-      %{schema: Xema.from_json_schema(%{"const" => true})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"const" => true},
+            draft: "draft6"
+          )
+      }
     end
 
     test "true is valid", %{schema: schema} do
@@ -113,7 +149,13 @@ defmodule JsonSchemaTestSuite.Draft6.Const do
 
   describe "const with 0 does not match false" do
     setup do
-      %{schema: Xema.from_json_schema(%{"const" => 0})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"const" => 0},
+            draft: "draft6"
+          )
+      }
     end
 
     test "false is invalid", %{schema: schema} do
@@ -131,7 +173,13 @@ defmodule JsonSchemaTestSuite.Draft6.Const do
 
   describe "const with 1 does not match true" do
     setup do
-      %{schema: Xema.from_json_schema(%{"const" => 1})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"const" => 1},
+            draft: "draft6"
+          )
+      }
     end
 
     test "true is invalid", %{schema: schema} do

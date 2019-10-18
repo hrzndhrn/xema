@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft6.Required do
+defmodule JsonSchemaTestSuite.Draft6.RequiredTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,10 +7,10 @@ defmodule JsonSchemaTestSuite.Draft6.Required do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "properties" => %{"bar" => %{}, "foo" => %{}},
-            "required" => ["foo"]
-          })
+          Xema.from_json_schema(
+            %{"properties" => %{"bar" => %{}, "foo" => %{}}, "required" => ["foo"]},
+            draft: "draft6"
+          )
       }
     end
 
@@ -37,7 +37,13 @@ defmodule JsonSchemaTestSuite.Draft6.Required do
 
   describe "required default validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"properties" => %{"foo" => %{}}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"properties" => %{"foo" => %{}}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "not required by default", %{schema: schema} do
@@ -47,7 +53,13 @@ defmodule JsonSchemaTestSuite.Draft6.Required do
 
   describe "required with empty array" do
     setup do
-      %{schema: Xema.from_json_schema(%{"properties" => %{"foo" => %{}}, "required" => []})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"properties" => %{"foo" => %{}}, "required" => []},
+            draft: "draft6"
+          )
+      }
     end
 
     test "property not required", %{schema: schema} do
@@ -59,9 +71,19 @@ defmodule JsonSchemaTestSuite.Draft6.Required do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "required" => ["foo\nbar", "foo\"bar", "foo\\bar", "foo\rbar", "foo\tbar", "foo\fbar"]
-          })
+          Xema.from_json_schema(
+            %{
+              "required" => [
+                "foo\nbar",
+                "foo\"bar",
+                "foo\\bar",
+                "foo\rbar",
+                "foo\tbar",
+                "foo\fbar"
+              ]
+            },
+            draft: "draft6"
+          )
       }
     end
 

@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft7.Default do
+defmodule JsonSchemaTestSuite.Draft7.DefaultTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,9 +7,10 @@ defmodule JsonSchemaTestSuite.Draft7.Default do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "properties" => %{"foo" => %{"default" => [], "type" => "integer"}}
-          })
+          Xema.from_json_schema(
+            %{"properties" => %{"foo" => %{"default" => [], "type" => "integer"}}},
+            draft: "draft7"
+          )
       }
     end
 
@@ -26,11 +27,14 @@ defmodule JsonSchemaTestSuite.Draft7.Default do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "properties" => %{
-              "bar" => %{"default" => "bad", "minLength" => 4, "type" => "string"}
-            }
-          })
+          Xema.from_json_schema(
+            %{
+              "properties" => %{
+                "bar" => %{"default" => "bad", "minLength" => 4, "type" => "string"}
+              }
+            },
+            draft: "draft7"
+          )
       }
     end
 

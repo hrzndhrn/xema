@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft6.Dependencies do
+defmodule JsonSchemaTestSuite.Draft6.DependenciesTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "dependencies" do
     setup do
-      %{schema: Xema.from_json_schema(%{"dependencies" => %{"bar" => ["foo"]}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"dependencies" => %{"bar" => ["foo"]}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "neither", %{schema: schema} do
@@ -39,7 +45,13 @@ defmodule JsonSchemaTestSuite.Draft6.Dependencies do
 
   describe "dependencies with empty array" do
     setup do
-      %{schema: Xema.from_json_schema(%{"dependencies" => %{"bar" => []}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"dependencies" => %{"bar" => []}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "empty object", %{schema: schema} do
@@ -53,7 +65,13 @@ defmodule JsonSchemaTestSuite.Draft6.Dependencies do
 
   describe "multiple dependencies" do
     setup do
-      %{schema: Xema.from_json_schema(%{"dependencies" => %{"quux" => ["foo", "bar"]}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"dependencies" => %{"quux" => ["foo", "bar"]}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "neither", %{schema: schema} do
@@ -85,16 +103,19 @@ defmodule JsonSchemaTestSuite.Draft6.Dependencies do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "dependencies" => %{
-              "bar" => %{
-                "properties" => %{
-                  "bar" => %{"type" => "integer"},
-                  "foo" => %{"type" => "integer"}
+          Xema.from_json_schema(
+            %{
+              "dependencies" => %{
+                "bar" => %{
+                  "properties" => %{
+                    "bar" => %{"type" => "integer"},
+                    "foo" => %{"type" => "integer"}
+                  }
                 }
               }
-            }
-          })
+            },
+            draft: "draft6"
+          )
       }
     end
 
@@ -121,7 +142,13 @@ defmodule JsonSchemaTestSuite.Draft6.Dependencies do
 
   describe "dependencies with boolean subschemas" do
     setup do
-      %{schema: Xema.from_json_schema(%{"dependencies" => %{"bar" => false, "foo" => true}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"dependencies" => %{"bar" => false, "foo" => true}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "object with property having schema true is valid", %{schema: schema} do
@@ -143,7 +170,13 @@ defmodule JsonSchemaTestSuite.Draft6.Dependencies do
 
   describe "empty array of dependencies" do
     setup do
-      %{schema: Xema.from_json_schema(%{"dependencies" => %{"foo" => []}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"dependencies" => %{"foo" => []}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "object with property is valid", %{schema: schema} do
@@ -163,14 +196,17 @@ defmodule JsonSchemaTestSuite.Draft6.Dependencies do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "dependencies" => %{
-              "foo\tbar" => %{"minProperties" => 4},
-              "foo\nbar" => ["foo\rbar"],
-              "foo\"bar" => ["foo'bar"],
-              "foo'bar" => %{"required" => ["foo\"bar"]}
-            }
-          })
+          Xema.from_json_schema(
+            %{
+              "dependencies" => %{
+                "foo\tbar" => %{"minProperties" => 4},
+                "foo\nbar" => ["foo\rbar"],
+                "foo\"bar" => ["foo'bar"],
+                "foo'bar" => %{"required" => ["foo\"bar"]}
+              }
+            },
+            draft: "draft6"
+          )
       }
     end
 

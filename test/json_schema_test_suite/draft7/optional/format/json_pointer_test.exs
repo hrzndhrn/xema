@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.JsonPointer do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.JsonPointerTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of JSON-pointers (JSON String Representation)" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "json-pointer"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "json-pointer"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid JSON-pointer", %{schema: schema} do

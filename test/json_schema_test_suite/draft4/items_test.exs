@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft4.Items do
+defmodule JsonSchemaTestSuite.Draft4.ItemsTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "a schema given for items" do
     setup do
-      %{schema: Xema.from_json_schema(%{"items" => %{"type" => "integer"}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"items" => %{"type" => "integer"}},
+            draft: "draft4"
+          )
+      }
     end
 
     test "valid items", %{schema: schema} do
@@ -29,7 +35,10 @@ defmodule JsonSchemaTestSuite.Draft4.Items do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{"items" => [%{"type" => "integer"}, %{"type" => "string"}]})
+          Xema.from_json_schema(
+            %{"items" => [%{"type" => "integer"}, %{"type" => "string"}]},
+            draft: "draft4"
+          )
       }
     end
 
@@ -62,26 +71,29 @@ defmodule JsonSchemaTestSuite.Draft4.Items do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "additionalItems" => false,
-            "definitions" => %{
-              "item" => %{
-                "additionalItems" => false,
-                "items" => [
-                  %{"$ref" => "#/definitions/sub-item"},
-                  %{"$ref" => "#/definitions/sub-item"}
-                ],
-                "type" => "array"
+          Xema.from_json_schema(
+            %{
+              "additionalItems" => false,
+              "definitions" => %{
+                "item" => %{
+                  "additionalItems" => false,
+                  "items" => [
+                    %{"$ref" => "#/definitions/sub-item"},
+                    %{"$ref" => "#/definitions/sub-item"}
+                  ],
+                  "type" => "array"
+                },
+                "sub-item" => %{"required" => ["foo"], "type" => "object"}
               },
-              "sub-item" => %{"required" => ["foo"], "type" => "object"}
+              "items" => [
+                %{"$ref" => "#/definitions/item"},
+                %{"$ref" => "#/definitions/item"},
+                %{"$ref" => "#/definitions/item"}
+              ],
+              "type" => "array"
             },
-            "items" => [
-              %{"$ref" => "#/definitions/item"},
-              %{"$ref" => "#/definitions/item"},
-              %{"$ref" => "#/definitions/item"}
-            ],
-            "type" => "array"
-          })
+            draft: "draft4"
+          )
       }
     end
 
@@ -135,16 +147,19 @@ defmodule JsonSchemaTestSuite.Draft4.Items do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "items" => %{
+          Xema.from_json_schema(
+            %{
               "items" => %{
-                "items" => %{"items" => %{"type" => "number"}, "type" => "array"},
+                "items" => %{
+                  "items" => %{"items" => %{"type" => "number"}, "type" => "array"},
+                  "type" => "array"
+                },
                 "type" => "array"
               },
               "type" => "array"
             },
-            "type" => "array"
-          })
+            draft: "draft4"
+          )
       }
     end
 

@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.MinLength do
+defmodule JsonSchemaTestSuite.Draft7.MinLengthTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "minLength validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"minLength" => 2})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"minLength" => 2},
+            draft: "draft7"
+          )
+      }
     end
 
     test "longer is valid", %{schema: schema} do

@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.MaxLength do
+defmodule JsonSchemaTestSuite.Draft7.MaxLengthTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "maxLength validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"maxLength" => 2})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"maxLength" => 2},
+            draft: "draft7"
+          )
+      }
     end
 
     test "shorter is valid", %{schema: schema} do

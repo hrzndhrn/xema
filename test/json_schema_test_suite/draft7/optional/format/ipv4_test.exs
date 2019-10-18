@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.Ipv4 do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.Ipv4Test do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of IP addresses" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "ipv4"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "ipv4"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid IP address", %{schema: schema} do

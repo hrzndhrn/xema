@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft7.PatternProperties do
+defmodule JsonSchemaTestSuite.Draft7.PatternPropertiesTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,7 +7,10 @@ defmodule JsonSchemaTestSuite.Draft7.PatternProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{"patternProperties" => %{"f.*o" => %{"type" => "integer"}}})
+          Xema.from_json_schema(
+            %{"patternProperties" => %{"f.*o" => %{"type" => "integer"}}},
+            draft: "draft7"
+          )
       }
     end
 
@@ -44,9 +47,15 @@ defmodule JsonSchemaTestSuite.Draft7.PatternProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "patternProperties" => %{"a*" => %{"type" => "integer"}, "aaa*" => %{"maximum" => 20}}
-          })
+          Xema.from_json_schema(
+            %{
+              "patternProperties" => %{
+                "a*" => %{"type" => "integer"},
+                "aaa*" => %{"maximum" => 20}
+              }
+            },
+            draft: "draft7"
+          )
       }
     end
 
@@ -79,12 +88,15 @@ defmodule JsonSchemaTestSuite.Draft7.PatternProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "patternProperties" => %{
-              "X_" => %{"type" => "string"},
-              "[0-9]{2,}" => %{"type" => "boolean"}
-            }
-          })
+          Xema.from_json_schema(
+            %{
+              "patternProperties" => %{
+                "X_" => %{"type" => "string"},
+                "[0-9]{2,}" => %{"type" => "boolean"}
+              }
+            },
+            draft: "draft7"
+          )
       }
     end
 
@@ -107,7 +119,13 @@ defmodule JsonSchemaTestSuite.Draft7.PatternProperties do
 
   describe "patternProperties with boolean schemas" do
     setup do
-      %{schema: Xema.from_json_schema(%{"patternProperties" => %{"b.*" => false, "f.*" => true}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"patternProperties" => %{"b.*" => false, "f.*" => true}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "object with property matching schema true is valid", %{schema: schema} do

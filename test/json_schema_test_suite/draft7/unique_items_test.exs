@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.UniqueItems do
+defmodule JsonSchemaTestSuite.Draft7.UniqueItemsTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "uniqueItems validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"uniqueItems" => true})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"uniqueItems" => true},
+            draft: "draft7"
+          )
+      }
     end
 
     test "unique array of integers is valid", %{schema: schema} do

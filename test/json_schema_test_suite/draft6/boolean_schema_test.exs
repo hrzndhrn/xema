@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft6.BooleanSchema do
+defmodule JsonSchemaTestSuite.Draft6.BooleanSchemaTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "boolean schema 'true'" do
     setup do
-      %{schema: Xema.from_json_schema(true)}
+      %{
+        schema:
+          Xema.from_json_schema(
+            true,
+            draft: "draft6"
+          )
+      }
     end
 
     test "number is valid", %{schema: schema} do
@@ -47,7 +53,13 @@ defmodule JsonSchemaTestSuite.Draft6.BooleanSchema do
 
   describe "boolean schema 'false'" do
     setup do
-      %{schema: Xema.from_json_schema(false)}
+      %{
+        schema:
+          Xema.from_json_schema(
+            false,
+            draft: "draft6"
+          )
+      }
     end
 
     test "number is invalid", %{schema: schema} do

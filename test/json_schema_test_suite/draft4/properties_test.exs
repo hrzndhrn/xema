@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft4.Properties do
+defmodule JsonSchemaTestSuite.Draft4.PropertiesTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,9 +7,10 @@ defmodule JsonSchemaTestSuite.Draft4.Properties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "properties" => %{"bar" => %{"type" => "string"}, "foo" => %{"type" => "integer"}}
-          })
+          Xema.from_json_schema(
+            %{"properties" => %{"bar" => %{"type" => "string"}, "foo" => %{"type" => "integer"}}},
+            draft: "draft4"
+          )
       }
     end
 
@@ -42,14 +43,17 @@ defmodule JsonSchemaTestSuite.Draft4.Properties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "additionalProperties" => %{"type" => "integer"},
-            "patternProperties" => %{"f.o" => %{"minItems" => 2}},
-            "properties" => %{
-              "bar" => %{"type" => "array"},
-              "foo" => %{"maxItems" => 3, "type" => "array"}
-            }
-          })
+          Xema.from_json_schema(
+            %{
+              "additionalProperties" => %{"type" => "integer"},
+              "patternProperties" => %{"f.o" => %{"minItems" => 2}},
+              "properties" => %{
+                "bar" => %{"type" => "array"},
+                "foo" => %{"maxItems" => 3, "type" => "array"}
+              }
+            },
+            draft: "draft4"
+          )
       }
     end
 
@@ -90,16 +94,19 @@ defmodule JsonSchemaTestSuite.Draft4.Properties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "properties" => %{
-              "foo\tbar" => %{"type" => "number"},
-              "foo\nbar" => %{"type" => "number"},
-              "foo\fbar" => %{"type" => "number"},
-              "foo\rbar" => %{"type" => "number"},
-              "foo\"bar" => %{"type" => "number"},
-              "foo\\bar" => %{"type" => "number"}
-            }
-          })
+          Xema.from_json_schema(
+            %{
+              "properties" => %{
+                "foo\tbar" => %{"type" => "number"},
+                "foo\nbar" => %{"type" => "number"},
+                "foo\fbar" => %{"type" => "number"},
+                "foo\rbar" => %{"type" => "number"},
+                "foo\"bar" => %{"type" => "number"},
+                "foo\\bar" => %{"type" => "number"}
+              }
+            },
+            draft: "draft4"
+          )
       }
     end
 

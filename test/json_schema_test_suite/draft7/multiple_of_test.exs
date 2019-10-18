@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.MultipleOf do
+defmodule JsonSchemaTestSuite.Draft7.MultipleOfTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "by int" do
     setup do
-      %{schema: Xema.from_json_schema(%{"multipleOf" => 2})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"multipleOf" => 2},
+            draft: "draft7"
+          )
+      }
     end
 
     test "int by int", %{schema: schema} do
@@ -23,7 +29,13 @@ defmodule JsonSchemaTestSuite.Draft7.MultipleOf do
 
   describe "by number" do
     setup do
-      %{schema: Xema.from_json_schema(%{"multipleOf" => 1.5})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"multipleOf" => 1.5},
+            draft: "draft7"
+          )
+      }
     end
 
     test "zero is multiple of anything", %{schema: schema} do
@@ -41,7 +53,13 @@ defmodule JsonSchemaTestSuite.Draft7.MultipleOf do
 
   describe "by small number" do
     setup do
-      %{schema: Xema.from_json_schema(%{"multipleOf" => 0.0001})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"multipleOf" => 0.0001},
+            draft: "draft7"
+          )
+      }
     end
 
     test "0.0075 is multiple of 0.0001", %{schema: schema} do

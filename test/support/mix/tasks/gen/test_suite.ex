@@ -96,13 +96,17 @@ defmodule Mix.Tasks.Gen.TestSuite do
   end
 
   defp test_code(file_name, test_cases) do
+    %{"draft" => draft} = Regex.named_captures(~r/\/(?<draft>draft[^\/]+)/, file_name)
+
     test_cases =
       test_cases
       |> Enum.filter(fn test_case -> test_case["description"] not in @exclude_test_case end)
       |> update_descriptions()
 
     @template
-    |> EEx.eval_string(assigns: [module: module_name(file_name), test_cases: test_cases])
+    |> EEx.eval_string(
+      assigns: [module: module_name(file_name), test_cases: test_cases, draft: draft]
+    )
     |> Code.format_string!()
   end
 

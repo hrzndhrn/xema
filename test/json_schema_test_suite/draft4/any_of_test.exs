@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft4.AnyOf do
+defmodule JsonSchemaTestSuite.Draft4.AnyOfTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "anyOf" do
     setup do
-      %{schema: Xema.from_json_schema(%{"anyOf" => [%{"type" => "integer"}, %{"minimum" => 2}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"anyOf" => [%{"type" => "integer"}, %{"minimum" => 2}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "first anyOf valid", %{schema: schema} do
@@ -29,10 +35,10 @@ defmodule JsonSchemaTestSuite.Draft4.AnyOf do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "anyOf" => [%{"maxLength" => 2}, %{"minLength" => 4}],
-            "type" => "string"
-          })
+          Xema.from_json_schema(
+            %{"anyOf" => [%{"maxLength" => 2}, %{"minLength" => 4}], "type" => "string"},
+            draft: "draft4"
+          )
       }
     end
 
@@ -53,12 +59,15 @@ defmodule JsonSchemaTestSuite.Draft4.AnyOf do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "anyOf" => [
-              %{"properties" => %{"bar" => %{"type" => "integer"}}, "required" => ["bar"]},
-              %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]}
-            ]
-          })
+          Xema.from_json_schema(
+            %{
+              "anyOf" => [
+                %{"properties" => %{"bar" => %{"type" => "integer"}}, "required" => ["bar"]},
+                %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]}
+              ]
+            },
+            draft: "draft4"
+          )
       }
     end
 
@@ -81,7 +90,13 @@ defmodule JsonSchemaTestSuite.Draft4.AnyOf do
 
   describe "anyOf with one empty schema" do
     setup do
-      %{schema: Xema.from_json_schema(%{"anyOf" => [%{"type" => "number"}, %{}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"anyOf" => [%{"type" => "number"}, %{}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "string is valid", %{schema: schema} do
@@ -95,7 +110,13 @@ defmodule JsonSchemaTestSuite.Draft4.AnyOf do
 
   describe "nested anyOf, to check validation semantics" do
     setup do
-      %{schema: Xema.from_json_schema(%{"anyOf" => [%{"anyOf" => [%{"type" => "null"}]}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"anyOf" => [%{"anyOf" => [%{"type" => "null"}]}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "null is valid", %{schema: schema} do

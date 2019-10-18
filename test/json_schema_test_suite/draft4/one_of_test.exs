@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft4.OneOf do
+defmodule JsonSchemaTestSuite.Draft4.OneOfTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "oneOf" do
     setup do
-      %{schema: Xema.from_json_schema(%{"oneOf" => [%{"type" => "integer"}, %{"minimum" => 2}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"oneOf" => [%{"type" => "integer"}, %{"minimum" => 2}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "first oneOf valid", %{schema: schema} do
@@ -29,10 +35,10 @@ defmodule JsonSchemaTestSuite.Draft4.OneOf do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "oneOf" => [%{"minLength" => 2}, %{"maxLength" => 4}],
-            "type" => "string"
-          })
+          Xema.from_json_schema(
+            %{"oneOf" => [%{"minLength" => 2}, %{"maxLength" => 4}], "type" => "string"},
+            draft: "draft4"
+          )
       }
     end
 
@@ -53,12 +59,15 @@ defmodule JsonSchemaTestSuite.Draft4.OneOf do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "oneOf" => [
-              %{"properties" => %{"bar" => %{"type" => "integer"}}, "required" => ["bar"]},
-              %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]}
-            ]
-          })
+          Xema.from_json_schema(
+            %{
+              "oneOf" => [
+                %{"properties" => %{"bar" => %{"type" => "integer"}}, "required" => ["bar"]},
+                %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]}
+              ]
+            },
+            draft: "draft4"
+          )
       }
     end
 
@@ -81,7 +90,13 @@ defmodule JsonSchemaTestSuite.Draft4.OneOf do
 
   describe "oneOf with empty schema" do
     setup do
-      %{schema: Xema.from_json_schema(%{"oneOf" => [%{"type" => "number"}, %{}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"oneOf" => [%{"type" => "number"}, %{}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "one valid - valid", %{schema: schema} do
@@ -97,10 +112,13 @@ defmodule JsonSchemaTestSuite.Draft4.OneOf do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "oneOf" => [%{"required" => ["foo", "bar"]}, %{"required" => ["foo", "baz"]}],
-            "type" => "object"
-          })
+          Xema.from_json_schema(
+            %{
+              "oneOf" => [%{"required" => ["foo", "bar"]}, %{"required" => ["foo", "baz"]}],
+              "type" => "object"
+            },
+            draft: "draft4"
+          )
       }
     end
 

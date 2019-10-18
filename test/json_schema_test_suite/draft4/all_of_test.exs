@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft4.AllOf do
+defmodule JsonSchemaTestSuite.Draft4.AllOfTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,12 +7,15 @@ defmodule JsonSchemaTestSuite.Draft4.AllOf do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "allOf" => [
-              %{"properties" => %{"bar" => %{"type" => "integer"}}, "required" => ["bar"]},
-              %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]}
-            ]
-          })
+          Xema.from_json_schema(
+            %{
+              "allOf" => [
+                %{"properties" => %{"bar" => %{"type" => "integer"}}, "required" => ["bar"]},
+                %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]}
+              ]
+            },
+            draft: "draft4"
+          )
       }
     end
 
@@ -37,14 +40,17 @@ defmodule JsonSchemaTestSuite.Draft4.AllOf do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "allOf" => [
-              %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]},
-              %{"properties" => %{"baz" => %{"type" => "null"}}, "required" => ["baz"]}
-            ],
-            "properties" => %{"bar" => %{"type" => "integer"}},
-            "required" => ["bar"]
-          })
+          Xema.from_json_schema(
+            %{
+              "allOf" => [
+                %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]},
+                %{"properties" => %{"baz" => %{"type" => "null"}}, "required" => ["baz"]}
+              ],
+              "properties" => %{"bar" => %{"type" => "integer"}},
+              "required" => ["bar"]
+            },
+            draft: "draft4"
+          )
       }
     end
 
@@ -71,7 +77,13 @@ defmodule JsonSchemaTestSuite.Draft4.AllOf do
 
   describe "allOf simple types" do
     setup do
-      %{schema: Xema.from_json_schema(%{"allOf" => [%{"maximum" => 30}, %{"minimum" => 20}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"allOf" => [%{"maximum" => 30}, %{"minimum" => 20}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "valid", %{schema: schema} do
@@ -85,7 +97,13 @@ defmodule JsonSchemaTestSuite.Draft4.AllOf do
 
   describe "allOf with one empty schema" do
     setup do
-      %{schema: Xema.from_json_schema(%{"allOf" => [%{}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"allOf" => [%{}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "any data is valid", %{schema: schema} do
@@ -95,7 +113,13 @@ defmodule JsonSchemaTestSuite.Draft4.AllOf do
 
   describe "allOf with two empty schemas" do
     setup do
-      %{schema: Xema.from_json_schema(%{"allOf" => [%{}, %{}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"allOf" => [%{}, %{}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "any data is valid", %{schema: schema} do
@@ -105,7 +129,13 @@ defmodule JsonSchemaTestSuite.Draft4.AllOf do
 
   describe "allOf with the first empty schema" do
     setup do
-      %{schema: Xema.from_json_schema(%{"allOf" => [%{}, %{"type" => "number"}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"allOf" => [%{}, %{"type" => "number"}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "number is valid", %{schema: schema} do
@@ -119,7 +149,13 @@ defmodule JsonSchemaTestSuite.Draft4.AllOf do
 
   describe "allOf with the last empty schema" do
     setup do
-      %{schema: Xema.from_json_schema(%{"allOf" => [%{"type" => "number"}, %{}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"allOf" => [%{"type" => "number"}, %{}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "number is valid", %{schema: schema} do

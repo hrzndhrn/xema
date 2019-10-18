@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft4.Optional.Format do
+defmodule JsonSchemaTestSuite.Draft4.Optional.FormatTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of date-time strings" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "date-time"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "date-time"},
+            draft: "draft4"
+          )
+      }
     end
 
     test "a valid date-time string", %{schema: schema} do
@@ -47,7 +53,13 @@ defmodule JsonSchemaTestSuite.Draft4.Optional.Format do
 
   describe "validation of URIs" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "uri"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "uri"},
+            draft: "draft4"
+          )
+      }
     end
 
     test "a valid URL with anchor tag", %{schema: schema} do
@@ -129,7 +141,13 @@ defmodule JsonSchemaTestSuite.Draft4.Optional.Format do
 
   describe "validation of e-mail addresses" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "email"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "email"},
+            draft: "draft4"
+          )
+      }
     end
 
     test "a valid e-mail address", %{schema: schema} do
@@ -143,7 +161,13 @@ defmodule JsonSchemaTestSuite.Draft4.Optional.Format do
 
   describe "validation of IP addresses" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "ipv4"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "ipv4"},
+            draft: "draft4"
+          )
+      }
     end
 
     test "a valid IP address", %{schema: schema} do
@@ -169,7 +193,13 @@ defmodule JsonSchemaTestSuite.Draft4.Optional.Format do
 
   describe "validation of IPv6 addresses" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "ipv6"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "ipv6"},
+            draft: "draft4"
+          )
+      }
     end
 
     test "a valid IPv6 address", %{schema: schema} do
@@ -191,7 +221,13 @@ defmodule JsonSchemaTestSuite.Draft4.Optional.Format do
 
   describe "validation of host names" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "hostname"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "hostname"},
+            draft: "draft4"
+          )
+      }
     end
 
     test "a valid host name", %{schema: schema} do

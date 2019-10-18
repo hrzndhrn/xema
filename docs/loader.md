@@ -88,18 +88,40 @@ defmodule My.Loader do
   @behaviour Xema.Loader
 
   @spec fetch(binary) :: {:ok, map} | {:error, any}
-  def fetch(uri),
-    do:
-      "path/to/schemas"
-      |> Path.join(uri.path)
-      |> File.read!()
-      |> eval(uri)
+  def fetch(uri) do
+    "path/to/schemas"
+    |> Path.join(uri.path)
+    |> File.read!()
+    |> eval(uri)
+  end
 
   defp eval(str, uri) do
     {data, _} = Code.eval_string(str)
     {:ok, data}
   rescue
     error -> {:error, %{error | file: URI.to_string(uri)}}
+  end
+end
+```
+
+## JSON Schema loader
+
+If the scheme is created with `Xema.from_json_schem/2`, the loader must return
+the decoded JSON.
+
+In this case the file loader looks like this:
+```elixir
+defmodule My.Loader do
+  @moduledoc false
+
+  @behaviour Xema.Loader
+
+  @spec fetch(binary) :: {:ok, map} | {:error, any}
+  def fetch(uri) do
+    "path/to/schemas"
+    |> Path.join(uri.path)
+    |> File.read!()
+    |> Jason.decode()
   end
 end
 ```

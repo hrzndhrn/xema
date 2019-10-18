@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft7.Ref do
+defmodule JsonSchemaTestSuite.Draft7.RefTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,10 +7,10 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "additionalProperties" => false,
-            "properties" => %{"foo" => %{"$ref" => "#"}}
-          })
+          Xema.from_json_schema(
+            %{"additionalProperties" => false, "properties" => %{"foo" => %{"$ref" => "#"}}},
+            draft: "draft7"
+          )
       }
     end
 
@@ -35,12 +35,15 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "properties" => %{
-              "bar" => %{"$ref" => "#/properties/foo"},
-              "foo" => %{"type" => "integer"}
-            }
-          })
+          Xema.from_json_schema(
+            %{
+              "properties" => %{
+                "bar" => %{"$ref" => "#/properties/foo"},
+                "foo" => %{"type" => "integer"}
+              }
+            },
+            draft: "draft7"
+          )
       }
     end
 
@@ -57,7 +60,10 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{"items" => [%{"type" => "integer"}, %{"$ref" => "#/items/0"}]})
+          Xema.from_json_schema(
+            %{"items" => [%{"type" => "integer"}, %{"$ref" => "#/items/0"}]},
+            draft: "draft7"
+          )
       }
     end
 
@@ -74,16 +80,20 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "percent%field" => %{"type" => "integer"},
-            "properties" => %{
-              "percent" => %{"$ref" => "#/percent%25field"},
-              "slash" => %{"$ref" => "#/slash~1field"},
-              "tilda" => %{"$ref" => "#/tilda~0field"}
+          Xema.from_json_schema(
+            %{
+              "percent%field" => %{"type" => "integer"},
+              "properties" => %{
+                "percent" => %{"$ref" => "#/percent%25field"},
+                "slash" => %{"$ref" => "#/slash~1field"},
+                "tilda" => %{"$ref" => "#/tilda~0field"}
+              },
+              "slash/field" => %{"type" => "integer"},
+              "tilda~field" => %{"type" => "integer"}
             },
-            "slash/field" => %{"type" => "integer"},
-            "tilda~field" => %{"type" => "integer"}
-          })
+            draft: "draft7",
+            atom: :force
+          )
       }
     end
 
@@ -116,14 +126,17 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "$ref" => "#/definitions/c",
-            "definitions" => %{
-              "a" => %{"type" => "integer"},
-              "b" => %{"$ref" => "#/definitions/a"},
-              "c" => %{"$ref" => "#/definitions/b"}
-            }
-          })
+          Xema.from_json_schema(
+            %{
+              "$ref" => "#/definitions/c",
+              "definitions" => %{
+                "a" => %{"type" => "integer"},
+                "b" => %{"$ref" => "#/definitions/a"},
+                "c" => %{"$ref" => "#/definitions/b"}
+              }
+            },
+            draft: "draft7"
+          )
       }
     end
 
@@ -140,10 +153,13 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "definitions" => %{"reffed" => %{"type" => "array"}},
-            "properties" => %{"foo" => %{"$ref" => "#/definitions/reffed", "maxItems" => 2}}
-          })
+          Xema.from_json_schema(
+            %{
+              "definitions" => %{"reffed" => %{"type" => "array"}},
+              "properties" => %{"foo" => %{"$ref" => "#/definitions/reffed", "maxItems" => 2}}
+            },
+            draft: "draft7"
+          )
       }
     end
 
@@ -162,7 +178,13 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
 
   describe "remote ref, containing refs itself" do
     setup do
-      %{schema: Xema.from_json_schema(%{"$ref" => "http://json-schema.org/draft-07/schema#"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"$ref" => "http://json-schema.org/draft-07/schema#"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "remote ref valid", %{schema: schema} do
@@ -176,7 +198,13 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
 
   describe "property named $ref that is not a reference" do
     setup do
-      %{schema: Xema.from_json_schema(%{"properties" => %{"$ref" => %{"type" => "string"}}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"properties" => %{"$ref" => %{"type" => "string"}}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "property named $ref valid", %{schema: schema} do
@@ -192,10 +220,10 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "$ref" => "#/definitions/bool",
-            "definitions" => %{"bool" => true}
-          })
+          Xema.from_json_schema(
+            %{"$ref" => "#/definitions/bool", "definitions" => %{"bool" => true}},
+            draft: "draft7"
+          )
       }
     end
 
@@ -208,10 +236,10 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "$ref" => "#/definitions/bool",
-            "definitions" => %{"bool" => false}
-          })
+          Xema.from_json_schema(
+            %{"$ref" => "#/definitions/bool", "definitions" => %{"bool" => false}},
+            draft: "draft7"
+          )
       }
     end
 
@@ -224,28 +252,31 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "$id" => "http://localhost:1234/tree",
-            "definitions" => %{
-              "node" => %{
-                "$id" => "http://localhost:1234/node",
-                "description" => "node",
-                "properties" => %{
-                  "subtree" => %{"$ref" => "tree"},
-                  "value" => %{"type" => "number"}
-                },
-                "required" => ["value"],
-                "type" => "object"
-              }
+          Xema.from_json_schema(
+            %{
+              "$id" => "http://localhost:1234/tree",
+              "definitions" => %{
+                "node" => %{
+                  "$id" => "http://localhost:1234/node",
+                  "description" => "node",
+                  "properties" => %{
+                    "subtree" => %{"$ref" => "tree"},
+                    "value" => %{"type" => "number"}
+                  },
+                  "required" => ["value"],
+                  "type" => "object"
+                }
+              },
+              "description" => "tree of nodes",
+              "properties" => %{
+                "meta" => %{"type" => "string"},
+                "nodes" => %{"items" => %{"$ref" => "node"}, "type" => "array"}
+              },
+              "required" => ["meta", "nodes"],
+              "type" => "object"
             },
-            "description" => "tree of nodes",
-            "properties" => %{
-              "meta" => %{"type" => "string"},
-              "nodes" => %{"items" => %{"$ref" => "node"}, "type" => "array"}
-            },
-            "required" => ["meta", "nodes"],
-            "type" => "object"
-          })
+            draft: "draft7"
+          )
       }
     end
 
@@ -298,10 +329,13 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "definitions" => %{"foo\"bar" => %{"type" => "number"}},
-            "properties" => %{"foo\"bar" => %{"$ref" => "#/definitions/foo%22bar"}}
-          })
+          Xema.from_json_schema(
+            %{
+              "definitions" => %{"foo\"bar" => %{"type" => "number"}},
+              "properties" => %{"foo\"bar" => %{"$ref" => "#/definitions/foo%22bar"}}
+            },
+            draft: "draft7"
+          )
       }
     end
 
@@ -318,10 +352,13 @@ defmodule JsonSchemaTestSuite.Draft7.Ref do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "allOf" => [%{"$ref" => "#foo"}],
-            "definitions" => %{"A" => %{"$id" => "#foo", "type" => "integer"}}
-          })
+          Xema.from_json_schema(
+            %{
+              "allOf" => [%{"$ref" => "#foo"}],
+              "definitions" => %{"A" => %{"$id" => "#foo", "type" => "integer"}}
+            },
+            draft: "draft7"
+          )
       }
     end
 

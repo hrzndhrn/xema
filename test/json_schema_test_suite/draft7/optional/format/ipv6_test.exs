@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.Ipv6 do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.Ipv6Test do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of IPv6 addresses" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "ipv6"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "ipv6"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid IPv6 address", %{schema: schema} do

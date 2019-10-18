@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.IfThenElse do
+defmodule JsonSchemaTestSuite.Draft7.IfThenElseTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "ignore if without then or else" do
     setup do
-      %{schema: Xema.from_json_schema(%{"if" => %{"const" => 0}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"if" => %{"const" => 0}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "valid when valid against lone if", %{schema: schema} do
@@ -19,7 +25,13 @@ defmodule JsonSchemaTestSuite.Draft7.IfThenElse do
 
   describe "ignore then without if" do
     setup do
-      %{schema: Xema.from_json_schema(%{"then" => %{"const" => 0}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"then" => %{"const" => 0}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "valid when valid against lone then", %{schema: schema} do
@@ -33,7 +45,13 @@ defmodule JsonSchemaTestSuite.Draft7.IfThenElse do
 
   describe "ignore else without if" do
     setup do
-      %{schema: Xema.from_json_schema(%{"else" => %{"const" => 0}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"else" => %{"const" => 0}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "valid when valid against lone else", %{schema: schema} do
@@ -49,10 +67,10 @@ defmodule JsonSchemaTestSuite.Draft7.IfThenElse do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "if" => %{"exclusiveMaximum" => 0},
-            "then" => %{"minimum" => -10}
-          })
+          Xema.from_json_schema(
+            %{"if" => %{"exclusiveMaximum" => 0}, "then" => %{"minimum" => -10}},
+            draft: "draft7"
+          )
       }
     end
 
@@ -73,10 +91,10 @@ defmodule JsonSchemaTestSuite.Draft7.IfThenElse do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "else" => %{"multipleOf" => 2},
-            "if" => %{"exclusiveMaximum" => 0}
-          })
+          Xema.from_json_schema(
+            %{"else" => %{"multipleOf" => 2}, "if" => %{"exclusiveMaximum" => 0}},
+            draft: "draft7"
+          )
       }
     end
 
@@ -97,11 +115,14 @@ defmodule JsonSchemaTestSuite.Draft7.IfThenElse do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "else" => %{"multipleOf" => 2},
-            "if" => %{"exclusiveMaximum" => 0},
-            "then" => %{"minimum" => -10}
-          })
+          Xema.from_json_schema(
+            %{
+              "else" => %{"multipleOf" => 2},
+              "if" => %{"exclusiveMaximum" => 0},
+              "then" => %{"minimum" => -10}
+            },
+            draft: "draft7"
+          )
       }
     end
 
@@ -126,13 +147,16 @@ defmodule JsonSchemaTestSuite.Draft7.IfThenElse do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "allOf" => [
-              %{"if" => %{"exclusiveMaximum" => 0}},
-              %{"then" => %{"minimum" => -10}},
-              %{"else" => %{"multipleOf" => 2}}
-            ]
-          })
+          Xema.from_json_schema(
+            %{
+              "allOf" => [
+                %{"if" => %{"exclusiveMaximum" => 0}},
+                %{"then" => %{"minimum" => -10}},
+                %{"else" => %{"multipleOf" => 2}}
+              ]
+            },
+            draft: "draft7"
+          )
       }
     end
 

@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.RelativeJsonPointer do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.RelativeJsonPointerTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of Relative JSON Pointers (RJP)" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "relative-json-pointer"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "relative-json-pointer"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid upwards RJP", %{schema: schema} do

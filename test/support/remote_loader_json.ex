@@ -38,6 +38,6 @@ defmodule Test.RemoteLoaderJson do
   end
 
   defp eval(json) do
-    {:ok, json |> Jason.decode!() |> JsonSchema.to_xema()}
+    {:ok, Jason.decode!(json)}
   end
 end

@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft4.AdditionalItems do
+defmodule JsonSchemaTestSuite.Draft4.AdditionalItemsTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,7 +7,10 @@ defmodule JsonSchemaTestSuite.Draft4.AdditionalItems do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{"additionalItems" => %{"type" => "integer"}, "items" => [%{}]})
+          Xema.from_json_schema(
+            %{"additionalItems" => %{"type" => "integer"}, "items" => [%{}]},
+            draft: "draft4"
+          )
       }
     end
 
@@ -22,7 +25,13 @@ defmodule JsonSchemaTestSuite.Draft4.AdditionalItems do
 
   describe "items is schema, no additionalItems" do
     setup do
-      %{schema: Xema.from_json_schema(%{"additionalItems" => false, "items" => %{}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"additionalItems" => false, "items" => %{}},
+            draft: "draft4"
+          )
+      }
     end
 
     test "all items match schema", %{schema: schema} do
@@ -32,7 +41,13 @@ defmodule JsonSchemaTestSuite.Draft4.AdditionalItems do
 
   describe "array of items with no additionalItems" do
     setup do
-      %{schema: Xema.from_json_schema(%{"additionalItems" => false, "items" => [%{}, %{}, %{}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"additionalItems" => false, "items" => [%{}, %{}, %{}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "fewer number of items present", %{schema: schema} do
@@ -50,7 +65,13 @@ defmodule JsonSchemaTestSuite.Draft4.AdditionalItems do
 
   describe "additionalItems as false without items" do
     setup do
-      %{schema: Xema.from_json_schema(%{"additionalItems" => false})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"additionalItems" => false},
+            draft: "draft4"
+          )
+      }
     end
 
     test "items defaults to empty schema so everything is valid", %{schema: schema} do
@@ -64,7 +85,13 @@ defmodule JsonSchemaTestSuite.Draft4.AdditionalItems do
 
   describe "additionalItems are allowed by default" do
     setup do
-      %{schema: Xema.from_json_schema(%{"items" => [%{"type" => "integer"}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"items" => [%{"type" => "integer"}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "only the first item is validated", %{schema: schema} do

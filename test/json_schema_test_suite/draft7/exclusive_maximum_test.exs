@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.ExclusiveMaximum do
+defmodule JsonSchemaTestSuite.Draft7.ExclusiveMaximumTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "exclusiveMaximum validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"exclusiveMaximum" => 3.0})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"exclusiveMaximum" => 3.0},
+            draft: "draft7"
+          )
+      }
     end
 
     test "below the exclusiveMaximum is valid", %{schema: schema} do

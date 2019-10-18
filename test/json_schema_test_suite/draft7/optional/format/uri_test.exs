@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.Uri do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.UriTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of URIs" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "uri"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "uri"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid URL with anchor tag", %{schema: schema} do

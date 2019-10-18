@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.MaxItems do
+defmodule JsonSchemaTestSuite.Draft7.MaxItemsTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "maxItems validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"maxItems" => 2})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"maxItems" => 2},
+            draft: "draft7"
+          )
+      }
     end
 
     test "shorter is valid", %{schema: schema} do

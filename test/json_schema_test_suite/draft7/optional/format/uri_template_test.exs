@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.UriTemplate do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.UriTemplateTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "format: uri-template" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "uri-template"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "uri-template"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid uri-template", %{schema: schema} do

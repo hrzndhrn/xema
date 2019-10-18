@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Type do
+defmodule JsonSchemaTestSuite.Draft7.TypeTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "integer type matches integers" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => "integer"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => "integer"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "an integer is an integer", %{schema: schema} do
@@ -43,7 +49,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "number type matches numbers" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => "number"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => "number"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "an integer is a number", %{schema: schema} do
@@ -81,7 +93,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "string type matches strings" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => "string"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => "string"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "1 is not a string", %{schema: schema} do
@@ -123,7 +141,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "object type matches objects" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => "object"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => "object"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "an integer is not an object", %{schema: schema} do
@@ -157,7 +181,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "array type matches arrays" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => "array"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => "array"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "an integer is not an array", %{schema: schema} do
@@ -191,7 +221,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "boolean type matches booleans" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => "boolean"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => "boolean"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "an integer is not a boolean", %{schema: schema} do
@@ -237,7 +273,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "null type matches only the null object" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => "null"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => "null"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "an integer is not null", %{schema: schema} do
@@ -283,7 +325,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "multiple types can be specified in an array" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => ["integer", "string"]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => ["integer", "string"]},
+            draft: "draft7"
+          )
+      }
     end
 
     test "an integer is valid", %{schema: schema} do
@@ -317,7 +365,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "type as array with one item" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => ["string"]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => ["string"]},
+            draft: "draft7"
+          )
+      }
     end
 
     test "string is valid", %{schema: schema} do
@@ -331,7 +385,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "type: array or object" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => ["array", "object"]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => ["array", "object"]},
+            draft: "draft7"
+          )
+      }
     end
 
     test "array is valid", %{schema: schema} do
@@ -357,7 +417,13 @@ defmodule JsonSchemaTestSuite.Draft7.Type do
 
   describe "type: array, object or null" do
     setup do
-      %{schema: Xema.from_json_schema(%{"type" => ["array", "object", "null"]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"type" => ["array", "object", "null"]},
+            draft: "draft7"
+          )
+      }
     end
 
     test "array is valid", %{schema: schema} do

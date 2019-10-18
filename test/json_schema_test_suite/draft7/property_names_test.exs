@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.PropertyNames do
+defmodule JsonSchemaTestSuite.Draft7.PropertyNamesTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "propertyNames validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"propertyNames" => %{"maxLength" => 3}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"propertyNames" => %{"maxLength" => 3}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "all property names valid", %{schema: schema} do
@@ -35,7 +41,13 @@ defmodule JsonSchemaTestSuite.Draft7.PropertyNames do
 
   describe "propertyNames with boolean schema true" do
     setup do
-      %{schema: Xema.from_json_schema(%{"propertyNames" => true})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"propertyNames" => true},
+            draft: "draft7"
+          )
+      }
     end
 
     test "object with any properties is valid", %{schema: schema} do
@@ -49,7 +61,13 @@ defmodule JsonSchemaTestSuite.Draft7.PropertyNames do
 
   describe "propertyNames with boolean schema false" do
     setup do
-      %{schema: Xema.from_json_schema(%{"propertyNames" => false})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"propertyNames" => false},
+            draft: "draft7"
+          )
+      }
     end
 
     test "object with any properties is invalid", %{schema: schema} do

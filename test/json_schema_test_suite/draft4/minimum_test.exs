@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft4.Minimum do
+defmodule JsonSchemaTestSuite.Draft4.MinimumTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "minimum validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"minimum" => 1.1})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"minimum" => 1.1},
+            draft: "draft4"
+          )
+      }
     end
 
     test "above the minimum is valid", %{schema: schema} do
@@ -27,7 +33,13 @@ defmodule JsonSchemaTestSuite.Draft4.Minimum do
 
   describe "minimum validation (explicit false exclusivity)" do
     setup do
-      %{schema: Xema.from_json_schema(%{"exclusiveMinimum" => false, "minimum" => 1.1})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"exclusiveMinimum" => false, "minimum" => 1.1},
+            draft: "draft4"
+          )
+      }
     end
 
     test "above the minimum is valid", %{schema: schema} do
@@ -49,7 +61,13 @@ defmodule JsonSchemaTestSuite.Draft4.Minimum do
 
   describe "exclusiveMinimum validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"exclusiveMinimum" => true, "minimum" => 1.1})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"exclusiveMinimum" => true, "minimum" => 1.1},
+            draft: "draft4"
+          )
+      }
     end
 
     test "above the minimum is still valid", %{schema: schema} do
@@ -63,7 +81,13 @@ defmodule JsonSchemaTestSuite.Draft4.Minimum do
 
   describe "minimum validation with signed integer" do
     setup do
-      %{schema: Xema.from_json_schema(%{"minimum" => -2})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"minimum" => -2},
+            draft: "draft4"
+          )
+      }
     end
 
     test "negative above the minimum is valid", %{schema: schema} do

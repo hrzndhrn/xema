@@ -5,6 +5,7 @@ defmodule Xema.Behaviour do
   """
 
   alias Xema.{
+    JsonSchema,
     Loader,
     Ref,
     Schema,
@@ -25,7 +26,7 @@ defmodule Xema.Behaviour do
   This callback initialize the schema. The function gets the data given to
   `Xema.new/1` and returns a `Xema.Schema`.
   """
-  @callback init(any) :: Schema.t()
+  @callback init(any, keyword) :: Schema.t()
 
   defmacro __using__(_opts) do
     quote do
@@ -64,7 +65,7 @@ defmodule Xema.Behaviour do
         end
       end
 
-      def new(data, opts), do: data |> init() |> new(opts)
+      def new(data, opts), do: data |> init(opts) |> new(opts)
 
       @doc """
       Returns `true` if the `value` is a valid value against the given `schema`;
@@ -338,7 +339,10 @@ defmodule Xema.Behaviour do
         nil
 
       {:ok, data} ->
-        module.new(data, opts)
+        case Keyword.get(opts, :draft, :xema) do
+          :xema -> module.new(data, opts)
+          draft -> data |> JsonSchema.to_xema(draft: draft) |> module.new(opts)
+        end
 
       {:error, reason} ->
         raise SchemaError, reason

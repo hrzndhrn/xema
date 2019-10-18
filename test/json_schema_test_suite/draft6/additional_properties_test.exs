@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft6.AdditionalProperties do
+defmodule JsonSchemaTestSuite.Draft6.AdditionalPropertiesTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,11 +7,14 @@ defmodule JsonSchemaTestSuite.Draft6.AdditionalProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "additionalProperties" => false,
-            "patternProperties" => %{"^v" => %{}},
-            "properties" => %{"bar" => %{}, "foo" => %{}}
-          })
+          Xema.from_json_schema(
+            %{
+              "additionalProperties" => false,
+              "patternProperties" => %{"^v" => %{}},
+              "properties" => %{"bar" => %{}, "foo" => %{}}
+            },
+            draft: "draft6"
+          )
       }
     end
 
@@ -44,10 +47,10 @@ defmodule JsonSchemaTestSuite.Draft6.AdditionalProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "additionalProperties" => false,
-            "patternProperties" => %{"^á" => %{}}
-          })
+          Xema.from_json_schema(
+            %{"additionalProperties" => false, "patternProperties" => %{"^á" => %{}}},
+            draft: "draft6"
+          )
       }
     end
 
@@ -64,10 +67,13 @@ defmodule JsonSchemaTestSuite.Draft6.AdditionalProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "additionalProperties" => %{"type" => "boolean"},
-            "properties" => %{"bar" => %{}, "foo" => %{}}
-          })
+          Xema.from_json_schema(
+            %{
+              "additionalProperties" => %{"type" => "boolean"},
+              "properties" => %{"bar" => %{}, "foo" => %{}}
+            },
+            draft: "draft6"
+          )
       }
     end
 
@@ -86,7 +92,13 @@ defmodule JsonSchemaTestSuite.Draft6.AdditionalProperties do
 
   describe "additionalProperties can exist by itself" do
     setup do
-      %{schema: Xema.from_json_schema(%{"additionalProperties" => %{"type" => "boolean"}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"additionalProperties" => %{"type" => "boolean"}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "an additional valid property is valid", %{schema: schema} do
@@ -100,7 +112,13 @@ defmodule JsonSchemaTestSuite.Draft6.AdditionalProperties do
 
   describe "additionalProperties are allowed by default" do
     setup do
-      %{schema: Xema.from_json_schema(%{"properties" => %{"bar" => %{}, "foo" => %{}}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"properties" => %{"bar" => %{}, "foo" => %{}}},
+            draft: "draft6"
+          )
+      }
     end
 
     test "additional properties are allowed", %{schema: schema} do
@@ -112,10 +130,13 @@ defmodule JsonSchemaTestSuite.Draft6.AdditionalProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "additionalProperties" => %{"type" => "boolean"},
-            "allOf" => [%{"properties" => %{"foo" => %{}}}]
-          })
+          Xema.from_json_schema(
+            %{
+              "additionalProperties" => %{"type" => "boolean"},
+              "allOf" => [%{"properties" => %{"foo" => %{}}}]
+            },
+            draft: "draft6"
+          )
       }
     end
 

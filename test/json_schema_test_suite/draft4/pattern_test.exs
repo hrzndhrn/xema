@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft4.Pattern do
+defmodule JsonSchemaTestSuite.Draft4.PatternTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "pattern validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"pattern" => "^a*$"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"pattern" => "^a*$"},
+            draft: "draft4"
+          )
+      }
     end
 
     test "a matching pattern is valid", %{schema: schema} do
@@ -23,7 +29,13 @@ defmodule JsonSchemaTestSuite.Draft4.Pattern do
 
   describe "pattern is not anchored" do
     setup do
-      %{schema: Xema.from_json_schema(%{"pattern" => "a+"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"pattern" => "a+"},
+            draft: "draft4"
+          )
+      }
     end
 
     test "matches a substring", %{schema: schema} do

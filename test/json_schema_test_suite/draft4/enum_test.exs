@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft4.Enum do
+defmodule JsonSchemaTestSuite.Draft4.EnumTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "simple enum validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"enum" => [1, 2, 3]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"enum" => [1, 2, 3]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "one of the enum is valid", %{schema: schema} do
@@ -19,7 +25,13 @@ defmodule JsonSchemaTestSuite.Draft4.Enum do
 
   describe "heterogeneous enum validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"enum" => [6, "foo", [], true, %{"foo" => 12}]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"enum" => [6, "foo", [], true, %{"foo" => 12}]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "one of the enum is valid", %{schema: schema} do
@@ -39,11 +51,14 @@ defmodule JsonSchemaTestSuite.Draft4.Enum do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "properties" => %{"bar" => %{"enum" => ["bar"]}, "foo" => %{"enum" => ["foo"]}},
-            "required" => ["bar"],
-            "type" => "object"
-          })
+          Xema.from_json_schema(
+            %{
+              "properties" => %{"bar" => %{"enum" => ["bar"]}, "foo" => %{"enum" => ["foo"]}},
+              "required" => ["bar"],
+              "type" => "object"
+            },
+            draft: "draft4"
+          )
       }
     end
 
@@ -66,7 +81,13 @@ defmodule JsonSchemaTestSuite.Draft4.Enum do
 
   describe "enum with escaped characters" do
     setup do
-      %{schema: Xema.from_json_schema(%{"enum" => ["foo\nbar", "foo\rbar"]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"enum" => ["foo\nbar", "foo\rbar"]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "member 1 is valid", %{schema: schema} do
@@ -84,7 +105,13 @@ defmodule JsonSchemaTestSuite.Draft4.Enum do
 
   describe "enum with false does not match 0" do
     setup do
-      %{schema: Xema.from_json_schema(%{"enum" => [false]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"enum" => [false]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "false is valid", %{schema: schema} do
@@ -102,7 +129,13 @@ defmodule JsonSchemaTestSuite.Draft4.Enum do
 
   describe "enum with true does not match 1" do
     setup do
-      %{schema: Xema.from_json_schema(%{"enum" => [true]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"enum" => [true]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "true is valid", %{schema: schema} do
@@ -120,7 +153,13 @@ defmodule JsonSchemaTestSuite.Draft4.Enum do
 
   describe "enum with 0 does not match false" do
     setup do
-      %{schema: Xema.from_json_schema(%{"enum" => [0]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"enum" => [0]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "false is invalid", %{schema: schema} do
@@ -138,7 +177,13 @@ defmodule JsonSchemaTestSuite.Draft4.Enum do
 
   describe "enum with 1 does not match true" do
     setup do
-      %{schema: Xema.from_json_schema(%{"enum" => [1]})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"enum" => [1]},
+            draft: "draft4"
+          )
+      }
     end
 
     test "true is invalid", %{schema: schema} do

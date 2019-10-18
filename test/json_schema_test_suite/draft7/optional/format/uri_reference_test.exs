@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.UriReference do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.UriReferenceTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of URI References" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "uri-reference"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "uri-reference"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid URI", %{schema: schema} do

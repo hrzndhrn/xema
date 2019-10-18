@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.Hostname do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.HostnameTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of host names" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "hostname"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "hostname"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid host name", %{schema: schema} do

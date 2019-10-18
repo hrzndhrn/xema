@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Not do
+defmodule JsonSchemaTestSuite.Draft7.NotTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "not" do
     setup do
-      %{schema: Xema.from_json_schema(%{"not" => %{"type" => "integer"}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"not" => %{"type" => "integer"}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "allowed", %{schema: schema} do
@@ -19,7 +25,13 @@ defmodule JsonSchemaTestSuite.Draft7.Not do
 
   describe "not multiple types" do
     setup do
-      %{schema: Xema.from_json_schema(%{"not" => %{"type" => ["integer", "boolean"]}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"not" => %{"type" => ["integer", "boolean"]}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "valid", %{schema: schema} do
@@ -39,9 +51,10 @@ defmodule JsonSchemaTestSuite.Draft7.Not do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "not" => %{"properties" => %{"foo" => %{"type" => "string"}}, "type" => "object"}
-          })
+          Xema.from_json_schema(
+            %{"not" => %{"properties" => %{"foo" => %{"type" => "string"}}, "type" => "object"}},
+            draft: "draft7"
+          )
       }
     end
 
@@ -60,7 +73,13 @@ defmodule JsonSchemaTestSuite.Draft7.Not do
 
   describe "forbidden property" do
     setup do
-      %{schema: Xema.from_json_schema(%{"properties" => %{"foo" => %{"not" => %{}}}})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"properties" => %{"foo" => %{"not" => %{}}}},
+            draft: "draft7"
+          )
+      }
     end
 
     test "property present", %{schema: schema} do
@@ -74,7 +93,13 @@ defmodule JsonSchemaTestSuite.Draft7.Not do
 
   describe "not with boolean schema true" do
     setup do
-      %{schema: Xema.from_json_schema(%{"not" => true})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"not" => true},
+            draft: "draft7"
+          )
+      }
     end
 
     test "any value is invalid", %{schema: schema} do
@@ -84,7 +109,13 @@ defmodule JsonSchemaTestSuite.Draft7.Not do
 
   describe "not with boolean schema false" do
     setup do
-      %{schema: Xema.from_json_schema(%{"not" => false})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"not" => false},
+            draft: "draft7"
+          )
+      }
     end
 
     test "any value is valid", %{schema: schema} do

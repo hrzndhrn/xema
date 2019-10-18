@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.Optional.Format.DateTime do
+defmodule JsonSchemaTestSuite.Draft7.Optional.Format.DateTimeTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "validation of date-time strings" do
     setup do
-      %{schema: Xema.from_json_schema(%{"format" => "date-time"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"format" => "date-time"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "a valid date-time string", %{schema: schema} do

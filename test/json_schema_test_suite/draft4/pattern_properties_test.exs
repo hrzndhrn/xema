@@ -1,4 +1,4 @@
-defmodule JsonSchemaTestSuite.Draft4.PatternProperties do
+defmodule JsonSchemaTestSuite.Draft4.PatternPropertiesTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
@@ -7,7 +7,10 @@ defmodule JsonSchemaTestSuite.Draft4.PatternProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{"patternProperties" => %{"f.*o" => %{"type" => "integer"}}})
+          Xema.from_json_schema(
+            %{"patternProperties" => %{"f.*o" => %{"type" => "integer"}}},
+            draft: "draft4"
+          )
       }
     end
 
@@ -44,9 +47,15 @@ defmodule JsonSchemaTestSuite.Draft4.PatternProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "patternProperties" => %{"a*" => %{"type" => "integer"}, "aaa*" => %{"maximum" => 20}}
-          })
+          Xema.from_json_schema(
+            %{
+              "patternProperties" => %{
+                "a*" => %{"type" => "integer"},
+                "aaa*" => %{"maximum" => 20}
+              }
+            },
+            draft: "draft4"
+          )
       }
     end
 
@@ -79,12 +88,15 @@ defmodule JsonSchemaTestSuite.Draft4.PatternProperties do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "patternProperties" => %{
-              "X_" => %{"type" => "string"},
-              "[0-9]{2,}" => %{"type" => "boolean"}
-            }
-          })
+          Xema.from_json_schema(
+            %{
+              "patternProperties" => %{
+                "X_" => %{"type" => "string"},
+                "[0-9]{2,}" => %{"type" => "boolean"}
+              }
+            },
+            draft: "draft4"
+          )
       }
     end
 

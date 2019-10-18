@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft7.RefRemote do
+defmodule JsonSchemaTestSuite.Draft7.RefRemoteTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "remote ref" do
     setup do
-      %{schema: Xema.from_json_schema(%{"$ref" => "http://localhost:1234/integer.json"})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"$ref" => "http://localhost:1234/integer.json"},
+            draft: "draft7"
+          )
+      }
     end
 
     test "remote ref valid", %{schema: schema} do
@@ -21,7 +27,10 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemote do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{"$ref" => "http://localhost:1234/subSchemas.json#/integer"})
+          Xema.from_json_schema(
+            %{"$ref" => "http://localhost:1234/subSchemas.json#/integer"},
+            draft: "draft7"
+          )
       }
     end
 
@@ -38,7 +47,10 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemote do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{"$ref" => "http://localhost:1234/subSchemas.json#/refToInteger"})
+          Xema.from_json_schema(
+            %{"$ref" => "http://localhost:1234/subSchemas.json#/refToInteger"},
+            draft: "draft7"
+          )
       }
     end
 
@@ -55,10 +67,13 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemote do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "$id" => "http://localhost:1234/",
-            "items" => %{"$id" => "folder/", "items" => %{"$ref" => "folderInteger.json"}}
-          })
+          Xema.from_json_schema(
+            %{
+              "$id" => "http://localhost:1234/",
+              "items" => %{"$id" => "folder/", "items" => %{"$ref" => "folderInteger.json"}}
+            },
+            draft: "draft7"
+          )
       }
     end
 
@@ -75,18 +90,21 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemote do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "$id" => "http://localhost:1234/scope_change_defs1.json",
-            "definitions" => %{
-              "baz" => %{
-                "$id" => "folder/",
-                "items" => %{"$ref" => "folderInteger.json"},
-                "type" => "array"
-              }
+          Xema.from_json_schema(
+            %{
+              "$id" => "http://localhost:1234/scope_change_defs1.json",
+              "definitions" => %{
+                "baz" => %{
+                  "$id" => "folder/",
+                  "items" => %{"$ref" => "folderInteger.json"},
+                  "type" => "array"
+                }
+              },
+              "properties" => %{"list" => %{"$ref" => "#/definitions/baz"}},
+              "type" => "object"
             },
-            "properties" => %{"list" => %{"$ref" => "#/definitions/baz"}},
-            "type" => "object"
-          })
+            draft: "draft7"
+          )
       }
     end
 
@@ -103,19 +121,22 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemote do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "$id" => "http://localhost:1234/scope_change_defs2.json",
-            "definitions" => %{
-              "baz" => %{
-                "$id" => "folder/",
-                "definitions" => %{
-                  "bar" => %{"items" => %{"$ref" => "folderInteger.json"}, "type" => "array"}
+          Xema.from_json_schema(
+            %{
+              "$id" => "http://localhost:1234/scope_change_defs2.json",
+              "definitions" => %{
+                "baz" => %{
+                  "$id" => "folder/",
+                  "definitions" => %{
+                    "bar" => %{"items" => %{"$ref" => "folderInteger.json"}, "type" => "array"}
+                  }
                 }
-              }
+              },
+              "properties" => %{"list" => %{"$ref" => "#/definitions/baz/definitions/bar"}},
+              "type" => "object"
             },
-            "properties" => %{"list" => %{"$ref" => "#/definitions/baz/definitions/bar"}},
-            "type" => "object"
-          })
+            draft: "draft7"
+          )
       }
     end
 
@@ -132,11 +153,14 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemote do
     setup do
       %{
         schema:
-          Xema.from_json_schema(%{
-            "$id" => "http://localhost:1234/object",
-            "properties" => %{"name" => %{"$ref" => "name.json#/definitions/orNull"}},
-            "type" => "object"
-          })
+          Xema.from_json_schema(
+            %{
+              "$id" => "http://localhost:1234/object",
+              "properties" => %{"name" => %{"$ref" => "name.json#/definitions/orNull"}},
+              "type" => "object"
+            },
+            draft: "draft7"
+          )
       }
     end
 

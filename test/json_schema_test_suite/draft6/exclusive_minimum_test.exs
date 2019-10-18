@@ -1,11 +1,17 @@
-defmodule JsonSchemaTestSuite.Draft6.ExclusiveMinimum do
+defmodule JsonSchemaTestSuite.Draft6.ExclusiveMinimumTest do
   use ExUnit.Case
 
   import Xema, only: [valid?: 2]
 
   describe "exclusiveMinimum validation" do
     setup do
-      %{schema: Xema.from_json_schema(%{"exclusiveMinimum" => 1.1})}
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"exclusiveMinimum" => 1.1},
+            draft: "draft6"
+          )
+      }
     end
 
     test "above the exclusiveMinimum is valid", %{schema: schema} do
