@@ -140,6 +140,7 @@ defmodule Xema do
   alias Xema.{
     Castable,
     CastError,
+    JsonSchema,
     Ref,
     Schema,
     SchemaError,
@@ -215,26 +216,77 @@ defmodule Xema do
   # This function prepares the given keyword list for the function schema.
   @impl true
   @doc false
-  @spec init(atom | keyword | {atom | [atom], keyword}) :: Schema.t()
-  def init(type) when is_atom(type), do: init({type, []})
+  @spec init(atom | keyword | {atom | [atom], keyword}, keyword) :: Schema.t()
+  def init(type, opts) when is_atom(type), do: init({type, []}, opts)
 
-  def init(val) when is_list(val) do
+  def init(val, opts) when is_list(val) do
     case Keyword.keyword?(val) do
       true ->
         # init without a given type
-        init({:any, val})
+        init({:any, val}, opts)
 
       false ->
         # init with multiple types
-        init({val, []})
+        init({val, []}, opts)
     end
   end
 
-  def init({:ref, pointer}), do: init({:any, ref: pointer})
+  def init({:ref, pointer}, opts), do: init({:any, ref: pointer}, opts)
 
-  def init(data) do
-    SchemaValidator.validate!(data)
+  def init(data, opts) do
+    # If opts contains key :draft the schema is created from_json_schema and
+    # already checked.
+    if !Keyword.has_key?(opts, :draft), do: SchemaValidator.validate!(data)
     schema(data)
+  end
+
+  @doc """
+  Creates a `Xema` from a JSON Schema.  The argument `json_schema` is expected
+  as a decoded JSON Schema.
+
+  All keys that are not standard JSON Schema keywords have to be known atoms. If
+  the schema has additional keys that are unknown atoms the option
+  `atom: :force` is needed. In this case the atoms will be created. This is not
+  needed for keys expected by JSON Schema (e.g. in properties)
+
+  Options:
+  * `:draft` specifies the draft to check the given JSON Schema. Possible values
+    are `"draft4"`, `"draft6"`, and `"draft7"`, default is `"draft7"`. If
+    `:draft` not set and the schema contains `$schema` then the value for
+    `$schema` is used for this option.
+  * `:atoms` creates atoms for unknown atoms when set to `:force`. This is just
+    needed for additional JSON Schema keywords.
+
+  ## Examples
+
+      iex> Xema.from_json_schema(%{"type" => "integer", "minimum" => 5})
+      %Xema{schema: %Xema.Schema{minimum: 5, type: :integer}}
+
+      iex> schema = %{
+      ...>   "type" => "object",
+      ...>   "properties" => %{"foo" => %{"type" => "integer"}}
+      ...> }
+      iex> Xema.from_json_schema(schema)
+      %Xema{schema:
+        %Xema.Schema{
+          properties: %{"foo" => %Xema.Schema{type: :integer}},
+          type: :map
+        }
+      }
+
+      iex> Xema.from_json_schema(%{"type" => "integer", "foo" => "bar"}, atom: :force)
+      %Xema{schema: %Xema.Schema{data: %{foo: "bar"}, type: :integer}}
+
+      iex> Xema.from_json_schema(%{"exclusiveMaximum" => 5}, draft: "draft7")
+      %Xema{schema: %Xema.Schema{exclusive_maximum: 5}}
+
+      iex> Xema.from_json_schema(%{"exclusiveMaximum" => 5}, draft: "draft4")
+      ** (Xema.SchemaError) Can't build schema:
+      Dependencies for "exclusiveMaximum" failed. Missing required key "maximum".
+  """
+  @spec from_json_schema(atom | map, keyword) :: __MODULE__.t()
+  def from_json_schema(json_schema, opts \\ []) do
+    json_schema |> JsonSchema.to_xema(opts) |> new(opts)
   end
 
   # This function creates a schema from the given data.

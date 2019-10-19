@@ -243,6 +243,13 @@ defmodule Xema.Validator do
 
   defp const(%{const: const}, const), do: :ok
 
+  defp const(%{const: const}, value) when is_number(const) do
+    case const == value do
+      true -> :ok
+      false -> {:error, %{const: const, value: value}}
+    end
+  end
+
   defp const(%{const: const}, value),
     do: {:error, %{const: const, value: value}}
 
@@ -301,12 +308,34 @@ defmodule Xema.Validator do
   @spec enum(Schema.t(), any) :: result
   defp enum(%{enum: nil}, _element), do: :ok
 
+  defp enum(%{enum: enum}, value) when is_integer(value) do
+    case Enum.member?(enum, value) || Enum.member?(enum, value * 1.0) do
+      true -> :ok
+      false -> {:error, %{enum: enum, value: value}}
+    end
+  end
+
+  defp enum(%{enum: enum}, value) when is_float(value) do
+    case Enum.member?(enum, value) do
+      true ->
+        :ok
+
+      false ->
+        case zero_terminated_float?(value) && Enum.member?(enum, trunc(value)) do
+          true -> :ok
+          false -> {:error, %{enum: enum, value: value}}
+        end
+    end
+  end
+
   defp enum(%{enum: enum}, value) do
     case Enum.member?(enum, value) do
       true -> :ok
       false -> {:error, %{enum: enum, value: value}}
     end
   end
+
+  defp zero_terminated_float?(value) when is_float(value), do: Float.round(value) == value
 
   @spec module(Schema.t(), any) :: result
   defp module(%{module: nil}, _val), do: :ok

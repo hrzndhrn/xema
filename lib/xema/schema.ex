@@ -251,6 +251,7 @@ defmodule Xema.Schema do
       %Schema{}
       |> Map.keys()
       |> List.delete(:data)
+      |> List.delete(:__struct__)
 
   @doc """
   Fetches a subschema from the `schema` by the given `pointer`.

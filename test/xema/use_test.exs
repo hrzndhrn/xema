@@ -31,7 +31,6 @@ defmodule Xema.UseTest do
       end
     end
 
-    @tag :only
     test "valild?/2 returns true for a valied user" do
       assert UserSchema.valid?(:user, %{name: "Nick", age: 24})
     end
@@ -396,7 +395,6 @@ defmodule Xema.UseTest do
                  ~s| missing required keys [:age]|
     end
 
-    @tag :only
     test "cast/1 from a map with string keys, missing age and an unknown property" do
       assert {:error, error} = UserStruct.cast(%{"name" => "Nick", "xyz" => 5})
 
@@ -475,7 +473,6 @@ defmodule Xema.UseTest do
       end
     end
 
-    @tag :only
     test "raises SchemaError for missing module" do
       code =
         quote do
@@ -495,7 +492,6 @@ defmodule Xema.UseTest do
       end
     end
 
-    @tag :only
     test "raises SchemaError for invalid module" do
       code =
         quote do

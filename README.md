@@ -1,7 +1,8 @@
 # Xema
+[![Hex.pm](https://img.shields.io/hexpm/v/xema.svg)](https://hex.pm/packages/xema)
 [![Build Status](https://travis-ci.org/hrzndhrn/xema.svg?branch=master)](https://travis-ci.org/hrzndhrn/xema)
 [![Coverage Status](https://coveralls.io/repos/github/hrzndhrn/xema/badge.svg?branch=master)](https://coveralls.io/github/hrzndhrn/xema?branch=master)
-[![Hex.pm](https://img.shields.io/hexpm/v/xema.svg)](https://hex.pm/packages/xema)
+[![codebeat badge](https://codebeat.co/badges/273a2bb2-2a32-41bf-af7e-44a94dd50807)](https://codebeat.co/projects/github-com-hrzndhrn-xema-master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Xema is a schema validator inspired by [JSON Schema](http://json-schema.org).
@@ -54,8 +55,11 @@ In version 0.7.0 the behaviour `Xema.Resolver` was renamed to `Xema.Loader`.
 
 ## Tests
 
-The test in the directory `xema/test/suite` are generated from the
+The test in the directory `xema/test/json_schema_test_suite` are generated from the
 [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite).
+
+The test suite can be generated with `mix gen.test_suite`. The mix task expected
+the suite in the root directory in the folder `JSON-Schema-Test-Suite`.
 
 ## References
 

@@ -4,7 +4,7 @@ defmodule Xema.Mixfile do
   def project do
     [
       app: :xema,
-      version: "0.10.0",
+      version: "0.11.0",
       elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -23,7 +23,8 @@ defmodule Xema.Mixfile do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.travis": :test,
-        "coveralls.html": :test
+        "coveralls.html": :test,
+        "gen.test_suite": :test
       ],
 
       # Docs
@@ -59,6 +60,7 @@ defmodule Xema.Mixfile do
   defp deps do
     [
       {:benchee, "~> 1.0", only: :dev, runtime: false},
+      {:conv_case, "~> 0.2.2"},
       {:cowboy, "~> 2.4", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:decimal, "~> 1.7", optional: true},

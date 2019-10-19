@@ -1070,15 +1070,16 @@ could be on your hard disk.
 You can use the schema above as follow.
 
 ```elixir
-iex> schema = Xema.new {
+iex> alias Test.RemoteLoaderExon
+iex> schema = Xema.new({
 ...>   :map,
 ...>   id: "http://localhost:1234",
 ...>   properties: %{
 ...>     name: {:ref, "xema_name.exon#/definitions/or_nil"},
 ...>     str: {:ref, "xema_name.exon"}
 ...>   }
-...> }
-...> Xema.validate schema, %{str: "foo"}
+...> }, loader: RemoteLoaderExon)
+iex> Xema.validate schema, %{str: "foo"}
 :ok
 iex> {:error, error} = Xema.validate schema, %{str: nil}
 {:error, %Xema.ValidationError{
