@@ -54,8 +54,11 @@ In version 0.7.0 the behaviour `Xema.Resolver` was renamed to `Xema.Loader`.
 
 ## Tests
 
-The test in the directory `xema/test/suite` are generated from the
+The test in the directory `xema/test/json_schema_test_suite` are generated from the
 [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite).
+
+The test suite can be generated with `mix gen.test_suite`. The mix task expected
+the suite in the root directory in the folder `JSON-Schema-Test-Suite`.
 
 ## References
 

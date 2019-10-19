@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.10.0 2019/10/8
+## 0.11.0 2019/10/19
+
++ Add `Xema.from_json_schema`.
+
+## 0.10.0 2019/09/8
 
 + Refactor `Xema.cast` with an improvement of the error messages.
 + Add macro `field` and `required` for struct schemas.
