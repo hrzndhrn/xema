@@ -3,10 +3,6 @@ defmodule Test.RemoteLoaderJson do
 
   @behaviour Xema.Loader
 
-  require Logger
-
-  alias Xema.JsonSchema
-
   @impl true
   def fetch(uri) do
     with {:ok, response} <- get(uri), do: eval(response)
