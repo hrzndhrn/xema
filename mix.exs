@@ -4,7 +4,7 @@ defmodule Xema.Mixfile do
   def project do
     [
       app: :xema,
-      version: "0.11.0",
+      version: "0.11.1",
       elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -35,7 +35,8 @@ defmodule Xema.Mixfile do
           "docs/cast.md",
           "docs/loader.md",
           "docs/examples.md",
-          "docs/unsupported.md"
+          "docs/unsupported.md",
+          "CHANGELOG.md"
         ],
         main: "readme"
       ],
