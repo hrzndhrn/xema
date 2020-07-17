@@ -106,7 +106,7 @@ end
 
 ## JSON Schema loader
 
-If the scheme is created with `Xema.from_json_schem/2`, the loader must return
+If the scheme is created with `Xema.from_json_schema/2`, the loader must return
 the decoded JSON.
 
 In this case the file loader looks like this:
