@@ -11,7 +11,8 @@ otp_release:
   - 22.1
 
 before_script:
-  - mix do deps.get, deps.compile
+  - mix do deps.get
+  - MIX_ENV=test mix deps.compile
   - MIX_ENV=test mix compile --warnings-as-errors
   - travis_wait mix dialyzer --plt
 
