@@ -66,6 +66,10 @@ defmodule JsonSchemaTestSuite.Draft4.Optional.FormatTest do
       assert valid?(schema, "http://foo.bar/?baz=qux#quux")
     end
 
+    test "a valid URL with domain starts with a digit", %{schema: schema} do
+      assert valid?(schema, "https://9gag.com/")
+    end
+
     test "a valid URL with anchor tag and parantheses", %{schema: schema} do
       assert valid?(schema, "http://foo.com/blah_(wikipedia)_blah#cite-1")
     end

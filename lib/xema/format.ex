@@ -211,7 +211,7 @@ defmodule Xema.Format do
   """
   @hostname ~r/
       (?(DEFINE)
-        (?<sub_domain> (?:[a-z][-a-z\d]{0,62}) )
+        (?<sub_domain> (?:[a-z\d][-a-z\d]{0,62}) )
       )
       ^(?&sub_domain)(?:\.(?&sub_domain))*$
     /xi
