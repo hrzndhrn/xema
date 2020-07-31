@@ -188,6 +188,9 @@ defmodule Xema.Behaviour do
         {ref, %Schema{} = schema} ->
           {ref, inline_refs(circulars, xema, nil, schema)}
 
+        {ref, %{ schema: %Schema{} = schema }} ->
+          {ref, inline_refs(circulars, xema, nil, schema)}
+
         {_ref, _xema} = ref ->
           ref
       end)
