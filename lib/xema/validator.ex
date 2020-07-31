@@ -584,6 +584,8 @@ defmodule Xema.Validator do
   @spec unique(Schema.t(), list | tuple) :: result
   defp unique(%{unique_items: nil}, _list), do: :ok
 
+  defp unique(%{unique_items: false}, _list), do: :ok
+
   defp unique(%{unique_items: true}, list) when is_list(list) do
     case unique?(list) do
       true -> :ok

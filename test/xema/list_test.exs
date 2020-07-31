@@ -194,6 +194,20 @@ defmodule Xema.ListTest do
     end
   end
 
+  describe "'list' schema with unique items set to false" do
+    setup do
+      %{schema: Xema.new({:list, unique_items: false})}
+    end
+
+    test "validate/2 with list of unique items", %{schema: schema} do
+      assert validate(schema, [1, 2, 3]) == :ok
+    end
+
+    test "validate/2 with list of not unique items", %{schema: schema} do
+      assert validate(schema, [1, 2, 3, 3, 4]) == :ok
+    end
+  end
+
   describe "'list' schema with tuple validation" do
     setup do
       %{

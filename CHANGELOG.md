@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.2 - 2020/07/31
+
++ Fix a bug when `unique_items` is explicit set to `false`.
+
 ## 0.11.1 - 2020/07/17
 
 + Fix hostname format validation. Thanks to @romul.
