@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.2 - 2020/08/18
+
++ Fix an issue with circular references.
+
 ## 0.11.2 - 2020/07/31
 
 + Fix a bug when `unique_items` is explicit set to `false`.
