@@ -1,0 +1,8 @@
+{
+  :map,
+  properties: %{
+    foo: {:ref, "circular.exon"},
+    bar: {:ref, "integer.exon"}
+  }
+}
+
