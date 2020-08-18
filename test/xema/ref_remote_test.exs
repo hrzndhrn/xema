@@ -545,6 +545,73 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
+  describe "remote circular ref with ref" do
+    setup do
+      %{
+        schema:
+          Xema.new({:ref, "http://localhost:1234/circular.exon"},
+            loader: FileLoader
+          )
+      }
+    end
+
+    test "check schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{
+                 "circular.exon" => %Xema{
+                   refs: %{},
+                   schema: %Xema.Schema{
+                     properties: %{
+                       bar: %Xema.Schema{type: :integer},
+                       foo: %Xema.Schema{
+                         ref: %Xema.Ref{
+                           pointer: "circular.exon",
+                           uri: %URI{
+                             authority: nil,
+                             fragment: nil,
+                             host: nil,
+                             path: "circular.exon",
+                             port: nil,
+                             query: nil,
+                             scheme: nil,
+                             userinfo: nil
+                           }
+                         }
+                       }
+                     },
+                     type: :map
+                   }
+                 }
+               },
+               schema: %Xema.Schema{
+                 properties: %{
+                   bar: %Xema.Schema{type: :integer},
+                   foo: %Xema.Schema{
+                     ref: %Xema.Ref{
+                       pointer: "circular.exon",
+                       uri: %URI{
+                         authority: nil,
+                         fragment: nil,
+                         host: nil,
+                         path: "circular.exon",
+                         port: nil,
+                         query: nil,
+                         scheme: nil,
+                         userinfo: nil
+                       }
+                     }
+                   }
+                 },
+                 type: :map
+               }
+             }
+    end
+
+    test "validate/2 with a valid value", %{schema: schema} do
+      assert validate(schema, %{bar: 1, foo: %{bar: 2}}) == :ok
+    end
+  end
+
   describe "remote ref in remote ref in remote ref" do
     setup do
       %{
@@ -591,12 +658,73 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "check schema", %{schema: schema} do
-      assert Map.keys(schema.refs) ==
-               [
-                 "http://localhost:1234/integer.exon",
-                 "http://localhost:1234/list_int.exon",
-                 "http://localhost:1234/obj_list_int.exon"
-               ]
+      assert schema == %Xema{
+               refs: %{
+                 "http://localhost:1234/integer.exon" => %Xema{
+                   refs: %{},
+                   schema: %Xema.Schema{type: :integer}
+                 },
+                 "http://localhost:1234/list_int.exon" => %Xema{
+                   refs: %{},
+                   schema: %Xema.Schema{
+                     items: %Xema.Schema{
+                       ref: %Xema.Ref{
+                         pointer: "http://localhost:1234/integer.exon",
+                         uri: %URI{
+                           authority: "localhost:1234",
+                           fragment: nil,
+                           host: "localhost",
+                           path: "/integer.exon",
+                           port: 1234,
+                           query: nil,
+                           scheme: "http",
+                           userinfo: nil
+                         }
+                       }
+                     },
+                     type: :list
+                   }
+                 },
+                 "http://localhost:1234/obj_list_int.exon" => %Xema{
+                   refs: %{},
+                   schema: %Xema.Schema{
+                     properties: %{
+                       ints: %Xema.Schema{
+                         ref: %Xema.Ref{
+                           pointer: "http://localhost:1234/list_int.exon",
+                           uri: %URI{
+                             authority: "localhost:1234",
+                             fragment: nil,
+                             host: "localhost",
+                             path: "/list_int.exon",
+                             port: 1234,
+                             query: nil,
+                             scheme: "http",
+                             userinfo: nil
+                           }
+                         }
+                       }
+                     },
+                     type: :map
+                   }
+                 }
+               },
+               schema: %Xema.Schema{
+                 ref: %Xema.Ref{
+                   pointer: "http://localhost:1234/obj_list_int.exon",
+                   uri: %URI{
+                     authority: "localhost:1234",
+                     fragment: nil,
+                     host: "localhost",
+                     path: "/obj_list_int.exon",
+                     port: 1234,
+                     query: nil,
+                     scheme: "http",
+                     userinfo: nil
+                   }
+                 }
+               }
+             }
     end
 
     test "valid?/2 with valid data", %{schema: schema} do
