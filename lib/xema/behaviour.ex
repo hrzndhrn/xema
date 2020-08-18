@@ -65,7 +65,9 @@ defmodule Xema.Behaviour do
         end
       end
 
-      def new(data, opts), do: data |> init(opts) |> new(opts)
+      def new(data, opts) when is_map(data) or is_tuple(data) or is_list(data) or is_atom(data) do
+        data |> init(opts) |> new(opts)
+      end
 
       @doc """
       Returns `true` if the `value` is a valid value against the given `schema`;
@@ -144,12 +146,12 @@ defmodule Xema.Behaviour do
     end
   end
 
-  defp inline(xema),
-    do:
-      xema.refs
-      |> Map.keys()
-      |> Enum.filter(fn ref -> circular?(xema, ref) end)
-      |> inline_refs(xema)
+  defp inline(xema) do
+    xema.refs
+    |> Map.keys()
+    |> Enum.filter(fn ref -> circular?(xema, ref) end)
+    |> inline_refs(xema)
+  end
 
   defp inline_refs(circulars, master, root, %Schema{} = schema) do
     map(schema, fn
@@ -182,14 +184,20 @@ defmodule Xema.Behaviour do
     refs =
       xema.refs
       |> Enum.map(fn
-        {ref, :root} ->
-          {ref, :root}
+        {_ref, :root} = root ->
+          root
 
         {ref, %Schema{} = schema} ->
           {ref, inline_refs(circulars, xema, nil, schema)}
 
-        {_ref, _xema} = ref ->
-          ref
+        {ref, %{schema: %Schema{} = schema} = master} ->
+          case ref in circulars do
+            true ->
+              {ref, Map.put(master, :schema, inline_refs(circulars, master, xema, schema))}
+
+            false ->
+              {ref, master}
+          end
       end)
       |> Enum.filter(fn {ref, _} -> Enum.member?(circulars, ref) end)
       |> Enum.into(%{})
@@ -199,12 +207,11 @@ defmodule Xema.Behaviour do
     |> Map.put(:refs, refs)
   end
 
-  defp update_master_ids(%{schema: schema} = xema)
-       when not is_nil(schema),
-       do:
-         Map.update!(xema, :refs, fn value ->
-           Map.merge(value, get_ids(schema))
-         end)
+  defp update_master_ids(%{schema: schema} = xema) when not is_nil(schema) do
+    Map.update!(xema, :refs, fn value ->
+      Map.merge(value, get_ids(schema))
+    end)
+  end
 
   defp update_master_ids(value), do: value
 
