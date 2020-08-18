@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.11.2 - 2020/08/18
+## 0.11.3 - 2020/08/18
 
 + Fix an issue with circular references.
 
