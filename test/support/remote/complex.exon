@@ -1,0 +1,8 @@
+{
+  :map,
+  properties: %{
+    int: {:ref, "integer.exon"},
+    ints: {:ref, "list_int.exon"},
+    linked_ints: {:ref, "linked_ints.exon"}
+  }
+}

@@ -1,0 +1,4 @@
+{
+  :list,
+  items: {:ref, "http://localhost:1234/obj_list_int.exon"}
+}

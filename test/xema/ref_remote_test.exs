@@ -736,6 +736,71 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
+  describe "complex remote refs" do
+    setup do
+      %{
+        schema:
+          Xema.new({:ref, "complex.exon"},
+            loader: FileLoader
+          )
+      }
+    end
+
+    @tag :only
+    test "check schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{
+                 "linked_ints.exon" => %Xema{
+                   refs: %{},
+                   schema: %Xema.Schema{
+                     properties: %{
+                       ints: %Xema.Schema{items: %Xema.Schema{type: :integer}, type: :list},
+                       next: %Xema.Schema{
+                         ref: %Xema.Ref{
+                           pointer: "linked_ints.exon",
+                           uri: %URI{
+                             authority: nil,
+                             fragment: nil,
+                             host: nil,
+                             path: "linked_ints.exon",
+                             port: nil,
+                             query: nil,
+                             scheme: nil,
+                             userinfo: nil
+                           }
+                         }
+                       }
+                     },
+                     type: :map
+                   }
+                 }
+               },
+               schema: %Xema.Schema{
+                 properties: %{
+                   int: %Xema.Schema{type: :integer},
+                   ints: %Xema.Schema{items: %Xema.Schema{type: :integer}, type: :list},
+                   linked_ints: %Xema.Schema{
+                     ref: %Xema.Ref{
+                       pointer: "linked_ints.exon",
+                       uri: %URI{
+                         authority: nil,
+                         fragment: nil,
+                         host: nil,
+                         path: "linked_ints.exon",
+                         port: nil,
+                         query: nil,
+                         scheme: nil,
+                         userinfo: nil
+                       }
+                     }
+                   }
+                 },
+                 type: :map
+               }
+             }
+    end
+  end
+
   describe "circular remote ref" do
     setup do
       %{schema: Xema.new({:ref, "http://localhost:1234/b_in_a.exon"}, loader: RemoteLoaderExon)}
