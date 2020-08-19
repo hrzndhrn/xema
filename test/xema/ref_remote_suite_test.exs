@@ -52,6 +52,7 @@ defmodule Xema.RefRemoteSuiteTest do
       }
     end
 
+    @tag :only
     test "ref within ref valid", %{schema: schema} do
       data = 1
       assert valid?(schema, data)

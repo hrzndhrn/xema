@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.11.4 - 2020/08/19
+
++ Fix an issue with circular references.
+
 ## 0.11.3 - 2020/08/18
 
 + Fix an issue with circular references.

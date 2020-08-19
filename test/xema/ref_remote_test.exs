@@ -566,16 +566,7 @@ defmodule Xema.RefRemoteTest do
                        foo: %Xema.Schema{
                          ref: %Xema.Ref{
                            pointer: "circular.exon",
-                           uri: %URI{
-                             authority: nil,
-                             fragment: nil,
-                             host: nil,
-                             path: "circular.exon",
-                             port: nil,
-                             query: nil,
-                             scheme: nil,
-                             userinfo: nil
-                           }
+                           uri: %URI{path: "circular.exon"}
                          }
                        }
                      },
@@ -589,16 +580,7 @@ defmodule Xema.RefRemoteTest do
                    foo: %Xema.Schema{
                      ref: %Xema.Ref{
                        pointer: "circular.exon",
-                       uri: %URI{
-                         authority: nil,
-                         fragment: nil,
-                         host: nil,
-                         path: "circular.exon",
-                         port: nil,
-                         query: nil,
-                         scheme: nil,
-                         userinfo: nil
-                       }
+                       uri: %URI{path: "circular.exon"}
                      }
                    }
                  },
@@ -672,13 +654,10 @@ defmodule Xema.RefRemoteTest do
                          pointer: "http://localhost:1234/integer.exon",
                          uri: %URI{
                            authority: "localhost:1234",
-                           fragment: nil,
                            host: "localhost",
                            path: "/integer.exon",
                            port: 1234,
-                           query: nil,
-                           scheme: "http",
-                           userinfo: nil
+                           scheme: "http"
                          }
                        }
                      },
@@ -694,13 +673,10 @@ defmodule Xema.RefRemoteTest do
                            pointer: "http://localhost:1234/list_int.exon",
                            uri: %URI{
                              authority: "localhost:1234",
-                             fragment: nil,
                              host: "localhost",
                              path: "/list_int.exon",
                              port: 1234,
-                             query: nil,
-                             scheme: "http",
-                             userinfo: nil
+                             scheme: "http"
                            }
                          }
                        }
@@ -733,6 +709,53 @@ defmodule Xema.RefRemoteTest do
 
     test "valid?/2 with invalid data", %{schema: schema} do
       refute valid?(schema, %{ints: [1, "2", 3]})
+    end
+  end
+
+  describe "complex remote refs" do
+    setup do
+      %{
+        schema:
+          Xema.new({:ref, "complex.exon"},
+            loader: FileLoader
+          )
+      }
+    end
+
+    @tag :only
+    test "check schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{
+                 "linked_ints.exon" => %Xema{
+                   refs: %{},
+                   schema: %Xema.Schema{
+                     properties: %{
+                       ints: %Xema.Schema{items: %Xema.Schema{type: :integer}, type: :list},
+                       next: %Xema.Schema{
+                         ref: %Xema.Ref{
+                           pointer: "linked_ints.exon",
+                           uri: %URI{path: "linked_ints.exon"}
+                         }
+                       }
+                     },
+                     type: :map
+                   }
+                 }
+               },
+               schema: %Xema.Schema{
+                 properties: %{
+                   int: %Xema.Schema{type: :integer},
+                   ints: %Xema.Schema{items: %Xema.Schema{type: :integer}, type: :list},
+                   linked_ints: %Xema.Schema{
+                     ref: %Xema.Ref{
+                       pointer: "linked_ints.exon",
+                       uri: %URI{path: "linked_ints.exon"}
+                     }
+                   }
+                 },
+                 type: :map
+               }
+             }
     end
   end
 

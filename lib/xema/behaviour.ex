@@ -153,6 +153,32 @@ defmodule Xema.Behaviour do
     |> inline_refs(xema)
   end
 
+  defp inline_refs(circulars, xema) do
+    schema = inline_refs(circulars, xema, nil, xema.schema)
+
+    refs =
+      xema.refs
+      |> Enum.map(fn {ref, schema} = item ->
+        case {ref in circulars, schema} do
+          {false, _} ->
+            item
+
+          {true, :root} ->
+            item
+
+          {true, %Schema{} = schema} ->
+            {ref, inline_refs(circulars, xema, xema, schema)}
+
+          {true, %{schema: %Schema{} = schema} = master} ->
+            {ref, Map.put(master, :schema, inline_refs(circulars, master, xema, schema))}
+        end
+      end)
+      |> Enum.filter(fn {ref, _} -> Enum.member?(circulars, ref) end)
+      |> Enum.into(%{})
+
+    %{xema | schema: schema, refs: refs}
+  end
+
   defp inline_refs(circulars, master, root, %Schema{} = schema) do
     map(schema, fn
       %Schema{ref: ref} = schema, _id when not is_nil(ref) ->
@@ -168,43 +194,14 @@ defmodule Xema.Behaviour do
               {xema, xema} ->
                 schema
 
-              {xema, _root} ->
-                inline_refs(circulars, master, xema, xema.schema)
+              {xema, root} ->
+                inline_refs(circulars, xema, root, xema.schema)
             end
         end
 
       value, _id ->
         value
     end)
-  end
-
-  defp inline_refs(circulars, xema) do
-    schema = inline_refs(circulars, xema, nil, xema.schema)
-
-    refs =
-      xema.refs
-      |> Enum.map(fn
-        {_ref, :root} = root ->
-          root
-
-        {ref, %Schema{} = schema} ->
-          {ref, inline_refs(circulars, xema, nil, schema)}
-
-        {ref, %{schema: %Schema{} = schema} = master} ->
-          case ref in circulars do
-            true ->
-              {ref, Map.put(master, :schema, inline_refs(circulars, master, xema, schema))}
-
-            false ->
-              {ref, master}
-          end
-      end)
-      |> Enum.filter(fn {ref, _} -> Enum.member?(circulars, ref) end)
-      |> Enum.into(%{})
-
-    xema
-    |> Map.put(:schema, schema)
-    |> Map.put(:refs, refs)
   end
 
   defp update_master_ids(%{schema: schema} = xema) when not is_nil(schema) do
