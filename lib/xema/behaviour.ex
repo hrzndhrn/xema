@@ -153,31 +153,6 @@ defmodule Xema.Behaviour do
     |> inline_refs(xema)
   end
 
-  defp inline_refs(circulars, master, root, %Schema{} = schema) do
-    map(schema, fn
-      %Schema{ref: ref} = schema, _id when not is_nil(ref) ->
-        case Enum.member?(circulars, Ref.key(ref)) do
-          true ->
-            schema
-
-          false ->
-            case Ref.fetch!(ref, master, root) do
-              {%Schema{} = ref_schema, root} ->
-                inline_refs(circulars, master, root, ref_schema)
-
-              {xema, xema} ->
-                schema
-
-              {xema, _root} ->
-                inline_refs(circulars, master, xema, xema.schema)
-            end
-        end
-
-      value, _id ->
-        value
-    end)
-  end
-
   defp inline_refs(circulars, xema) do
     schema = inline_refs(circulars, xema, nil, xema.schema)
 
@@ -205,6 +180,31 @@ defmodule Xema.Behaviour do
     xema
     |> Map.put(:schema, schema)
     |> Map.put(:refs, refs)
+  end
+
+  defp inline_refs(circulars, master, root, %Schema{} = schema) do
+    map(schema, fn
+      %Schema{ref: ref} = schema, _id when not is_nil(ref) ->
+        case Enum.member?(circulars, Ref.key(ref)) do
+          true ->
+            schema
+
+          false ->
+            case Ref.fetch!(ref, master, root) do
+              {%Schema{} = ref_schema, root} ->
+                inline_refs(circulars, master, root, ref_schema)
+
+              {xema, xema} ->
+                schema
+
+              {xema, _root} ->
+                inline_refs(circulars, master, xema, xema.schema)
+            end
+        end
+
+      value, _id ->
+        value
+    end)
   end
 
   defp update_master_ids(%{schema: schema} = xema) when not is_nil(schema) do
