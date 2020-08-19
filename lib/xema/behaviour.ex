@@ -158,28 +158,25 @@ defmodule Xema.Behaviour do
 
     refs =
       xema.refs
-      |> Enum.map(fn
-        {_ref, :root} = root ->
-          root
+      |> Enum.map(fn {ref, schema} = item ->
+        case {ref in circulars, schema} do
+          {false, _} ->
+            item
 
-        {ref, %Schema{} = schema} ->
-          {ref, inline_refs(circulars, xema, nil, schema)}
+          {true, :root} ->
+            item
 
-        {ref, %{schema: %Schema{} = schema} = master} ->
-          case ref in circulars do
-            true ->
-              {ref, Map.put(master, :schema, inline_refs(circulars, master, xema, schema))}
+          {true, %Schema{} = schema} ->
+            {ref, inline_refs(circulars, xema, xema, schema)}
 
-            false ->
-              {ref, master}
-          end
+          {true, %{schema: %Schema{} = schema} = master} ->
+            {ref, Map.put(master, :schema, inline_refs(circulars, master, xema, schema))}
+        end
       end)
       |> Enum.filter(fn {ref, _} -> Enum.member?(circulars, ref) end)
       |> Enum.into(%{})
 
-    xema
-    |> Map.put(:schema, schema)
-    |> Map.put(:refs, refs)
+    %{xema | schema: schema, refs: refs}
   end
 
   defp inline_refs(circulars, master, root, %Schema{} = schema) do
@@ -197,8 +194,8 @@ defmodule Xema.Behaviour do
               {xema, xema} ->
                 schema
 
-              {xema, _root} ->
-                inline_refs(circulars, master, xema, xema.schema)
+              {xema, root} ->
+                inline_refs(circulars, xema, root, xema.schema)
             end
         end
 

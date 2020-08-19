@@ -566,16 +566,7 @@ defmodule Xema.RefRemoteTest do
                        foo: %Xema.Schema{
                          ref: %Xema.Ref{
                            pointer: "circular.exon",
-                           uri: %URI{
-                             authority: nil,
-                             fragment: nil,
-                             host: nil,
-                             path: "circular.exon",
-                             port: nil,
-                             query: nil,
-                             scheme: nil,
-                             userinfo: nil
-                           }
+                           uri: %URI{path: "circular.exon"}
                          }
                        }
                      },
@@ -589,16 +580,7 @@ defmodule Xema.RefRemoteTest do
                    foo: %Xema.Schema{
                      ref: %Xema.Ref{
                        pointer: "circular.exon",
-                       uri: %URI{
-                         authority: nil,
-                         fragment: nil,
-                         host: nil,
-                         path: "circular.exon",
-                         port: nil,
-                         query: nil,
-                         scheme: nil,
-                         userinfo: nil
-                       }
+                       uri: %URI{path: "circular.exon"}
                      }
                    }
                  },
@@ -672,13 +654,10 @@ defmodule Xema.RefRemoteTest do
                          pointer: "http://localhost:1234/integer.exon",
                          uri: %URI{
                            authority: "localhost:1234",
-                           fragment: nil,
                            host: "localhost",
                            path: "/integer.exon",
                            port: 1234,
-                           query: nil,
-                           scheme: "http",
-                           userinfo: nil
+                           scheme: "http"
                          }
                        }
                      },
@@ -694,13 +673,10 @@ defmodule Xema.RefRemoteTest do
                            pointer: "http://localhost:1234/list_int.exon",
                            uri: %URI{
                              authority: "localhost:1234",
-                             fragment: nil,
                              host: "localhost",
                              path: "/list_int.exon",
                              port: 1234,
-                             query: nil,
-                             scheme: "http",
-                             userinfo: nil
+                             scheme: "http"
                            }
                          }
                        }
@@ -758,16 +734,7 @@ defmodule Xema.RefRemoteTest do
                        next: %Xema.Schema{
                          ref: %Xema.Ref{
                            pointer: "linked_ints.exon",
-                           uri: %URI{
-                             authority: nil,
-                             fragment: nil,
-                             host: nil,
-                             path: "linked_ints.exon",
-                             port: nil,
-                             query: nil,
-                             scheme: nil,
-                             userinfo: nil
-                           }
+                           uri: %URI{path: "linked_ints.exon"}
                          }
                        }
                      },
@@ -782,16 +749,7 @@ defmodule Xema.RefRemoteTest do
                    linked_ints: %Xema.Schema{
                      ref: %Xema.Ref{
                        pointer: "linked_ints.exon",
-                       uri: %URI{
-                         authority: nil,
-                         fragment: nil,
-                         host: nil,
-                         path: "linked_ints.exon",
-                         port: nil,
-                         query: nil,
-                         scheme: nil,
-                         userinfo: nil
-                       }
+                       uri: %URI{path: "linked_ints.exon"}
                      }
                    }
                  },
