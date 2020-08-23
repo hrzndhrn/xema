@@ -4,7 +4,7 @@
 
 ### Breaking changes
 
-+ The error data struct for list items has changed from `keyword` to `map`.
++ The error data structure for list items has changed from `keyword` to `map`.
 
 since 0.12.0:
 ```elixir
