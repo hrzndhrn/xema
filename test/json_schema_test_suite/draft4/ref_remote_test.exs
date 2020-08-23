@@ -48,6 +48,7 @@ defmodule JsonSchemaTestSuite.Draft4.RefRemoteTest do
   describe "ref within remote ref" do
     setup do
       :refToInteger
+
       %{
         schema:
           Xema.from_json_schema(
