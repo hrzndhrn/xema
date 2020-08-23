@@ -9,7 +9,8 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemoteTest do
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/integer.json"},
-            draft: "draft7"
+            draft: "draft7",
+            atom: :force
           )
       }
     end
@@ -29,7 +30,8 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemoteTest do
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/subSchemas.json#/integer"},
-            draft: "draft7"
+            draft: "draft7",
+            atom: :force
           )
       }
     end
@@ -45,16 +47,17 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemoteTest do
 
   describe "ref within remote ref" do
     setup do
-      :refToInteger
       %{
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/subSchemas.json#/refToInteger"},
-            draft: "draft7"
+            draft: "draft7",
+            atom: :force
           )
       }
     end
 
+    @tag :only
     test "ref within ref valid", %{schema: schema} do
       assert valid?(schema, 1)
     end
@@ -73,7 +76,8 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemoteTest do
               "$id" => "http://localhost:1234/",
               "items" => %{"$id" => "folder/", "items" => %{"$ref" => "folderInteger.json"}}
             },
-            draft: "draft7"
+            draft: "draft7",
+            atom: :force
           )
       }
     end
@@ -104,7 +108,8 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemoteTest do
               "properties" => %{"list" => %{"$ref" => "#/definitions/baz"}},
               "type" => "object"
             },
-            draft: "draft7"
+            draft: "draft7",
+            atom: :force
           )
       }
     end
@@ -136,7 +141,8 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemoteTest do
               "properties" => %{"list" => %{"$ref" => "#/definitions/baz/definitions/bar"}},
               "type" => "object"
             },
-            draft: "draft7"
+            draft: "draft7",
+            atom: :force
           )
       }
     end
