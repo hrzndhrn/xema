@@ -54,7 +54,7 @@ defmodule Xema.NestedTest do
                 reason: %{
                   properties: %{
                     items: %{
-                      items: [{1, %{properties: %{num: %{minimum: 0, value: -2}}}}]
+                      items: %{1 => %{properties: %{num: %{minimum: 0, value: -2}}}}
                     }
                   }
                 }
@@ -114,7 +114,7 @@ defmodule Xema.NestedTest do
                 reason: %{
                   properties: %{
                     items: %{
-                      items: [{1, %{properties: %{num: %{minimum: 0, value: -2}}}}]
+                      items: %{1 => %{properties: %{num: %{minimum: 0, value: -2}}}}
                     }
                   }
                 }

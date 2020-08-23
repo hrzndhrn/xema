@@ -37,34 +37,33 @@ defmodule Xema.ErrorHandlingTest do
       """
 
       reason = %{
-        items: [
-          {1,
-           %{
-             properties: %{
-               properties: %{
-                 properties: %{
-                   pos: %{
-                     any_of: [
-                       %{items: [{1, %{type: :keyword, value: %{min_length: 10}}}]},
-                       %{type: :atom, value: {:string, %{min_length: 10}}},
-                       %{type: :list, value: {:string, %{min_length: 10}}},
-                       %{
-                         items: [
-                           {0, %{const: :ref, value: :string}},
-                           {1, %{type: :string, value: %{min_length: 10}}}
-                         ]
-                       },
-                       %{type: :keyword, value: {:string, %{min_length: 10}}},
-                       %{type: :struct, value: {:string, %{min_length: 10}}},
-                       %{type: :atom, value: {:string, %{min_length: 10}}}
-                     ],
-                     value: {:string, %{min_length: 10}}
-                   }
-                 }
-               }
-             }
-           }}
-        ]
+        items: %{
+          1 => %{
+            properties: %{
+              properties: %{
+                properties: %{
+                  pos: %{
+                    any_of: [
+                      %{items: %{1 => %{type: :keyword, value: %{min_length: 10}}}},
+                      %{type: :atom, value: {:string, %{min_length: 10}}},
+                      %{type: :list, value: {:string, %{min_length: 10}}},
+                      %{
+                        items: %{
+                          0 => %{const: :ref, value: :string},
+                          1 => %{type: :string, value: %{min_length: 10}}
+                        }
+                      },
+                      %{type: :keyword, value: {:string, %{min_length: 10}}},
+                      %{type: :struct, value: {:string, %{min_length: 10}}},
+                      %{type: :atom, value: {:string, %{min_length: 10}}}
+                    ],
+                    value: {:string, %{min_length: 10}}
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       assert %SchemaError{} = error

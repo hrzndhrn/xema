@@ -198,7 +198,7 @@ defmodule Xema.UseTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{properties: %{pos: %{items: [{1, %{minimum: 0, value: -2}}]}}}
+                 reason: %{properties: %{pos: %{items: %{1 => %{minimum: 0, value: -2}}}}}
                } = error
              } = Schema.validate(:nums, %{pos: [1, -2, 3], neg: [-5, -4]})
 

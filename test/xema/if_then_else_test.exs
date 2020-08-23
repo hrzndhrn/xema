@@ -116,10 +116,10 @@ defmodule Xema.IfThenElseTest do
               %ValidationError{
                 reason: %{
                   then: %{
-                    items: [
-                      {2, %{type: :integer, value: "foo"}},
-                      {3, %{type: :integer, value: "bar"}}
-                    ]
+                    items: %{
+                      2 => %{type: :integer, value: "foo"},
+                      3 => %{type: :integer, value: "bar"}
+                    }
                   }
                 }
               } = error} = validate(schema, [1, 2, "foo", "bar"])

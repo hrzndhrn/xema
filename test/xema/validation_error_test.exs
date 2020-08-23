@@ -23,13 +23,22 @@ defmodule Xema.ValidationErrorTest do
   end
 
   describe "format_error/1" do
-    setup do
-      %{schema: Xema.new(:integer)}
-    end
+    test "returns a formated error for an error tuple (:integer)" do
+      schema = Xema.new(:integer)
 
-    test "returns a formated error for an error tuple", %{schema: schema} do
       assert schema |> Validator.validate("foo") |> ValidationError.format_error() ==
                ~s|Expected :integer, got \"foo\".|
+    end
+
+    test "returns a formated error for an error tuple (:list)" do
+      schema = Xema.new({:list, items: :integer})
+      data = [1, "foo", 2, :bar]
+
+      assert schema |> Validator.validate(data) |> ValidationError.format_error() ==
+               """
+               Expected :integer, got "foo", at [1].
+               Expected :integer, got :bar, at [3].\
+               """
     end
   end
 
