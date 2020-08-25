@@ -4,7 +4,9 @@
 
 ### Breaking changes
 
-+ The error data structure for list items has changed from `keyword` to `map`.
++ The error data structure for `list` `items` has changed from a `list` of
+  `tuple`s to a `map`. This change allows you to convert `reason` directly to
+  JSON.
 
 since 0.12.0:
 ```elixir
@@ -28,10 +30,10 @@ iex> Xema.validate(schema, [1, "foo", 2, :bar])
 {:error,
  %Xema.ValidationError{
    message: nil,
-   reason: [
-     items: %{
-       1, %{type: :integer, value: "foo"},
-       3, %{type: :integer, value: :bar}
+   reason: %{
+     items: [
+       {1, %{type: :integer, value: "foo"}},
+       {3, %{type: :integer, value: :bar}}
      ]
    }
  }}
