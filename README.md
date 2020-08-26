@@ -1,8 +1,7 @@
 # Xema
 [![Hex.pm](https://img.shields.io/hexpm/v/xema.svg)](https://hex.pm/packages/xema)
-[![Build Status](https://travis-ci.org/hrzndhrn/xema.svg?branch=master)](https://travis-ci.org/hrzndhrn/xema)
+![CI](https://github.com/hrzndhrn/xema/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/hrzndhrn/xema/badge.svg?branch=master)](https://coveralls.io/github/hrzndhrn/xema?branch=master)
-[![codebeat badge](https://codebeat.co/badges/273a2bb2-2a32-41bf-af7e-44a94dd50807)](https://codebeat.co/projects/github-com-hrzndhrn-xema-master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Xema is a schema validator inspired by [JSON Schema](http://json-schema.org).
