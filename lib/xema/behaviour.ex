@@ -345,7 +345,7 @@ defmodule Xema.Behaviour do
       {:ok, data} ->
         case Keyword.get(opts, :draft, :xema) do
           :xema -> module.new(data, opts)
-          draft -> data |> JsonSchema.to_xema(draft: draft) |> module.new(opts)
+          _ -> data |> JsonSchema.to_xema(opts) |> module.new(opts)
         end
 
       {:error, reason} ->

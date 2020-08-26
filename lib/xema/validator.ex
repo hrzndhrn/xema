@@ -669,7 +669,7 @@ defmodule Xema.Validator do
   defp items_list(_schema, [], [], _opts), do: :ok
 
   defp items_list(_schema, [], errors, _opts),
-    do: {:error, %{items: Enum.reverse(errors)}}
+    do: {:error, %{items: Enum.into(errors, %{})}}
 
   defp items_list(schema, [{item, index} | list], errors, opts) do
     case do_validate(schema, item, opts) do
@@ -685,7 +685,7 @@ defmodule Xema.Validator do
   defp items_tuple(_schemas, _additonal_items, [], [], _opts), do: :ok
 
   defp items_tuple(_schemas, _additonal_items, [], errors, _opts),
-    do: {:error, %{items: Enum.reverse(errors)}}
+    do: {:error, %{items: Enum.into(errors, %{})}}
 
   defp items_tuple([], false, [{_, index} | list], errors, opts),
     do:
@@ -703,7 +703,7 @@ defmodule Xema.Validator do
 
   defp items_tuple([], additional_items, _list, errors, _opts)
        when additional_items in [nil, true],
-       do: {:error, %{items: Enum.reverse(errors)}}
+       do: {:error, %{items: Enum.into(errors, %{})}}
 
   defp items_tuple([], schema, [{item, index} | list], errors, opts) do
     case do_validate(schema, item, opts) do

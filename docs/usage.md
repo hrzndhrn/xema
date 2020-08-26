@@ -361,7 +361,7 @@ iex> Xema.valid? schema, ["a", "b", "abc"]
 true
 iex> {:error, error} = Xema.validate schema, ["a", 1]
 {:error, %Xema.ValidationError{
-  reason: %{items: [{1, %{type: :string, value: 1}}]}
+  reason: %{items: %{1 => %{type: :string, value: 1}}}
 }}
 iex> Exception.message(error)
 "Expected :string, got 1, at [1]."
@@ -375,7 +375,7 @@ iex> Xema.validate schema, [1, 2, 3]
 :ok
 iex> {:error, error} = Xema.validate schema, [3, 2, 1, 0]
 {:error, %Xema.ValidationError{
-  reason: %{items: [{3, %{value: 0, minimum: 1}}]}
+  reason: %{items: %{3 => %{value: 0, minimum: 1}}}
 }}
 iex> Exception.message(error)
 "Value 0 is less than minimum value of 1, at [3]."
@@ -392,7 +392,7 @@ iex> Xema.valid? schema, [1, "hello"]
 true
 iex> {:error, error} = Xema.validate schema, [1, "five"]
 {:error, %Xema.ValidationError{
-  reason: %{items: [{1, %{value: "five", min_length: 5}}]}
+  reason: %{items: %{1 => %{value: "five", min_length: 5}}}
 }}
 iex> Exception.message(error)
 ~s|Expected minimum length of 5, got "five", at [1].|
@@ -421,17 +421,17 @@ iex> Xema.validate schema, [1]
 # But, since additionalItems is false, we can’t provide extra items:
 iex> {:error, error} = Xema.validate schema, [1, "hello", "foo"]
 {:error, %Xema.ValidationError{
-  reason: %{items: [{2, %{additional_items: false}}]}
+  reason: %{items: %{2 => %{additional_items: false}}}
 }}
 iex> Exception.message(error)
 "Unexpected additional item, at [2]."
 iex> {:error, error} = Xema.validate schema, [1, "hello", "foo", "bar"]
 {:error, %Xema.ValidationError{
   reason: %{
-    items: [
-      {2, %{additional_items: false}},
-      {3, %{additional_items: false}}
-    ]
+    items: %{
+      2 => %{additional_items: false},
+      3 => %{additional_items: false}
+    }
   }
 }}
 iex> Exception.message(error)
@@ -452,7 +452,7 @@ iex> Xema.valid? schema, [1, "two", 3, 4]
 true
 iex> {:error, error} = Xema.validate schema, [1, "two", 3, "four"]
 {:error, %Xema.ValidationError{
-  reason: %{items: [{3, %{type: :integer, value: "four"}}]}
+  reason: %{items: %{3 => %{type: :integer, value: "four"}}}
 }}
 iex> Exception.message(error)
 ~s|Expected :integer, got "four", at [3].|

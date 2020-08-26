@@ -628,7 +628,7 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{items: [{1, %{type: :integer, value: "2"}}]}
+                 reason: %{items: %{1 => %{type: :integer, value: "2"}}}
                } = error
              } = validate(schema, [1, "2"])
 
@@ -658,7 +658,7 @@ defmodule Xema.RefTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{items: [{1, %{type: :string, value: 2}}]}
+                 reason: %{items: %{1 => %{type: :string, value: 2}}}
                } = error
              } = validate(schema, [1, 2])
 
@@ -862,27 +862,25 @@ defmodule Xema.RefTest do
                 reason: %{
                   properties: %{
                     nodes: %{
-                      items: [
-                        {0,
-                         %{
-                           properties: %{
-                             subtree: %{
-                               properties: %{
-                                 nodes: %{
-                                   items: [
-                                     {1,
-                                      %{
-                                        properties: %{
-                                          subtree: %{required: [:nodes]}
-                                        }
-                                      }}
-                                   ]
-                                 }
-                               }
-                             }
-                           }
-                         }}
-                      ]
+                      items: %{
+                        0 => %{
+                          properties: %{
+                            subtree: %{
+                              properties: %{
+                                nodes: %{
+                                  items: %{
+                                    1 => %{
+                                      properties: %{
+                                        subtree: %{required: [:nodes]}
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }

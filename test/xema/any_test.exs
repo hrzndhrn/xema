@@ -186,10 +186,10 @@ defmodule Xema.AnyTest do
                 %ValidationError{
                   message: nil,
                   reason: %{
-                    items: [
-                      {0, %{type: :string, value: 5}},
-                      {1, %{type: :string, value: 6}}
-                    ]
+                    items: %{
+                      0 => %{type: :string, value: 5},
+                      1 => %{type: :string, value: 6}
+                    }
                   }
                 }}
     end

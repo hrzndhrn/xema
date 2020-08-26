@@ -42,17 +42,6 @@ Documentation can be generated with
 generated docs can be found at
 [https://hexdocs.pm/xema](https://hexdocs.pm/xema).
 
-## Changelog
-
-Version 0.5.0 coming soon.
-
-Since version 0.5.0 a [changelog](CHANGELOG.md) is available.
-
-To update to version 0.5.0 some migrations steps are required, see
-[changelog](CHANGELOG.md).
-
-In version 0.7.0 the behaviour `Xema.Resolver` was renamed to `Xema.Loader`.
-
 ## Tests
 
 The test in the directory `xema/test/json_schema_test_suite` are generated from the

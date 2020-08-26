@@ -103,7 +103,7 @@ defmodule Xema.AnyOfTest do
                 reason: %{
                   any_of: [
                     %{type: :map, value: ["foo"]},
-                    %{items: [{0, %{type: :integer, value: "foo"}}]}
+                    %{items: %{0 => %{type: :integer, value: "foo"}}}
                   ],
                   value: ["foo"]
                 }
@@ -283,8 +283,8 @@ defmodule Xema.AnyOfTest do
                message: nil,
                reason: %{
                  any_of: [
-                   %{items: [{1, %{type: :integer, value: "2"}}]},
-                   %{items: [{0, %{type: :string, value: 1}}]}
+                   %{items: %{1 => %{type: :integer, value: "2"}}},
+                   %{items: %{0 => %{type: :string, value: 1}}}
                  ],
                  value: [1, "2"]
                }

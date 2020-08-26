@@ -9,7 +9,8 @@ defmodule JsonSchemaTestSuite.Draft6.RefRemoteTest do
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/integer.json"},
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
@@ -29,7 +30,8 @@ defmodule JsonSchemaTestSuite.Draft6.RefRemoteTest do
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/subSchemas.json#/integer"},
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
@@ -49,7 +51,8 @@ defmodule JsonSchemaTestSuite.Draft6.RefRemoteTest do
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/subSchemas.json#/refToInteger"},
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
@@ -72,7 +75,8 @@ defmodule JsonSchemaTestSuite.Draft6.RefRemoteTest do
               "$id" => "http://localhost:1234/",
               "items" => %{"$id" => "folder/", "items" => %{"$ref" => "folderInteger.json"}}
             },
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
@@ -103,7 +107,8 @@ defmodule JsonSchemaTestSuite.Draft6.RefRemoteTest do
               "properties" => %{"list" => %{"$ref" => "#/definitions/baz"}},
               "type" => "object"
             },
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
@@ -135,7 +140,8 @@ defmodule JsonSchemaTestSuite.Draft6.RefRemoteTest do
               "properties" => %{"list" => %{"$ref" => "#/definitions/baz/definitions/bar"}},
               "type" => "object"
             },
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end

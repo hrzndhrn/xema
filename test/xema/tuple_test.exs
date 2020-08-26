@@ -90,9 +90,7 @@ defmodule Xema.TupleTest do
       assert {:error,
               %ValidationError{
                 reason: %{
-                  items: [
-                    {2, %{type: :integer, value: "foo"}}
-                  ]
+                  items: %{2 => %{type: :integer, value: "foo"}}
                 }
               } = error} = validate(schema, {1, 2, "foo"})
 
@@ -111,10 +109,10 @@ defmodule Xema.TupleTest do
       assert {:error,
               %ValidationError{
                 reason: %{
-                  items: [
-                    {0, %{type: :string, value: 1}},
-                    {1, %{type: :string, value: 2}}
-                  ]
+                  items: %{
+                    0 => %{type: :string, value: 1},
+                    1 => %{type: :string, value: 2}
+                  }
                 }
               } = error} = validate(schema, {1, 2, "foo"})
 
@@ -204,7 +202,7 @@ defmodule Xema.TupleTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{items: [{1, %{type: :number, value: "bar"}}]}
+                 reason: %{items: %{1 => %{type: :number, value: "bar"}}}
                } = error
              } = validate(schema, {"foo", "bar"})
 
@@ -213,7 +211,7 @@ defmodule Xema.TupleTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{items: [{0, %{value: "x", min_length: 3}}]}
+                 reason: %{items: %{0 => %{value: "x", min_length: 3}}}
                } = error
              } = validate(schema, {"x", 33})
 
@@ -224,7 +222,7 @@ defmodule Xema.TupleTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{items: [{0, %{value: "x", min_length: 3}}]}
+                 reason: %{items: %{0 => %{value: "x", min_length: 3}}}
                } = error
              } = validate(schema, {"x", 33, 7})
 
@@ -259,7 +257,7 @@ defmodule Xema.TupleTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{items: [{2, %{additional_items: false}}]}
+                 reason: %{items: %{2 => %{additional_items: false}}}
                } = error
              } = validate(schema, {"foo", 42, "add"})
 
@@ -289,7 +287,7 @@ defmodule Xema.TupleTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{items: [{2, %{type: :string, value: 13}}]}
+                 reason: %{items: %{2 => %{type: :string, value: 13}}}
                } = error
              } = validate(schema, {11, "twelve", 13})
 

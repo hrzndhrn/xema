@@ -338,7 +338,7 @@ defmodule Xema.RefRemoteTest do
               %ValidationError{
                 reason: %{
                   properties: %{
-                    list: %{items: [{0, %{type: :integer, value: "1"}}]}
+                    list: %{items: %{0 => %{type: :integer, value: "1"}}}
                   }
                 }
               } = error} = validate(schema, %{list: ["1"]})

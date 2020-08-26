@@ -201,7 +201,7 @@ defmodule Xema do
       iex> Xema.validate(schema, [2, 3, 1])
       {:error, %Xema.ValidationError{
         reason: %{
-          items: [{2, %{value: 1, minimum: 2}}]}
+          items: %{2 => %{value: 1, minimum: 2}}}
         }
       }
 

@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.12.0 - dev
+
+### Breaking changes
+
++ The error data structure for `list` `items` has changed from a `list` of
+  `tuple`s to a `map`. This change allows you to convert `reason` directly to
+  JSON.
+
+since 0.12.0:
+```elixir
+iex> schema = Xema.new({:list, items: :integer})
+iex> Xema.validate(schema, [1, "foo", 2, :bar])
+{:error,
+ %Xema.ValidationError{
+   message: nil,
+   reason: %{
+     items: %{
+       1 => %{type: :integer, value: "foo"},
+       3 => %{type: :integer, value: :bar}
+     }
+   }
+ }}
+```
+before 0.12.0:
+```elixir
+iex> schema = Xema.new({:list, items: :integer})
+iex> Xema.validate(schema, [1, "foo", 2, :bar])
+{:error,
+ %Xema.ValidationError{
+   message: nil,
+   reason: %{
+     items: [
+       {1, %{type: :integer, value: "foo"}},
+       {3, %{type: :integer, value: :bar}}
+     ]
+   }
+ }}
+```
+
 ## 0.11.4 - 2020/08/19
 
 + Fix an issue with circular references.

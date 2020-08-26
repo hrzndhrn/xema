@@ -9,7 +9,8 @@ defmodule JsonSchemaTestSuite.Draft4.RefRemoteTest do
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/integer.json"},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
@@ -29,7 +30,8 @@ defmodule JsonSchemaTestSuite.Draft4.RefRemoteTest do
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/subSchemas.json#/integer"},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
@@ -45,11 +47,14 @@ defmodule JsonSchemaTestSuite.Draft4.RefRemoteTest do
 
   describe "ref within remote ref" do
     setup do
+      :refToInteger
+
       %{
         schema:
           Xema.from_json_schema(
             %{"$ref" => "http://localhost:1234/subSchemas.json#/refToInteger"},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
@@ -72,7 +77,8 @@ defmodule JsonSchemaTestSuite.Draft4.RefRemoteTest do
               "id" => "http://localhost:1234/",
               "items" => %{"id" => "folder/", "items" => %{"$ref" => "folderInteger.json"}}
             },
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
@@ -103,7 +109,8 @@ defmodule JsonSchemaTestSuite.Draft4.RefRemoteTest do
               "properties" => %{"list" => %{"$ref" => "#/definitions/baz"}},
               "type" => "object"
             },
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
@@ -135,7 +142,8 @@ defmodule JsonSchemaTestSuite.Draft4.RefRemoteTest do
               "properties" => %{"list" => %{"$ref" => "#/definitions/baz/definitions/bar"}},
               "type" => "object"
             },
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
@@ -159,7 +167,8 @@ defmodule JsonSchemaTestSuite.Draft4.RefRemoteTest do
               "properties" => %{"name" => %{"$ref" => "name.json#/definitions/orNull"}},
               "type" => "object"
             },
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
