@@ -749,11 +749,12 @@ defmodule Xema.Validator do
 
   @spec all_properties(Schema.t(), map, keyword) :: :ok | {:error, map}
   defp all_properties(schema, value, opts) do
-    collect([
+    [
       patterns(schema, value, opts),
       properties(schema, value, opts),
       additionals(schema, value, opts)
-    ])
+    ]
+    |> collect()
     |> case do
       :ok ->
         :ok
