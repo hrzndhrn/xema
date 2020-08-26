@@ -969,23 +969,24 @@ defmodule Xema.MapTest do
 
     test "validate/2 with invalid properties", %{schema: schema} do
       assert {:error, error} = validate(schema, %{foo: "foo", str_a: 42, add: :more})
-      assert error ==  %ValidationError{
-                  message: nil,
-                  reason: %{
-                    properties: %{
-                      add: %{additional_properties: false},
-                      foo: %{type: :integer, value: "foo"},
-                      str_a: %{type: :string, value: 42}
-                    }
-                  }
-                }
+
+      assert error == %ValidationError{
+               message: nil,
+               reason: %{
+                 properties: %{
+                   add: %{additional_properties: false},
+                   foo: %{type: :integer, value: "foo"},
+                   str_a: %{type: :string, value: 42}
+                 }
+               }
+             }
 
       assert Exception.message(error) ==
-        """
-        Expected only defined properties, got key [:add].
-        Expected :integer, got \"foo\", at [:foo].
-        Expected :string, got 42, at [:str_a].\
-        """
+               """
+               Expected only defined properties, got key [:add].
+               Expected :integer, got \"foo\", at [:foo].
+               Expected :string, got 42, at [:str_a].\
+               """
     end
 
     test "validate/2 with too many properties", %{schema: schema} do
