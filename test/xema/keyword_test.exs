@@ -100,7 +100,7 @@ defmodule Xema.KeywordTest do
                } = error
              } = validate(schema, foo: 42)
 
-      assert Exception.message(error) == "Expected at least 2 properties, got %{foo: 42}."
+      assert Exception.message(error) == "Expected at least 2 properties, got [foo: 42]."
     end
 
     test "validate/2 with valid amount of properties", %{schema: schema} do
@@ -116,7 +116,7 @@ defmodule Xema.KeywordTest do
              } = validate(schema, a: 1, b: 2, c: 3, d: 4)
 
       assert Exception.message(error) ==
-               "Expected at most 3 properties, got %{a: 1, b: 2, c: 3, d: 4}."
+               "Expected at most 3 properties, got [a: 1, b: 2, c: 3, d: 4]."
     end
   end
 
@@ -643,6 +643,89 @@ defmodule Xema.KeywordTest do
       """
 
       assert Exception.message(error) == message
+    end
+  end
+
+  describe "keyword schema with multiple rules" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:keyword,
+             properties: %{foo: :integer, bar: :integer},
+             max_properties: 3,
+             pattern_properties: %{~r/str_.*/ => :string},
+             additional_properties: false}
+          )
+      }
+    end
+
+    test "validate/2 with valid data", %{schema: schema} do
+      assert validate(schema, foo: 5, str_a: "a") == :ok
+    end
+
+    test "validate/2 with invalid property", %{schema: schema} do
+      assert validate(schema, foo: :bar) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: nil,
+                  reason: %{properties: %{foo: %{type: :integer, value: :bar}}}
+                }}
+    end
+
+    test "validate/2 with invalid pattern property", %{schema: schema} do
+      assert validate(schema, foo: 1, str_bar: :bar) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: nil,
+                  reason: %{properties: %{str_bar: %{type: :string, value: :bar}}}
+                }}
+    end
+
+    test "validate/2 with additional property", %{schema: schema} do
+      assert validate(schema, foo: 5, baz: 5) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: nil,
+                  reason: %{properties: %{baz: %{additional_properties: false}}}
+                }}
+    end
+
+    test "validate/2 with invalid properties", %{schema: schema} do
+      assert {:error, error} = validate(schema, foo: "foo", str_a: 42, add: :more)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{
+                 properties: %{
+                   add: %{additional_properties: false},
+                   foo: %{type: :integer, value: "foo"},
+                   str_a: %{type: :string, value: 42}
+                 }
+               }
+             }
+
+      assert Exception.message(error) ==
+               """
+               Expected only defined properties, got key [:add].
+               Expected :integer, got \"foo\", at [:foo].
+               Expected :string, got 42, at [:str_a].\
+               """
+    end
+
+    test "validate/2 with too many properties", %{schema: schema} do
+      assert validate(schema, foo: :bar, baz: 5, str_a: "a", str_b: "b", z: 1) ==
+               {
+                 :error,
+                 %Xema.ValidationError{
+                   __exception__: true,
+                   message: nil,
+                   reason: %{
+                     max_properties: 3,
+                     value: [foo: :bar, baz: 5, str_a: "a", str_b: "b", z: 1]
+                   }
+                 }
+               }
     end
   end
 end

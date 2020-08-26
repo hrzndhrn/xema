@@ -2,6 +2,8 @@
 
 ## 0.12.0 - dev
 
++ Refactoring of the properties validation.
+
 ### Breaking changes
 
 + The error data structure for `list` `items` has changed from a `list` of

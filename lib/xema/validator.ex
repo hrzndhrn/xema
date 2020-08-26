@@ -135,24 +135,17 @@ defmodule Xema.Validator do
          :ok <- required(schema, value),
          :ok <- property_names(schema, value, opts),
          :ok <- dependencies(schema, value, opts),
-         {:ok, patts_rest} <- patterns(schema, value, opts),
-         {:ok, props_rest} <- properties(schema, value, opts),
-         value <- intersection(props_rest, patts_rest),
-         :ok <- additionals(schema, value, opts),
+         :ok <- all_properties(schema, value, opts),
          do: :ok
   end
 
   defp validate_by(:keyword, schema, value, opts) do
     with :ok <- dependencies(schema, value, opts),
-         value <- Enum.into(value, %{}),
          :ok <- size(schema, value),
-         :ok <- keys(schema, value),
+         value <- Enum.into(value, %{}),
          :ok <- required(schema, value),
          :ok <- property_names(schema, value, opts),
-         {:ok, patts_rest} <- patterns(schema, value, opts),
-         {:ok, props_rest} <- properties(schema, value, opts),
-         value <- intersection(props_rest, patts_rest),
-         :ok <- additionals(schema, value, opts),
+         :ok <- all_properties(schema, value, opts),
          do: :ok
   end
 
@@ -754,30 +747,42 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec properties(Schema.t(), map, keyword) :: {:ok, map} | {:error, map}
-  defp properties(%{properties: nil}, map, _opts), do: {:ok, map}
+  @spec all_properties(Schema.t(), map, keyword) :: :ok | {:error, map}
+  defp all_properties(schema, value, opts) do
+    [
+      patterns(schema, value, opts),
+      properties(schema, value, opts),
+      additionals(schema, value, opts)
+    ]
+    |> collect()
+    |> case do
+      :ok ->
+        :ok
+
+      {:error, reasons} ->
+        properties =
+          Enum.reduce(reasons, %{}, fn %{properties: properties}, acc ->
+            Map.merge(acc, properties)
+          end)
+
+        {:error, %{properties: properties}}
+    end
+  end
+
+  @spec properties(Schema.t(), map, keyword) :: :ok | {:error, map}
+  defp properties(%{properties: nil}, _map, _opts), do: :ok
 
   defp properties(%{properties: props}, map, opts),
     do: do_properties(Map.to_list(props), map, %{}, opts)
 
   @spec do_properties(list, map, map, keyword) :: result
-  defp do_properties([], map, errors, _opts) when errors == %{}, do: {:ok, map}
+  defp do_properties([], _map, errors, _opts) when errors == %{}, do: :ok
 
-  defp do_properties([], _map, errors, _opts),
-    do: {:error, %{properties: errors}}
+  defp do_properties([], _map, errors, _opts), do: {:error, %{properties: errors}}
 
   defp do_properties([{prop, schema} | props], map, errors, opts) do
     with {:ok, value} <- Map.fetch(map, prop),
          :ok <- do_validate(schema, value, opts) do
-      # The list `props` can contain multiple schemas for the same value.
-      # The value will be just deleted if one schema is available.
-      # Multiple schemas are coming from `pattern_properties`.
-      map =
-        case has_key?(props, prop) do
-          true -> map
-          false -> Map.delete(map, prop)
-        end
-
       do_properties(props, map, errors, opts)
     else
       # The property is not in the map.
@@ -785,12 +790,8 @@ defmodule Xema.Validator do
         do_properties(props, map, errors, opts)
 
       {:error, reason} ->
-        do_properties(
-          props,
-          Map.delete(map, prop),
-          Map.put(errors, prop, reason),
-          opts
-        )
+        updated_errors = Map.put(errors, prop, reason)
+        do_properties(props, map, updated_errors, opts)
     end
   end
 
@@ -810,26 +811,30 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec size(Schema.t(), map) :: result
-  defp size(%{min_properties: nil, max_properties: nil}, _map), do: :ok
+  @spec size(Schema.t(), map | keyword) :: result
+  defp size(%{min_properties: nil, max_properties: nil}, _value), do: :ok
 
-  defp size(%{min_properties: min, max_properties: max}, map) do
-    do_size(length(Map.keys(map)), min, max, map)
+  defp size(%{min_properties: min, max_properties: max}, value) when is_map(value) do
+    do_size(length(Map.keys(value)), min, max, value)
   end
 
-  @spec do_size(number, number, number, map) :: result
-  defp do_size(len, min, _max, map) when not is_nil(min) and len < min do
-    {:error, %{min_properties: min, value: map}}
+  defp size(%{min_properties: min, max_properties: max}, value) when is_list(value) do
+    do_size(length(value), min, max, value)
   end
 
-  defp do_size(len, _min, max, map) when not is_nil(max) and len > max do
-    {:error, %{max_properties: max, value: map}}
+  @spec do_size(number, number, number, map | keyword) :: result
+  defp do_size(len, min, _max, value) when not is_nil(min) and len < min do
+    {:error, %{min_properties: min, value: value}}
+  end
+
+  defp do_size(len, _min, max, value) when not is_nil(max) and len > max do
+    {:error, %{max_properties: max, value: value}}
   end
 
   defp do_size(_len, _min, _max, _map), do: :ok
 
-  @spec patterns(Schema.t(), map, keyword) :: {:ok, map} | {:error, map}
-  defp patterns(%{pattern_properties: nil}, map, _opts), do: {:ok, map}
+  @spec patterns(Schema.t(), map, keyword) :: :ok | {:error, map}
+  defp patterns(%{pattern_properties: nil}, _map, _opts), do: :ok
 
   defp patterns(%{pattern_properties: patterns}, map, opts) do
     props =
@@ -849,7 +854,16 @@ defmodule Xema.Validator do
   defp key_match?(regex, string), do: Regex.match?(regex, string)
 
   @spec additionals(Schema.t(), map, keyword) :: result
-  defp additionals(%{additional_properties: false}, map, _opts) do
+  defp additionals(%{additional_properties: true}, _map, _opts), do: :ok
+
+  defp additionals(%{additional_properties: nil}, _map, _opts), do: :ok
+
+  defp additionals(schema, map, opts) do
+    map = map |> delete_properties(schema) |> delete_patterns(schema)
+    do_additionals(schema, map, opts)
+  end
+
+  defp do_additionals(%{additional_properties: false}, map, _opts) do
     case Map.equal?(map, %{}) do
       true ->
         :ok
@@ -869,7 +883,7 @@ defmodule Xema.Validator do
     end
   end
 
-  defp additionals(%{additional_properties: schema}, map, opts)
+  defp do_additionals(%{additional_properties: schema}, map, opts)
        when is_map(schema) do
     result =
       Enum.reduce(map, %{}, fn {key, value}, acc ->
@@ -884,8 +898,6 @@ defmodule Xema.Validator do
       false -> {:error, %{properties: result}}
     end
   end
-
-  defp additionals(_schema, _map, _opts), do: :ok
 
   @spec dependencies(Schema.t(), map, keyword) :: result
   defp dependencies(%{dependencies: nil}, _map, _opts), do: :ok
@@ -965,15 +977,45 @@ defmodule Xema.Validator do
 
   defp custom_validator(_, _), do: :ok
 
-  # Returns a map containing only keys that `map_1` and `map_2` have in common.
-  # Values for the returned map are taken from `map_2`.
-  @spec intersection(map, map) :: map
-  defp intersection(map_1, map_2) when is_map(map_1) and is_map(map_2),
-    do:
-      for(
-        key <- Map.keys(map_1),
-        true == Map.has_key?(map_2, key),
-        into: %{},
-        do: {key, Map.get(map_2, key)}
-      )
+  defp delete_properties(map, %{properties: nil}), do: map
+
+  defp delete_properties(map, %{properties: properties}) do
+    map
+    |> Enum.filter(fn {key, _value} -> !Map.has_key?(properties, key) end)
+    |> Enum.into(%{})
+  end
+
+  defp delete_patterns(map, %{pattern_properties: nil}), do: map
+
+  defp delete_patterns(map, %{pattern_properties: patterns}) do
+    patterns = Map.keys(patterns)
+
+    map
+    |> Enum.filter(fn {key, _value} -> !match_any?(patterns, key) end)
+    |> Enum.into(%{})
+  end
+
+  defp match_any?(patterns, pattern) when is_atom(pattern) do
+    match_any?(patterns, Atom.to_string(pattern))
+  end
+
+  defp match_any?(patterns, pattern) when is_binary(pattern) do
+    Enum.any?(patterns, fn regex -> Regex.match?(regex, pattern) end)
+  end
+
+  defp collect(results) do
+    Enum.reduce(results, :ok, fn
+      :ok, :ok ->
+        :ok
+
+      {:error, reason}, :ok ->
+        {:error, [reason]}
+
+      :ok, {:error, _} = error ->
+        error
+
+      {:error, reason}, {:error, reasons} ->
+        {:error, [reason | reasons]}
+    end)
+  end
 end

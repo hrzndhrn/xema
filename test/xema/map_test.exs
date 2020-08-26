@@ -920,4 +920,106 @@ defmodule Xema.MapTest do
       assert Exception.message(error) == "More as one schema matches (indexes: [0, 1])."
     end
   end
+
+  describe "map with multiple rules" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:map,
+             keys: :atoms,
+             properties: %{foo: :integer, bar: :integer},
+             max_properties: 3,
+             pattern_properties: %{~r/str_.*/ => :string},
+             additional_properties: false}
+          )
+      }
+    end
+
+    test "validate/2 with valid data", %{schema: schema} do
+      assert validate(schema, %{foo: 5, str_a: "a"}) == :ok
+    end
+
+    test "validate/2 with invalid property", %{schema: schema} do
+      assert validate(schema, %{foo: :bar}) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: nil,
+                  reason: %{properties: %{foo: %{type: :integer, value: :bar}}}
+                }}
+    end
+
+    test "validate/2 with invalid pattern property", %{schema: schema} do
+      assert validate(schema, %{foo: 1, str_bar: :bar}) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: nil,
+                  reason: %{properties: %{str_bar: %{type: :string, value: :bar}}}
+                }}
+    end
+
+    test "validate/2 with additional property", %{schema: schema} do
+      assert validate(schema, %{foo: 5, baz: 5}) ==
+               {:error,
+                %ValidationError{
+                  message: nil,
+                  reason: %{properties: %{baz: %{additional_properties: false}}}
+                }}
+    end
+
+    test "validate/2 with invalid properties", %{schema: schema} do
+      assert {:error, error} = validate(schema, %{foo: "foo", str_a: 42, add: :more})
+
+      assert error == %ValidationError{
+               message: nil,
+               reason: %{
+                 properties: %{
+                   add: %{additional_properties: false},
+                   foo: %{type: :integer, value: "foo"},
+                   str_a: %{type: :string, value: 42}
+                 }
+               }
+             }
+
+      assert Exception.message(error) ==
+               """
+               Expected only defined properties, got key [:add].
+               Expected :integer, got \"foo\", at [:foo].
+               Expected :string, got 42, at [:str_a].\
+               """
+    end
+
+    test "validate/2 with too many properties", %{schema: schema} do
+      data = Map.put(%{foo: :bar, baz: 5, str_a: "a", str_b: "b"}, "z", 1)
+
+      assert validate(schema, data) == {
+               :error,
+               %ValidationError{
+                 __exception__: true,
+                 message: nil,
+                 reason: %{
+                   max_properties: 3,
+                   value: %{
+                     :baz => 5,
+                     :foo => :bar,
+                     :str_a => "a",
+                     :str_b => "b",
+                     "z" => 1
+                   }
+                 }
+               }
+             }
+    end
+
+    test "validate/2 with invalid key", %{schema: schema} do
+      data = Map.put(%{foo: :bar}, "z", 1)
+
+      assert validate(schema, data) ==
+               {:error,
+                %ValidationError{
+                  message: nil,
+                  reason: %{keys: :atoms, value: %{:foo => :bar, "z" => 1}}
+                }}
+    end
+  end
 end
