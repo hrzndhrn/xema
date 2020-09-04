@@ -92,19 +92,19 @@ defmodule Xema.ValidationError do
   def travers_errors(error, acc, fun, []), do: travers_errors(error, acc, fun, path: [])
 
   def travers_errors(%{properties: properties} = error, acc, fun, opts) do
-      Enum.reduce(
-        properties,
-        fun.(error, opts[:path], acc),
-        fn {key, value}, acc -> travers_errors(value, acc, fun, path: opts[:path] ++ [key]) end
-      )
+    Enum.reduce(
+      properties,
+      fun.(error, opts[:path], acc),
+      fn {key, value}, acc -> travers_errors(value, acc, fun, path: opts[:path] ++ [key]) end
+    )
   end
 
   def travers_errors(%{items: items} = error, acc, fun, opts) do
-      Enum.reduce(
-        items,
-        fun.(error, opts[:path], acc),
-        fn {key, value}, acc -> travers_errors(value, acc, fun, path: opts[:path] ++ [key]) end
-      )
+    Enum.reduce(
+      items,
+      fun.(error, opts[:path], acc),
+      fn {key, value}, acc -> travers_errors(value, acc, fun, path: opts[:path] ++ [key]) end
+    )
   end
 
   def travers_errors(errors, acc, fun, opts) when is_list(errors) do
@@ -402,11 +402,11 @@ defmodule Xema.ValidationError do
 
   defp format_error(%{items: _}, _path, acc), do: acc
 
-  #defp format_error(errors, path, acc) do
+  # defp format_error(errors, path, acc) do
   #   errors
   #   |> Enum.flat_map(fn error -> format_error(error |> IO.inspect(label: :error), path, []) |> IO.inspect(label: :out) end)
   #   |> Enum.concat(acc)
-  #end
+  # end
 
   defp format_error(_error, path, acc) do
     msg = "Unexpected error"

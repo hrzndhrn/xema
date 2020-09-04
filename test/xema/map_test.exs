@@ -1041,13 +1041,14 @@ defmodule Xema.MapTest do
                }
 
       got = ~s|got %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}.|
+
       assert Exception.message(error) == """
-      Expected at most 3 properties, #{got}
-      Expected :atoms as key, #{got}
-      Expected only defined properties, got key [:baz].
-      Expected :integer, got :bar, at [:foo].
-      Expected only defined properties, got key [\"z\"].\
-      """
+             Expected at most 3 properties, #{got}
+             Expected :atoms as key, #{got}
+             Expected only defined properties, got key [:baz].
+             Expected :integer, got :bar, at [:foo].
+             Expected only defined properties, got key [\"z\"].\
+             """
     end
 
     test "validate/2 with invalid key", %{schema: schema} do
