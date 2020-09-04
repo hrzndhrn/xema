@@ -76,27 +76,26 @@ defmodule Xema.Behaviour do
       @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok
 
+      # TODO: update doc
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise returns an error tuple.
       """
-      @spec validate(__MODULE__.t() | Schema.t(), any) :: Validator.result()
-      def validate(schema, value), do: validate(schema, value, [])
-
       @doc false
       @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
-      def validate(%{} = schema, value, opts) do
+      def validate(%{} = schema, value, opts \\ []) do
         with {:error, error} <- Validator.validate(schema, value, opts),
              do: {:error, on_error(error)}
       end
 
+      # TODO: update doc
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise raises a `#{__MODULE__}.ValidationError`.
       """
-      @spec validate!(__MODULE__.t() | Schema.t(), any) :: :ok
-      def validate!(xema, value) do
-        with {:error, reason} <- validate(xema, value),
+      @spec validate!(__MODULE__.t() | Schema.t(), any, keyword) :: :ok
+      def validate!(xema, value, opts \\ []) do
+        with {:error, reason} <- validate(xema, value, opts),
              do: raise(reason)
       end
 

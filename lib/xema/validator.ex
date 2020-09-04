@@ -130,13 +130,26 @@ defmodule Xema.Validator do
   end
 
   defp validate_by(:map, schema, value, opts) do
-    with :ok <- size(schema, value),
-         :ok <- keys(schema, value),
-         :ok <- required(schema, value),
-         :ok <- property_names(schema, value, opts),
-         :ok <- dependencies(schema, value, opts),
-         :ok <- all_properties(schema, value, opts),
-         do: :ok
+    case fail?(opts, [:fail, :early]) do
+      true ->
+        with :ok <- size(schema, value),
+             :ok <- keys(schema, value),
+             :ok <- required(schema, value),
+             :ok <- property_names(schema, value, opts),
+             :ok <- dependencies(schema, value, opts),
+             :ok <- all_properties(schema, value, opts),
+             do: :ok
+
+      false ->
+        collect([
+          size(schema, value),
+          keys(schema, value),
+          required(schema, value),
+          property_names(schema, value, opts),
+          dependencies(schema, value, opts),
+          all_properties(schema, value, opts)
+        ])
+    end
   end
 
   defp validate_by(:keyword, schema, value, opts) do
@@ -1017,5 +1030,13 @@ defmodule Xema.Validator do
       {:error, reason}, {:error, reasons} ->
         {:error, [reason | reasons]}
     end)
+  end
+
+  defp fail?(opts, cmp) when is_list(cmp) do
+    Keyword.get(opts, :fail, :early) in cmp
+  end
+
+  defp fail?(opts, cmp) do
+    Keyword.get(opts, :fail, :early) == cmp
   end
 end

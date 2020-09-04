@@ -1,7 +1,7 @@
 defmodule Xema.MapTest do
   use ExUnit.Case, async: true
 
-  import Xema, only: [valid?: 2, validate: 2]
+  import Xema, only: [valid?: 2, validate: 2, validate: 3]
 
   alias Xema.ValidationError
 
@@ -1009,6 +1009,45 @@ defmodule Xema.MapTest do
                  }
                }
              }
+    end
+
+    @tag :only
+    test "validate/2 with too many properties and option [fail: :finally]", %{schema: schema} do
+      data = Map.put(%{foo: :bar, baz: 5, str_a: "a", str_b: "b"}, "z", 1)
+
+      assert {:error, error} = validate(schema, data, fail: :finally)
+
+      assert error ==
+               %ValidationError{
+                 __exception__: true,
+                 message: nil,
+                 reason: [
+                   %{
+                     properties: %{
+                       :baz => %{additional_properties: false},
+                       :foo => %{type: :integer, value: :bar},
+                       "z" => %{additional_properties: false}
+                     }
+                   },
+                   %{
+                     keys: :atoms,
+                     value: %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}
+                   },
+                   %{
+                     max_properties: 3,
+                     value: %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}
+                   }
+                 ]
+               }
+
+      got = ~s|got %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}.|
+      assert Exception.message(error) == """
+      Expected at most 3 properties, #{got}
+      Expected :atoms as key, #{got}
+      Expected only defined properties, got key [:baz].
+      Expected :integer, got :bar, at [:foo].
+      Expected only defined properties, got key [\"z\"].\
+      """
     end
 
     test "validate/2 with invalid key", %{schema: schema} do
