@@ -402,12 +402,6 @@ defmodule Xema.ValidationError do
 
   defp format_error(%{items: _}, _path, acc), do: acc
 
-  # defp format_error(errors, path, acc) do
-  #   errors
-  #   |> Enum.flat_map(fn error -> format_error(error |> IO.inspect(label: :error), path, []) |> IO.inspect(label: :out) end)
-  #   |> Enum.concat(acc)
-  # end
-
   defp format_error(_error, path, acc) do
     msg = "Unexpected error"
     [msg <> at_path(path) | acc]
