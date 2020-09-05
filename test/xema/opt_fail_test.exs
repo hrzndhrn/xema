@@ -1,4 +1,4 @@
-defmodule Xema.MapTest do
+defmodule Xema.OptFailTest do
   use ExUnit.Case, async: true
 
   import Xema, only: [validate: 3]
