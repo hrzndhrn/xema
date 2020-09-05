@@ -5,6 +5,11 @@ defmodule Xema.MapTest do
 
   alias Xema.ValidationError
 
+  test "throws ArgumentError for invalid fail option" do
+    message = "the optional option :fail must be one of [:immediately, :early, :finally] when set"
+    assert_raise ArgumentError, message, fn -> validate(Xema.new(:integer), 5, fail: :unknown) end
+  end
+
   describe "map schema" do
     setup do
       %{

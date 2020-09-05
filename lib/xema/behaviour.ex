@@ -33,6 +33,8 @@ defmodule Xema.Behaviour do
       @behaviour Xema.Behaviour
       alias Xema.Behaviour
 
+      @opt_fail [:immediately, :early, :finally]
+
       @enforce_keys [:schema]
 
       @typedoc """
@@ -84,6 +86,11 @@ defmodule Xema.Behaviour do
       @doc false
       @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
       def validate(%{} = schema, value, opts \\ []) do
+        if Keyword.get(opts, :fail, :early) not in @opt_fail do
+          raise ArgumentError,
+            message: "the optional option :fail must be one of #{inspect(@opt_fail)} when set"
+        end
+
         with {:error, error} <- Validator.validate(schema, value, opts),
              do: {:error, on_error(error)}
       end
