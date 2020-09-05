@@ -78,12 +78,27 @@ defmodule Xema.Behaviour do
       @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value) == :ok
 
-      # TODO: update doc
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise returns an error tuple.
+
+      With the option XYZ, you can define when the validation is aborted. This
+      also influences how many error reasons are returned.
+      - `:immediately` aborts the validation when the first validation fails.
+      - `:early` (default) aborts on failed validations, but runs validations
+        for all properties and items.
+      - `:finally` aborts after all possible validations.
+
+      ## Examples
+
+      ```elixir
+      iex> schema = Xema.new(:list, max_items: 3, items: :integer)
+      iex> data = [1, "a", "b"]
+      iex> {:error, error} = Xema.validate(schema, data, fail: :immediately)
+      iex> error.reason
+      :todo
+      ```
       """
-      @doc false
       @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
       def validate(%{} = schema, value, opts \\ []) do
         if Keyword.get(opts, :fail, :early) not in @opt_fail do
@@ -98,7 +113,8 @@ defmodule Xema.Behaviour do
       # TODO: update doc
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
-      otherwise raises a `#{__MODULE__}.ValidationError`.
+      otherwise raises a `#{__MODULE__}.ValidationError`. See `validate3` for
+      available options.
       """
       @spec validate!(__MODULE__.t() | Schema.t(), any, keyword) :: :ok
       def validate!(xema, value, opts \\ []) do

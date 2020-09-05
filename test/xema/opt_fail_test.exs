@@ -10,7 +10,7 @@ defmodule Xema.OptFailTest do
     assert_raise ArgumentError, message, fn -> validate(Xema.new(:integer), 5, fail: :unknown) end
   end
 
-  describe "multiple invalid data in a map" do
+  describe "map schema" do
     setup do
       %{
         schema:
@@ -178,5 +178,47 @@ defmodule Xema.OptFailTest do
              Expected :integer, got "foo", at [:foo].\
              """
     end
+  end
+
+  describe "list schema" do
+    setup do
+      %{
+        schema: Xema.new({:list, items_max: 3, items: :integer, unique: true}),
+        invalid: %{
+          short: [1, "a", "b"],
+          long: [1, "a", "b", 4],
+          duplicate: [1, "a", "b", 1]
+        }
+      }
+    end
+
+    test "validate/3 with [fail: :immediately] and invalid.short",
+         %{schema: schema, invalid: %{short: data}} do
+      opts = [fail: :immediately]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{items: %{1 => %{type: :integer, value: "a"}}}
+             }
+
+      assert Exception.message(error) == ~s|Expected :integer, got "a", at [1].|
+    end
+
+    test "validate/3 with [fail: :early] and invalid.short"
+    test "validate/3 with [fail: :finally] and invalid.short"
+
+    test "validate/3 with [fail: :immediately] and invalid.long",
+    test "validate/3 with [fail: :early] and invalid.long",
+    test "validate/3 with [fail: :finally] and invalid.long",
+
+    test "validate/3 with [fail: :immediately] and invalid.duplicate",
+    test "validate/3 with [fail: :early] and invalid.duplicate",
+    test "validate/3 with [fail: :finally] and invalid.duplicate",
+  end
+
+  describe "list-tuple schema" do
+    test "todo"
   end
 end

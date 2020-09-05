@@ -115,6 +115,7 @@ defmodule Xema.Validator do
     do: validate_by(:list, schema, value, opts)
 
   defp validate_by(:list, schema, value, opts) do
+    # TODO collect
     with :ok <- min_items(schema, value),
          :ok <- max_items(schema, value),
          :ok <- unique(schema, value),
@@ -649,27 +650,29 @@ defmodule Xema.Validator do
   @spec items(Schema.t(), list | tuple, keyword) :: result
   defp items(%{items: nil}, _list, _opts), do: :ok
 
-  defp items(schema, tuple, opts) when is_tuple(tuple),
-    do: items(schema, Tuple.to_list(tuple), opts)
+  defp items(schema, tuple, opts) when is_tuple(tuple) do
+    items(schema, Tuple.to_list(tuple), opts)
+  end
 
-  defp items(%{items: items} = schema, list, opts)
-       when is_list(items),
-       do:
-         items_tuple(
-           items,
-           Map.get(schema, :additional_items, true),
-           Enum.with_index(list),
-           [],
-           opts
-         )
+  defp items(%{items: items} = schema, list, opts) when is_list(items) do
+    items_tuple(
+      items,
+      Map.get(schema, :additional_items, true),
+      Enum.with_index(list),
+      [],
+      opts
+    )
+  end
 
-  defp items(%{items: items}, list, opts),
-    do: items_list(items, Enum.with_index(list), [], opts)
+  defp items(%{items: items}, list, opts) do
+    items_list(items, Enum.with_index(list), [], opts)
+  end
 
   @spec items_list(Schema.t(), [{any, integer}], list, keyword) :: result
-
   defp items_list(%{type: false}, [], _, _), do: :ok
+
   defp items_list(%{type: false}, _, _, _), do: {:error, %{type: false}}
+
   defp items_list(%{type: true}, _, _, _), do: :ok
 
   defp items_list(_schema, [], [], _opts), do: :ok
@@ -683,7 +686,10 @@ defmodule Xema.Validator do
         items_list(schema, list, errors, opts)
 
       {:error, reason} ->
-        items_list(schema, list, [{index, reason} | errors], opts)
+        case fail?(opts, :immediately) do
+          true -> items_list(schema, [], [{index, reason} | errors], opts)
+          false -> items_list(schema, list, [{index, reason} | errors], opts)
+        end
     end
   end
 
@@ -814,6 +820,7 @@ defmodule Xema.Validator do
 
       {:error, reason} ->
         updated_errors = Map.put(errors, prop, reason)
+
         case fail?(opts, :immediately) do
           true -> do_properties([], map, updated_errors, opts)
           false -> do_properties(props, map, updated_errors, opts)
