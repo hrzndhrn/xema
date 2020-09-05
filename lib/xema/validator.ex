@@ -130,7 +130,7 @@ defmodule Xema.Validator do
   end
 
   defp validate_by(:map, schema, value, opts) do
-    case fail?(opts, [:fail, :early]) do
+    case fail?(opts, [:immediately, :early]) do
       true ->
         with :ok <- size(schema, value),
              :ok <- keys(schema, value),

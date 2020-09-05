@@ -10,7 +10,7 @@ defmodule Xema.MapTest do
     assert_raise ArgumentError, message, fn -> validate(Xema.new(:integer), 5, fail: :unknown) end
   end
 
-  describe "map schema" do
+  describe "multiple invalid data in a map" do
     setup do
       %{
         schema:
@@ -22,11 +22,52 @@ defmodule Xema.MapTest do
              pattern_properties: %{~r/str_.*/ => :string},
              additional_properties: false}
           ),
-        data: Map.put(%{foo: :bar, baz: 5, str_a: "a", str_b: "b"}, "z", 1)
+        invalid: %{
+          multi: Map.put(%{foo: :bar, baz: 5, str_a: "a", str_b: "b"}, "z", 1)
+        }
       }
     end
 
-    test "with [fail: :finally]", %{schema: schema, data: data} do
+    test "validate/3 with [fail: :immediately] and invalid.multi",
+         %{schema: schema, invalid: %{multi: data}} do
+      opts = [fail: :immediately]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{
+                 max_properties: 3,
+                 value: %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}
+               }
+             }
+
+      assert Exception.message(error) ==
+               ~s|Expected at most 3 properties, | <>
+                 ~s|got %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}.|
+    end
+
+    test "validate/3 with [fail: :early] and invalid.multi",
+         %{schema: schema, invalid: %{multi: data}} do
+      opts = [fail: :early]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{
+                 max_properties: 3,
+                 value: %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}
+               }
+             }
+
+      assert Exception.message(error) ==
+               ~s|Expected at most 3 properties, | <>
+                 ~s|got %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}.|
+    end
+
+    test "validate/3 with [fail: :finally] and invalid.multi",
+         %{schema: schema, invalid: %{multi: data}} do
       opts = [fail: :finally]
 
       assert {:error, error} = validate(schema, data, opts)
