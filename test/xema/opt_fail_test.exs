@@ -23,7 +23,8 @@ defmodule Xema.MapTest do
              additional_properties: false}
           ),
         invalid: %{
-          multi: Map.put(%{foo: :bar, baz: 5, str_a: "a", str_b: "b"}, "z", 1)
+          multi: Map.put(%{foo: :bar, baz: 5, str_a: "a", str_b: "b"}, "z", 1),
+          properties: %{foo: "foo", bar: "bar"}
         }
       }
     end
@@ -103,6 +104,78 @@ defmodule Xema.MapTest do
              Expected only defined properties, got key [:baz].
              Expected :integer, got :bar, at [:foo].
              Expected only defined properties, got key [\"z\"].\
+             """
+    end
+
+    test "validate/3 with [fail: :immediately] and invalid.properties",
+         %{schema: schema, invalid: %{properties: data}} do
+      opts = [fail: :immediately]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{properties: %{bar: %{type: :integer, value: "bar"}}}
+             }
+
+      assert Exception.message(error) == """
+             Expected :integer, got "bar", at [:bar].\
+             """
+    end
+
+    test "validate/3 with [fail: :early] and invalid.propertes",
+         %{schema: schema, invalid: %{properties: data}} do
+      opts = [fail: :early]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error ==
+               %ValidationError{
+                 __exception__: true,
+                 message: nil,
+                 reason: %{
+                   properties: %{
+                     foo: %{
+                       type: :integer,
+                       value: "foo"
+                     },
+                     bar: %{type: :integer, value: "bar"}
+                   }
+                 }
+               }
+
+      assert Exception.message(error) == """
+             Expected :integer, got "bar", at [:bar].
+             Expected :integer, got "foo", at [:foo].\
+             """
+    end
+
+    test "validate/3 with [fail: :finally] and invalid.properties",
+         %{schema: schema, invalid: %{properties: data}} do
+      opts = [fail: :finally]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error ==
+               %ValidationError{
+                 __exception__: true,
+                 message: nil,
+                 reason: [
+                   %{
+                     properties: %{
+                       foo: %{
+                         type: :integer,
+                         value: "foo"
+                       },
+                       bar: %{type: :integer, value: "bar"}
+                     }
+                   }
+                 ]
+               }
+
+      assert Exception.message(error) == """
+             Expected :integer, got "bar", at [:bar].
+             Expected :integer, got "foo", at [:foo].\
              """
     end
   end

@@ -762,23 +762,32 @@ defmodule Xema.Validator do
 
   @spec all_properties(Schema.t(), map, keyword) :: :ok | {:error, map}
   defp all_properties(schema, value, opts) do
-    [
-      patterns(schema, value, opts),
-      properties(schema, value, opts),
-      additionals(schema, value, opts)
-    ]
-    |> collect()
-    |> case do
-      :ok ->
-        :ok
+    case fail?(opts, :immediately) do
+      true ->
+        with :ok <- patterns(schema, value, opts),
+             :ok <- properties(schema, value, opts),
+             :ok <- additionals(schema, value, opts),
+             do: :ok
 
-      {:error, reasons} ->
-        properties =
-          Enum.reduce(reasons, %{}, fn %{properties: properties}, acc ->
-            Map.merge(acc, properties)
-          end)
+      false ->
+        [
+          patterns(schema, value, opts),
+          properties(schema, value, opts),
+          additionals(schema, value, opts)
+        ]
+        |> collect()
+        |> case do
+          :ok ->
+            :ok
 
-        {:error, %{properties: properties}}
+          {:error, reasons} ->
+            properties =
+              Enum.reduce(reasons, %{}, fn %{properties: properties}, acc ->
+                Map.merge(acc, properties)
+              end)
+
+            {:error, %{properties: properties}}
+        end
     end
   end
 
@@ -798,13 +807,17 @@ defmodule Xema.Validator do
          :ok <- do_validate(schema, value, opts) do
       do_properties(props, map, errors, opts)
     else
-      # The property is not in the map.
+      # The property is not in the map. The required properties are checked at
+      # another location.
       :error ->
         do_properties(props, map, errors, opts)
 
       {:error, reason} ->
         updated_errors = Map.put(errors, prop, reason)
-        do_properties(props, map, updated_errors, opts)
+        case fail?(opts, :immediately) do
+          true -> do_properties([], map, updated_errors, opts)
+          false -> do_properties(props, map, updated_errors, opts)
+        end
     end
   end
 
