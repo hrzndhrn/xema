@@ -722,7 +722,6 @@ defmodule Xema.RefRemoteTest do
       }
     end
 
-    @tag :only
     test "check schema", %{schema: schema} do
       assert schema == %Xema{
                refs: %{

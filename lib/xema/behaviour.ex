@@ -76,7 +76,7 @@ defmodule Xema.Behaviour do
       otherwise returns `false`.
       """
       @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
-      def valid?(schema, value), do: validate(schema, value) == :ok
+      def valid?(schema, value), do: validate(schema, value, fail: :immediately) == :ok
 
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
@@ -92,11 +92,44 @@ defmodule Xema.Behaviour do
       ## Examples
 
       ```elixir
-      iex> schema = Xema.new(:list, max_items: 3, items: :integer)
+      iex> schema = Xema.new({:list, max_items: 3, items: :integer})
       iex> data = [1, "a", "b"]
       iex> {:error, error} = Xema.validate(schema, data, fail: :immediately)
       iex> error.reason
-      :todo
+      %{items: %{
+        1 => %{type: :integer, value: "a"}
+      }}
+      iex> {:error, error} = Xema.validate(schema, data, fail: :early)
+      iex> error.reason
+      %{items: %{
+        1 => %{type: :integer, value: "a"},
+        2 => %{type: :integer, value: "b"}
+      }}
+      iex> {:error, error} = Xema.validate(schema, data, fail: :finally)
+      iex> error.reason
+      [
+        %{items: %{
+          1 => %{type: :integer, value: "a"},
+          2 => %{type: :integer, value: "b"}
+        }}
+      ]
+      iex> # new data
+      iex> data = [1, "a", "b", 4]
+      iex> {:error, error} = Xema.validate(schema, data, fail: :immediately)
+      iex> error.reason
+      %{max_items: 3, value: [1, "a", "b", 4]}
+      iex> {:error, error} = Xema.validate(schema, data, fail: :early)
+      iex> error.reason
+      %{max_items: 3, value: [1, "a", "b", 4]}
+      iex> {:error, error} = Xema.validate(schema, data, fail: :finally)
+      iex> error.reason
+      [
+        %{items: %{
+          1 => %{type: :integer, value: "a"},
+          2 => %{type: :integer, value: "b"}
+        }},
+        %{max_items: 3, value: [1, "a", "b", 4]}
+      ]
       ```
       """
       @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
@@ -110,7 +143,6 @@ defmodule Xema.Behaviour do
              do: {:error, on_error(error)}
       end
 
-      # TODO: update doc
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise raises a `#{__MODULE__}.ValidationError`. See `validate3` for
