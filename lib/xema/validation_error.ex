@@ -108,9 +108,11 @@ defmodule Xema.ValidationError do
   end
 
   def travers_errors(errors, acc, fun, opts) when is_list(errors) do
-    Enum.flat_map(errors, fn error ->
-      travers_errors(error, acc, fun, opts)
+    errors
+    |> Enum.flat_map(fn error ->
+      travers_errors(error, [], fun, opts)
     end)
+    |> Enum.concat(acc)
   end
 
   def travers_errors(error, acc, fun, opts), do: fun.(error, opts[:path], acc)

@@ -769,4 +769,341 @@ defmodule Xema.OptFailTest do
              """
     end
   end
+
+  describe "all together" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:map,
+             properties: %{
+               a:
+                 {:map,
+                  keys: :atoms,
+                  properties: %{foo: :integer, bar: :integer},
+                  max_properties: 3,
+                  pattern_properties: %{~r/str_.*/ => :string},
+                  additional_properties: false},
+               b:
+                 {:keyword,
+                  properties: %{foo: :integer, bar: :integer},
+                  pattern_properties: %{~r/str_.*/ => :string},
+                  max_properties: 3,
+                  additional_properties: false},
+               c: {:list, max_items: 3, items: :integer, unique_items: true},
+               d:
+                 {:list,
+                  items: [:integer, :integer, :string],
+                  unique_items: true,
+                  additional_items: false}
+             }}
+          ),
+        valid: %{
+          a: %{foo: 5, bar: 9, str_baz: "baz"},
+          b: [foo: 11, bar: 12, str_boo: "boo"],
+          c: [1, 2, 3],
+          d: [1, 2, "three"]
+        },
+        invalid: %{
+          values: %{
+            a: %{foo: "foo", bar: 9, str_baz: 7},
+            b: [foo: 11, bar: "bar", str_boo: 11],
+            c: [1, "2", "3"],
+            d: ["1", 2, 3]
+          },
+          structure: %{
+            a: %{foo: "foo", bar: 9, str_baz: 7, more: :things},
+            b: [foo: 11, bar: "bar", str_boo: 11, another: :thing],
+            c: [1, "2", "3", :next, 1],
+            d: ["1", 2, 3, 2]
+          }
+        }
+      }
+    end
+
+    test "validate/3 with valid data", %{schema: schema, valid: data} do
+      assert validate(schema, data, fail: :immediately) == :ok
+      assert validate(schema, data, fail: :early) == :ok
+      assert validate(schema, data, fail: :finally) == :ok
+    end
+
+    test "validate/3 with [fail: :immediately] invalid.values",
+         %{schema: schema, invalid: %{values: data}} do
+      opts = [fail: :immediately]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{
+                 properties: %{
+                   a: %{
+                     properties: %{str_baz: %{type: :string, value: 7}}
+                   }
+                 }
+               }
+             }
+
+      assert Exception.message(error) == "Expected :string, got 7, at [:a, :str_baz]."
+    end
+
+    test "validate/3 with [fail: :early] invalid.values",
+         %{schema: schema, invalid: %{values: data}} do
+      opts = [fail: :early]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{
+                 properties: %{
+                   a: %{
+                     properties: %{
+                       foo: %{type: :integer, value: "foo"},
+                       str_baz: %{type: :string, value: 7}
+                     }
+                   },
+                   b: %{
+                     properties: %{
+                       bar: %{type: :integer, value: "bar"},
+                       str_boo: %{type: :string, value: 11}
+                     }
+                   },
+                   c: %{
+                     items: %{
+                       1 => %{type: :integer, value: "2"},
+                       2 => %{type: :integer, value: "3"}
+                     }
+                   },
+                   d: %{
+                     items: %{
+                       0 => %{type: :integer, value: "1"},
+                       2 => %{type: :string, value: 3}
+                     }
+                   }
+                 }
+               }
+             }
+
+      assert Exception.message(error) == """
+             Expected :integer, got "foo", at [:a, :foo].
+             Expected :string, got 7, at [:a, :str_baz].
+             Expected :integer, got "bar", at [:b, :bar].
+             Expected :string, got 11, at [:b, :str_boo].
+             Expected :integer, got "2", at [:c, 1].
+             Expected :integer, got "3", at [:c, 2].
+             Expected :integer, got "1", at [:d, 0].
+             Expected :string, got 3, at [:d, 2].\
+             """
+    end
+
+    test "validate/3 with [fail: :finally] invalid.values",
+         %{schema: schema, invalid: %{values: data}} do
+      opts = [fail: :finally]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: [
+                 %{
+                   properties: %{
+                     a: [
+                       %{
+                         properties: %{
+                           foo: %{type: :integer, value: "foo"},
+                           str_baz: %{type: :string, value: 7}
+                         }
+                       }
+                     ],
+                     b: [
+                       %{
+                         properties: %{
+                           bar: %{type: :integer, value: "bar"},
+                           str_boo: %{type: :string, value: 11}
+                         }
+                       }
+                     ],
+                     c: [
+                       %{
+                         items: %{
+                           1 => %{type: :integer, value: "2"},
+                           2 => %{type: :integer, value: "3"}
+                         }
+                       }
+                     ],
+                     d: [
+                       %{
+                         items: %{
+                           0 => %{type: :integer, value: "1"},
+                           2 => %{type: :string, value: 3}
+                         }
+                       }
+                     ]
+                   }
+                 }
+               ]
+             }
+
+      assert Exception.message(error) == """
+             Expected :integer, got "foo", at [:a, :foo].
+             Expected :string, got 7, at [:a, :str_baz].
+             Expected :integer, got "bar", at [:b, :bar].
+             Expected :string, got 11, at [:b, :str_boo].
+             Expected :integer, got "2", at [:c, 1].
+             Expected :integer, got "3", at [:c, 2].
+             Expected :integer, got "1", at [:d, 0].
+             Expected :string, got 3, at [:d, 2].\
+             """
+    end
+
+    test "validate/3 with [fail: :immediately] invalid.structure",
+         %{schema: schema, invalid: %{structure: data}} do
+      opts = [fail: :immediately]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{
+                 properties: %{
+                   a: %{
+                     max_properties: 3,
+                     value: %{bar: 9, foo: "foo", more: :things, str_baz: 7}
+                   }
+                 }
+               }
+             }
+
+      assert Exception.message(error) ==
+               ~s|Expected at most 3 properties, | <>
+                 ~s|got %{bar: 9, foo: \"foo\", more: :things, str_baz: 7}, at [:a].|
+    end
+
+    test "validate/3 with [fail: :early] invalid.structure",
+         %{schema: schema, invalid: %{structure: data}} do
+      opts = [fail: :early]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: %{
+                 properties: %{
+                   a: %{
+                     max_properties: 3,
+                     value: %{bar: 9, foo: "foo", more: :things, str_baz: 7}
+                   },
+                   b: %{
+                     max_properties: 3,
+                     value: [foo: 11, bar: "bar", str_boo: 11, another: :thing]
+                   },
+                   c: %{max_items: 3, value: [1, "2", "3", :next, 1]},
+                   d: %{unique_items: true, value: ["1", 2, 3, 2]}
+                 }
+               }
+             }
+
+      got = %{
+        a: ~s|got %{bar: 9, foo: "foo", more: :things, str_baz: 7}, at [:a].|,
+        b: ~s|got [foo: 11, bar: "bar", str_boo: 11, another: :thing], at [:b].|
+      }
+
+      assert Exception.message(error) == """
+             Expected at most 3 properties, #{got.a}
+             Expected at most 3 properties, #{got.b}
+             Expected at most 3 items, got [1, "2", "3", :next, 1], at [:c].
+             Expected unique items, got ["1", 2, 3, 2], at [:d].\
+             """
+    end
+
+    test "validate/3 with [fail: :finally] invalid.structure",
+         %{schema: schema, invalid: %{structure: data}} do
+      opts = [fail: :finally]
+
+      assert {:error, error} = validate(schema, data, opts)
+
+      assert error == %Xema.ValidationError{
+               message: nil,
+               reason: [
+                 %{
+                   properties: %{
+                     a: [
+                       %{
+                         properties: %{
+                           foo: %{type: :integer, value: "foo"},
+                           more: %{additional_properties: false},
+                           str_baz: %{type: :string, value: 7}
+                         }
+                       },
+                       %{
+                         max_properties: 3,
+                         value: %{bar: 9, foo: "foo", more: :things, str_baz: 7}
+                       }
+                     ],
+                     b: [
+                       %{
+                         properties: %{
+                           another: %{additional_properties: false},
+                           bar: %{type: :integer, value: "bar"},
+                           str_boo: %{type: :string, value: 11}
+                         }
+                       },
+                       %{
+                         max_properties: 3,
+                         value: [foo: 11, bar: "bar", str_boo: 11, another: :thing]
+                       }
+                     ],
+                     c: [
+                       %{
+                         items: %{
+                           1 => %{type: :integer, value: "2"},
+                           2 => %{type: :integer, value: "3"},
+                           3 => %{type: :integer, value: :next}
+                         }
+                       },
+                       %{unique_items: true, value: [1, "2", "3", :next, 1]},
+                       %{max_items: 3, value: [1, "2", "3", :next, 1]}
+                     ],
+                     d: [
+                       %{
+                         items: %{
+                           0 => %{type: :integer, value: "1"},
+                           2 => %{type: :string, value: 3},
+                           3 => %{additional_items: false}
+                         }
+                       },
+                       %{unique_items: true, value: ["1", 2, 3, 2]}
+                     ]
+                   }
+                 }
+               ]
+             }
+
+      got = %{
+        a: ~s|got %{bar: 9, foo: "foo", more: :things, str_baz: 7}, at [:a].|,
+        b: ~s|got [foo: 11, bar: "bar", str_boo: 11, another: :thing], at [:b].|
+      }
+
+      assert Exception.message(error) == """
+             Expected at most 3 properties, #{got.a}
+             Expected :integer, got "foo", at [:a, :foo].
+             Expected only defined properties, got key [:a, :more].
+             Expected :string, got 7, at [:a, :str_baz].
+             Expected at most 3 properties, #{got.b}
+             Expected only defined properties, got key [:b, :another].
+             Expected :integer, got "bar", at [:b, :bar].
+             Expected :string, got 11, at [:b, :str_boo].
+             Expected at most 3 items, got [1, "2", "3", :next, 1], at [:c].
+             Expected unique items, got [1, "2", "3", :next, 1], at [:c].
+             Expected :integer, got "2", at [:c, 1].
+             Expected :integer, got "3", at [:c, 2].
+             Expected :integer, got :next, at [:c, 3].
+             Expected unique items, got ["1", 2, 3, 2], at [:d].
+             Expected :integer, got "1", at [:d, 0].
+             Expected :string, got 3, at [:d, 2].
+             Unexpected additional item, at [:d, 3].\
+             """
+    end
+  end
 end
