@@ -35,6 +35,13 @@ defmodule Xema.Behaviour do
 
       @opt_fail [:immediately, :early, :finally]
 
+      @typedoc """
+      The return type of a validation run.
+      """
+      @type result :: Xema.Validator.result()
+
+      @type schema :: Xema.Schema.t()
+
       @enforce_keys [:schema]
 
       @typedoc """
@@ -75,7 +82,7 @@ defmodule Xema.Behaviour do
       Returns `true` if the `value` is a valid value against the given `schema`;
       otherwise returns `false`.
       """
-      @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
+      @spec valid?(__MODULE__.t() | schema(), any) :: boolean
       def valid?(schema, value), do: validate(schema, value, fail: :immediately) == :ok
 
       @doc """
@@ -132,7 +139,7 @@ defmodule Xema.Behaviour do
       ]
       ```
       """
-      @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
+      @spec validate(__MODULE__.t() | schema(), any, keyword) :: result()
       def validate(%{} = schema, value, opts \\ []) do
         if Keyword.get(opts, :fail, :early) not in @opt_fail do
           raise ArgumentError,
@@ -148,7 +155,7 @@ defmodule Xema.Behaviour do
       otherwise raises a `#{__MODULE__}.ValidationError`. See `validate3` for
       available options.
       """
-      @spec validate!(__MODULE__.t() | Schema.t(), any, keyword) :: :ok
+      @spec validate!(__MODULE__.t() | schema(), any, keyword) :: :ok
       def validate!(xema, value, opts \\ []) do
         with {:error, reason} <- validate(xema, value, opts),
              do: raise(reason)
