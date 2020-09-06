@@ -51,9 +51,10 @@ defmodule Xema.OptFailTest do
                }
              }
 
-      assert Exception.message(error) ==
-               ~s|Expected at most 3 properties, | <>
-                 ~s|got %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}.|
+      assert Exception.message(error) == """
+             Expected at most 3 properties, \
+             got %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}.\
+             """
     end
 
     test "validate/3 with [fail: :early] and invalid.multi",
@@ -70,9 +71,10 @@ defmodule Xema.OptFailTest do
                }
              }
 
-      assert Exception.message(error) ==
-               ~s|Expected at most 3 properties, | <>
-                 ~s|got %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}.|
+      assert Exception.message(error) == """
+             Expected at most 3 properties, \
+             got %{:baz => 5, :foo => :bar, :str_a => "a", :str_b => "b", "z" => 1}.\
+             """
     end
 
     test "validate/3 with [fail: :finally] and invalid.multi",
@@ -201,9 +203,10 @@ defmodule Xema.OptFailTest do
                }
              }
 
-      assert Exception.message(error) ==
-               ~s|Expected at most 3 properties, | <>
-                 ~s|got %{bar: "bar", foo: 1, more: :things, str_baz: 4}.|
+      assert Exception.message(error) == """
+             Expected at most 3 properties, \
+             got %{bar: "bar", foo: 1, more: :things, str_baz: 4}.\
+             """
     end
 
     test "validate/3 with [fail: :early] and invalid.pattern",
@@ -222,9 +225,10 @@ defmodule Xema.OptFailTest do
                  }
                }
 
-      assert Exception.message(error) ==
-               ~s|Expected at most 3 properties, | <>
-                 ~s|got %{bar: \"bar\", foo: 1, more: :things, str_baz: 4}.|
+      assert Exception.message(error) == """
+             Expected at most 3 properties, \
+             got %{bar: \"bar\", foo: 1, more: :things, str_baz: 4}.\
+             """
     end
 
     test "validate/3 with [fail: :finally] and invalid.pattern",
@@ -300,9 +304,10 @@ defmodule Xema.OptFailTest do
                }
              }
 
-      assert Exception.message(error) ==
-               ~s|Expected at most 3 properties, | <>
-                 ~s|got [foo: 1, bar: "bar", str_baz: 4, more: :things].|
+      assert Exception.message(error) == """
+             Expected at most 3 properties, \
+             got [foo: 1, bar: "bar", str_baz: 4, more: :things].\
+             """
     end
 
     test "validate/3 with [fail: :early] and invalid.multi",
@@ -975,9 +980,10 @@ defmodule Xema.OptFailTest do
                }
              }
 
-      assert Exception.message(error) ==
-               ~s|Expected at most 3 properties, | <>
-                 ~s|got %{bar: 9, foo: \"foo\", more: :things, str_baz: 7}, at [:a].|
+      assert Exception.message(error) == """
+             Expected at most 3 properties, \
+             got %{bar: 9, foo: \"foo\", more: :things, str_baz: 7}, at [:a].\
+             """
     end
 
     test "validate/3 with [fail: :early] invalid.structure",
