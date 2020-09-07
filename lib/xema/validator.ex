@@ -11,7 +11,14 @@ defmodule Xema.Validator do
 
   @compile {
     :inline,
-    do_validate: 3, get_type: 1, struct?: 1, struct?: 2, type?: 2, types: 2, validate_by: 4
+    do_validate: 3,
+    get_type: 1,
+    struct?: 1,
+    struct?: 2,
+    type?: 2,
+    types: 2,
+    validate_by: 4,
+    fail?: 2
   }
 
   @type result :: :ok | {:error, map}
@@ -115,12 +122,24 @@ defmodule Xema.Validator do
     do: validate_by(:list, schema, value, opts)
 
   defp validate_by(:list, schema, value, opts) do
-    with :ok <- min_items(schema, value),
-         :ok <- max_items(schema, value),
-         :ok <- unique(schema, value),
-         :ok <- items(schema, value, opts),
-         :ok <- contains(schema, value, opts),
-         do: :ok
+    case fail?(opts, :finally) do
+      true ->
+        collect([
+          min_items(schema, value),
+          max_items(schema, value),
+          unique(schema, value),
+          items(schema, value, opts),
+          contains(schema, value, opts)
+        ])
+
+      false ->
+        with :ok <- min_items(schema, value),
+             :ok <- max_items(schema, value),
+             :ok <- unique(schema, value),
+             :ok <- items(schema, value, opts),
+             :ok <- contains(schema, value, opts),
+             do: :ok
+    end
   end
 
   defp validate_by(:struct, schema, value, opts) do
@@ -130,23 +149,50 @@ defmodule Xema.Validator do
   end
 
   defp validate_by(:map, schema, value, opts) do
-    with :ok <- size(schema, value),
-         :ok <- keys(schema, value),
-         :ok <- required(schema, value),
-         :ok <- property_names(schema, value, opts),
-         :ok <- dependencies(schema, value, opts),
-         :ok <- all_properties(schema, value, opts),
-         do: :ok
+    case fail?(opts, :finally) do
+      false ->
+        with :ok <- size(schema, value),
+             :ok <- keys(schema, value),
+             :ok <- required(schema, value),
+             :ok <- property_names(schema, value, opts),
+             :ok <- dependencies(schema, value, opts),
+             :ok <- all_properties(schema, value, opts),
+             do: :ok
+
+      true ->
+        collect([
+          size(schema, value),
+          keys(schema, value),
+          required(schema, value),
+          property_names(schema, value, opts),
+          dependencies(schema, value, opts),
+          all_properties(schema, value, opts)
+        ])
+    end
   end
 
   defp validate_by(:keyword, schema, value, opts) do
-    with :ok <- dependencies(schema, value, opts),
-         :ok <- size(schema, value),
-         value <- Enum.into(value, %{}),
-         :ok <- required(schema, value),
-         :ok <- property_names(schema, value, opts),
-         :ok <- all_properties(schema, value, opts),
-         do: :ok
+    case fail?(opts, :finally) do
+      true ->
+        map = Enum.into(value, %{})
+
+        collect([
+          dependencies(schema, value, opts),
+          size(schema, value),
+          required(schema, map),
+          property_names(schema, map, opts),
+          all_properties(schema, map, opts)
+        ])
+
+      false ->
+        with :ok <- dependencies(schema, value, opts),
+             :ok <- size(schema, value),
+             value <- Enum.into(value, %{}),
+             :ok <- required(schema, value),
+             :ok <- property_names(schema, value, opts),
+             :ok <- all_properties(schema, value, opts),
+             do: :ok
+    end
   end
 
   defp validate_by(:integer, schema, value, opts),
@@ -636,27 +682,29 @@ defmodule Xema.Validator do
   @spec items(Schema.t(), list | tuple, keyword) :: result
   defp items(%{items: nil}, _list, _opts), do: :ok
 
-  defp items(schema, tuple, opts) when is_tuple(tuple),
-    do: items(schema, Tuple.to_list(tuple), opts)
+  defp items(schema, tuple, opts) when is_tuple(tuple) do
+    items(schema, Tuple.to_list(tuple), opts)
+  end
 
-  defp items(%{items: items} = schema, list, opts)
-       when is_list(items),
-       do:
-         items_tuple(
-           items,
-           Map.get(schema, :additional_items, true),
-           Enum.with_index(list),
-           [],
-           opts
-         )
+  defp items(%{items: items} = schema, list, opts) when is_list(items) do
+    items_tuple(
+      items,
+      Map.get(schema, :additional_items, true),
+      Enum.with_index(list),
+      [],
+      opts
+    )
+  end
 
-  defp items(%{items: items}, list, opts),
-    do: items_list(items, Enum.with_index(list), [], opts)
+  defp items(%{items: items}, list, opts) do
+    items_list(items, Enum.with_index(list), [], opts)
+  end
 
   @spec items_list(Schema.t(), [{any, integer}], list, keyword) :: result
-
   defp items_list(%{type: false}, [], _, _), do: :ok
+
   defp items_list(%{type: false}, _, _, _), do: {:error, %{type: false}}
+
   defp items_list(%{type: true}, _, _, _), do: :ok
 
   defp items_list(_schema, [], [], _opts), do: :ok
@@ -670,7 +718,10 @@ defmodule Xema.Validator do
         items_list(schema, list, errors, opts)
 
       {:error, reason} ->
-        items_list(schema, list, [{index, reason} | errors], opts)
+        case fail?(opts, :immediately) do
+          true -> items_list(schema, [], [{index, reason} | errors], opts)
+          false -> items_list(schema, list, [{index, reason} | errors], opts)
+        end
     end
   end
 
@@ -680,15 +731,15 @@ defmodule Xema.Validator do
   defp items_tuple(_schemas, _additonal_items, [], errors, _opts),
     do: {:error, %{items: Enum.into(errors, %{})}}
 
-  defp items_tuple([], false, [{_, index} | list], errors, opts),
-    do:
-      items_tuple(
-        [],
-        false,
-        list,
-        [{index, %{additional_items: false}} | errors],
-        opts
-      )
+  defp items_tuple([], false, [{_, index} | list], errors, opts) do
+    items_tuple(
+      [],
+      false,
+      list,
+      [{index, %{additional_items: false}} | errors],
+      opts
+    )
+  end
 
   defp items_tuple([], additional_items, _list, [], _opts)
        when additional_items in [nil, true],
@@ -704,7 +755,10 @@ defmodule Xema.Validator do
         items_tuple([], schema, list, errors, opts)
 
       {:error, reason} ->
-        items_tuple([], schema, list, [{index, reason} | errors], opts)
+        case fail?(opts, :immediately) do
+          true -> items_tuple([], schema, [], [{index, reason} | errors], opts)
+          false -> items_tuple([], schema, list, [{index, reason} | errors], opts)
+        end
     end
   end
 
@@ -720,13 +774,10 @@ defmodule Xema.Validator do
         items_tuple(schemas, additional_items, list, errors, opts)
 
       {:error, reason} ->
-        items_tuple(
-          schemas,
-          additional_items,
-          list,
-          [{index, reason} | errors],
-          opts
-        )
+        case fail?(opts, :immediately) do
+          true -> items_tuple(schemas, additional_items, [], [{index, reason} | errors], opts)
+          false -> items_tuple(schemas, additional_items, list, [{index, reason} | errors], opts)
+        end
     end
   end
 
@@ -749,23 +800,35 @@ defmodule Xema.Validator do
 
   @spec all_properties(Schema.t(), map, keyword) :: :ok | {:error, map}
   defp all_properties(schema, value, opts) do
-    [
-      patterns(schema, value, opts),
-      properties(schema, value, opts),
-      additionals(schema, value, opts)
-    ]
-    |> collect()
-    |> case do
-      :ok ->
-        :ok
+    case fail?(opts, :immediately) do
+      true ->
+        with :ok <- patterns(schema, value, opts),
+             :ok <- properties(schema, value, opts),
+             :ok <- additionals(schema, value, opts),
+             do: :ok
 
-      {:error, reasons} ->
-        properties =
-          Enum.reduce(reasons, %{}, fn %{properties: properties}, acc ->
-            Map.merge(acc, properties)
-          end)
+      false ->
+        [
+          patterns(schema, value, opts),
+          properties(schema, value, opts),
+          additionals(schema, value, opts)
+        ]
+        |> collect()
+        |> case do
+          :ok ->
+            :ok
 
-        {:error, %{properties: properties}}
+          {:error, reasons} when is_list(reasons) ->
+            properties =
+              Enum.reduce(reasons, %{}, fn %{properties: properties}, acc ->
+                Map.merge(acc, properties)
+              end)
+
+            {:error, %{properties: properties}}
+
+          {:error, _} = error ->
+            error
+        end
     end
   end
 
@@ -785,13 +848,18 @@ defmodule Xema.Validator do
          :ok <- do_validate(schema, value, opts) do
       do_properties(props, map, errors, opts)
     else
-      # The property is not in the map.
+      # The property is not in the map. The required properties are checked at
+      # another location.
       :error ->
         do_properties(props, map, errors, opts)
 
       {:error, reason} ->
         updated_errors = Map.put(errors, prop, reason)
-        do_properties(props, map, updated_errors, opts)
+
+        case fail?(opts, :immediately) do
+          true -> do_properties([], map, updated_errors, opts)
+          false -> do_properties(props, map, updated_errors, opts)
+        end
     end
   end
 
@@ -1003,8 +1071,9 @@ defmodule Xema.Validator do
     Enum.any?(patterns, fn regex -> Regex.match?(regex, pattern) end)
   end
 
-  defp collect(results) do
-    Enum.reduce(results, :ok, fn
+  defp collect(results) when is_list(results) do
+    results
+    |> Enum.reduce(:ok, fn
       :ok, :ok ->
         :ok
 
@@ -1017,5 +1086,14 @@ defmodule Xema.Validator do
       {:error, reason}, {:error, reasons} ->
         {:error, [reason | reasons]}
     end)
+    |> collect()
   end
+
+  defp collect(:ok), do: :ok
+
+  defp collect({:error, [reason]}), do: {:error, reason}
+
+  defp collect(errors), do: errors
+
+  defp fail?(opts, cmp), do: Keyword.get(opts, :fail, :early) == cmp
 end

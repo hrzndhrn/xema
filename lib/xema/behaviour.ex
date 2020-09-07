@@ -33,6 +33,15 @@ defmodule Xema.Behaviour do
       @behaviour Xema.Behaviour
       alias Xema.Behaviour
 
+      @opt_fail [:immediately, :early, :finally]
+
+      @typedoc """
+      The return type of a validation run.
+      """
+      @type result :: Xema.Validator.result()
+
+      @type schema :: Xema.Schema.t()
+
       @enforce_keys [:schema]
 
       @typedoc """
@@ -73,30 +82,39 @@ defmodule Xema.Behaviour do
       Returns `true` if the `value` is a valid value against the given `schema`;
       otherwise returns `false`.
       """
-      @spec valid?(__MODULE__.t() | Schema.t(), any) :: boolean
-      def valid?(schema, value), do: validate(schema, value) == :ok
+      @spec valid?(__MODULE__.t() | schema(), any) :: boolean
+      def valid?(schema, value), do: validate(schema, value, fail: :immediately) == :ok
 
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
       otherwise returns an error tuple.
-      """
-      @spec validate(__MODULE__.t() | Schema.t(), any) :: Validator.result()
-      def validate(schema, value), do: validate(schema, value, [])
 
-      @doc false
-      @spec validate(__MODULE__.t() | Schema.t(), any, keyword) :: Validator.result()
-      def validate(%{} = schema, value, opts) do
+      With the option `:fail`, you can define when the validation is aborted. This
+      also influences how many error reasons are returned.
+      - `:immediately` aborts the validation when the first validation fails.
+      - `:early` (default) aborts on failed validations, but runs validations
+        for all properties and items.
+      - `:finally` aborts after all possible validations.
+      """
+      @spec validate(__MODULE__.t() | schema(), any, keyword) :: result()
+      def validate(%{} = schema, value, opts \\ []) do
+        if Keyword.get(opts, :fail, :early) not in @opt_fail do
+          raise ArgumentError,
+            message: "the optional option :fail must be one of #{inspect(@opt_fail)} when set"
+        end
+
         with {:error, error} <- Validator.validate(schema, value, opts),
              do: {:error, on_error(error)}
       end
 
       @doc """
       Returns `:ok` if the `value` is a valid value against the given `schema`;
-      otherwise raises a `#{__MODULE__}.ValidationError`.
+      otherwise raises a `#{__MODULE__}.ValidationError`. See `validate3` for
+      available options.
       """
-      @spec validate!(__MODULE__.t() | Schema.t(), any) :: :ok
-      def validate!(xema, value) do
-        with {:error, reason} <- validate(xema, value),
+      @spec validate!(__MODULE__.t() | schema(), any, keyword) :: :ok
+      def validate!(xema, value, opts \\ []) do
+        with {:error, reason} <- validate(xema, value, opts),
              do: raise(reason)
       end
 

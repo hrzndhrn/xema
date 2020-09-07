@@ -421,3 +421,53 @@ returns a `User` struct
   updated: nil
 }
 ```
+
+## Validate with option `:fail`
+
+With the option `:fail`, you can define when the validation is aborted. This
+also influences how many error reasons are returned.
+- `:immediately` aborts the validation when the first validation fails.
+- `:early` (default) aborts on failed validations, but runs validations
+  for all properties and items.
+- `:finally` aborts after all possible validations.
+
+### Examples
+
+```elixir
+iex> schema = Xema.new({:list, max_items: 3, items: :integer})
+iex> data = [1, "a", "b"]
+iex> {:error, error} = Xema.validate(schema, data, fail: :immediately)
+iex> error.reason
+%{items: %{
+  1 => %{type: :integer, value: "a"}
+}}
+iex> {:error, error} = Xema.validate(schema, data, fail: :early)
+iex> error.reason
+%{items: %{
+  1 => %{type: :integer, value: "a"},
+  2 => %{type: :integer, value: "b"}
+}}
+iex> {:error, error} = Xema.validate(schema, data, fail: :finally)
+iex> error.reason
+%{items: %{
+  1 => %{type: :integer, value: "a"},
+  2 => %{type: :integer, value: "b"}
+}}
+iex> # new data
+iex> data = [1, "a", "b", 4]
+iex> {:error, error} = Xema.validate(schema, data, fail: :immediately)
+iex> error.reason
+%{max_items: 3, value: [1, "a", "b", 4]}
+iex> {:error, error} = Xema.validate(schema, data, fail: :early)
+iex> error.reason
+%{max_items: 3, value: [1, "a", "b", 4]}
+iex> {:error, error} = Xema.validate(schema, data, fail: :finally)
+iex> error.reason
+[
+  %{items: %{
+    1 => %{type: :integer, value: "a"},
+    2 => %{type: :integer, value: "b"}
+  }},
+  %{max_items: 3, value: [1, "a", "b", 4]}
+]
+```

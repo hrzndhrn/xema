@@ -91,21 +91,29 @@ defmodule Xema.ValidationError do
 
   def travers_errors(error, acc, fun, []), do: travers_errors(error, acc, fun, path: [])
 
-  def travers_errors(%{properties: properties} = error, acc, fun, opts),
-    do:
-      Enum.reduce(
-        properties,
-        fun.(error, opts[:path], acc),
-        fn {key, value}, acc -> travers_errors(value, acc, fun, path: opts[:path] ++ [key]) end
-      )
+  def travers_errors(%{properties: properties} = error, acc, fun, opts) do
+    Enum.reduce(
+      properties,
+      fun.(error, opts[:path], acc),
+      fn {key, value}, acc -> travers_errors(value, acc, fun, path: opts[:path] ++ [key]) end
+    )
+  end
 
-  def travers_errors(%{items: items} = error, acc, fun, opts),
-    do:
-      Enum.reduce(
-        items,
-        fun.(error, opts[:path], acc),
-        fn {key, value}, acc -> travers_errors(value, acc, fun, path: opts[:path] ++ [key]) end
-      )
+  def travers_errors(%{items: items} = error, acc, fun, opts) do
+    Enum.reduce(
+      items,
+      fun.(error, opts[:path], acc),
+      fn {key, value}, acc -> travers_errors(value, acc, fun, path: opts[:path] ++ [key]) end
+    )
+  end
+
+  def travers_errors(errors, acc, fun, opts) when is_list(errors) do
+    errors
+    |> Enum.flat_map(fn error ->
+      travers_errors(error, [], fun, opts)
+    end)
+    |> Enum.concat(acc)
+  end
 
   def travers_errors(error, acc, fun, opts), do: fun.(error, opts[:path], acc)
 

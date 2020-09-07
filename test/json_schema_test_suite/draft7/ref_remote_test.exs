@@ -57,7 +57,6 @@ defmodule JsonSchemaTestSuite.Draft7.RefRemoteTest do
       }
     end
 
-    @tag :only
     test "ref within ref valid", %{schema: schema} do
       assert valid?(schema, 1)
     end
