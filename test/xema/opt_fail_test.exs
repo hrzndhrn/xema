@@ -170,17 +170,15 @@ defmodule Xema.OptFailTest do
                %ValidationError{
                  __exception__: true,
                  message: nil,
-                 reason: [
-                   %{
-                     properties: %{
-                       foo: %{
-                         type: :integer,
-                         value: "foo"
-                       },
-                       bar: %{type: :integer, value: "bar"}
-                     }
+                 reason: %{
+                   properties: %{
+                     foo: %{
+                       type: :integer,
+                       value: "foo"
+                     },
+                     bar: %{type: :integer, value: "bar"}
                    }
-                 ]
+                 }
                }
 
       assert Exception.message(error) == """
@@ -411,15 +409,13 @@ defmodule Xema.OptFailTest do
                %ValidationError{
                  __exception__: true,
                  message: nil,
-                 reason: [
-                   %{
-                     properties: %{
-                       bar: %{type: :integer, value: "bar"},
-                       foo: %{type: :integer, value: "foo"},
-                       str_baz: %{type: :string, value: 6}
-                     }
+                 reason: %{
+                   properties: %{
+                     bar: %{type: :integer, value: "bar"},
+                     foo: %{type: :integer, value: "foo"},
+                     str_baz: %{type: :string, value: 6}
                    }
-                 ]
+                 }
                }
 
       assert Exception.message(error) == """
@@ -493,14 +489,12 @@ defmodule Xema.OptFailTest do
 
       assert error == %Xema.ValidationError{
                message: nil,
-               reason: [
-                 %{
-                   items: %{
-                     1 => %{type: :integer, value: "a"},
-                     2 => %{type: :integer, value: "b"}
-                   }
+               reason: %{
+                 items: %{
+                   1 => %{type: :integer, value: "a"},
+                   2 => %{type: :integer, value: "b"}
                  }
-               ]
+               }
              }
 
       assert Exception.message(error) == """
@@ -667,14 +661,12 @@ defmodule Xema.OptFailTest do
 
       assert error == %Xema.ValidationError{
                message: nil,
-               reason: [
-                 %{
-                   items: %{
-                     1 => %{type: :integer, value: "a"},
-                     2 => %{type: :string, value: 2}
-                   }
+               reason: %{
+                 items: %{
+                   1 => %{type: :integer, value: "a"},
+                   2 => %{type: :string, value: 2}
                  }
-               ]
+               }
              }
 
       assert Exception.message(error) == """
@@ -729,14 +721,12 @@ defmodule Xema.OptFailTest do
 
       assert error == %Xema.ValidationError{
                message: nil,
-               reason: [
-                 %{
-                   items: %{
-                     1 => %{type: :integer, value: "a"},
-                     3 => %{additional_items: false}
-                   }
+               reason: %{
+                 items: %{
+                   1 => %{type: :integer, value: "a"},
+                   3 => %{additional_items: false}
                  }
-               ]
+               }
              }
 
       assert Exception.message(error) == """
@@ -910,44 +900,34 @@ defmodule Xema.OptFailTest do
 
       assert error == %Xema.ValidationError{
                message: nil,
-               reason: [
-                 %{
-                   properties: %{
-                     a: [
-                       %{
-                         properties: %{
-                           foo: %{type: :integer, value: "foo"},
-                           str_baz: %{type: :string, value: 7}
-                         }
-                       }
-                     ],
-                     b: [
-                       %{
-                         properties: %{
-                           bar: %{type: :integer, value: "bar"},
-                           str_boo: %{type: :string, value: 11}
-                         }
-                       }
-                     ],
-                     c: [
-                       %{
-                         items: %{
-                           1 => %{type: :integer, value: "2"},
-                           2 => %{type: :integer, value: "3"}
-                         }
-                       }
-                     ],
-                     d: [
-                       %{
-                         items: %{
-                           0 => %{type: :integer, value: "1"},
-                           2 => %{type: :string, value: 3}
-                         }
-                       }
-                     ]
+               reason: %{
+                 properties: %{
+                   a: %{
+                     properties: %{
+                       foo: %{type: :integer, value: "foo"},
+                       str_baz: %{type: :string, value: 7}
+                     }
+                   },
+                   b: %{
+                     properties: %{
+                       bar: %{type: :integer, value: "bar"},
+                       str_boo: %{type: :string, value: 11}
+                     }
+                   },
+                   c: %{
+                     items: %{
+                       1 => %{type: :integer, value: "2"},
+                       2 => %{type: :integer, value: "3"}
+                     }
+                   },
+                   d: %{
+                     items: %{
+                       0 => %{type: :integer, value: "1"},
+                       2 => %{type: :string, value: 3}
+                     }
                    }
                  }
-               ]
+               }
              }
 
       assert Exception.message(error) == """
@@ -1031,59 +1011,57 @@ defmodule Xema.OptFailTest do
 
       assert error == %Xema.ValidationError{
                message: nil,
-               reason: [
-                 %{
-                   properties: %{
-                     a: [
-                       %{
-                         properties: %{
-                           foo: %{type: :integer, value: "foo"},
-                           more: %{additional_properties: false},
-                           str_baz: %{type: :string, value: 7}
-                         }
-                       },
-                       %{
-                         max_properties: 3,
-                         value: %{bar: 9, foo: "foo", more: :things, str_baz: 7}
+               reason: %{
+                 properties: %{
+                   a: [
+                     %{
+                       properties: %{
+                         foo: %{type: :integer, value: "foo"},
+                         more: %{additional_properties: false},
+                         str_baz: %{type: :string, value: 7}
                        }
-                     ],
-                     b: [
-                       %{
-                         properties: %{
-                           another: %{additional_properties: false},
-                           bar: %{type: :integer, value: "bar"},
-                           str_boo: %{type: :string, value: 11}
-                         }
-                       },
-                       %{
-                         max_properties: 3,
-                         value: [foo: 11, bar: "bar", str_boo: 11, another: :thing]
+                     },
+                     %{
+                       max_properties: 3,
+                       value: %{bar: 9, foo: "foo", more: :things, str_baz: 7}
+                     }
+                   ],
+                   b: [
+                     %{
+                       properties: %{
+                         another: %{additional_properties: false},
+                         bar: %{type: :integer, value: "bar"},
+                         str_boo: %{type: :string, value: 11}
                        }
-                     ],
-                     c: [
-                       %{
-                         items: %{
-                           1 => %{type: :integer, value: "2"},
-                           2 => %{type: :integer, value: "3"},
-                           3 => %{type: :integer, value: :next}
-                         }
-                       },
-                       %{unique_items: true, value: [1, "2", "3", :next, 1]},
-                       %{max_items: 3, value: [1, "2", "3", :next, 1]}
-                     ],
-                     d: [
-                       %{
-                         items: %{
-                           0 => %{type: :integer, value: "1"},
-                           2 => %{type: :string, value: 3},
-                           3 => %{additional_items: false}
-                         }
-                       },
-                       %{unique_items: true, value: ["1", 2, 3, 2]}
-                     ]
-                   }
+                     },
+                     %{
+                       max_properties: 3,
+                       value: [foo: 11, bar: "bar", str_boo: 11, another: :thing]
+                     }
+                   ],
+                   c: [
+                     %{
+                       items: %{
+                         1 => %{type: :integer, value: "2"},
+                         2 => %{type: :integer, value: "3"},
+                         3 => %{type: :integer, value: :next}
+                       }
+                     },
+                     %{unique_items: true, value: [1, "2", "3", :next, 1]},
+                     %{max_items: 3, value: [1, "2", "3", :next, 1]}
+                   ],
+                   d: [
+                     %{
+                       items: %{
+                         0 => %{type: :integer, value: "1"},
+                         2 => %{type: :string, value: 3},
+                         3 => %{additional_items: false}
+                       }
+                     },
+                     %{unique_items: true, value: ["1", 2, 3, 2]}
+                   ]
                  }
-               ]
+               }
              }
 
       got = %{

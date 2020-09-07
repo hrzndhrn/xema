@@ -1,6 +1,11 @@
-# Changelog
+0# Changelog
 
-## 0.12.0 - dev
+## 0.13.0 - 2020/09/07
+
++ Adding option `:fail` to `Xema.validate/3`. See also
+  ["Validate with option `:fail`"](examples.html#validate-with-option-fail)
+
+## 0.12.0 - 2020/08/26
 
 + Refactoring of the properties validation.
 

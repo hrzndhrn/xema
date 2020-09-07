@@ -449,12 +449,10 @@ iex> error.reason
 }}
 iex> {:error, error} = Xema.validate(schema, data, fail: :finally)
 iex> error.reason
-[
-  %{items: %{
-    1 => %{type: :integer, value: "a"},
-    2 => %{type: :integer, value: "b"}
-  }}
-]
+%{items: %{
+  1 => %{type: :integer, value: "a"},
+  2 => %{type: :integer, value: "b"}
+}}
 iex> # new data
 iex> data = [1, "a", "b", 4]
 iex> {:error, error} = Xema.validate(schema, data, fail: :immediately)

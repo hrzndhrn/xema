@@ -818,13 +818,16 @@ defmodule Xema.Validator do
           :ok ->
             :ok
 
-          {:error, reasons} ->
+          {:error, reasons} when is_list(reasons) ->
             properties =
               Enum.reduce(reasons, %{}, fn %{properties: properties}, acc ->
                 Map.merge(acc, properties)
               end)
 
             {:error, %{properties: properties}}
+
+          {:error, _} = error ->
+            error
         end
     end
   end
@@ -1068,8 +1071,9 @@ defmodule Xema.Validator do
     Enum.any?(patterns, fn regex -> Regex.match?(regex, pattern) end)
   end
 
-  defp collect(results) do
-    Enum.reduce(results, :ok, fn
+  defp collect(results) when is_list(results) do
+    results
+    |> Enum.reduce(:ok, fn
       :ok, :ok ->
         :ok
 
@@ -1082,7 +1086,14 @@ defmodule Xema.Validator do
       {:error, reason}, {:error, reasons} ->
         {:error, [reason | reasons]}
     end)
+    |> collect()
   end
+
+  defp collect(:ok), do: :ok
+
+  defp collect({:error, [reason]}), do: {:error, reason}
+
+  defp collect(errors), do: errors
 
   defp fail?(opts, cmp), do: Keyword.get(opts, :fail, :early) == cmp
 end
