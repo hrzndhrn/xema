@@ -9,7 +9,7 @@ defmodule Xema.RefRemoteTest do
   test "http server" do
     assert %{body: body} = HTTPoison.get!("http://localhost:1234/folder/folderInteger.exon")
 
-    assert body == File.read!("test/support/remote/folder/folderInteger.exon")
+    assert body == File.read!("test/fixtures/remote/folder/folderInteger.exon")
   end
 
   describe "invalid exon" do
