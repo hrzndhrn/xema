@@ -3,7 +3,7 @@ defmodule JsonSchemaTestSuite.Draft4.AllOfTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "allOf" do
+  describe ~s|allOf| do
     setup do
       %{
         schema:
@@ -14,29 +14,30 @@ defmodule JsonSchemaTestSuite.Draft4.AllOfTest do
                 %{"properties" => %{"foo" => %{"type" => "string"}}, "required" => ["foo"]}
               ]
             },
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "allOf", %{schema: schema} do
+    test ~s|allOf|, %{schema: schema} do
       assert valid?(schema, %{"bar" => 2, "foo" => "baz"})
     end
 
-    test "mismatch second", %{schema: schema} do
+    test ~s|mismatch second|, %{schema: schema} do
       refute valid?(schema, %{"foo" => "baz"})
     end
 
-    test "mismatch first", %{schema: schema} do
+    test ~s|mismatch first|, %{schema: schema} do
       refute valid?(schema, %{"bar" => 2})
     end
 
-    test "wrong type", %{schema: schema} do
+    test ~s|wrong type|, %{schema: schema} do
       refute valid?(schema, %{"bar" => "quux", "foo" => "baz"})
     end
   end
 
-  describe "allOf with base schema" do
+  describe ~s|allOf with base schema| do
     setup do
       %{
         schema:
@@ -49,121 +50,197 @@ defmodule JsonSchemaTestSuite.Draft4.AllOfTest do
               "properties" => %{"bar" => %{"type" => "integer"}},
               "required" => ["bar"]
             },
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "valid", %{schema: schema} do
+    test ~s|valid|, %{schema: schema} do
       assert valid?(schema, %{"bar" => 2, "baz" => nil, "foo" => "quux"})
     end
 
-    test "mismatch base schema", %{schema: schema} do
+    test ~s|mismatch base schema|, %{schema: schema} do
       refute valid?(schema, %{"baz" => nil, "foo" => "quux"})
     end
 
-    test "mismatch first allOf", %{schema: schema} do
+    test ~s|mismatch first allOf|, %{schema: schema} do
       refute valid?(schema, %{"bar" => 2, "baz" => nil})
     end
 
-    test "mismatch second allOf", %{schema: schema} do
+    test ~s|mismatch second allOf|, %{schema: schema} do
       refute valid?(schema, %{"bar" => 2, "foo" => "quux"})
     end
 
-    test "mismatch both", %{schema: schema} do
+    test ~s|mismatch both|, %{schema: schema} do
       refute valid?(schema, %{"bar" => 2})
     end
   end
 
-  describe "allOf simple types" do
+  describe ~s|allOf simple types| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"allOf" => [%{"maximum" => 30}, %{"minimum" => 20}]},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "valid", %{schema: schema} do
+    test ~s|valid|, %{schema: schema} do
       assert valid?(schema, 25)
     end
 
-    test "mismatch one", %{schema: schema} do
+    test ~s|mismatch one|, %{schema: schema} do
       refute valid?(schema, 35)
     end
   end
 
-  describe "allOf with one empty schema" do
+  describe ~s|allOf with one empty schema| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"allOf" => [%{}]},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "any data is valid", %{schema: schema} do
+    test ~s|any data is valid|, %{schema: schema} do
       assert valid?(schema, 1)
     end
   end
 
-  describe "allOf with two empty schemas" do
+  describe ~s|allOf with two empty schemas| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"allOf" => [%{}, %{}]},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "any data is valid", %{schema: schema} do
+    test ~s|any data is valid|, %{schema: schema} do
       assert valid?(schema, 1)
     end
   end
 
-  describe "allOf with the first empty schema" do
+  describe ~s|allOf with the first empty schema| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"allOf" => [%{}, %{"type" => "number"}]},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "number is valid", %{schema: schema} do
+    test ~s|number is valid|, %{schema: schema} do
       assert valid?(schema, 1)
     end
 
-    test "string is invalid", %{schema: schema} do
+    test ~s|string is invalid|, %{schema: schema} do
       refute valid?(schema, "foo")
     end
   end
 
-  describe "allOf with the last empty schema" do
+  describe ~s|allOf with the last empty schema| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"allOf" => [%{"type" => "number"}, %{}]},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "number is valid", %{schema: schema} do
+    test ~s|number is valid|, %{schema: schema} do
       assert valid?(schema, 1)
     end
 
-    test "string is invalid", %{schema: schema} do
+    test ~s|string is invalid|, %{schema: schema} do
       refute valid?(schema, "foo")
+    end
+  end
+
+  describe ~s|nested allOf, to check validation semantics| do
+    setup do
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"allOf" => [%{"allOf" => [%{"type" => "null"}]}]},
+            draft: "draft4",
+            atom: :force
+          )
+      }
+    end
+
+    test ~s|null is valid|, %{schema: schema} do
+      assert valid?(schema, nil)
+    end
+
+    test ~s|anything non-null is invalid|, %{schema: schema} do
+      refute valid?(schema, 123)
+    end
+  end
+
+  describe ~s|allOf combined with anyOf, oneOf| do
+    setup do
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{
+              "allOf" => [%{"multipleOf" => 2}],
+              "anyOf" => [%{"multipleOf" => 3}],
+              "oneOf" => [%{"multipleOf" => 5}]
+            },
+            draft: "draft4",
+            atom: :force
+          )
+      }
+    end
+
+    test ~s|allOf: false, anyOf: false, oneOf: false|, %{schema: schema} do
+      refute valid?(schema, 1)
+    end
+
+    test ~s|allOf: false, anyOf: false, oneOf: true|, %{schema: schema} do
+      refute valid?(schema, 5)
+    end
+
+    test ~s|allOf: false, anyOf: true, oneOf: false|, %{schema: schema} do
+      refute valid?(schema, 3)
+    end
+
+    test ~s|allOf: false, anyOf: true, oneOf: true|, %{schema: schema} do
+      refute valid?(schema, 15)
+    end
+
+    test ~s|allOf: true, anyOf: false, oneOf: false|, %{schema: schema} do
+      refute valid?(schema, 2)
+    end
+
+    test ~s|allOf: true, anyOf: false, oneOf: true|, %{schema: schema} do
+      refute valid?(schema, 10)
+    end
+
+    test ~s|allOf: true, anyOf: true, oneOf: false|, %{schema: schema} do
+      refute valid?(schema, 6)
+    end
+
+    test ~s|allOf: true, anyOf: true, oneOf: true|, %{schema: schema} do
+      assert valid?(schema, 30)
     end
   end
 end

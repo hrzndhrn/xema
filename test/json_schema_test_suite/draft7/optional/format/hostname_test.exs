@@ -3,37 +3,69 @@ defmodule JsonSchemaTestSuite.Draft7.Optional.Format.HostnameTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "validation of host names" do
+  describe ~s|validation of host names| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"format" => "hostname"},
-            draft: "draft7"
+            draft: "draft7",
+            atom: :force
           )
       }
     end
 
-    test "a valid host name", %{schema: schema} do
+    test ~s|a valid host name|, %{schema: schema} do
       assert valid?(schema, "www.example.com")
     end
 
-    test "a valid punycoded IDN hostname", %{schema: schema} do
+    test ~s|a valid punycoded IDN hostname|, %{schema: schema} do
       assert valid?(schema, "xn--4gbwdl.xn--wgbh1c")
     end
 
-    test "a host name starting with an illegal character", %{schema: schema} do
+    test ~s|a host name starting with an illegal character|, %{schema: schema} do
       refute valid?(schema, "-a-host-name-that-starts-with--")
     end
 
-    test "a host name containing illegal characters", %{schema: schema} do
+    test ~s|a host name containing illegal characters|, %{schema: schema} do
       refute valid?(schema, "not_a_valid_host_name")
     end
 
-    test "a host name with a component too long", %{schema: schema} do
+    test ~s|a host name with a component too long|, %{schema: schema} do
       refute valid?(
                schema,
                "a-vvvvvvvvvvvvvvvveeeeeeeeeeeeeeeerrrrrrrrrrrrrrrryyyyyyyyyyyyyyyy-long-host-name-component"
+             )
+    end
+
+    test ~s|starts with hyphen|, %{schema: schema} do
+      refute valid?(schema, "-hostname")
+    end
+
+    test ~s|ends with hyphen|, %{schema: schema} do
+      refute valid?(schema, "hostname-")
+    end
+
+    test ~s|starts with underscore|, %{schema: schema} do
+      refute valid?(schema, "_hostname")
+    end
+
+    test ~s|ends with underscore|, %{schema: schema} do
+      refute valid?(schema, "hostname_")
+    end
+
+    test ~s|contains underscore|, %{schema: schema} do
+      refute valid?(schema, "host_name")
+    end
+
+    test ~s|maximum label length|, %{schema: schema} do
+      assert valid?(schema, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com")
+    end
+
+    test ~s|exceeds maximum label length|, %{schema: schema} do
+      refute valid?(
+               schema,
+               "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl.com"
              )
     end
   end

@@ -178,7 +178,11 @@ defmodule Xema.Format do
     [\x01-\x09\x0b\x0c\x0e-\x7f])+)\])
   >ix
   @spec email?(String.t()) :: boolean
-  def email?(string) when is_binary(string), do: Regex.match?(@email, string)
+  def email?(string) when is_binary(string) do
+    !Regex.match?(~r/^\./, string) &&
+      !Regex.match?(~r/\.\./, string) &&
+      Regex.match?(@email, string)
+  end
 
   @doc """
   Checks if the `string` is a valid host representation.
@@ -217,7 +221,7 @@ defmodule Xema.Format do
     /xi
   @spec hostname?(String.t()) :: boolean
   def hostname?(string) when is_binary(string),
-    do: Regex.match?(@hostname, string)
+    do: !Regex.match?(~r/-$/, string) && Regex.match?(@hostname, string)
 
   @doc """
   Checks if the `string` is a valid IPv4 address representation.

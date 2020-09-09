@@ -242,13 +242,15 @@ defmodule Xema.Validator do
   defp type?(:tuple, value), do: is_tuple(value)
   defp type?(:keyword, value), do: Keyword.keyword?(value)
   defp type?(:number, value), do: is_number(value)
-  defp type?(:integer, value), do: is_integer(value)
+  defp type?(:integer, value), do: is_integer(value) || like_integer(value)
   defp type?(:float, value), do: is_float(value)
   defp type?(:map, value), do: is_map(value)
   defp type?(:list, value), do: is_list(value)
   defp type?(:struct, value), do: is_map(value) && struct?(value)
   defp type?(nil, nil), do: true
   defp type?(_, _), do: false
+
+  defp like_integer(value), do: is_float(value) && trunc(value) - value == 0
 
   @spec struct?(any) :: boolean
   defp struct?(%_{}), do: true

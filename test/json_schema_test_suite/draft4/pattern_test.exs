@@ -3,42 +3,64 @@ defmodule JsonSchemaTestSuite.Draft4.PatternTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "pattern validation" do
+  describe ~s|pattern validation| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"pattern" => "^a*$"},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "a matching pattern is valid", %{schema: schema} do
+    test ~s|a matching pattern is valid|, %{schema: schema} do
       assert valid?(schema, "aaa")
     end
 
-    test "a non-matching pattern is invalid", %{schema: schema} do
+    test ~s|a non-matching pattern is invalid|, %{schema: schema} do
       refute valid?(schema, "abc")
     end
 
-    test "ignores non-strings", %{schema: schema} do
+    test ~s|ignores booleans|, %{schema: schema} do
       assert valid?(schema, true)
+    end
+
+    test ~s|ignores integers|, %{schema: schema} do
+      assert valid?(schema, 123)
+    end
+
+    test ~s|ignores floats|, %{schema: schema} do
+      assert valid?(schema, 1.0)
+    end
+
+    test ~s|ignores objects|, %{schema: schema} do
+      assert valid?(schema, %{})
+    end
+
+    test ~s|ignores arrays|, %{schema: schema} do
+      assert valid?(schema, [])
+    end
+
+    test ~s|ignores null|, %{schema: schema} do
+      assert valid?(schema, nil)
     end
   end
 
-  describe "pattern is not anchored" do
+  describe ~s|pattern is not anchored| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"pattern" => "a+"},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "matches a substring", %{schema: schema} do
+    test ~s|matches a substring|, %{schema: schema} do
       assert valid?(schema, "xxaayy")
     end
   end

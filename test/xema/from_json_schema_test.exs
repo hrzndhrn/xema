@@ -60,5 +60,31 @@ defmodule Xema.FromJsonSchemaTest do
                  }
                }
     end
+
+    test "with an supported format value" do
+      json_schema =
+        """
+        {"format": "email"}
+        """
+        |> Jason.decode!()
+
+      assert Xema.from_json_schema(json_schema) == %Xema{
+               refs: %{},
+               schema: %Xema.Schema{format: :email}
+             }
+    end
+
+    test "with an unsupported format value" do
+      json_schema =
+        """
+        {"format": "unsupported"}
+        """
+        |> Jason.decode!()
+
+      assert Xema.from_json_schema(json_schema) == %Xema{
+               refs: %{},
+               schema: %Xema.Schema{format: :unsupported}
+             }
+    end
   end
 end

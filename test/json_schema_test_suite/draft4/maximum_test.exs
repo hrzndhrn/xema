@@ -3,78 +3,110 @@ defmodule JsonSchemaTestSuite.Draft4.MaximumTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "maximum validation" do
+  describe ~s|maximum validation| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"maximum" => 3.0},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "below the maximum is valid", %{schema: schema} do
+    test ~s|below the maximum is valid|, %{schema: schema} do
       assert valid?(schema, 2.6)
     end
 
-    test "boundary point is valid", %{schema: schema} do
+    test ~s|boundary point is valid|, %{schema: schema} do
       assert valid?(schema, 3.0)
     end
 
-    test "above the maximum is invalid", %{schema: schema} do
+    test ~s|above the maximum is invalid|, %{schema: schema} do
       refute valid?(schema, 3.5)
     end
 
-    test "ignores non-numbers", %{schema: schema} do
+    test ~s|ignores non-numbers|, %{schema: schema} do
       assert valid?(schema, "x")
     end
   end
 
-  describe "maximum validation (explicit false exclusivity)" do
+  describe ~s|maximum validation with unsigned integer| do
+    setup do
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"maximum" => 300},
+            draft: "draft4",
+            atom: :force
+          )
+      }
+    end
+
+    test ~s|below the maximum is invalid|, %{schema: schema} do
+      assert valid?(schema, 299.97)
+    end
+
+    test ~s|boundary point integer is valid|, %{schema: schema} do
+      assert valid?(schema, 300)
+    end
+
+    test ~s|boundary point float is valid|, %{schema: schema} do
+      assert valid?(schema, 300.0)
+    end
+
+    test ~s|above the maximum is invalid|, %{schema: schema} do
+      refute valid?(schema, 300.5)
+    end
+  end
+
+  describe ~s|maximum validation (explicit false exclusivity)| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"exclusiveMaximum" => false, "maximum" => 3.0},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "below the maximum is valid", %{schema: schema} do
+    test ~s|below the maximum is valid|, %{schema: schema} do
       assert valid?(schema, 2.6)
     end
 
-    test "boundary point is valid", %{schema: schema} do
+    test ~s|boundary point is valid|, %{schema: schema} do
       assert valid?(schema, 3.0)
     end
 
-    test "above the maximum is invalid", %{schema: schema} do
+    test ~s|above the maximum is invalid|, %{schema: schema} do
       refute valid?(schema, 3.5)
     end
 
-    test "ignores non-numbers", %{schema: schema} do
+    test ~s|ignores non-numbers|, %{schema: schema} do
       assert valid?(schema, "x")
     end
   end
 
-  describe "exclusiveMaximum validation" do
+  describe ~s|exclusiveMaximum validation| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"exclusiveMaximum" => true, "maximum" => 3.0},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "below the maximum is still valid", %{schema: schema} do
+    test ~s|below the maximum is still valid|, %{schema: schema} do
       assert valid?(schema, 2.2)
     end
 
-    test "boundary point is invalid", %{schema: schema} do
+    test ~s|boundary point is invalid|, %{schema: schema} do
       refute valid?(schema, 3.0)
     end
   end

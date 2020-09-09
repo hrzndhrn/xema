@@ -3,30 +3,31 @@ defmodule JsonSchemaTestSuite.Draft6.ExclusiveMaximumTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "exclusiveMaximum validation" do
+  describe ~s|exclusiveMaximum validation| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"exclusiveMaximum" => 3.0},
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
 
-    test "below the exclusiveMaximum is valid", %{schema: schema} do
+    test ~s|below the exclusiveMaximum is valid|, %{schema: schema} do
       assert valid?(schema, 2.2)
     end
 
-    test "boundary point is invalid", %{schema: schema} do
+    test ~s|boundary point is invalid|, %{schema: schema} do
       refute valid?(schema, 3.0)
     end
 
-    test "above the exclusiveMaximum is invalid", %{schema: schema} do
+    test ~s|above the exclusiveMaximum is invalid|, %{schema: schema} do
       refute valid?(schema, 3.5)
     end
 
-    test "ignores non-numbers", %{schema: schema} do
+    test ~s|ignores non-numbers|, %{schema: schema} do
       assert valid?(schema, "x")
     end
   end

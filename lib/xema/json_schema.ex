@@ -158,7 +158,12 @@ defmodule Xema.JsonSchema do
   defp rule({key, value}, opts), do: {to_existing_atom(key, opts), value}
 
   defp rule(:format, value, _) do
-    {:format, value |> ConvCase.to_snake_case() |> to_existing_atom()}
+    format = value |> ConvCase.to_snake_case() |> to_existing_atom(maybe: true)
+
+    case is_atom(format) do
+      true -> {:format, format}
+      false -> {:format, :unsupported}
+    end
   end
 
   defp rule(:dependencies, value, opts) do
@@ -196,8 +201,14 @@ defmodule Xema.JsonSchema do
     end
   rescue
     _ ->
-      reraise SchemaError,
-              "All additional schema keys must be existing atoms. Missing atom for #{str}",
-              __STACKTRACE__
+      case Keyword.get(opts, :maybe, false) do
+        true ->
+          str
+
+        false ->
+          reraise SchemaError,
+                  "All additional schema keys must be existing atoms. Missing atom for #{str}",
+                  __STACKTRACE__
+      end
   end
 end
