@@ -10,13 +10,16 @@ defmodule Mix.Tasks.Gen.TestSuite do
   @test_path "test/json_schema_test_suite"
   @template File.read!("test/support/test.eex")
   @exclude [
+    # Link to latest
+    "latest",
     # Unsupported JSON Schema versions
     "draft3",
-    "draft2019-08",
+    "draft2019-09",
     # Unsupported optional features
     "content.json",
     "ecmascript-regex.json",
     "zeroTerminatedFloats.json",
+    "non-bmp-regex.json",
     # Unsupported semantic formats
     "idn-email.json",
     "idn-hostname.json",
@@ -25,6 +28,9 @@ defmodule Mix.Tasks.Gen.TestSuite do
   ]
 
   @exclude_test_case [
+    # Unsupported semantic formats
+    "validation of IDN e-mail addresses",
+    "validation of IDN hostnames",
     # will be fixed soon
     "Location-independent identifier with absolute URI",
     "Location-independent identifier with base URI change in subschema"
@@ -83,10 +89,13 @@ defmodule Mix.Tasks.Gen.TestSuite do
 
   defp include?(file), do: not Enum.any?(@exclude, &String.ends_with?(file, &1))
 
-  defp read_json(file_name), do: {file_name, file_name |> File.read!() |> Jason.decode!()}
+  defp read_json(file_name) do
+    {file_name, file_name |> File.read!() |> Jason.decode!()}
+  end
 
-  defp create_tests({file_name, json}),
-    do: {test_file_name(file_name), test_code(file_name, json)}
+  defp create_tests({file_name, json}) do
+    {test_file_name(file_name), test_code(file_name, json)}
+  end
 
   defp test_file_name(file_name) do
     file_name

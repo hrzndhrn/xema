@@ -1,4 +1,8 @@
-0# Changelog
+# Changelog
+
+## 0.13.1 - 2020/09/09
+
++ Fixing minor issues.
 
 ## 0.13.0 - 2020/09/07
 

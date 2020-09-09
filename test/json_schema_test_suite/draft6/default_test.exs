@@ -3,27 +3,28 @@ defmodule JsonSchemaTestSuite.Draft6.DefaultTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "invalid type for default" do
+  describe ~s|invalid type for default| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"properties" => %{"foo" => %{"default" => [], "type" => "integer"}}},
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
 
-    test "valid when property is specified", %{schema: schema} do
+    test ~s|valid when property is specified|, %{schema: schema} do
       assert valid?(schema, %{"foo" => 13})
     end
 
-    test "still valid when the invalid default is used", %{schema: schema} do
+    test ~s|still valid when the invalid default is used|, %{schema: schema} do
       assert valid?(schema, %{})
     end
   end
 
-  describe "invalid string value for default" do
+  describe ~s|invalid string value for default| do
     setup do
       %{
         schema:
@@ -33,16 +34,17 @@ defmodule JsonSchemaTestSuite.Draft6.DefaultTest do
                 "bar" => %{"default" => "bad", "minLength" => 4, "type" => "string"}
               }
             },
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
 
-    test "valid when property is specified", %{schema: schema} do
+    test ~s|valid when property is specified|, %{schema: schema} do
       assert valid?(schema, %{"bar" => "good"})
     end
 
-    test "still valid when the invalid default is used", %{schema: schema} do
+    test ~s|still valid when the invalid default is used|, %{schema: schema} do
       assert valid?(schema, %{})
     end
   end

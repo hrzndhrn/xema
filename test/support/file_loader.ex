@@ -6,7 +6,7 @@ defmodule Test.FileLoader do
   @spec fetch(binary) :: {:ok, map} | {:error, any}
   def fetch(uri),
     do:
-      "test/support/remote"
+      "test/fixtures/remote"
       |> Path.join(uri.path)
       |> File.read!()
       |> eval(uri)

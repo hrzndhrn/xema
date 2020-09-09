@@ -3,42 +3,43 @@ defmodule JsonSchemaTestSuite.Draft7.Optional.Format.UriReferenceTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "validation of URI References" do
+  describe ~s|validation of URI References| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"format" => "uri-reference"},
-            draft: "draft7"
+            draft: "draft7",
+            atom: :force
           )
       }
     end
 
-    test "a valid URI", %{schema: schema} do
+    test ~s|a valid URI|, %{schema: schema} do
       assert valid?(schema, "http://foo.bar/?baz=qux#quux")
     end
 
-    test "a valid protocol-relative URI Reference", %{schema: schema} do
+    test ~s|a valid protocol-relative URI Reference|, %{schema: schema} do
       assert valid?(schema, "//foo.bar/?baz=qux#quux")
     end
 
-    test "a valid relative URI Reference", %{schema: schema} do
+    test ~s|a valid relative URI Reference|, %{schema: schema} do
       assert valid?(schema, "/abc")
     end
 
-    test "an invalid URI Reference", %{schema: schema} do
+    test ~s|an invalid URI Reference|, %{schema: schema} do
       refute valid?(schema, "\\\\WINDOWS\\fileshare")
     end
 
-    test "a valid URI Reference", %{schema: schema} do
+    test ~s|a valid URI Reference|, %{schema: schema} do
       assert valid?(schema, "abc")
     end
 
-    test "a valid URI fragment", %{schema: schema} do
+    test ~s|a valid URI fragment|, %{schema: schema} do
       assert valid?(schema, "#fragment")
     end
 
-    test "an invalid URI fragment", %{schema: schema} do
+    test ~s|an invalid URI fragment|, %{schema: schema} do
       refute valid?(schema, "#frag\\ment")
     end
   end

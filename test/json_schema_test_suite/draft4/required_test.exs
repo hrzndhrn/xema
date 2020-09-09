@@ -3,55 +3,57 @@ defmodule JsonSchemaTestSuite.Draft4.RequiredTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "required validation" do
+  describe ~s|required validation| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"properties" => %{"bar" => %{}, "foo" => %{}}, "required" => ["foo"]},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "present required property is valid", %{schema: schema} do
+    test ~s|present required property is valid|, %{schema: schema} do
       assert valid?(schema, %{"foo" => 1})
     end
 
-    test "non-present required property is invalid", %{schema: schema} do
+    test ~s|non-present required property is invalid|, %{schema: schema} do
       refute valid?(schema, %{"bar" => 1})
     end
 
-    test "ignores arrays", %{schema: schema} do
+    test ~s|ignores arrays|, %{schema: schema} do
       assert valid?(schema, [])
     end
 
-    test "ignores strings", %{schema: schema} do
+    test ~s|ignores strings|, %{schema: schema} do
       assert valid?(schema, "")
     end
 
-    test "ignores other non-objects", %{schema: schema} do
+    test ~s|ignores other non-objects|, %{schema: schema} do
       assert valid?(schema, 12)
     end
   end
 
-  describe "required default validation" do
+  describe ~s|required default validation| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"properties" => %{"foo" => %{}}},
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "not required by default", %{schema: schema} do
+    test ~s|not required by default|, %{schema: schema} do
       assert valid?(schema, %{})
     end
   end
 
-  describe "required with escaped characters" do
+  describe ~s|required with escaped characters| do
     setup do
       %{
         schema:
@@ -66,12 +68,13 @@ defmodule JsonSchemaTestSuite.Draft4.RequiredTest do
                 "foo\fbar"
               ]
             },
-            draft: "draft4"
+            draft: "draft4",
+            atom: :force
           )
       }
     end
 
-    test "object with all properties present is valid", %{schema: schema} do
+    test ~s|object with all properties present is valid|, %{schema: schema} do
       assert valid?(schema, %{
                "foo\tbar" => 1,
                "foo\nbar" => 1,
@@ -82,7 +85,7 @@ defmodule JsonSchemaTestSuite.Draft4.RequiredTest do
              })
     end
 
-    test "object with some properties missing is invalid", %{schema: schema} do
+    test ~s|object with some properties missing is invalid|, %{schema: schema} do
       refute valid?(schema, %{"foo\nbar" => "1", "foo\"bar" => "1"})
     end
   end

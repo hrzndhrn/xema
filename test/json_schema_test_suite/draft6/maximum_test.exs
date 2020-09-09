@@ -3,31 +3,61 @@ defmodule JsonSchemaTestSuite.Draft6.MaximumTest do
 
   import Xema, only: [valid?: 2]
 
-  describe "maximum validation" do
+  describe ~s|maximum validation| do
     setup do
       %{
         schema:
           Xema.from_json_schema(
             %{"maximum" => 3.0},
-            draft: "draft6"
+            draft: "draft6",
+            atom: :force
           )
       }
     end
 
-    test "below the maximum is valid", %{schema: schema} do
+    test ~s|below the maximum is valid|, %{schema: schema} do
       assert valid?(schema, 2.6)
     end
 
-    test "boundary point is valid", %{schema: schema} do
+    test ~s|boundary point is valid|, %{schema: schema} do
       assert valid?(schema, 3.0)
     end
 
-    test "above the maximum is invalid", %{schema: schema} do
+    test ~s|above the maximum is invalid|, %{schema: schema} do
       refute valid?(schema, 3.5)
     end
 
-    test "ignores non-numbers", %{schema: schema} do
+    test ~s|ignores non-numbers|, %{schema: schema} do
       assert valid?(schema, "x")
+    end
+  end
+
+  describe ~s|maximum validation with unsigned integer| do
+    setup do
+      %{
+        schema:
+          Xema.from_json_schema(
+            %{"maximum" => 300},
+            draft: "draft6",
+            atom: :force
+          )
+      }
+    end
+
+    test ~s|below the maximum is invalid|, %{schema: schema} do
+      assert valid?(schema, 299.97)
+    end
+
+    test ~s|boundary point integer is valid|, %{schema: schema} do
+      assert valid?(schema, 300)
+    end
+
+    test ~s|boundary point float is valid|, %{schema: schema} do
+      assert valid?(schema, 300.0)
+    end
+
+    test ~s|above the maximum is invalid|, %{schema: schema} do
+      refute valid?(schema, 300.5)
     end
   end
 end
