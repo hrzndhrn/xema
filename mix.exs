@@ -14,7 +14,6 @@ defmodule Xema.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env()),
       source_url: "https://github.com/hrzndhrn/xema",
       aliases: aliases(),
-      xref: [exclude: EEx],
 
       # Coveralls
       test_coverage: [tool: ExCoveralls],

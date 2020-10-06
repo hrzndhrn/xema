@@ -4,6 +4,7 @@
 
 + Fixing docs for `Xema.Builder.strux/1`.
 + Updating deps.
++ Fixing tests.
 
 ## 0.13.1 - 2020/09/09
 
