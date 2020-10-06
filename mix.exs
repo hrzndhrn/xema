@@ -4,7 +4,7 @@ defmodule Xema.Mixfile do
   def project do
     [
       app: :xema,
-      version: "0.13.1",
+      version: "0.13.2",
       elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -14,6 +14,7 @@ defmodule Xema.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env()),
       source_url: "https://github.com/hrzndhrn/xema",
       aliases: aliases(),
+      xref: [exclude: EEx],
 
       # Coveralls
       test_coverage: [tool: ExCoveralls],
@@ -64,7 +65,7 @@ defmodule Xema.Mixfile do
       {:conv_case, "~> 0.2.2"},
       {:cowboy, "== 2.7.0", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:decimal, "~> 1.7", optional: true},
+      {:decimal, "~> 2.0", optional: true},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:elixir_uuid, "~> 1.2", only: [:dev, :test]},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},

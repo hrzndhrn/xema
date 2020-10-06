@@ -50,14 +50,14 @@ defmodule Xema.Builder do
   def strux, do: :struct
 
   @doc """
-  Returns a tuple of `:stuct` and the given keyword list.
+  Returns a tuple of `:struct` and the given keyword list when the function gets
+  a keyword list.
+
+  Returns the tuple `{:struct, module: module}` when the function gets an atom.
   """
   @spec strux(keyword) :: {:struct, keyword}
   def strux(keywords) when is_list(keywords), do: {:struct, keywords}
 
-  @doc """
-  Returns the tuple `{:struct, module: module}`.
-  """
   @spec strux(atom) :: {:struct, module: module}
   def strux(module) when is_atom(module), do: strux(module: module)
 

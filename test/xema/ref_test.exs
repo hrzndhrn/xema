@@ -62,7 +62,7 @@ defmodule Xema.RefTest do
 
     test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
       ref = Ref.new("#")
-      assert schema = Ref.fetch!(ref, schema, nil)
+      assert Ref.fetch!(ref, schema, nil) == {schema, schema}
     end
 
     test "Ref.fetch!/3 returns nil for an invalid ref", %{schema: schema} do
@@ -92,7 +92,7 @@ defmodule Xema.RefTest do
 
     test "Ref.fetch!/3 returns schema for a valid ref", %{schema: schema} do
       ref = Ref.new("", URI.parse("http://foo.com"))
-      assert schema = Ref.fetch!(ref, schema, nil)
+      assert Ref.fetch!(ref, schema, nil) == {:root, schema}
     end
 
     test "Ref.fetch!/3 returns nil for an invalid ref", %{schema: schema} do

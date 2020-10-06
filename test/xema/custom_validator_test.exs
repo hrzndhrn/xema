@@ -142,7 +142,7 @@ defmodule Xema.CustomValidatorTest do
 
       assert {:error,
               %ValidationError{
-                reason: %{properties: %{to: %{value: to, module: NaiveDateTime}}}
+                reason: %{properties: %{to: %{value: ^to, module: NaiveDateTime}}}
               } = error} = Schemas.validate(:timespan, %{from: from, to: to})
 
       assert Exception.message(error) =~

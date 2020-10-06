@@ -144,7 +144,6 @@ defmodule Xema.Cast.ExampleTest do
     end
 
     test "validate/1" do
-      assert {:error, error} = Person.validate(6)
       assert {:error, error} = Person.validate(%{name: 42, age: -1, fav: :php})
 
       assert Exception.message(error) == """

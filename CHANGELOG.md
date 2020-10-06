@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.2 - 2020/10/06
+
++ Fixing docs for `Xema.Builder.strux/1`.
++ Updating deps.
+
 ## 0.13.1 - 2020/09/09
 
 + Fixing minor issues.
