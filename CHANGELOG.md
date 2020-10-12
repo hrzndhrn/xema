@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.3 - 2020/10/dev
+
++ Relaxing format validation for URIs.
+
 ## 0.13.2 - 2020/10/06
 
 + Fixing docs for `Xema.Builder.strux/1`.
