@@ -60,4 +60,20 @@ defmodule FormatTest do
                ~s|String "a(.*b" does not validate against format :regex.|
     end
   end
+
+  describe "fromat: :uri" do
+    test "returns true for a valid uri" do
+      schema = Xema.new(format: :uri)
+      assert Xema.valid?(schema, "http://foo.bar")
+    end
+
+    test "returns true for a valid uri with long sub-domain" do
+      schema = Xema.new(format: :uri)
+
+      assert Xema.valid?(
+               schema,
+               "http://abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcd.net"
+             )
+    end
+  end
 end
