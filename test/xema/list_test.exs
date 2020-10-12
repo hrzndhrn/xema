@@ -443,7 +443,12 @@ defmodule Xema.ListTest do
     end
 
     test "return error tuple for invalid data", %{schema: schema} do
-      assert Xema.validate(schema, ["a", 1]) == :ok
+      assert Xema.validate(schema, ["a", 1]) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: nil,
+                  reason: %{items: %{1 => %{type: :string, value: 1}}}
+                }}
     end
   end
 end
