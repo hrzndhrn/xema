@@ -1,8 +1,9 @@
 # Changelog
 
-## 0.13.3 - 2020/10/dev
+## 0.13.3 - 2020/10/12
 
 + Relaxing format validation for URIs.
++ Fixing keyword `:items`.
 
 ## 0.13.2 - 2020/10/06
 
