@@ -395,6 +395,8 @@ defmodule Xema do
   defp bool_or_schema(schema), do: schema(schema)
 
   @spec items(any) :: list
+  defp items(%Xema{schema: schema}), do: schema
+
   defp items(schema) when is_atom(schema) or is_tuple(schema),
     do: schema(schema)
 
@@ -411,7 +413,7 @@ defmodule Xema do
     end
   end
 
-  defp items(items), do: items
+  defp items(items), do: items |> IO.inspect(label: :foo)
 
   @spec schemas?(keyword) :: boolean
   defp schemas?(value),
