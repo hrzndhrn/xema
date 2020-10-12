@@ -413,8 +413,6 @@ defmodule Xema do
     end
   end
 
-  defp items(items), do: items
-
   @spec schemas?(keyword) :: boolean
   defp schemas?(value),
     do:
