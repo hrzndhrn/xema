@@ -374,14 +374,14 @@ defmodule Xema.Format do
 
   # credo:disable-for-next-line
   defp do_uri?(%URI{} = uri, :uri_template) do
-    (is_nil(uri.host) || host?(uri.host)) &&
+    (is_nil(uri.host) || uri_host?(uri.host)) &&
       (is_nil(uri.userinfo) || uri_userinfo?(uri.userinfo)) &&
       (is_nil(uri.path) || uri_template_path?(uri.path))
   end
 
   # credo:disable-for-next-line
   defp do_uri?(%URI{} = uri, _) do
-    (is_nil(uri.host) || host?(uri.host)) &&
+    (is_nil(uri.host) || uri_host?(uri.host)) &&
       (is_nil(uri.userinfo) || uri_userinfo?(uri.userinfo)) &&
       (is_nil(uri.path) || uri_path?(uri.path)) &&
       (is_nil(uri.query) || uri_query?(uri.query)) &&
@@ -482,4 +482,20 @@ defmodule Xema.Format do
   """
   @spec uri_fragment?(String.t()) :: boolean
   def uri_fragment?(string) when is_binary(string), do: uri_query?(string)
+
+  # The same as, `hostname?` with the exception that sub-domains are not restricted
+  # to 63 octets.
+  @uri_hostname ~r/
+      (?(DEFINE)
+        (?<sub_domain> (?:[a-z\d][-a-z\d]*) )
+      )
+      ^(?&sub_domain)(?:\.(?&sub_domain))*$
+    /xi
+  defp uri_hostname?(string) when is_binary(string),
+    do: !Regex.match?(~r/-$/, string) && Regex.match?(@uri_hostname, string)
+
+  # The same as, `host?` with the exception of using `uri_hostname?` instead of
+  # `hostname?`.
+  defp uri_host?(string) when is_binary(string),
+    do: ipv4?(string) || ipv6?(string) || uri_hostname?(string)
 end
