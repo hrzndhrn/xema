@@ -323,4 +323,22 @@ defmodule Xema.Cast.ListTest do
       assert_blame CastError, msg, fn -> cast!(schema, [[[1, "1"], ["foo", 2]], [{"3", 3}]]) end
     end
   end
+
+  describe "cast/2 with list items (Xema)" do
+    setup do
+      string = Xema.new(:string)
+
+      %{
+        schema: Xema.new({:list, items: string})
+      }
+    end
+
+    test "return ok tuple for strings", %{schema: schema} do
+      assert Xema.cast(schema, ["a", "b"]) == {:ok, ["a", "b"]}
+    end
+
+    test "return ok tuple for atoms", %{schema: schema} do
+      assert Xema.cast(schema, [:a, :b]) == {:ok, ["a", "b"]}
+    end
+  end
 end

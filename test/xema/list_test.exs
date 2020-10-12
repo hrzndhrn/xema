@@ -4,7 +4,7 @@ defmodule Xema.ListTest do
   import AssertBlame
   import Xema, only: [valid?: 2, validate: 2, validate!: 2]
 
-  alias Xema.ValidationError
+  alias Xema.{Schema, ValidationError}
 
   describe "'list' schema" do
     setup do
@@ -379,6 +379,16 @@ defmodule Xema.ListTest do
       }
     end
 
+    test "check xema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{},
+               schema: %Schema{
+                 contains: %Schema{minimum: 4},
+                 type: :list
+               }
+             }
+    end
+
     test "an element has a value of minium 4", %{schema: schema} do
       assert validate(schema, [2, 3, 4]) == :ok
     end
@@ -406,6 +416,39 @@ defmodule Xema.ListTest do
       """
 
       assert Exception.message(error) == message
+    end
+  end
+
+  describe "validate/2 with list items (Xema)" do
+    setup do
+      string = Xema.new(:string)
+
+      %{
+        schema: Xema.new({:list, items: string})
+      }
+    end
+
+    test "check xema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{},
+               schema: %Schema{
+                 items: %Schema{type: :string},
+                 type: :list
+               }
+             }
+    end
+
+    test "return ok for valid data", %{schema: schema} do
+      assert Xema.validate(schema, ["a", "b"]) == :ok
+    end
+
+    test "return error tuple for invalid data", %{schema: schema} do
+      assert Xema.validate(schema, ["a", 1]) ==
+               {:error,
+                %Xema.ValidationError{
+                  message: nil,
+                  reason: %{items: %{1 => %{type: :string, value: 1}}}
+                }}
     end
   end
 end
