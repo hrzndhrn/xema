@@ -413,7 +413,7 @@ defmodule Xema do
     end
   end
 
-  defp items(items), do: items |> IO.inspect(label: :foo)
+  defp items(items), do: items
 
   @spec schemas?(keyword) :: boolean
   defp schemas?(value),
