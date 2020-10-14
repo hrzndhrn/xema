@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.3 - 2020/10/14
+
++ Updating `decimal` dependency.
+
 ## 0.13.3 - 2020/10/12
 
 + Relaxing format validation for URIs.
