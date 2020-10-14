@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.13.3 - 2020/10/14
+## 0.13.4 - 2020/10/14
 
 + Updating `decimal` dependency.
 
