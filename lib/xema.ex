@@ -208,6 +208,7 @@ defmodule Xema do
   More examples can be found on page
   [Usage](https://hexdocs.pm/xema/usage.html#content).
   """
+  # TODO: Add @type schema :: ...
   @spec new(Schema.t() | Schema.type() | tuple | atom | keyword, keyword) :: __MODULE__.t()
   def new(data, opts)
 

@@ -25,7 +25,7 @@ defmodule Xema.Builder do
     ## Examples
 
         iex> Xema.Builder.#{fun}(key: 42)
-        {:#{fun}, [key: 42]}
+        {:#{fun}, key: 42}
     """
     @spec unquote(fun)() :: unquote(fun)
     def unquote(fun)() do
@@ -37,6 +37,21 @@ defmodule Xema.Builder do
       {unquote(fun), keywords}
     end
   end)
+
+  # TODO: add spec and doc
+  def any_of(type \\ :any, schemas) when type in @types and is_list(schemas) do
+    {type, any_of: schemas}
+  end
+
+  # TODO: add spec and doc
+  def all_of(type \\ :any, schemas) when type in @types and is_list(schemas) do
+    {type, all_of: schemas}
+  end
+
+  # TODO: add spec and doc
+  def one_of(type \\ :any, schemas) when type in @types and is_list(schemas) do
+    {type, one_of: schemas}
+  end
 
   @doc """
   Returns the tuple `{:ref, ref}`.
