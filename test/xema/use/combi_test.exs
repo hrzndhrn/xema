@@ -1,7 +1,9 @@
 defmodule Xema.Use.CombiTest do
   use ExUnit.Case, async: true
 
-  describe "any_of schema" do
+  alias Xema.Builder
+
+  describe "any_of schema:" do
     defmodule MySchema.Any do
       use Xema
 
@@ -24,7 +26,27 @@ defmodule Xema.Use.CombiTest do
     end
   end
 
-  describe "all_of schema" do
+  describe "any_of integer schema:" do
+    setup do
+      schema =
+        :integer
+        |> Builder.any_of([[minimum: 10], [maximum: 5]])
+        |> Xema.new()
+
+      %{schema: schema}
+    end
+
+    test "valid?/1 returns true", %{schema: schema} do
+      assert Xema.valid?(schema, 1)
+      assert Xema.valid?(schema, 11)
+    end
+
+    test "valid?/1 returns false", %{schema: schema} do
+      refute Xema.valid?(schema, 7)
+    end
+  end
+
+  describe "all_of schema:" do
     defmodule MySchema.All do
       use Xema
 
@@ -47,7 +69,28 @@ defmodule Xema.Use.CombiTest do
     end
   end
 
-  describe "one_of schema" do
+  describe "all_of integer schema:" do
+    setup do
+      schema =
+        :integer
+        |> Builder.all_of([[multiple_of: 2], [multiple_of: 3]])
+        |> Xema.new()
+
+      %{schema: schema}
+    end
+
+    test "valid?/1 returns true", %{schema: schema} do
+      assert Xema.valid?(schema, 6)
+      assert Xema.valid?(schema, 12)
+    end
+
+    test "valid?/1 returns false", %{schema: schema} do
+      refute Xema.valid?(schema, 8)
+      refute Xema.valid?(schema, 9)
+    end
+  end
+
+  describe "one_of schema:" do
     defmodule MySchema.One do
       use Xema
 
@@ -67,6 +110,27 @@ defmodule Xema.Use.CombiTest do
     test "valid?/1 returns false for an invalid list" do
       refute MySchema.One.valid?([10, 90])
       refute MySchema.One.valid?([40, 50])
+    end
+  end
+
+  describe "one_of integer schema:" do
+    setup do
+      schema =
+        :integer
+        |> Builder.one_of([[multiple_of: 2], [multiple_of: 3]])
+        |> Xema.new()
+
+      %{schema: schema}
+    end
+
+    test "valid?/1 returns true", %{schema: schema} do
+      assert Xema.valid?(schema, 8)
+      assert Xema.valid?(schema, 9)
+    end
+
+    test "valid?/1 returns false", %{schema: schema} do
+      refute Xema.valid?(schema, 6)
+      refute Xema.valid?(schema, 12)
     end
   end
 end
