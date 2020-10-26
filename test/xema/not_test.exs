@@ -98,7 +98,7 @@ defmodule Xema.NotTest do
           Xema.new({
             :map,
             properties: %{
-              foo: [not: {:string, min_length: 3}]
+              foo: [not: {:string, min_length: 4}]
             }
           })
       }
@@ -109,9 +109,32 @@ defmodule Xema.NotTest do
                Xema.new({
                  :map,
                  properties: %{
-                   foo: {:any, not: {:string, min_length: 3}}
+                   foo: {:any, not: {:string, min_length: 4}}
                  }
                })
+    end
+
+    test "validates strings", %{schema: schema} do
+      assert Xema.valid?(schema, %{foo: "abc"})
+      refute Xema.valid?(schema, %{foo: "abcdef"})
+    end
+
+    test "alternative schema", %{schema: schema} do
+      alt =
+        Xema.new({
+          :map,
+          properties: %{
+            foo: {:string, not: [min_length: 4]}
+          }
+        })
+
+      assert schema != alt
+
+      assert Xema.valid?(schema, %{foo: "abc"})
+      refute Xema.valid?(schema, %{foo: "abcdef"})
+
+      assert Xema.valid?(alt, %{foo: "abc"})
+      refute Xema.valid?(alt, %{foo: "abcdef"})
     end
   end
 end

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.5 - 2020/10/26
+
++ Adding `Xema.Builder.all_of/2`, `Xema.Builder.any_of/2` and
+  `Xema.Builder.one_of/2`
+
 ## 0.13.4 - 2020/10/14
 
 + Updating `decimal` dependency.

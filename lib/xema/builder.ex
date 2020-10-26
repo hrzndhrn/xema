@@ -1,6 +1,8 @@
 defmodule Xema.Builder do
   @moduledoc """
-  This module contains some convenience functions to generate schemas.
+  This module contains some convenience functions to generate schemas. Beside
+  the type-functions the module contains the combinator-functions `all_of/2`,
+  `any_of/2` and `one_of/2`.
 
   ## Examples
 
@@ -20,23 +22,137 @@ defmodule Xema.Builder do
   |> Enum.filter(fn x -> x not in [nil, true, false, :struct] end)
   |> Enum.each(fn fun ->
     @doc """
-    Returns a tuple of `:#{fun}` and the given keyword list.
-
-    ## Examples
-
-        iex> Xema.Builder.#{fun}(key: 42)
-        {:#{fun}, [key: 42]}
+    Returns :#{fun}.
     """
     @spec unquote(fun)() :: unquote(fun)
     def unquote(fun)() do
       unquote(fun)
     end
 
+    @doc """
+    Returns a tuple of `:#{fun}` and the given keyword list.
+
+    ## Examples
+
+        iex> Xema.Builder.#{fun}(key: 42)
+        {:#{fun}, key: 42}
+    """
     @spec unquote(fun)(keyword) :: {unquote(fun), keyword}
     def unquote(fun)(keywords) when is_list(keywords) do
       {unquote(fun), keywords}
     end
   end)
+
+  @doc """
+  Returns a tuple with the given `type` (default `:any`) and the given schemas
+  tagged by the keyword `:any_of`. This function provides a shortcut for
+  something like `integer(any_of: [...])` or `any(any_of: [...])`.
+
+  ## Examples
+
+      iex> Xema.Builder.any_of([:integer, :string])
+      {:any, any_of: [:integer, :string] }
+
+      iex> Xema.Builder.any_of(:integer, [[minimum: 10], [maximum: 5]])
+      {:integer, any_of: [[minimum: 10], [maximum: 5]]}
+
+  ```elixir
+  defmodule MySchema do
+    use Xema
+
+    xema do
+      any_of [
+        list(items: integer(minimum: 1, maximum: 66)),
+        list(items: integer(minimum: 33, maximum: 100))
+      ]
+    end
+  end
+
+  MySchema.valid?([20, 30]) #=> true
+  MySchema.valid?([40, 50]) #=> true
+  MySchema.valid?([60, 70]) #=> true
+  MySchema.valid?([10, 90]) #=> false
+  ```
+  """
+  @spec any_of(type, [schema]) :: {type, any_of: [schema]}
+        when type: Schema.type(), schema: Schema.t() | Schema.type() | tuple | atom | keyword
+  def any_of(type \\ :any, schemas) when type in @types and is_list(schemas) do
+    {type, any_of: schemas}
+  end
+
+  @doc """
+  Returns a tuple with the given `type` (default `:any`) and the given schemas
+  tagged by the keyword `:all_of`. This function provides a shortcut for
+  something like `integer(all_of: [...])` or `any(all_of: [...])`.
+
+  ## Examples
+
+      iex> Xema.Builder.all_of([:integer, :string])
+      {:any, all_of: [:integer, :string] }
+
+      iex> Xema.Builder.all_of(:integer, [[minimum: 10], [maximum: 5]])
+      {:integer, all_of: [[minimum: 10], [maximum: 5]]}
+
+  ```elixir
+  defmodule MySchema do
+    use Xema
+
+    xema do
+      all_of [
+        list(items: integer(minimum: 1, maximum: 66)),
+        list(items: integer(minimum: 33, maximum: 100))
+      ]
+    end
+  end
+
+  MySchema.valid?([20, 30]) #=> false
+  MySchema.valid?([40, 50]) #=> true
+  MySchema.valid?([60, 70]) #=> false
+  MySchema.valid?([10, 90]) #=> false
+  ```
+  """
+  @spec all_of(type, [schema]) :: {type, all_of: [schema]}
+        when type: Schema.type(), schema: Schema.t() | Schema.type() | tuple | atom | keyword
+  def all_of(type \\ :any, schemas) when type in @types and is_list(schemas) do
+    {type, all_of: schemas}
+  end
+
+  @doc """
+  Returns a tuple with the given `type` (default `:any`) and the given schemas
+  tagged by the keyword `:one_of`. This function provides a shortcut for
+  something like `integer(one_of: [...])` or `any(one_of: [...])`.
+
+  ## Examples
+
+      iex> Xema.Builder.one_of([:integer, :string])
+      {:any, one_of: [:integer, :string] }
+
+      iex> Xema.Builder.one_of(:integer, [[minimum: 10], [maximum: 5]])
+      {:integer, one_of: [[minimum: 10], [maximum: 5]]}
+
+  ```elixir
+  defmodule MySchema do
+    use Xema
+
+    xema do
+      one_of [
+        list(items: integer(minimum: 1, maximum: 66)),
+        list(items: integer(minimum: 33, maximum: 100))
+      ]
+    end
+  end
+
+  MySchema.valid?([20, 30]) #=> true
+  MySchema.valid?([40, 50]) #=> false
+  MySchema.valid?([60, 70]) #=> true
+  MySchema.valid?([10, 90]) #=> false
+  ```
+  """
+  @spec one_of(type, [schema]) :: {type, one_of: [schema]}
+        when type: Schema.type(), schema: Schema.t() | Schema.type() | tuple | atom | keyword
+  def one_of(type \\ :any, schemas) when type in @types and is_list(schemas) do
+    {type, one_of: schemas}
+  end
 
   @doc """
   Returns the tuple `{:ref, ref}`.
