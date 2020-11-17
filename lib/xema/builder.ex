@@ -473,9 +473,7 @@ defmodule Xema.Builder do
   def field(name, type, opts \\ [])
 
   def field(name, type, opts) do
-    name
-    |> check_field_type!(type)
-    |> case do
+    case check_field_type!(name, type) do
       {:xema, module} -> module.xema()
       {:module, module} -> {:struct, Keyword.put(opts, :module, module)}
       {:type, type} -> {type, opts}
