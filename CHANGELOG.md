@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.6 - 2020/12/23
+
++ Add `.formatter.ex` to package
+
 ## 0.13.5 - 2020/10/26
 
 + Adding `Xema.Builder.all_of/2`, `Xema.Builder.any_of/2` and

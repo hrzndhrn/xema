@@ -87,6 +87,7 @@ defmodule Xema.Mixfile do
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/hrzndhrn/xema"},
       files: [
+        ".formatter.exs",
         "lib",
         "mix.exs",
         "README*",
