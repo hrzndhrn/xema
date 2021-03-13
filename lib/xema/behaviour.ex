@@ -254,11 +254,11 @@ defmodule Xema.Behaviour do
     end)
   end
 
-  defp update_master_refs(%{schema: schema} = xema, refs),
-    do:
-      Map.update!(xema, :refs, fn value ->
-        Map.merge(value, get_schema_refs(schema, refs))
-      end)
+  defp update_master_refs(%{schema: schema} = xema, refs) do
+    Map.update!(xema, :refs, fn value ->
+      Map.merge(value, get_schema_refs(schema, refs))
+    end)
+  end
 
   defp update_remote_refs(%{refs: refs} = xema, refs_map) do
     refs =
@@ -277,11 +277,11 @@ defmodule Xema.Behaviour do
     end)
   end
 
-  defp get_schema_refs(schema, refs),
-    do:
-      Enum.into(refs, %{}, fn key ->
-        {key, Schema.fetch!(schema, key)}
-      end)
+  defp get_schema_refs(schema, refs) do
+    Enum.into(refs, %{}, fn key ->
+      {key, Schema.fetch!(schema, key)}
+    end)
+  end
 
   defp get_refs_map(refs, key, %{schema: schema}) do
     reduce(schema, refs, fn
