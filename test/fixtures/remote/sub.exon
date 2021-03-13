@@ -1,0 +1,12 @@
+[
+  ref: "#/definitions/self",
+  definitions: %{
+    self: {
+      :map,
+      properties: %{
+        a: :string,
+        b: {:ref, "#/definitions/self"}
+      }
+    }
+  }
+]
