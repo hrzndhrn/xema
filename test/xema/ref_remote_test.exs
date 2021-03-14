@@ -73,13 +73,21 @@ defmodule Xema.RefRemoteTest do
 
     test "check schema", %{schema: schema} do
       assert schema == %Xema{
-               refs: %{},
+               refs: %{
+                 "#/definitions/self" => %Schema{
+                   properties: %{
+                     a: %Schema{type: :string},
+                     b: %Schema{ref: %Ref{pointer: "#/definitions/self"}}
+                   },
+                   type: :map
+                 }
+               },
                schema: %Schema{
                  definitions: %{
                    self: %Schema{
                      properties: %{
                        a: %Schema{type: :string},
-                       b: %Schema{ref: %Xema.Ref{pointer: "#/definitions/self"}}
+                       b: %Schema{ref: %Ref{pointer: "#/definitions/self"}}
                      },
                      type: :map
                    }
@@ -87,6 +95,16 @@ defmodule Xema.RefRemoteTest do
                  ref: %Ref{pointer: "#/definitions/self"}
                }
              }
+    end
+
+    test "check with valid data", %{schema: schema} do
+      assert Xema.valid?(schema, %{a: "a"}) == true
+      assert Xema.valid?(schema, %{a: "a", b: %{a: "next"}}) == true
+    end
+
+    test "check with invalid data", %{schema: schema} do
+      assert Xema.valid?(schema, %{a: 1}) == false
+      assert Xema.valid?(schema, %{a: "a", b: %{a: :next}}) == false
     end
   end
 

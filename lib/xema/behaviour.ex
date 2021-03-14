@@ -174,7 +174,8 @@ defmodule Xema.Behaviour do
     schema = inline_refs(circulars, xema, nil, xema.schema)
 
     refs =
-      xema.refs
+      xema
+      |> refs()
       |> Enum.map(fn {ref, schema} = item ->
         case {ref in circulars, schema} do
           {false, _} ->
@@ -220,6 +221,16 @@ defmodule Xema.Behaviour do
         value
     end)
   end
+
+  defp refs(xema), do: Enum.into(do_refs(xema), %{})
+
+  defp do_refs(%{refs: refs}) do
+    Enum.flat_map(refs, fn {key, schema} ->
+      [{key, schema} | do_refs(schema)]
+    end)
+  end
+
+  defp do_refs(_schema), do: []
 
   defp update_master_ids(%{schema: schema} = xema) when not is_nil(schema) do
     Map.update!(xema, :refs, fn value ->
