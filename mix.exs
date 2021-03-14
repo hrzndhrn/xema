@@ -29,6 +29,7 @@ defmodule Xema.Mixfile do
 
       # Docs
       docs: [
+        main: "readme",
         extras: [
           "docs/readme.md",
           "docs/usage.md",
@@ -38,7 +39,9 @@ defmodule Xema.Mixfile do
           "docs/unsupported.md",
           "CHANGELOG.md"
         ],
-        main: "readme"
+        skip_undefined_reference_warnings_on: [
+          "CHANGELOG.md"
+        ]
       ],
 
       # Dialyzer

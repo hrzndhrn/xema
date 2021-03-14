@@ -72,7 +72,21 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "check schema", %{schema: schema} do
-      assert schema == :todo
+      assert schema == %Xema{
+               refs: %{},
+               schema: %Schema{
+                 definitions: %{
+                   self: %Schema{
+                     properties: %{
+                       a: %Schema{type: :string},
+                       b: %Schema{ref: %Xema.Ref{pointer: "#/definitions/self"}}
+                     },
+                     type: :map
+                   }
+                 },
+                 ref: %Ref{pointer: "#/definitions/self"}
+               }
+             }
     end
   end
 

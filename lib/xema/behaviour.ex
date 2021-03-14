@@ -165,9 +165,8 @@ defmodule Xema.Behaviour do
   end
 
   defp inline(xema) do
-    xema.refs
-    |> Map.keys()
-    |> Enum.filter(fn ref -> circular?(xema, ref) end)
+    xema
+    |> circulars()
     |> inline_refs(xema)
   end
 
@@ -446,6 +445,20 @@ defmodule Xema.Behaviour do
     do: Enum.map(list, fn v -> map(v, fun, id) end)
 
   defp map(value, _fun, _id), do: value
+
+  defp circulars(%{refs: refs} = xema) do
+    Enum.reduce(refs, [], fn {ref, schema}, acc ->
+      Enum.concat(
+        circulars(schema),
+        case circular?(xema, ref) do
+          true -> [ref | acc]
+          false -> acc
+        end
+      )
+    end)
+  end
+
+  defp circulars(_schema), do: []
 
   # Returns true if the `reference` builds up a circular reference.
   @spec circular?(struct(), String.t()) :: boolean
