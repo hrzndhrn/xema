@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.6 - 2021/03/14
+
++ Fix inlining
+
 ## 0.13.6 - 2020/12/23
 
 + Add `.formatter.ex` to package
