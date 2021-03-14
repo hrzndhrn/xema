@@ -165,9 +165,8 @@ defmodule Xema.Behaviour do
   end
 
   defp inline(xema) do
-    xema.refs
-    |> Map.keys()
-    |> Enum.filter(fn ref -> circular?(xema, ref) end)
+    xema
+    |> circulars()
     |> inline_refs(xema)
   end
 
@@ -175,7 +174,8 @@ defmodule Xema.Behaviour do
     schema = inline_refs(circulars, xema, nil, xema.schema)
 
     refs =
-      xema.refs
+      xema
+      |> refs()
       |> Enum.map(fn {ref, schema} = item ->
         case {ref in circulars, schema} do
           {false, _} ->
@@ -222,6 +222,16 @@ defmodule Xema.Behaviour do
     end)
   end
 
+  defp refs(xema), do: Enum.into(do_refs(xema), %{})
+
+  defp do_refs(%{refs: refs}) do
+    Enum.flat_map(refs, fn {key, schema} ->
+      [{key, schema} | do_refs(schema)]
+    end)
+  end
+
+  defp do_refs(_schema), do: []
+
   defp update_master_ids(%{schema: schema} = xema) when not is_nil(schema) do
     Map.update!(xema, :refs, fn value ->
       Map.merge(value, get_ids(schema))
@@ -254,11 +264,11 @@ defmodule Xema.Behaviour do
     end)
   end
 
-  defp update_master_refs(%{schema: schema} = xema, refs),
-    do:
-      Map.update!(xema, :refs, fn value ->
-        Map.merge(value, get_schema_refs(schema, refs))
-      end)
+  defp update_master_refs(%{schema: schema} = xema, refs) do
+    Map.update!(xema, :refs, fn value ->
+      Map.merge(value, get_schema_refs(schema, refs))
+    end)
+  end
 
   defp update_remote_refs(%{refs: refs} = xema, refs_map) do
     refs =
@@ -277,11 +287,11 @@ defmodule Xema.Behaviour do
     end)
   end
 
-  defp get_schema_refs(schema, refs),
-    do:
-      Enum.into(refs, %{}, fn key ->
-        {key, Schema.fetch!(schema, key)}
-      end)
+  defp get_schema_refs(schema, refs) do
+    Enum.into(refs, %{}, fn key ->
+      {key, Schema.fetch!(schema, key)}
+    end)
+  end
 
   defp get_refs_map(refs, key, %{schema: schema}) do
     reduce(schema, refs, fn
@@ -446,6 +456,20 @@ defmodule Xema.Behaviour do
     do: Enum.map(list, fn v -> map(v, fun, id) end)
 
   defp map(value, _fun, _id), do: value
+
+  defp circulars(%{refs: refs} = xema) do
+    Enum.reduce(refs, [], fn {ref, schema}, acc ->
+      Enum.concat(
+        circulars(schema),
+        case circular?(xema, ref) do
+          true -> [ref | acc]
+          false -> acc
+        end
+      )
+    end)
+  end
+
+  defp circulars(_schema), do: []
 
   # Returns true if the `reference` builds up a circular reference.
   @spec circular?(struct(), String.t()) :: boolean

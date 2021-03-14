@@ -4,7 +4,7 @@ defmodule Xema.Mixfile do
   def project do
     [
       app: :xema,
-      version: "0.13.6",
+      version: "0.13.7",
       elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -29,6 +29,7 @@ defmodule Xema.Mixfile do
 
       # Docs
       docs: [
+        main: "readme",
         extras: [
           "docs/readme.md",
           "docs/usage.md",
@@ -38,7 +39,9 @@ defmodule Xema.Mixfile do
           "docs/unsupported.md",
           "CHANGELOG.md"
         ],
-        main: "readme"
+        skip_undefined_reference_warnings_on: [
+          "CHANGELOG.md"
+        ]
       ],
 
       # Dialyzer
@@ -62,7 +65,7 @@ defmodule Xema.Mixfile do
     [
       {:benchee, "~> 1.0", only: :dev, runtime: false},
       {:conv_case, "~> 0.2.2"},
-      {:cowboy, "~> 2.8", only: :test},
+      {:cowboy, "~> 2.7.0", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:decimal, "~> 1.0 or ~> 2.0", optional: true},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
@@ -70,7 +73,7 @@ defmodule Xema.Mixfile do
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
       {:jason, "~> 1.1", only: [:dev, :test]},
-      {:httpoison, "~> 1.8", only: :test}
+      {:httpoison, "~> 1.6.0", only: :test}
     ]
   end
 

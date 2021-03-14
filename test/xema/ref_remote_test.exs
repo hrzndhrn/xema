@@ -66,6 +66,99 @@ defmodule Xema.RefRemoteTest do
     end
   end
 
+  describe "file circular ref in sub schema" do
+    setup do
+      %{schema: Xema.new({:ref, "main.exon"}, loader: FileLoader)}
+    end
+
+    test "check schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{
+                 "#/definitions/self" => %Schema{
+                   properties: %{
+                     a: %Schema{type: :string},
+                     b: %Schema{ref: %Ref{pointer: "#/definitions/self"}}
+                   },
+                   type: :map
+                 }
+               },
+               schema: %Schema{
+                 definitions: %{
+                   self: %Schema{
+                     properties: %{
+                       a: %Schema{type: :string},
+                       b: %Schema{ref: %Ref{pointer: "#/definitions/self"}}
+                     },
+                     type: :map
+                   }
+                 },
+                 ref: %Ref{pointer: "#/definitions/self"}
+               }
+             }
+    end
+
+    test "check with valid data", %{schema: schema} do
+      assert Xema.valid?(schema, %{a: "a"}) == true
+      assert Xema.valid?(schema, %{a: "a", b: %{a: "next"}}) == true
+    end
+
+    test "check with invalid data", %{schema: schema} do
+      assert Xema.valid?(schema, %{a: 1}) == false
+      assert Xema.valid?(schema, %{a: "a", b: %{a: :next}}) == false
+    end
+  end
+
+  describe "file circular ref in sub schema [inline: false]" do
+    setup do
+      %{schema: Xema.new({:ref, "main.exon"}, loader: FileLoader, inline: false)}
+    end
+
+    test "check schema", %{schema: schema} do
+      assert schema == %Xema{
+               refs: %{
+                 "main.exon" => %Xema{
+                   refs: %{},
+                   schema: %Schema{
+                     ref: %Ref{
+                       pointer: "sub.exon",
+                       uri: %URI{path: "sub.exon"}
+                     }
+                   }
+                 },
+                 "sub.exon" => %Xema{
+                   refs: %{
+                     "#/definitions/self" => %Schema{
+                       properties: %{
+                         a: %Schema{type: :string},
+                         b: %Schema{ref: %Ref{pointer: "#/definitions/self"}}
+                       },
+                       type: :map
+                     }
+                   },
+                   schema: %Schema{
+                     definitions: %{
+                       self: %Schema{
+                         properties: %{
+                           a: %Schema{type: :string},
+                           b: %Schema{ref: %Ref{pointer: "#/definitions/self"}}
+                         },
+                         type: :map
+                       }
+                     },
+                     ref: %Ref{pointer: "#/definitions/self"}
+                   }
+                 }
+               },
+               schema: %Schema{
+                 ref: %Ref{
+                   pointer: "main.exon",
+                   uri: %URI{path: "main.exon"}
+                 }
+               }
+             }
+    end
+  end
+
   describe "file ref" do
     setup do
       %{schema: Xema.new({:ref, "integer.exon"}, loader: FileLoader)}
