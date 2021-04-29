@@ -23,7 +23,8 @@ defmodule Xema.Schema do
   * `content_media_type` annotation for the media type.
   * `contains` validates a list whether any item is valid for the given schema.
   * `data` none schema data.
-  * `default` this keyword can be used to supply a default JSON value.
+  * `default` this keyword can be used to supply a default value for JSON and
+    `defstruct`.
   * `definitions` contains schemas for reuse.
   * `dependencies` allows the schema of the map to change based on the presence
     of certain special properties
