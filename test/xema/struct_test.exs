@@ -17,7 +17,7 @@ defmodule Xema.StructTest do
     use Xema
 
     xema do
-      field :foo_bar, [:list], default: []
+      field :foo_bar, :list, default: []
     end
   end
 
