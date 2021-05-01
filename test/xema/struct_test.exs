@@ -17,7 +17,10 @@ defmodule Xema.StructTest do
     use Xema
 
     xema do
-      field :foo_bar, :list, default: []
+      field :a, [:integer, nil]
+      field :b, :list, default: []
+      field :c, [:integer, nil], default: 1
+      field :d, [:integer, nil]
     end
   end
 
@@ -99,7 +102,12 @@ defmodule Xema.StructTest do
   describe "struct with default value" do
     test "list not nil" do
       baz = %Baz{}
-      assert baz.foo_bar == []
+      assert baz.a == nil
+      assert baz.b == []
+      assert baz.c == 1
+      assert baz.d == nil
+
+      assert Baz.valid?(baz)
     end
   end
 end

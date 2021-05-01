@@ -447,7 +447,7 @@ defmodule Xema.Builder do
 
   defp xema_field_name({:field, _context, [name | _]}) do
     quote do
-      unquote(name)
+      unquote({name, nil})
     end
   end
 

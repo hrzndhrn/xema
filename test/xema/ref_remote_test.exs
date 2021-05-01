@@ -24,12 +24,7 @@ defmodule Xema.RefRemoteTest do
     end
 
     test "syntax error" do
-      expected = """
-      http://localhost:1234/syntax-error.exon:2: \
-      keyword argument must be followed by space after: a:\
-      """
-
-      assert_raise SyntaxError, expected, fn ->
+      assert_raise SyntaxError, fn ->
         Xema.new({:ref, "http://localhost:1234/syntax-error.exon"}, loader: RemoteLoaderExon)
       end
     end
