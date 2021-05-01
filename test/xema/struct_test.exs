@@ -13,6 +13,14 @@ defmodule Xema.StructTest do
     defstruct [:foo]
   end
 
+  defmodule Baz do
+    use Xema
+
+    xema do
+      field :foo_bar, :list, default: []
+    end
+  end
+
   describe "empty struct schema" do
     setup do
       %{schema: Xema.new(:struct)}
@@ -85,6 +93,13 @@ defmodule Xema.StructTest do
              } = validate(schema, %Bar{})
 
       assert Exception.message(error) == "Expected Regex, got %Xema.StructTest.Bar{foo: nil}."
+    end
+  end
+
+  describe "struct with default value" do
+    test "list not nil" do
+      baz = %Baz{}
+      assert baz.foo_bar == []
     end
   end
 end

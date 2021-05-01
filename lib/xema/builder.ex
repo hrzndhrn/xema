@@ -437,6 +437,14 @@ defmodule Xema.Builder do
     end
   end
 
+  defp xema_field_name({:field, _context, [name, _type, opts]}) do
+    default = Keyword.get(opts, :default, nil)
+
+    quote do
+      unquote({name, default})
+    end
+  end
+
   defp xema_field_name({:field, _context, [name | _]}) do
     quote do
       unquote(name)
