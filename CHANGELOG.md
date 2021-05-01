@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.13.6 - 2021/03/14
+## 0.13.8 - 2021/05/01
+
++ Use the `:default` option to set `defstruct` default. Thanks to @garret-smith.
+
+## 0.13.7 - 2021/03/14
 
 + Fix inlining
 
