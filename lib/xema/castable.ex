@@ -59,6 +59,10 @@ defimpl Xema.Castable, for: BitString do
     _ -> {:error, %{to: Decimal, value: str}}
   end
 
+  def cast("true", :boolean, _module, _schema), do: {:ok, true}
+
+  def cast("false", :boolean, _module, _schema), do: {:ok, false}
+
   def cast(str, type, module, _schema) do
     case type do
       :atom ->
