@@ -51,8 +51,8 @@ defmodule Xema.Cast.BooleanTest do
     end
 
     test "from a string containing a boolean", %{schema: schema} do
-      assert cast!(schema, "true") == {:ok, true}
-      assert cast!(schema, "false") == {:ok, false}
+      assert cast!(schema, "true") == true
+      assert cast!(schema, "false") == false
     end
 
     test "from an invalid type", %{schema: schema} do
