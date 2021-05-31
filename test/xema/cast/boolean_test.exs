@@ -57,7 +57,7 @@ defmodule Xema.Cast.BooleanTest do
 
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
-        msg = "cannot cast #{inspect data} to :boolean"
+        msg = "cannot cast #{inspect(data)} to :boolean"
 
         assert_blame CastError, msg, fn -> cast!(schema, data) end
       end)
