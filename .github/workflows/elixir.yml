@@ -44,7 +44,7 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir_version }}
           otp-version: ${{ matrix.otp_version }}
-          experimental-otp: true
+          # experimental-otp: true
       - name: Restore deps and _build
         uses: actions/cache@v2
         with:
