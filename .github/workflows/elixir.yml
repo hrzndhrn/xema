@@ -44,7 +44,6 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir_version }}
           otp-version: ${{ matrix.otp_version }}
-          # experimental-otp: true
       - name: Restore deps and _build
         uses: actions/cache@v2
         with:
@@ -73,4 +72,4 @@ jobs:
       - name: Static code analysis
         run: |
           mix compile
-          mix dialyzer --halt-exit-status
+          mix dialyzer
