@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.9 - 2021/06/01
+
++ Fix: Cast to boolean not working as expected.
+
 ## 0.13.8 - 2021/05/01
 
 + Use the `:default` option to set `defstruct` default. Thanks to @garret-smith.

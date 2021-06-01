@@ -1,12 +1,12 @@
 defmodule Xema.Cast.BooleanTest do
   use ExUnit.Case, async: true
 
-  alias Xema.{CastError, ValidationError}
+  alias Xema.CastError
 
   import AssertBlame
-  import Xema, only: [cast: 2, cast!: 2, validate: 2]
+  import Xema, only: [cast: 2, cast!: 2]
 
-  @set [:foo, 1, 1.0, [42], [foo: 42], %{}, {:tuple}]
+  @set [:foo, 1, 1.0, [42], [foo: 42], %{}, {:tuple}, "foo"]
 
   describe "cast/2 with a minimal boolean schema" do
     setup do
@@ -20,14 +20,9 @@ defmodule Xema.Cast.BooleanTest do
       assert cast(schema, false) == {:ok, false}
     end
 
-    test "from a string", %{schema: schema} do
-      assert {:error,
-              %ValidationError{
-                reason: %{
-                  type: :boolean,
-                  value: "true"
-                }
-              }} = validate(schema, "true")
+    test "from a string containing a boolean", %{schema: schema} do
+      assert cast(schema, "true") == {:ok, true}
+      assert cast(schema, "false") == {:ok, false}
     end
 
     test "from an invalid type", %{schema: schema} do
@@ -43,7 +38,7 @@ defmodule Xema.Cast.BooleanTest do
     end
   end
 
-  describe "cast!/2 with a minimal integer schema" do
+  describe "cast!/2 with a minimal boolean schema" do
     setup do
       %{
         schema: Xema.new(:boolean)
@@ -55,17 +50,9 @@ defmodule Xema.Cast.BooleanTest do
       assert cast!(schema, false) == false
     end
 
-    test "from a string", %{schema: schema} do
-      data = "true"
-      msg = "cannot cast #{inspect(data)} to :boolean"
-
-      assert_blame CastError, msg, fn -> cast!(schema, data) end
-    end
-
-    test "from a type without protocol implementation", %{schema: schema} do
-      assert_raise(Protocol.UndefinedError, fn ->
-        cast!(schema, ~r/.*/)
-      end)
+    test "from a string containing a boolean", %{schema: schema} do
+      assert cast!(schema, "true") == true
+      assert cast!(schema, "false") == false
     end
 
     test "from an invalid type", %{schema: schema} do
@@ -74,6 +61,10 @@ defmodule Xema.Cast.BooleanTest do
 
         assert_blame CastError, msg, fn -> cast!(schema, data) end
       end)
+    end
+
+    test "from a type without protocol implementation", %{schema: schema} do
+      assert_raise Protocol.UndefinedError, fn -> cast!(schema, ~r/.*/) end
     end
   end
 end
