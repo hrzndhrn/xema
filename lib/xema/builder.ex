@@ -482,11 +482,30 @@ defmodule Xema.Builder do
 
   def field(name, type, opts) do
     case check_field_type!(name, type) do
-      {:xema, module} -> module.xema()
+      {:xema, module} -> allow(module.xema(), opts)
       {:module, module} -> {:struct, Keyword.put(opts, :module, module)}
       {:type, type} -> {type, opts}
     end
   end
+
+  defp allow(%Xema{schema: schema} = xema, opts) do
+    schema =
+      case Keyword.get(opts, :allow, :undefined) do
+        :undefined -> schema
+        value -> update_allow(schema, value)
+      end
+
+    %Xema{xema | schema: schema}
+  end
+
+  defp update_allow(schema, types) when is_list(types) do
+    Map.update!(schema, :type, fn
+      type when is_list(type) -> Enum.concat(type, types)
+      type -> [type | types]
+    end)
+  end
+
+  defp update_allow(schema, type), do: update_allow(schema, [type])
 
   defp check_field_type!(field, types) when is_list(types) do
     Enum.each(types, fn type -> check_field_type!(field, type) end)

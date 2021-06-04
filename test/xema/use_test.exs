@@ -515,4 +515,34 @@ defmodule Xema.UseTest do
       end
     end
   end
+
+  describe "allow nil property" do
+    defmodule AllowFoo do
+      use Xema
+
+      xema do
+        field :a, :integer, allow: nil
+      end
+    end
+
+    defmodule AllowBar do
+      use Xema
+
+      xema do
+        field :foo, AllowFoo, allow: nil
+      end
+    end
+
+    test "with a valid value struct" do
+      assert AllowBar.valid?(%AllowBar{foo: %AllowFoo{a: 5}}) == true
+    end
+
+    test "with an invalid value struct" do
+      assert AllowBar.valid?(%AllowBar{foo: %AllowFoo{a: "5"}}) == false
+    end
+
+    test "with nil instead of a struct" do
+      assert AllowBar.valid?(%AllowBar{}) == true
+    end
+  end
 end
