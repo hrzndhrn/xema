@@ -392,7 +392,13 @@ defmodule Xema.Builder do
     end
   end
 
-  defp xema_struct({:__block__, _context, data}) do
+  defp xema_struct({:field, _context, _args} = data), do: do_xema_struct([data])
+
+  defp xema_struct({:__block__, _context, data}), do: do_xema_struct(data)
+
+  defp xema_struct(data), do: data
+
+  defp do_xema_struct(data) do
     data =
       data
       |> Enum.group_by(fn
@@ -416,20 +422,6 @@ defmodule Xema.Builder do
        |> Keyword.merge(unquote(xema_required(data.required)))}
     end
   end
-
-  defp xema_struct({:field, _context, _args} = data) do
-    quote do
-      defstruct [unquote(xema_field_name(data))]
-
-      {:struct,
-       [
-         properties: Map.new([unquote(xema_field(data))]),
-         keys: :atoms
-       ]}
-    end
-  end
-
-  defp xema_struct(data), do: data
 
   defp xema_field({:field, _context, [name | _]} = field) do
     quote do
