@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.10 - 2021/06/05
+
++ Fix: Add types with option `:allow`.
+
 ## 0.13.9 - 2021/06/01
 
 + Fix: Cast to boolean not working as expected.
