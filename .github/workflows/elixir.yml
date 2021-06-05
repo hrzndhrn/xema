@@ -59,7 +59,7 @@ jobs:
       - name: Get and compile dependencies
         run: |
           mix deps.get
-          mix deps.compile
+          MIX_ENV=test mix deps.compile
       - name: Compile project
         run: MIX_ENV=test mix compile --warnings-as-errors
       - name: Check code format
