@@ -515,4 +515,146 @@ defmodule Xema.UseTest do
       end
     end
   end
+
+  describe "allow nil property" do
+    defmodule AllowFoo do
+      use Xema
+
+      xema do
+        field :a, :integer, allow: nil
+      end
+    end
+
+    defmodule AllowBar do
+      use Xema
+
+      xema do
+        field :foo, AllowFoo, allow: nil
+      end
+    end
+
+    test "with a valid value struct" do
+      assert AllowBar.valid?(%AllowBar{foo: %AllowFoo{a: 5}}) == true
+    end
+
+    test "with an invalid value struct" do
+      assert AllowBar.valid?(%AllowBar{foo: %AllowFoo{a: "5"}}) == false
+    end
+
+    test "with nil instead of a struct" do
+      assert AllowBar.valid?(%AllowBar{}) == true
+    end
+  end
+
+  describe "allow multiple types to extend struct" do
+    defmodule AllowMultiFoo do
+      use Xema
+
+      xema do
+        field :a, :integer
+      end
+    end
+
+    defmodule AllowMultiBar do
+      use Xema
+
+      xema do
+        field :foo, AllowMultiFoo, allow: [:integer, nil]
+      end
+    end
+
+    test "with a valid value struct" do
+      assert AllowMultiBar.valid?(%AllowMultiBar{foo: %AllowMultiFoo{a: 5}}) == true
+    end
+
+    test "with a valid integer" do
+      assert AllowMultiBar.valid?(%AllowMultiBar{foo: 5}) == true
+    end
+
+    test "with a valid nil" do
+      assert AllowMultiBar.valid?(%AllowMultiBar{}) == true
+    end
+
+    test "with an invalid value" do
+      assert AllowMultiBar.valid?(%AllowMultiBar{foo: :foo}) == false
+    end
+  end
+
+  describe "allow multiple types to extend basic type" do
+    defmodule AllowMulti do
+      use Xema
+
+      xema do
+        field :a, :integer, allow: [:string, :boolean]
+      end
+    end
+
+    test "with a valid integer value" do
+      assert AllowMulti.valid?(%AllowMulti{a: 5}) == true
+    end
+
+    test "with a valid string value" do
+      assert AllowMulti.valid?(%AllowMulti{a: "5"}) == true
+    end
+
+    test "with a valid boolean value" do
+      assert AllowMulti.valid?(%AllowMulti{a: false}) == true
+    end
+
+    test "with an invalid value" do
+      assert AllowMulti.valid?(%AllowMulti{a: :foo}) == false
+    end
+  end
+
+  describe "allow type to extend multiple types" do
+    defmodule AllowToMulti do
+      use Xema
+
+      xema do
+        field :a, [:integer, :boolean], allow: :string
+      end
+    end
+
+    test "with a valid integer value" do
+      assert AllowToMulti.valid?(%AllowToMulti{a: 5}) == true
+    end
+
+    test "with a valid string value" do
+      assert AllowToMulti.valid?(%AllowToMulti{a: "5"}) == true
+    end
+
+    test "with a valid boolean value" do
+      assert AllowToMulti.valid?(%AllowToMulti{a: false}) == true
+    end
+
+    test "with an invalid value" do
+      assert AllowToMulti.valid?(%AllowToMulti{a: :foo}) == false
+    end
+  end
+
+  describe "allow multiple types to extend multiple types" do
+    defmodule AllowMultiMulti do
+      use Xema
+
+      xema do
+        field :a, [:integer], allow: [:string, :boolean]
+      end
+    end
+
+    test "with a valid integer value" do
+      assert AllowMultiMulti.valid?(%AllowMultiMulti{a: 5}) == true
+    end
+
+    test "with a valid string value" do
+      assert AllowMultiMulti.valid?(%AllowMultiMulti{a: "5"}) == true
+    end
+
+    test "with a valid boolean value" do
+      assert AllowMultiMulti.valid?(%AllowMultiMulti{a: false}) == true
+    end
+
+    test "with an invalid value" do
+      assert AllowMultiMulti.valid?(%AllowMultiMulti{a: :foo}) == false
+    end
+  end
 end

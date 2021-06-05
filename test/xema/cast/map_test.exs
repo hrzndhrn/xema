@@ -53,6 +53,10 @@ defmodule Xema.Cast.MapTest do
       assert cast(schema, foo: 6) == {:ok, %{foo: 6}}
     end
 
+    test "from an empty list", %{schema: schema} do
+      assert cast(schema, []) == {:ok, %{}}
+    end
+
     test "from an invalid type", %{schema: schema} do
       Enum.each(@set, fn data ->
         expected = {:error, CastError.exception(path: [], to: :map, value: data)}

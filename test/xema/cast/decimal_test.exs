@@ -5,7 +5,7 @@ defmodule Xema.Cast.DecimalTest do
 
   import Xema, only: [cast: 2, cast!: 2]
 
-  @set [:foo, [42], {:tuple}]
+  @set [:foo, [42], [], {:tuple}]
 
   describe "cast/2 with a time schema" do
     setup do
@@ -99,6 +99,30 @@ defmodule Xema.Cast.DecimalTest do
       Enum.each(@set, fn data ->
         assert_raise CastError, fn -> cast!(schema, data) end
       end)
+    end
+  end
+
+  describe "cast/2 without a decimail schema" do
+    test "raises an error for a naive date-time schema" do
+      schema = Xema.new({:struct, module: Regex})
+      assert {:error, error} = cast(schema, Decimal.from_float(1.1))
+
+      assert error == %Xema.CastError{
+               path: [],
+               to: Regex,
+               value: Decimal.from_float(1.1)
+             }
+    end
+
+    test "raises an error for an integer schema" do
+      schema = Xema.new(:integer)
+      assert {:error, error} = cast(schema, Decimal.from_float(1.1))
+
+      assert error == %Xema.CastError{
+               path: [],
+               to: :integer,
+               value: Decimal.from_float(1.1)
+             }
     end
   end
 end

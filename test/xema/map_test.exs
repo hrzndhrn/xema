@@ -616,6 +616,48 @@ defmodule Xema.MapTest do
     end
   end
 
+  describe "string key map schema with dependencies property: " do
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :map,
+            properties: %{
+              "a" => :number,
+              "b" => :number,
+              "c" => :number
+            },
+            dependencies: %{
+              "b" => "c"
+            }
+          })
+      }
+    end
+
+    test "validate/2 without dependency", %{schema: schema} do
+      assert validate(schema, %{"a" => 1}) == :ok
+      assert valid?(schema, %{"a" => "a"}) == false
+    end
+
+    test "validate/2 with dependency", %{schema: schema} do
+      assert validate(schema, %{"a" => 1, "b" => 2, "c" => 3}) == :ok
+    end
+
+    test "validate/2 with missing dependency", %{schema: schema} do
+      {:error,
+       %ValidationError{
+         reason: %{
+           dependencies: %{
+             "b" => "c"
+           }
+         }
+       } = error} = validate(schema, %{"a" => 1, "b" => 2})
+
+      assert Exception.message(error) ==
+               ~s|Dependencies for "b" failed. Missing required key "c".|
+    end
+  end
+
   describe "map schema with dependencies list" do
     setup do
       %{

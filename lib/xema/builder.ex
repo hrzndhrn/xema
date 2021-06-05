@@ -392,7 +392,13 @@ defmodule Xema.Builder do
     end
   end
 
-  defp xema_struct({:__block__, _context, data}) do
+  defp xema_struct({:field, _context, _args} = data), do: do_xema_struct([data])
+
+  defp xema_struct({:__block__, _context, data}), do: do_xema_struct(data)
+
+  defp xema_struct(data), do: data
+
+  defp do_xema_struct(data) do
     data =
       data
       |> Enum.group_by(fn
@@ -416,20 +422,6 @@ defmodule Xema.Builder do
        |> Keyword.merge(unquote(xema_required(data.required)))}
     end
   end
-
-  defp xema_struct({:field, _context, _args} = data) do
-    quote do
-      defstruct [unquote(xema_field_name(data))]
-
-      {:struct,
-       [
-         properties: Map.new([unquote(xema_field(data))]),
-         keys: :atoms
-       ]}
-    end
-  end
-
-  defp xema_struct(data), do: data
 
   defp xema_field({:field, _context, [name | _]} = field) do
     quote do
@@ -476,17 +468,55 @@ defmodule Xema.Builder do
 
   For more examples see "[Examples: Struct](examples.html#struct)".
   """
-  @spec field(atom, Schema.type() | module, keyword) ::
-          {:xema, Xema.t()} | {:module, module} | {:type, atom}
-  def field(name, type, opts \\ [])
-
-  def field(name, type, opts) do
+  @spec field(atom, Schema.type() | module, keyword) :: {atom() | [atom()], keyword()}
+  def field(name, type, opts \\ []) do
     case check_field_type!(name, type) do
-      {:xema, module} -> module.xema()
-      {:module, module} -> {:struct, Keyword.put(opts, :module, module)}
-      {:type, type} -> {type, opts}
+      {:xema, module} ->
+        allow(module.xema(), opts)
+
+      {:module, module} ->
+        allow(:struct, Keyword.put(opts, :module, module))
+
+      {:type, type} ->
+        allow(type, opts)
     end
   end
+
+  defp allow(type, opts) when is_atom(type) do
+    case Keyword.has_key?(opts, :allow) do
+      true -> allow([type], opts)
+      false -> {type, opts}
+    end
+  end
+
+  defp allow(types, opts) when is_list(types) do
+    case Keyword.pop(opts, :allow, :undefined) do
+      {:undefined, opts} ->
+        {types, opts}
+
+      {value, opts} when is_list(value) ->
+        {Enum.concat(types, value), opts}
+
+      {value, opts} ->
+        {[value | types], opts}
+    end
+  end
+
+  defp allow(%Xema{schema: schema} = xema, opts) do
+    schema =
+      case Keyword.get(opts, :allow, :undefined) do
+        :undefined -> schema
+        value -> update_allow(schema, value)
+      end
+
+    %Xema{xema | schema: schema}
+  end
+
+  defp update_allow(schema, types) when is_list(types) do
+    Map.update!(schema, :type, fn type -> [type | types] end)
+  end
+
+  defp update_allow(schema, type), do: update_allow(schema, [type])
 
   defp check_field_type!(field, types) when is_list(types) do
     Enum.each(types, fn type -> check_field_type!(field, type) end)
