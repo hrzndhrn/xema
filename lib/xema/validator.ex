@@ -96,9 +96,6 @@ defmodule Xema.Validator do
          do: :ok
   end
 
-  defp do_validate(%{schema: schema}, value, opts),
-    do: do_validate(schema, value, opts)
-
   defp validate_by(:default, schema, value, opts) do
     with :ok <- enum(schema, value),
          :ok <- not_(schema, value, opts),

@@ -117,4 +117,28 @@ defmodule Xema.Cast.DateTimeTest do
       assert_raise CastError, fn -> cast!(schema, %{}) end
     end
   end
+
+  describe "cast/2 without a date-time schema" do
+    test "raises an error for a naive date-time schema" do
+      schema = Xema.new({:struct, module: Regex})
+      assert {:error, error} = cast(schema, ~U[2021-06-05 15:07:58Z])
+
+      assert error == %Xema.CastError{
+               path: [],
+               to: Regex,
+               value: ~U[2021-06-05 15:07:58Z]
+             }
+    end
+
+    test "raises an error for an integer schema" do
+      schema = Xema.new(:integer)
+      assert {:error, error} = cast(schema, ~U[2021-06-05 15:07:58Z])
+
+      assert error == %Xema.CastError{
+               path: [],
+               to: :integer,
+               value: ~U[2021-06-05 15:07:58Z]
+             }
+    end
+  end
 end

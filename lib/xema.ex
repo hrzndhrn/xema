@@ -367,27 +367,27 @@ defmodule Xema do
   defp schemas(map) when is_map(map), do: map_values(map, &schema/1)
 
   @spec dependencies(map) :: map
-  defp dependencies(map),
-    do:
-      Enum.into(map, %{}, fn
-        {key, dep} when is_list(dep) ->
-          case Keyword.keyword?(dep) do
-            true -> {key, schema(dep)}
-            false -> {key, dep}
-          end
+  defp dependencies(map) do
+    Enum.into(map, %{}, fn
+      {key, dep} when is_list(dep) ->
+        case Keyword.keyword?(dep) do
+          true -> {key, schema(dep)}
+          false -> {key, dep}
+        end
 
-        {key, dep} when is_boolean(dep) ->
-          {key, schema(dep)}
+      {key, dep} when is_boolean(dep) ->
+        {key, schema(dep)}
 
-        {key, dep} when is_atom(dep) ->
-          {key, [dep]}
+      {key, dep} when is_atom(dep) ->
+        {key, [dep]}
 
-        {key, dep} when is_binary(dep) ->
-          {key, [dep]}
+      {key, dep} when is_binary(dep) ->
+        {key, [dep]}
 
-        {key, dep} ->
-          {key, schema(dep)}
-      end)
+      {key, dep} ->
+        {key, schema(dep)}
+    end)
+  end
 
   @spec bool_or_schema(boolean | atom) :: boolean | Schema.t()
   defp bool_or_schema(bool) when is_boolean(bool), do: bool
@@ -424,6 +424,12 @@ defmodule Xema do
     case Keyword.pop(keywords, :allow, :undefined) do
       {:undefined, keywords} ->
         keywords
+
+      {value, keywords} when is_list(value) ->
+        Keyword.update!(keywords, :type, fn
+          types when is_list(types) -> Enum.concat(value, types)
+          type -> [type | value]
+        end)
 
       {value, keywords} ->
         Keyword.update!(keywords, :type, fn

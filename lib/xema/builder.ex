@@ -468,15 +468,37 @@ defmodule Xema.Builder do
 
   For more examples see "[Examples: Struct](examples.html#struct)".
   """
-  @spec field(atom, Schema.type() | module, keyword) ::
-          {:xema, Xema.t()} | {:module, module} | {:type, atom}
-  def field(name, type, opts \\ [])
-
-  def field(name, type, opts) do
+  @spec field(atom, Schema.type() | module, keyword) :: {atom() | [atom()], keyword()}
+  def field(name, type, opts \\ []) do
     case check_field_type!(name, type) do
-      {:xema, module} -> allow(module.xema(), opts)
-      {:module, module} -> {:struct, Keyword.put(opts, :module, module)}
-      {:type, type} -> {type, opts}
+      {:xema, module} ->
+        allow(module.xema(), opts)
+
+      {:module, module} ->
+        allow(:struct, Keyword.put(opts, :module, module))
+
+      {:type, type} ->
+        allow(type, opts)
+    end
+  end
+
+  defp allow(type, opts) when is_atom(type) do
+    case Keyword.has_key?(opts, :allow) do
+      true -> allow([type], opts)
+      false -> {type, opts}
+    end
+  end
+
+  defp allow(types, opts) when is_list(types) do
+    case Keyword.pop(opts, :allow, :undefined) do
+      {:undefined, opts} ->
+        {types, opts}
+
+      {value, opts} when is_list(value) ->
+        {Enum.concat(types, value), opts}
+
+      {value, opts} ->
+        {[value | types], opts}
     end
   end
 
@@ -491,10 +513,7 @@ defmodule Xema.Builder do
   end
 
   defp update_allow(schema, types) when is_list(types) do
-    Map.update!(schema, :type, fn
-      type when is_list(type) -> Enum.concat(type, types)
-      type -> [type | types]
-    end)
+    Map.update!(schema, :type, fn type -> [type | types] end)
   end
 
   defp update_allow(schema, type), do: update_allow(schema, [type])

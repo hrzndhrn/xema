@@ -90,4 +90,87 @@ defmodule Xema.MultiTypeTest do
       assert Exception.message(error) == "Expected [:string, nil], got 42."
     end
   end
+
+  describe "keyword allow: with multiple types" do
+    setup do
+      %{schema: Xema.new({[:string, :boolean], allow: nil})}
+    end
+
+    test "with a string", %{schema: schema} do
+      assert validate(schema, "string") == :ok
+    end
+
+    test "with a boolean value", %{schema: schema} do
+      assert validate(schema, true) == :ok
+    end
+
+    test "with nil", %{schema: schema} do
+      assert validate(schema, nil) == :ok
+    end
+
+    test "with a number", %{schema: schema} do
+      assert {
+               :error,
+               %ValidationError{
+                 reason: %{type: [nil, :string, :boolean], value: 42}
+               } = error
+             } = validate(schema, 42)
+
+      assert Exception.message(error) == "Expected [nil, :string, :boolean], got 42."
+    end
+  end
+
+  describe "keyword allow: list" do
+    setup do
+      %{schema: Xema.new({:string, allow: [nil]})}
+    end
+
+    test "with a string", %{schema: schema} do
+      assert validate(schema, "string") == :ok
+    end
+
+    test "with nil", %{schema: schema} do
+      assert validate(schema, nil) == :ok
+    end
+
+    test "with a number", %{schema: schema} do
+      assert {
+               :error,
+               %ValidationError{
+                 reason: %{type: [:string, nil], value: 42}
+               } = error
+             } = validate(schema, 42)
+
+      assert Exception.message(error) == "Expected [:string, nil], got 42."
+    end
+  end
+
+  describe "keyword allow: list with multiple types" do
+    setup do
+      %{schema: Xema.new({[:string, :boolean], allow: [nil]})}
+    end
+
+    test "with a string", %{schema: schema} do
+      assert validate(schema, "string") == :ok
+    end
+
+    test "with a boolean value", %{schema: schema} do
+      assert validate(schema, true) == :ok
+    end
+
+    test "with nil", %{schema: schema} do
+      assert validate(schema, nil) == :ok
+    end
+
+    test "with a number", %{schema: schema} do
+      assert {
+               :error,
+               %ValidationError{
+                 reason: %{type: [nil, :string, :boolean], value: 42}
+               } = error
+             } = validate(schema, 42)
+
+      assert Exception.message(error) == "Expected [nil, :string, :boolean], got 42."
+    end
+  end
 end
