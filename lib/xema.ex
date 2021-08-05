@@ -1084,7 +1084,6 @@ defmodule Xema do
     schemas
     |> Enum.reverse()
     |> Enum.reduce({nil, []}, fn schema, {result, errors} ->
-      # TODO case do_cast(schema, data, opts, []) do
       case cast(schema, data, opts) do
         {:ok, cast} ->
           {cast, errors}
