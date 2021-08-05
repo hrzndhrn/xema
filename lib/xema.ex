@@ -1134,7 +1134,6 @@ defmodule Xema do
     end
   end
 
-  @spec get_combiner(Schema.t()) :: [Schema.t()]
   defp get_combiner(%Schema{} = schema) do
     cond do
       schema.any_of != nil -> {:any, schema.any_of}
