@@ -69,7 +69,7 @@ defmodule Xema.Cast.AnyOfTest do
     end
 
     test "from a map", %{schema: schema} do
-      assert cast(schema, %{a: 1, b: "2"}) == {:ok, %{a: "1", b: 2}}
+      assert cast(schema, %{a: 1, b: "2"}) == {:ok, %{a: "1", b: "2"}}
     end
 
     test "from a map with an invalid value", %{schema: schema} do
@@ -77,7 +77,7 @@ defmodule Xema.Cast.AnyOfTest do
     end
 
     test "from a keyword list", %{schema: schema} do
-      assert cast(schema, a: 1, b: "2") == {:ok, [a: "1", b: 2]}
+      assert cast(schema, a: 1, b: "2") == {:ok, [a: "1", b: "2"]}
     end
   end
 
@@ -273,7 +273,7 @@ defmodule Xema.Cast.AnyOfTest do
 
     test "from valid data", %{schema: schema} do
       assert cast(schema, %{foo: %{faa: "1"}, bar: %{bas: %{baz: "2", bax: "3"}}}) ==
-               {:ok, %{foo: %{faa: 1}, bar: %{bas: %{bax: 3, baz: 2}}}}
+               {:ok, %{foo: %{faa: 1}, bar: %{bas: %{bax: "3", baz: 2}}}}
     end
 
     test "from data causing a deep nested cast error", %{schema: schema} do

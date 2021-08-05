@@ -708,7 +708,13 @@ defmodule Xema do
       }}
   """
   @spec cast(Xema.t(), term) :: {:ok, term} | {:error, term}
-  def cast(%Xema{schema: schema}, value, opts \\ []) do
+  def cast(xema, value, opts \\ [])
+
+  def cast(%Xema{schema: schema}, value, opts) do
+    cast(schema, value, opts)
+  end
+
+  def cast(%Schema{} = schema, value, opts) do
     with {:ok, result} <- do_cast(schema, value, opts, []),
          :ok <- validate(schema, result) do
       {:ok, result}
@@ -783,7 +789,9 @@ defmodule Xema do
        when caster != nil and is_atom(caster),
        do: caster.cast(value)
 
-  defp do_castable_cast(schema, value), do: Castable.cast(value, schema)
+  defp do_castable_cast(schema, value) do
+    Castable.cast(value, schema)
+  end
 
   @spec cast_values(Schema.t(), term, keyword, list) :: term
   defp cast_values(schema, tuple, opts, path) when is_tuple(tuple) do
@@ -818,7 +826,7 @@ defmodule Xema do
          path
        )
        when is_map(data) do
-    keys = if type == :keyword, do: :atoms, else: keys
+    key_type = if type == :keyword, do: :atoms, else: keys
 
     with :ok <- check_required(schema, data, path) do
       data
@@ -828,7 +836,7 @@ defmodule Xema do
             properties,
             pattern_properties,
             additional_properties,
-            key_to(keys, key)
+            key_to(key_type, key)
           )
 
         case do_cast(schema, value, opts, [key | path]) do
@@ -1064,15 +1072,47 @@ defmodule Xema do
 
   defp key?(key, keys, patterns), do: key?(key, keys, []) && key?(key, [], patterns)
 
-  defp cast_combiner(schema, data, opts, path),
-    do:
-      schema
-      |> get_combiner()
-      |> do_cast_combiner(data, opts, path)
+  defp cast_combiner(schema, data, opts, path) do
+    schema
+    |> get_combiner()
+    |> do_cast_combiner(data, opts, path)
+  end
 
-  defp do_cast_combiner([], data, _opts, _path), do: {:ok, data}
+  defp do_cast_combiner(nil, data, _opts, _path), do: {:ok, data}
 
-  defp do_cast_combiner(schemas, data, opts, path) do
+  defp do_cast_combiner({type, schemas}, data, opts, path) when type in [:any, :one] do
+    schemas
+    |> Enum.reverse()
+    |> Enum.reduce({nil, []}, fn schema, {result, errors} ->
+      # TODO case do_cast(schema, data, opts, []) do
+      case cast(schema, data, opts) do
+        {:ok, cast} ->
+          {cast, errors}
+
+        {:error, %ValidationError{} = validation_error} ->
+          error = %{to: schema.type, module: schema.module, value: data, reason: validation_error}
+          {result, [error | errors]}
+
+        {:error, %CastError{path: path, to: to, value: value}} ->
+          error = %{path: path, to: to, value: value}
+          {result, [error | errors]}
+      end
+    end)
+    |> case do
+      {data, errors} when length(errors) < length(schemas) ->
+        {:ok, data}
+
+      {_, errors} ->
+        {:error,
+         %{
+           to: errors,
+           value: data,
+           path: Enum.reverse(path)
+         }}
+    end
+  end
+
+  defp do_cast_combiner({:all, schemas}, data, opts, path) do
     schemas
     |> Enum.reverse()
     |> Enum.reduce({data, []}, fn schema, {data, errors} ->
@@ -1096,8 +1136,14 @@ defmodule Xema do
   end
 
   @spec get_combiner(Schema.t()) :: [Schema.t()]
-  defp get_combiner(%Schema{} = schema),
-    do: Enum.concat([schema.any_of || [], schema.all_of || [], schema.one_of || []])
+  defp get_combiner(%Schema{} = schema) do
+    cond do
+      schema.any_of != nil -> {:any, schema.any_of}
+      schema.all_of != nil -> {:all, schema.all_of}
+      schema.one_of != nil -> {:one, schema.one_of}
+      true -> nil
+    end
+  end
 
   defp key_to(:atoms, key) when is_binary(key), do: to_existing_atom(key)
 

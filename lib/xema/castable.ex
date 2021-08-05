@@ -259,7 +259,7 @@ end
 defimpl Xema.Castable, for: Map do
   use Xema.Castable.Helper
 
-  def cast(map, :struct, nil, _schem), do: {:ok, map}
+  def cast(map, :struct, nil, _schema), do: {:ok, map}
 
   def cast(map, :struct, module, _schema) do
     with {:ok, fields} <- fields(map), do: to_struct(module, fields)

@@ -69,8 +69,7 @@ defmodule Xema.Cast.OneOfTest do
     end
 
     test "from a map", %{schema: schema} do
-      assert {:error, %ValidationError{} = error} = cast(schema, %{a: 1, b: "2"})
-      assert error.reason.value == %{a: "1", b: 2}
+      assert cast(schema, %{a: 1, b: "2"}) == {:ok, %{a: "1", b: "2"}}
     end
 
     test "from a map with an invalid value", %{schema: schema} do
@@ -78,8 +77,7 @@ defmodule Xema.Cast.OneOfTest do
     end
 
     test "from a keyword list", %{schema: schema} do
-      assert {:error, %ValidationError{} = error} = cast(schema, a: 1, b: "2")
-      assert error.reason.value == [a: "1", b: 2]
+      assert cast(schema, a: 1, b: "2") == {:ok, [a: "1", b: "2"]}
     end
   end
 
@@ -116,8 +114,17 @@ defmodule Xema.Cast.OneOfTest do
     test "from a map with an empty list", %{schema: schema} do
       assert {:error, error} = cast(schema, %{a: []})
 
+      message = """
+      cannot cast %{a: []} to any of:
+        cannot cast [] to :integer at [:a]
+        cannot cast [] to :string at [:a]
+        cannot cast [] to nil at [:a]\
+      """
+
+      assert Exception.message(error) == message
+
       assert error ==
-               %Xema.CastError{
+               %CastError{
                  error: nil,
                  key: nil,
                  message: nil,
@@ -129,15 +136,81 @@ defmodule Xema.Cast.OneOfTest do
                  ],
                  value: %{a: []}
                }
+    end
+  end
 
-      message = """
-      cannot cast %{a: []} to any of:
-        cannot cast [] to :integer at [:a]
-        cannot cast [] to :string at [:a]
-        cannot cast [] to nil at [:a]\
-      """
+  describe "cast/2 with xema modules" do
+    defmodule OneOf.Foo do
+      use Xema
 
-      assert Exception.message(error) == message
+      xema do
+        field :value, :atom, const: :foo
+      end
+    end
+
+    defmodule OneOf.Bar do
+      use Xema
+
+      xema do
+        field :value, :atom, const: :bar
+      end
+    end
+
+    defmodule OneOf.FooBar do
+      use Xema
+
+      xema do
+        field :foobar, :any, one_of: [OneOf.Foo, OneOf.Bar]
+      end
+    end
+
+    test "casts valid data to foobar: Foo" do
+      assert OneOf.FooBar.cast(%{foobar: %{value: :foo}}) ==
+               {:ok, %OneOf.FooBar{foobar: %OneOf.Foo{value: :foo}}}
+    end
+
+    test "casts valid data to foobar: Bar" do
+      assert OneOf.FooBar.cast(%{foobar: %{value: :bar}}) ==
+               {:ok, %OneOf.FooBar{foobar: %OneOf.Bar{value: :bar}}}
+    end
+
+    test "returns an error for invalid data" do
+      {:error, error} = OneOf.FooBar.cast(%{foobar: %{value: :baz}})
+
+      assert Exception.message(error) == """
+             cannot cast %{value: :baz} at [:foobar] to any of:
+               cannot cast %{value: :baz} to Xema.Cast.OneOfTest.OneOf.Foo - \
+             Expected :foo, got :baz, at [:value].
+               cannot cast %{value: :baz} to Xema.Cast.OneOfTest.OneOf.Bar - \
+             Expected :bar, got :baz, at [:value].\
+             """
+
+      assert error == %CastError{
+               path: [:foobar],
+               to: [
+                 %{
+                   reason: %ValidationError{
+                     __exception__: true,
+                     message: nil,
+                     reason: %{properties: %{value: %{const: :foo, value: :baz}}}
+                   },
+                   module: Xema.Cast.OneOfTest.OneOf.Foo,
+                   to: :struct,
+                   value: %{value: :baz}
+                 },
+                 %{
+                   reason: %ValidationError{
+                     __exception__: true,
+                     message: nil,
+                     reason: %{properties: %{value: %{const: :bar, value: :baz}}}
+                   },
+                   module: Xema.Cast.OneOfTest.OneOf.Bar,
+                   to: :struct,
+                   value: %{value: :baz}
+                 }
+               ],
+               value: %{value: :baz}
+             }
     end
   end
 end

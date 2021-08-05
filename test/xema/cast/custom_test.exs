@@ -274,7 +274,7 @@ defmodule Xema.Cast.CustomTest do
     end
   end
 
-  describe "use Xema an caster behaviour" do
+  describe "use Xema and caster behaviour" do
     defmodule UriSchema do
       use Xema
 

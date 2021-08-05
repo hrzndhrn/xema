@@ -12,9 +12,7 @@ defmodule Xema.Castable.Helper do
 
       def cast(value, %Schema{type: :any}), do: {:ok, value}
 
-      def cast(value, %Schema{type: type})
-          when is_boolean(type),
-          do: {:ok, value}
+      def cast(value, %Schema{type: type}) when is_boolean(type), do: {:ok, value}
 
       def cast(value, %Schema{type: type, module: module} = schema),
         do: cast(value, type, module, schema)
