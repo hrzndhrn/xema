@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.14.0 - 2021/08/07
+
+## Breaking changes
+
++ Refactoring the cast functionality with the combining operators `:any_of` and
+  `:one_of`. Before 0.14.0 `Xema` tries to cast as many values from a data
+  structure according to all sub-schemas as possible.
+
+  Before 0.14.0 `Xema` tries to cast as many values from a data structure
+  according to all sub-schemas as possible. For this, any casting result in
+  `:any_of` and `one_of` was the input for the next casting. The new version
+  takes the first valid cast as a result of the whole combining operator.
+
+
 ## 0.13.10 - 2021/06/05
 
 + Fix: Add types with option `:allow`.

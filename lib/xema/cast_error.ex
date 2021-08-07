@@ -4,6 +4,7 @@ defmodule Xema.CastError do
   """
 
   alias Xema.CastError
+  alias Xema.ValidationError
 
   defexception [:message, :path, :required, :to, :value, :key, :error]
 
@@ -13,7 +14,7 @@ defmodule Xema.CastError do
           message: String.t() | nil,
           path: [atom | integer | String.t()] | nil,
           required: [atom] | nil,
-          to: atom | nil,
+          to: atom | list | nil,
           value: term | nil
         }
 
@@ -89,6 +90,11 @@ defmodule Xema.CastError do
 
   defp traverse_error(%{path: path, to: to, value: value}) do
     ["cannot cast #{inspect(value)} to #{inspect(to)}" <> at_path(path)]
+  end
+
+  defp traverse_error(%{reason: %ValidationError{} = reason, value: value} = error) do
+    to = if is_nil(error.module), do: error.to, else: error.module
+    ["cannot cast #{inspect(value)} to #{inspect(to)} - #{Exception.message(reason)}"]
   end
 
   defp at_path([]), do: ""
