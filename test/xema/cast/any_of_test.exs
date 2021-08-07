@@ -4,6 +4,7 @@ defmodule Xema.Cast.AnyOfTest do
   import Xema, only: [cast: 2]
 
   alias Xema.CastError
+  alias Xema.ValidationError
 
   describe "cast/2 with any_of schema with types" do
     setup do
@@ -290,6 +291,81 @@ defmodule Xema.Cast.AnyOfTest do
                    cannot cast "three" to :integer
                    cannot cast "three" to nil\
                """
+    end
+  end
+
+  describe "cast/2 with xema modules" do
+    defmodule AnyOf.Foo do
+      use Xema
+
+      xema do
+        field :value, :atom, const: :foo
+      end
+    end
+
+    defmodule AnyOf.Bar do
+      use Xema
+
+      xema do
+        field :value, :atom, const: :bar
+      end
+    end
+
+    defmodule AnyOf.FooBar do
+      use Xema
+
+      xema do
+        field :foobar, :any, any_of: [AnyOf.Foo, AnyOf.Bar]
+      end
+    end
+
+    test "casts valid data to foobar: Foo" do
+      assert AnyOf.FooBar.cast(%{foobar: %{value: :foo}}) ==
+               {:ok, %AnyOf.FooBar{foobar: %AnyOf.Foo{value: :foo}}}
+    end
+
+    test "casts valid data to foobar: Bar" do
+      assert AnyOf.FooBar.cast(%{foobar: %{value: :bar}}) ==
+               {:ok, %AnyOf.FooBar{foobar: %AnyOf.Bar{value: :bar}}}
+    end
+
+    test "returns an error for invalid data" do
+      {:error, error} = AnyOf.FooBar.cast(%{foobar: %{value: :baz}})
+
+      assert Exception.message(error) == """
+             cannot cast %{value: :baz} at [:foobar] to any of:
+               cannot cast %{value: :baz} to Xema.Cast.AnyOfTest.AnyOf.Foo - \
+             Expected :foo, got :baz, at [:value].
+               cannot cast %{value: :baz} to Xema.Cast.AnyOfTest.AnyOf.Bar - \
+             Expected :bar, got :baz, at [:value].\
+             """
+
+      assert error == %CastError{
+               path: [:foobar],
+               to: [
+                 %{
+                   reason: %ValidationError{
+                     __exception__: true,
+                     message: nil,
+                     reason: %{properties: %{value: %{const: :foo, value: :baz}}}
+                   },
+                   module: Xema.Cast.AnyOfTest.AnyOf.Foo,
+                   to: :struct,
+                   value: %{value: :baz}
+                 },
+                 %{
+                   reason: %ValidationError{
+                     __exception__: true,
+                     message: nil,
+                     reason: %{properties: %{value: %{const: :bar, value: :baz}}}
+                   },
+                   module: Xema.Cast.AnyOfTest.AnyOf.Bar,
+                   to: :struct,
+                   value: %{value: :baz}
+                 }
+               ],
+               value: %{value: :baz}
+             }
     end
   end
 end
