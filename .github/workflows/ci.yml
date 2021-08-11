@@ -85,7 +85,7 @@ jobs:
       - name: Compile dependencies
         run: MIX_ENV=test mix deps.compile --warning-as-errors
       - name: Check code format
-        if: ${{ contains(matrix.elixir-version, 1.12.2) }}
+        if: ${{ contains(matrix.elixir-version, '1.12.2') }}
         run: MIX_ENV=test mix format --check-formatted
       - name: Lint code
         run: MIX_ENV=test mix credo --strict
