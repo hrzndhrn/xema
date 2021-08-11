@@ -67,16 +67,19 @@ jobs:
           otp-version: ${{ matrix.otp-version }}
       - name: Restore deps
         uses: actions/cache@v2
-        path: deps
-        key: deps-${{ runner.os }}-${{ matrix.elixir-version }}-${{ matrix.otp-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        with:
+          path: deps
+          key: deps-${{ runner.os }}-${{ matrix.elixir-version }}-${{ matrix.otp-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
       - name: Restore _build
         uses: actions/cache@v2
-        path: _build
-        key: _build-${{ runner.os }}-${{ matrix.elixir-version }}-${{ matrix.otp-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        with:
+          path: _build
+          key: _build-${{ runner.os }}-${{ matrix.elixir-version }}-${{ matrix.otp-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
       - name: Restore test/support/plts
         uses: actions/cache@v2
-        path: test/support/plts
-        key: test/support/plts-${{ runner.os }}-${{ matrix.elixir-version }}-${{ matrix.otp-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+        with:
+          path: test/support/plts
+          key: test/support/plts-${{ runner.os }}-${{ matrix.elixir-version }}-${{ matrix.otp-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
       - name: Get dependencies
         run: MIX_ENV=test mix deps.get
       - name: Compile dependencies
