@@ -18,7 +18,6 @@ jobs:
           - 1.11.4
           - 1.12.2
         otp-version:
-          - 19.3
           - 20.3
           - 21.3
           - 22.3
@@ -30,29 +29,19 @@ jobs:
           - elixir-version: 1.7.4
             otp-version: 24.0
           - elixir-version: 1.8.2
-            otp-version: 19.3
-          - elixir-version: 1.8.2
             otp-version: 23.3
           - elixir-version: 1.8.2
             otp-version: 24.0
-          - elixir-version: 1.9.4
-            otp-version: 19.3
           - elixir-version: 1.9.4
             otp-version: 23.3
           - elixir-version: 1.9.4
             otp-version: 24.0
           - elixir-version: 1.10.4
-            otp-version: 19.3
-          - elixir-version: 1.10.4
             otp-version: 20.3
           - elixir-version: 1.10.4
             otp-version: 24.0
           - elixir-version: 1.11.4
-            otp-version: 19.3
-          - elixir-version: 1.11.4
             otp-version: 20.3
-          - elixir-version: 1.12.2
-            otp-version: 19.3
           - elixir-version: 1.12.2
             otp-version: 20.3
           - elixir-version: 1.12.2
