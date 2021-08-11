@@ -79,6 +79,6 @@ jobs:
       - name: Lint code
         run: mix credo --strict
       - name: Run tests with coverage
-        run: mix coveralls.github
+        run: MIX_ENV=test mix coveralls.github
       - name: Static code analysis
         run: mix dialyzer
