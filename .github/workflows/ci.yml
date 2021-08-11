@@ -6,7 +6,7 @@ on:
   - push
 jobs:
   linux:
-    name: Test on Ubuntu (Elixir ${{ matrix.elixir-version }}
+    name: Test on Ubuntu (Elixir ${{ matrix.elixir-version }}, OTP ${{ matrix.elixir-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
