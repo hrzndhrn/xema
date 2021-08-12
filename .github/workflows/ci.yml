@@ -31,6 +31,10 @@ jobs:
       - name: Compile dependencies
         run: |
           set MIX_ENV=test
-          mix deps.compile --warning-as-errors
+          mix deps.compile
+      - name: Compile project
+        run: |
+          set MIX_ENV=test
+          mix compile --warnings-as-errors
       - name: Run tests
         run: mix test
