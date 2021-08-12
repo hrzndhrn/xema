@@ -29,6 +29,10 @@ jobs:
       - name: Get dependencies
         run: mix deps.get
       - name: Compile dependencies
-        run: MIX_ENV=test mix deps.compile --warning-as-errors
+        run: |
+          set MIX_ENV=test
+          mix deps.compile --warning-as-errors
       - name: Run tests with coverage
-        run: MIX_ENV=test mix coveralls.github
+        run: |
+          set MIX_ENV=test
+          mix coveralls.github
