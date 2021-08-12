@@ -5,36 +5,33 @@ on:
   - pull_request
   - push
 jobs:
-  windows:
-    name: Test on Windows
-    runs-on: windows-latest
+  macos:
+    name: Test on macOS
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Restore chocolatey
-        uses: actions/cache@v2
-        with:
-          path: C:\Users\runneradmin\AppData\Local\Temp\chocolatey
-          key: ${{ runner.os }}-chocolatey-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-chocolatey-
       - name: Setup Elixir
-        run: |
-          cinst elixir --no-progress
-          echo "C:\ProgramData\chocolatey\lib\Elixir\bin;C:\ProgramData\chocolatey\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        run: brew install elixir
       - name: Install hex
         run: mix local.hex --force
       - name: Install rebar
         run: mix local.rebar --force
+      - name: Restore deps
+        uses: actions/cache@v2
+        with:
+          path: deps
+          key: deps-${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+      - name: Restore _build
+        uses: actions/cache@v2
+        with:
+          path: _build
+          key: _build-${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
       - name: Get dependencies
         run: mix deps.get
       - name: Compile dependencies
-        run: |
-          set MIX_ENV=test
-          mix deps.compile
+        run: MIX_ENV=test mix deps.compile
       - name: Compile project
-        run: |
-          set MIX_ENV=test
-          mix compile --warnings-as-errors
-      - name: Run tests
-        run: mix test
+        run: MIX_ENV=test mix compile --warnings-as-errors
+      - name: Run tests with coverage
+        run: MIX_ENV=test mix coveralls.github
