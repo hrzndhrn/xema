@@ -360,7 +360,7 @@ defmodule Xema.Format do
   """
   def uri_template?(string), do: do_uri?(string, :uri_template)
 
-  # do_uri?/2 handels:
+  # do_uri?/2 handles:
   #   * uri?
   #   * uri_reference?
   #   * uri_template?

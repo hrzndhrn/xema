@@ -31,11 +31,11 @@ defmodule Xema.UseTest do
       end
     end
 
-    test "valild?/2 returns true for a valied user" do
+    test "valild?/2 returns true for a valid user" do
       assert UserSchema.valid?(:user, %{name: "Nick", age: 24})
     end
 
-    test "valild?/1 returns true for a valied user" do
+    test "valild?/1 returns true for a valid user" do
       assert UserSchema.valid?(%{name: "Nick", age: 24})
     end
 
@@ -55,7 +55,7 @@ defmodule Xema.UseTest do
       assert Exception.message(error) == "cannot cast [] to :string at [:name]"
     end
 
-    test "cast/1 returns an errot tuple with ValidationError for invalid data" do
+    test "cast/1 returns an error tuple with ValidationError for invalid data" do
       assert {:error,
               %Xema.ValidationError{
                 reason: %{properties: %{age: %{minimum: 0, value: -42}}}
@@ -83,7 +83,7 @@ defmodule Xema.UseTest do
       end
     end
 
-    test "valild?/1 returns true for a valied user" do
+    test "valild?/1 returns true for a valid user" do
       assert PersonSchema.valid?(%{name: "Nick", age: 24})
     end
 

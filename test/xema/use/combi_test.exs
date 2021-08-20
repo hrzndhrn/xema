@@ -15,7 +15,7 @@ defmodule Xema.Use.CombiTest do
       end
     end
 
-    test "valild?/1 returns true for a valied list" do
+    test "valild?/1 returns true for a valid list" do
       assert MySchema.Any.valid?([20, 30])
       assert MySchema.Any.valid?([40, 50])
       assert MySchema.Any.valid?([60, 70])
@@ -58,7 +58,7 @@ defmodule Xema.Use.CombiTest do
       end
     end
 
-    test "valild?/1 returns true for a valied list" do
+    test "valild?/1 returns true for a valid list" do
       assert MySchema.All.valid?([40, 50])
     end
 
@@ -102,7 +102,7 @@ defmodule Xema.Use.CombiTest do
       end
     end
 
-    test "valild?/1 returns true for a valied list" do
+    test "valild?/1 returns true for a valid list" do
       assert MySchema.One.valid?([20, 30])
       assert MySchema.One.valid?([60, 70])
     end

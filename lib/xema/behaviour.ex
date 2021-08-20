@@ -16,7 +16,7 @@ defmodule Xema.Behaviour do
   }
 
   @typedoc """
-  The schema containter.
+  The schema container.
   """
   @type t :: struct
 

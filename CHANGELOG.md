@@ -1,8 +1,15 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
 ## 0.14.0 - 2021/08/07
 
-## Breaking changes
+### Breaking changes
 
 + Refactoring the cast functionality with the combining operators `:any_of` and
   `:one_of`. Before 0.14.0 `Xema` tries to cast as many values from a data
@@ -73,7 +80,7 @@
   `tuple`s to a `map`. This change allows you to convert `reason` directly to
   JSON.
 
-since 0.12.0:
+Since 0.12.0:
 ```elixir
 iex> schema = Xema.new({:list, items: :integer})
 iex> Xema.validate(schema, [1, "foo", 2, :bar])
@@ -88,7 +95,7 @@ iex> Xema.validate(schema, [1, "foo", 2, :bar])
    }
  }}
 ```
-before 0.12.0:
+Before 0.12.0:
 ```elixir
 iex> schema = Xema.new({:list, items: :integer})
 iex> Xema.validate(schema, [1, "foo", 2, :bar])

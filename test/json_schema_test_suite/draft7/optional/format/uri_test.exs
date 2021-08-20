@@ -19,7 +19,7 @@ defmodule JsonSchemaTestSuite.Draft7.Optional.Format.UriTest do
       assert valid?(schema, "http://foo.bar/?baz=qux#quux")
     end
 
-    test ~s|a valid URL with anchor tag and parantheses|, %{schema: schema} do
+    test ~s|a valid URL with anchor tag and parentheses|, %{schema: schema} do
       assert valid?(schema, "http://foo.com/blah_(wikipedia)_blah#cite-1")
     end
 

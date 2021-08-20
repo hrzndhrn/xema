@@ -779,7 +779,7 @@ false
 
 ### Module
 
-The `module` keyword allows specifing which struct is expected.
+The `module` keyword allows specifying which struct is expected.
 
 ```elixir
 iex> schema = Xema.new {:struct, module: Regex}
@@ -1047,7 +1047,7 @@ iex> positive = Xema.new {:integer, minimum: 1}
 
 ### In multiple files
 
-To structure schemas in multiple files you have to configure a loader to laod
+To structure schemas in multiple files you have to configure a loader to load
 the files. The section "[Configure a loader](loader.html)" described the
 configuration and implementation of an loader.
 

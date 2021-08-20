@@ -268,7 +268,7 @@ defmodule Xema.ListTest do
     end
   end
 
-  describe "'list' schema with tuple validation without addtional items" do
+  describe "'list' schema with tuple validation without additional items" do
     setup do
       %{
         schema:
@@ -338,7 +338,7 @@ defmodule Xema.ListTest do
       }
     end
 
-    test "an element has a value of minium 4", %{schema: schema} do
+    test "an element has a value of minimum 4", %{schema: schema} do
       assert validate(schema, [2, 3, 4]) == :ok
     end
 
@@ -389,7 +389,7 @@ defmodule Xema.ListTest do
              }
     end
 
-    test "an element has a value of minium 4", %{schema: schema} do
+    test "an element has a value of minimum 4", %{schema: schema} do
       assert validate(schema, [2, 3, 4]) == :ok
     end
 

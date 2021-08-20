@@ -1,14 +1,18 @@
 # Xema
-[![Hex.pm](https://img.shields.io/hexpm/v/xema.svg)](https://hex.pm/packages/xema)
-![CI](https://github.com/hrzndhrn/xema/workflows/CI/badge.svg)
+
+[![CI](https://github.com/hrzndhrn/xema/actions/workflows/ci.yml/badge.svg)](https://github.com/hrzndhrn/xema/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/hrzndhrn/xema/badge.svg?branch=master)](https://coveralls.io/github/hrzndhrn/xema?branch=master)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Module Version](https://img.shields.io/hexpm/v/xema.svg)](https://hex.pm/packages/xema)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/xema/)
+[![Total Download](https://img.shields.io/hexpm/dt/xema.svg)](https://hex.pm/packages/xema)
+[![License](https://img.shields.io/hexpm/l/xema.svg)](https://github.com/hrzndhrn/xema/blob/master/LICENSE.md)
+[![Last Updated](https://img.shields.io/github/last-commit/hrzndhrn/xema.svg)](https://github.com/hrzndhrn/xema/commits/master)
 
 Xema is a schema validator inspired by [JSON Schema](http://json-schema.org).
 For now, Xema supports the features documented in draft 04, 06, and 07 of the
 JSON-Schema specification.
 
-Xema allows you to annotate and validate elixir data structures.
+Xema allows you to annotate and validate Elixir data structures.
 
 If you search for a real JSON Schema validator give
 [JsonXema](https://github.com/hrzndhrn/json_xema) a try.
@@ -17,17 +21,19 @@ Xema is in beta. If you try it and has an issue, report them.
 
 ## Installation
 
-First, add Xema to your `mix.exs` dependencies:
+First, add `:xema` to your `mix.exs` dependencies:
 
 ```elixir
 def deps do
-  [{:xema, "~> 0.13"}]
+  [
+    {:xema, "~> 0.13"}
+  ]
 end
 ```
 
 Then, update your dependencies:
 
-```Shell
+```shell
 $ mix deps.get
 ```
 
@@ -74,3 +80,9 @@ contains informations to migrate schemas.
 [Understanding JSON Schema](https://spacetelescope.github.io/understanding-json-schema/index.html)
 a great tutorial for JSON Schema authors and a template for the description of
 Xema.
+
+## Copyright and License
+
+Copyright (c) 2017 Herz und Hirn
+
+This library licensed under the [MIT license](./LICENSE.md).
