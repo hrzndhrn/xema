@@ -2,7 +2,7 @@
 
 ## 0.14.0 - 2021/08/07
 
-## Breaking changes
+### Breaking changes
 
 + Refactoring the cast functionality with the combining operators `:any_of` and
   `:one_of`. Before 0.14.0 `Xema` tries to cast as many values from a data
