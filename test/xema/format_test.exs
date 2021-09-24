@@ -61,7 +61,7 @@ defmodule FormatTest do
     end
   end
 
-  describe "fromat: :uri" do
+  describe "format: :uri" do
     test "returns true for a valid uri" do
       schema = Xema.new(format: :uri)
       assert Xema.valid?(schema, "http://foo.bar")

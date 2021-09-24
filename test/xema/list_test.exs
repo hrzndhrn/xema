@@ -268,7 +268,7 @@ defmodule Xema.ListTest do
     end
   end
 
-  describe "'list' schema with tuple validation without addtional items" do
+  describe "'list' schema with tuple validation without additional items" do
     setup do
       %{
         schema:

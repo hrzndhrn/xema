@@ -32,7 +32,7 @@ defmodule Xema do
 
   ## Examples
 
-  Sinlge schema module:
+  Single schema module:
 
       iex> defmodule SingleSchema do
       ...>   use Xema
