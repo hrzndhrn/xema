@@ -1,16 +1,16 @@
 ### Elixir ###
 
 # The directory Mix will write compiled artifacts to.
-/_build
+/_build/
 
 # If you run "mix test --cover", coverage assets end up here.
-/cover
+/cover/
 
-## The directory Mix downloads your dependencies sources to.
-/deps
+# The directory Mix downloads your dependencies sources to.
+/deps/
 
-# Where 3rd-party dependencies like ExDoc output generated docs.
-/doc
+# Where third-party dependencies like ExDoc output generated docs.
+/doc/
 
 # Ignore .fetch files in case you like to edit your project deps locally.
 /.fetch
@@ -21,13 +21,17 @@ erl_crash.dump
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
 
-# dialyzer plt
+# Ignore package tarball (built via "mix hex.build").
+xema-*.tar
+
+# Temporary files, for example, from tests.
+/tmp/
+
+### etc ###
+
+# Dialyzer PLT
 /test/support/plts/*.plt
 /test/support/plts/*.plt.hash
 
-# Bench
-/bench/tmp/
-
 # The JSON Schema Test Suite
 JSON-Schema-Test-Suite/
-
