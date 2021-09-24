@@ -1,8 +1,8 @@
 # Xema
 [![Hex.pm](https://img.shields.io/hexpm/v/xema.svg)](https://hex.pm/packages/xema)
-![CI](https://github.com/hrzndhrn/xema/workflows/CI/badge.svg)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/hrzndhrn/xema/CI)](https://github.com/hrzndhrn/xema/actions)
 [![Coverage Status](https://coveralls.io/repos/github/hrzndhrn/xema/badge.svg?branch=master)](https://coveralls.io/github/hrzndhrn/xema?branch=master)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/hrzndhrn/xema/blob/master/LICENSE)
 
 Xema is a schema validator inspired by [JSON Schema](http://json-schema.org).
 For now, Xema supports the features documented in draft 04, 06, and 07 of the
