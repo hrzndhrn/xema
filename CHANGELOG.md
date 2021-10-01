@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.1 - 2021/10/01
+
++ Fix casting to `struct` with required properties.
+
 ## 0.14.0 - 2021/08/07
 
 ### Breaking changes

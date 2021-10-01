@@ -397,4 +397,30 @@ defmodule Xema.Cast.StructTest do
       end)
     end
   end
+
+  describe "cast!/2 with a struct schema and required property" do
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :struct,
+            module: User, properties: %{name: :string, age: :integer}, required: [:name]
+          })
+      }
+    end
+
+    test "from a keyword list", %{schema: schema} do
+      name = "Otto"
+      age = 18
+
+      assert cast!(schema, name: name, age: age) == %User{name: name, age: age}
+    end
+
+    test "from a map with string keys", %{schema: schema} do
+      name = "Otto"
+      age = 18
+
+      assert cast!(schema, %{"name" => name, "age" => age}) == %User{name: name, age: age}
+    end
+  end
 end

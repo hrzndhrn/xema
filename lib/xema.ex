@@ -949,7 +949,7 @@ defmodule Xema do
          data,
          path
        ) do
-    with {:error, keys} <- do_check_required(required, data, keys) do
+    with {:error, keys} <- do_check_required(required, data, keys || :atoms) do
       to = if module == nil, do: type, else: module
       {:error, %{to: to, value: data, required: keys, path: path}}
     end
