@@ -423,4 +423,25 @@ defmodule Xema.Cast.StructTest do
       assert cast!(schema, %{"name" => name, "age" => age}) == %User{name: name, age: age}
     end
   end
+
+  describe "cast!/2 with a nested DateTime" do
+    defmodule NestedDateTime do
+      defstruct [:time]
+    end
+
+    setup do
+      %{
+        schema:
+          Xema.new({
+            :struct,
+            module: NestedDateTime, properties: %{time: {:struct, module: DateTime}}
+          })
+      }
+    end
+
+    test "from a map", %{schema: schema} do
+      assert cast!(schema, %{time: "1984-03-04 13:37:00.000000Z"}) ==
+               %NestedDateTime{time: ~U[1984-03-04 13:37:00.000000Z]}
+    end
+  end
 end

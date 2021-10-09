@@ -1,0 +1,28 @@
+defmodule Xema.Use.CastTest do
+  use ExUnit.Case, async: true
+
+  describe "struct with nested DateTime" do
+    defmodule Bar do
+      use Xema
+
+      defstruct [:time]
+
+      xema do
+        strux(
+          module: Bar,
+          properties: %{time: strux(DateTime)}
+        )
+      end
+    end
+
+    test "cast!/1 from a map with atom keys" do
+      Bar.cast!(%{time: "1984-03-04 13:37:00.000000Z"}) ==
+        %Bar{time: ~U[1984-03-04 13:37:00.000000Z]}
+    end
+
+    test "cast!/1 from a map with string keys" do
+      Bar.cast!(%{"time" => "1984-03-04 13:37:00.000000Z"}) ==
+        %Bar{time: ~U[1984-03-04 13:37:00.000000Z]}
+    end
+  end
+end
