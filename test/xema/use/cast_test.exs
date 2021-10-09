@@ -2,6 +2,8 @@ defmodule Xema.Use.CastTest do
   use ExUnit.Case, async: true
 
   describe "struct with nested DateTime" do
+    # Issue: https://github.com/hrzndhrn/xema/issues/157
+
     defmodule Bar do
       use Xema
 
