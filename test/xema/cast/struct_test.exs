@@ -440,8 +440,10 @@ defmodule Xema.Cast.StructTest do
     end
 
     test "from a map", %{schema: schema} do
+      {:ok, datetime, 0} = DateTime.from_iso8601("1984-03-04 13:37:00.000000Z")
+
       assert cast!(schema, %{time: "1984-03-04 13:37:00.000000Z"}) ==
-               %NestedDateTime{time: ~U[1984-03-04 13:37:00.000000Z]}
+               %NestedDateTime{time: datetime}
     end
   end
 end
