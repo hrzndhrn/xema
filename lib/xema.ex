@@ -826,7 +826,7 @@ defmodule Xema do
          path
        )
        when is_map(data) do
-    key_type = if type == :keyword, do: :atoms, else: keys
+    key_type = if type in [:keyword, :struct], do: :atoms, else: keys
 
     with :ok <- check_required(schema, data, path) do
       data
