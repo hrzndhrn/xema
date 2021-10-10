@@ -1,6 +1,8 @@
 defmodule Xema.Use.CastTest do
   use ExUnit.Case, async: true
 
+  alias Xema.CastError
+
   describe "struct with nested DateTime" do
     # Issue: https://github.com/hrzndhrn/xema/issues/157
 
@@ -29,6 +31,14 @@ defmodule Xema.Use.CastTest do
 
       assert Bar.cast!(%{"time" => "1984-03-04 13:37:00.000000Z"}) ==
                %Bar{time: datetime}
+    end
+
+    test "cast!/1 from a map with stirng keys throws error" do
+      message = ~s|cannot cast "foo" to DateTime at ["time"]|
+
+      assert_raise CastError, message, fn ->
+        Bar.cast!(%{"time" => "foo"}) == :todo
+      end
     end
   end
 end
