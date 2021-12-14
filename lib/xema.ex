@@ -270,7 +270,8 @@ defmodule Xema do
       %Xema{schema:
         %Xema.Schema{
           properties: %{"foo" => %Xema.Schema{type: :integer}},
-          type: :map
+          type: :map,
+          keys: :strings
         }
       }
 
