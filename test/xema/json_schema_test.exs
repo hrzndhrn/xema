@@ -42,7 +42,7 @@ defmodule Xema.JsonSchemaTest do
     }
     """
 
-    assert to_xema(json_schema) == {:map, properties: %{"number" => :number}}
+    assert to_xema(json_schema) == {:map, keys: :strings, properties: %{"number" => :number}}
   end
 
   test "none schema" do

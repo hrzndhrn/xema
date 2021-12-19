@@ -73,7 +73,7 @@ defmodule Xema.JsonSchema do
       ...>   "properties" => %{"foo" => %{"type" => "integer"}}
       ...> }
       iex> Xema.JsonSchema.to_xema(schema)
-      {:map, [properties: %{"foo" => :integer}]}
+      {:map, [keys: :strings, properties: %{"foo" => :integer}]}
 
       iex> Xema.JsonSchema.to_xema(%{"type" => "integer", "foo" => "bar"}, atom: :force)
       {:integer, [foo: "bar"]}

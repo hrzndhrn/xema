@@ -32,7 +32,8 @@ defmodule Xema.FromJsonSchemaTest do
                  refs: %{},
                  schema: %Schema{
                    properties: %{"foo" => %Schema{type: :integer}},
-                   type: :map
+                   type: :map,
+                   keys: :strings
                  }
                }
     end
@@ -56,7 +57,8 @@ defmodule Xema.FromJsonSchemaTest do
                  schema: %Xema.Schema{
                    data: %{zonk: "bla"},
                    properties: %{"foo" => %Xema.Schema{type: :integer}},
-                   type: :map
+                   type: :map,
+                   keys: :strings
                  }
                }
     end
