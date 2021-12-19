@@ -92,16 +92,16 @@ defmodule Xema.FromJsonSchemaTest do
     test "can cast from a json schema" do
       json_schema =
         """
-          {
-            "additionalProperties": false,
-            "properties": {
-              "foo": { "type": "string" },
-              "bar": { "items": { "type": "string" }, "type": "array" },
-              "baz": { "type": "object", "properties": {"prop": { "type": "string" } } }
-            },
-            "required": ["foo", "bar"],
-            "type": "object"
-          }
+        {
+          "additionalProperties": false,
+          "properties": {
+            "foo": {"type": "string"},
+            "bar": {"items": { "type": "string" }, "type": "array"},
+            "baz": {"type": "object", "properties": {"prop": { "type": "string"}}}
+          },
+          "required": ["foo", "bar"],
+          "type": "object"
+        }
         """
         |> Jason.decode!()
         |> Xema.from_json_schema()
