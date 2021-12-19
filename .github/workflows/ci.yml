@@ -1,4 +1,4 @@
-# Created with GitHubActions version 0.1.3
+# Created with GitHubActions version 0.1.4
 name: CI
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -18,7 +18,7 @@ jobs:
           - '1.10.4'
           - '1.11.4'
           - '1.12.3'
-          - '1.13.0'
+          - '1.13.1'
         otp:
           - '20.3'
           - '21.3'
@@ -48,9 +48,9 @@ jobs:
             otp: '20.3'
           - elixir: '1.12.3'
             otp: '21.3'
-          - elixir: '1.13.0'
+          - elixir: '1.13.1'
             otp: '20.3'
-          - elixir: '1.13.0'
+          - elixir: '1.13.1'
             otp: '21.3'
     steps:
       - name: Checkout
@@ -82,16 +82,16 @@ jobs:
       - name: Compile project
         run: MIX_ENV=test mix compile --warnings-as-errors
       - name: Check code format
-        if: ${{ contains(matrix.elixir, '1.13.0') && contains(matrix.otp, '24.1') }}
+        if: ${{ contains(matrix.elixir, '1.13.1') && contains(matrix.otp, '24.1') }}
         run: MIX_ENV=test mix format --check-formatted
       - name: Lint code
-        if: ${{ contains(matrix.elixir, '1.13.0') && contains(matrix.otp, '24.1') }}
+        if: ${{ contains(matrix.elixir, '1.13.1') && contains(matrix.otp, '24.1') }}
         run: MIX_ENV=test mix credo --strict
       - name: Run tests
         run: MIX_ENV=test mix test
-        if: ${{ !(contains(matrix.elixir, '1.13.0') && contains(matrix.otp, '24.1')) }}
+        if: ${{ !(contains(matrix.elixir, '1.13.1') && contains(matrix.otp, '24.1')) }}
       - name: Run tests with coverage
         run: MIX_ENV=test mix coveralls.github
-        if: ${{ contains(matrix.elixir, '1.13.0') && contains(matrix.otp, '24.1') }}
+        if: ${{ contains(matrix.elixir, '1.13.1') && contains(matrix.otp, '24.1') }}
       - name: Static code analysis
         run: mix dialyzer
