@@ -115,6 +115,7 @@
            excluded_functions: []
          ]},
         {Credo.Check.Refactor.UnlessWithElse, []},
+        {Credo.Check.Refactor.RedundantWithClauseResult, false},
 
         #
         ## Warnings

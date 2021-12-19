@@ -1034,7 +1034,7 @@ defmodule Xema do
     end)
   end
 
-  defp get_default(fun) when is_function(fun), do: apply(fun, [])
+  defp get_default(fun) when is_function(fun), do: fun.()
 
   defp get_default({mod, fun})
        when is_atom(mod) and is_atom(fun),
