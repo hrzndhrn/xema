@@ -131,8 +131,16 @@ defmodule Xema.JsonSchema do
 
   defp schema(json, opts) do
     json
+    |> add_keys()
     |> Enum.map(&rule(&1, opts))
     |> Keyword.new()
+  end
+
+  defp add_keys(json) do
+    case map_schema?(json) do
+      true -> Map.put(json, "keys", :strings)
+      false -> json
+    end
   end
 
   # handles all rules with a regular keyword
@@ -192,6 +200,10 @@ defmodule Xema.JsonSchema do
 
   defp schema?(value) do
     value |> Map.keys() |> Enum.any?(fn key -> Enum.member?(@keywords, key) end)
+  end
+
+  defp map_schema?(value) do
+    Enum.any?(["properties", "pattern_properties"], fn key -> Map.has_key?(value, key) end)
   end
 
   defp to_existing_atom(str, opts \\ []) do

@@ -14,9 +14,7 @@ defmodule Xema.RefRemoteTest do
 
   describe "invalid exon" do
     test "compile error" do
-      expected =
-        "http://localhost:1234/compile-error.exon:3: " <>
-          "undefined function invalid/0"
+      expected = ~r|http://localhost:1234/compile-error.exon:3: undefined function invalid/0.*|
 
       assert_raise CompileError, expected, fn ->
         Xema.new({:ref, "http://localhost:1234/compile-error.exon"}, loader: RemoteLoaderExon)
