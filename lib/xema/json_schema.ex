@@ -73,7 +73,7 @@ defmodule Xema.JsonSchema do
       ...>   "properties" => %{"foo" => %{"type" => "integer"}}
       ...> }
       iex> Xema.JsonSchema.to_xema(schema)
-      {:map, [properties: %{"foo" => :integer}]}
+      {:map, [keys: :strings, properties: %{"foo" => :integer}]}
 
       iex> Xema.JsonSchema.to_xema(%{"type" => "integer", "foo" => "bar"}, atom: :force)
       {:integer, [foo: "bar"]}
@@ -98,8 +98,14 @@ defmodule Xema.JsonSchema do
     {type, json} = type(json)
 
     case Enum.empty?(json) do
-      true -> type
-      false -> {type, schema(json, opts)}
+      true ->
+        type
+
+      false ->
+        case type do
+          :map -> {type, schema(Map.put_new(json, "keys", :strings), opts)}
+          _ -> {type, schema(json, opts)}
+        end
     end
   end
 

@@ -32,7 +32,8 @@ defmodule Xema.FromJsonSchemaTest do
                  refs: %{},
                  schema: %Schema{
                    properties: %{"foo" => %Schema{type: :integer}},
-                   type: :map
+                   type: :map,
+                   keys: :strings
                  }
                }
     end
@@ -56,7 +57,8 @@ defmodule Xema.FromJsonSchemaTest do
                  schema: %Xema.Schema{
                    data: %{zonk: "bla"},
                    properties: %{"foo" => %Xema.Schema{type: :integer}},
-                   type: :map
+                   type: :map,
+                   keys: :strings
                  }
                }
     end
@@ -85,6 +87,28 @@ defmodule Xema.FromJsonSchemaTest do
                refs: %{},
                schema: %Xema.Schema{format: :unsupported}
              }
+    end
+
+    test "can cast from a json schema" do
+      json_schema =
+        """
+          {
+            "additionalProperties": false,
+            "properties": {
+              "foo": { "type": "string" },
+              "bar": { "items": { "type": "string" }, "type": "array" },
+              "baz": { "type": "object", "properties": {"prop": { "type": "string" } } }
+            },
+            "required": ["foo", "bar"],
+            "type": "object"
+          }
+        """
+        |> Jason.decode!()
+        |> Xema.from_json_schema()
+
+      data = %{"foo" => "somestring", "bar" => ["a", "b"]}
+      assert Xema.validate(json_schema, data) == :ok
+      assert Xema.cast(json_schema, data) == {:ok, data}
     end
   end
 end
