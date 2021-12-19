@@ -43,6 +43,10 @@ defmodule Xema.Utils do
         true
         iex> Utils.has_key?([{"foo", 5}], "foo")
         true
+        iex> Utils.has_key?([{"foo", 5}], "bar")
+        false
+        iex> Utils.has_key?([], "bar")
+        false
   """
   @spec has_key?(map | keyword | [{String.t(), any}], any) :: boolean
   def has_key?([], _), do: false
