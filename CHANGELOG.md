@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.3 - 2021/12/19
+
++ `Xeam.from_json_schema/2` sets now `keys: :strings` for any
+  `{"type": "object"}`
+
 ## 0.14.2 - 2021/10/09
 
 + Fix casting to struct.

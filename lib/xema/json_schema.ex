@@ -97,15 +97,15 @@ defmodule Xema.JsonSchema do
   defp do_to_xema(json, opts) when is_map(json) do
     {type, json} = type(json)
 
-    case Enum.empty?(json) do
-      true ->
+    cond do
+      Enum.empty?(json) ->
         type
 
-      false ->
-        case type do
-          :map -> {type, schema(Map.put_new(json, "keys", :strings), opts)}
-          _ -> {type, schema(json, opts)}
-        end
+      type == :map ->
+        {:map, json |> Map.put("keys", :strings) |> schema(opts)}
+
+      true ->
+        {type, schema(json, opts)}
     end
   end
 

@@ -92,23 +92,26 @@ defmodule Xema.FromJsonSchemaTest do
     test "can cast from a json schema" do
       json_schema =
         """
-          {
-            "additionalProperties": false,
-            "properties": {
-              "foo": { "type": "string" },
-              "bar": { "items": { "type": "string" }, "type": "array" },
-              "baz": { "type": "object", "properties": {"prop": { "type": "string" } } }
-            },
-            "required": ["foo", "bar"],
-            "type": "object"
-          }
+        {
+          "additionalProperties": false,
+          "properties": {
+            "foo": {"type": "string"},
+            "bar": {"items": { "type": "string" }, "type": "array"},
+            "baz": {"type": "object", "properties": {"prop": { "type": "string"}}}
+          },
+          "required": ["foo", "bar"],
+          "type": "object"
+        }
         """
         |> Jason.decode!()
         |> Xema.from_json_schema()
 
-      data = %{"foo" => "somestring", "bar" => ["a", "b"]}
-      assert Xema.validate(json_schema, data) == :ok
-      assert Xema.cast(json_schema, data) == {:ok, data}
+      string_keys = %{"foo" => "somestring", "bar" => ["a", "b"], "baz" => %{"prop" => "c"}}
+      assert Xema.validate(json_schema, string_keys) == :ok
+      assert Xema.cast(json_schema, string_keys) == {:ok, string_keys}
+
+      atom_keys = %{foo: "somestring", bar: ["a", "b"], baz: %{prop: "c"}}
+      assert Xema.cast(json_schema, atom_keys) == {:ok, string_keys}
     end
   end
 end

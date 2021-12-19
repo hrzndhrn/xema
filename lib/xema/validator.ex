@@ -518,8 +518,6 @@ defmodule Xema.Validator do
        when is_number(value),
        do: minimum(minimum, exclusive_minimum, value)
 
-  defp minimum(_, _), do: :ok
-
   @spec minimum(number, boolean, number) :: result
   defp minimum(minimum, _exclusive, value) when value > minimum, do: :ok
   defp minimum(minimum, nil, value) when value == minimum, do: :ok
@@ -562,8 +560,6 @@ defmodule Xema.Validator do
       _ -> {:error, %{value: value, multiple_of: multiple_of}}
     end
   end
-
-  defp multiple_of(_, _), do: :ok
 
   @spec min_length(Schema.t(), String.t()) :: result
   defp min_length(%{min_length: nil}, _), do: :ok
@@ -1024,7 +1020,7 @@ defmodule Xema.Validator do
   @spec custom_validator(Schema.t(), any) :: result
   defp custom_validator(%{validator: validator}, value)
        when is_function(validator, 1) do
-    with {:error, reason} <- apply(validator, [value]) do
+    with {:error, reason} <- validator.(value) do
       {:error, %{validator: reason, value: value}}
     end
   end
@@ -1037,7 +1033,7 @@ defmodule Xema.Validator do
 
   defp custom_validator(%{validator: behaviour}, value)
        when not is_nil(behaviour) and is_atom(behaviour) do
-    with {:error, reason} <- apply(behaviour, :validate, [value]) do
+    with {:error, reason} <- behaviour.validate(value) do
       {:error, %{validator: reason, value: value}}
     end
   end

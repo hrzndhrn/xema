@@ -35,6 +35,10 @@ defmodule Xema.BuilderTest do
 
       assert schema == raw
     end
+
+    test "returns :struct" do
+      assert strux() == :struct
+    end
   end
 
   describe "map function" do

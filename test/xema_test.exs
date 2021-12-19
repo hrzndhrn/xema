@@ -5,4 +5,5 @@ defmodule XemaTest do
   doctest Examples
   doctest Usage
   doctest Xema
+  doctest Xema.NoLoader
 end

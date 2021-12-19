@@ -10,6 +10,11 @@ defmodule Xema.NoLoader do
   @doc """
   Returns for `any` data always the error tuple
   `{:error, "No loader configured."}`.
+
+  ## Examples
+
+      iex> Xema.NoLoader.fetch(nil)
+      {:error, "No loader configured."}
   """
   @spec fetch(any :: any) :: {:error, binary}
   def fetch(_), do: {:error, "No loader configured."}

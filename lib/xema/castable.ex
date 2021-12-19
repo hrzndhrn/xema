@@ -44,7 +44,7 @@ defimpl Xema.Castable, for: BitString do
 
   def cast(str, :struct, module, _schema)
       when module in [Date, DateTime, NaiveDateTime, Time] do
-    case apply(module, :from_iso8601, [str]) do
+    case module.from_iso8601(str) do
       {:ok, value, _offset} -> {:ok, value}
       {:ok, value} -> {:ok, value}
       {:error, _} -> {:error, %{to: module, value: str}}
