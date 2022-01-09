@@ -4,7 +4,7 @@ defmodule Xema.Mixfile do
   def project do
     [
       app: :xema,
-      version: "0.14.3",
+      version: "0.15.0",
       elixir: "~> 1.7",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -13,43 +13,11 @@ defmodule Xema.Mixfile do
       package: package(),
       elixirc_paths: elixirc_paths(Mix.env()),
       source_url: "https://github.com/hrzndhrn/xema",
+      docs: docs(),
       aliases: aliases(),
-
-      # Coveralls
+      dialyzer: dialyzer(),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
-        carp: :test,
-        coveralls: :test,
-        "coveralls.detail": :test,
-        "coveralls.post": :test,
-        "coveralls.travis": :test,
-        "coveralls.html": :test,
-        "gen.test_suite": :test
-      ],
-
-      # Docs
-      docs: [
-        main: "readme",
-        extras: [
-          "docs/readme.md",
-          "docs/usage.md",
-          "docs/cast.md",
-          "docs/loader.md",
-          "docs/examples.md",
-          "docs/unsupported.md",
-          "CHANGELOG.md"
-        ],
-        skip_undefined_reference_warnings_on: [
-          "CHANGELOG.md"
-        ]
-      ],
-
-      # Dialyzer
-      dialyzer: [
-        ignore_warnings: ".dialyzer_ignore.exs",
-        plt_add_apps: [:decimal],
-        plt_file: {:no_warn, "test/support/plts/dialyzer.plt"}
-      ]
+      preferred_cli_env: preferred_cli_env()
     ]
   end
 
@@ -59,6 +27,52 @@ defmodule Xema.Mixfile do
 
   def application do
     [extra_applications: [:logger], env: [loader: Xema.NoLoader]]
+  end
+
+  def preferred_cli_env do
+    [
+      carp: :test,
+      coveralls: :test,
+      "coveralls.detail": :test,
+      "coveralls.post": :test,
+      "coveralls.travis": :test,
+      "coveralls.html": :test,
+      "gen.test_suite": :test
+    ]
+  end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
+  defp aliases do
+    [carp: "test --seed 0 --max-failures 1 --trace"]
+  end
+
+  def docs do
+    [
+      main: "readme",
+      formatters: ["html"],
+      extras: [
+        "docs/readme.md",
+        "docs/usage.md",
+        "docs/cast.md",
+        "docs/loader.md",
+        "docs/examples.md",
+        "docs/unsupported.md",
+        "CHANGELOG.md"
+      ],
+      skip_undefined_reference_warnings_on: [
+        "CHANGELOG.md"
+      ]
+    ]
+  end
+
+  def dialyzer do
+    [
+      ignore_warnings: ".dialyzer_ignore.exs",
+      plt_add_apps: [:decimal],
+      plt_file: {:no_warn, "test/support/plts/dialyzer.plt"}
+    ]
   end
 
   defp deps do
@@ -75,13 +89,6 @@ defmodule Xema.Mixfile do
       {:jason, "~> 1.1", only: [:dev, :test]},
       {:httpoison, "~> 1.8", only: :test}
     ]
-  end
-
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_), do: ["lib"]
-
-  defp aliases do
-    [carp: "test --seed 0 --max-failures 1 --trace"]
   end
 
   defp package do

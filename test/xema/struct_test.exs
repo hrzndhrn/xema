@@ -16,7 +16,7 @@ defmodule Xema.StructTest do
   defmodule Baz do
     use Xema
 
-    xema do
+    xema_struct do
       field :a, [:integer, nil]
       field :b, :list, default: []
       field :c, [:integer, nil], default: 1

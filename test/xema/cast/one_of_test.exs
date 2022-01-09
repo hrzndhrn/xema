@@ -143,7 +143,7 @@ defmodule Xema.Cast.OneOfTest do
     defmodule OneOf.Foo do
       use Xema
 
-      xema do
+      xema_struct do
         field :value, :atom, const: :foo
       end
     end
@@ -151,7 +151,7 @@ defmodule Xema.Cast.OneOfTest do
     defmodule OneOf.Bar do
       use Xema
 
-      xema do
+      xema_struct do
         field :value, :atom, const: :bar
       end
     end
@@ -159,7 +159,7 @@ defmodule Xema.Cast.OneOfTest do
     defmodule OneOf.FooBar do
       use Xema
 
-      xema do
+      xema_struct do
         field :foobar, :any, one_of: [OneOf.Foo, OneOf.Bar]
       end
     end

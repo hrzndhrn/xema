@@ -43,6 +43,21 @@ defmodule Xema.Builder do
     end
   end)
 
+  @xema_deprecated_message """
+  Xema.Builder.xema/1 with :field arguments is deprecated.
+  Use Xema.Builder.xema_struct/1 to define a struct instead.
+
+  Example:
+
+  defmoudle MyApp.User do
+    use Xema
+
+    xema_struct do
+      field :name, :string
+    end
+  end
+  """
+
   @doc """
   Returns a tuple with the given `type` (default `:any`) and the given schemas
   tagged by the keyword `:any_of`. This function provides a shortcut for
@@ -183,7 +198,21 @@ defmodule Xema.Builder do
   @doc """
   Creates a `schema`.
   """
+  defmacro xema(do: {:field, _context, _args} = schema) do
+    warn(@xema_deprecated_message, __CALLER__)
+    do_xema(schema)
+  end
+
+  defmacro xema(do: {:__block__, _context_1, [{:field, _context_2, _args} | _ast]} = schema) do
+    warn(@xema_deprecated_message, __CALLER__)
+    do_xema(schema)
+  end
+
   defmacro xema(do: schema) do
+    do_xema(schema)
+  end
+
+  defp do_xema(schema) do
     quote do
       xema :__xema_default__ do
         unquote(schema)
@@ -194,8 +223,25 @@ defmodule Xema.Builder do
   @doc """
   Creates a `schema` with the given name.
   """
+  defmacro xema(name, do: {:filed, _context, _args} = schema) do
+    unless name == :__xema_default__, do: warn(@xema_deprecated_message, __CALLER__)
+    do_xema(name, schema)
+  end
+
+  defmacro xema(
+             name,
+             do: {:__block__, _context_1, [{:field, _context_2, _args} | _ast]} = schema
+           ) do
+    unless name == :__xema_default__, do: warn(@xema_deprecated_message, __CALLER__)
+    do_xema(name, schema)
+  end
+
   defmacro xema(name, do: schema) do
-    schema = xema_struct(schema)
+    do_xema(name, schema)
+  end
+
+  defp do_xema(name, schema) do
+    schema = dep_xema_struct(schema)
 
     quote do
       Module.register_attribute(__MODULE__, :xemas, accumulate: true)
@@ -239,6 +285,13 @@ defmodule Xema.Builder do
         end
       end
     end
+  end
+
+  @doc """
+  Creates a `schema` and defines the corresponding struct.
+  """
+  defmacro xema_struct(do: schema) do
+    do_xema(schema)
   end
 
   defp xema_funs(:header) do
@@ -392,13 +445,13 @@ defmodule Xema.Builder do
     end
   end
 
-  defp xema_struct({:field, _context, _args} = data), do: do_xema_struct([data])
+  defp dep_xema_struct({:field, _context, _args} = data), do: do_dep_xema_struct([data])
 
-  defp xema_struct({:__block__, _context, data}), do: do_xema_struct(data)
+  defp dep_xema_struct({:__block__, _context, data}), do: do_dep_xema_struct(data)
 
-  defp xema_struct(data), do: data
+  defp dep_xema_struct(data), do: data
 
-  defp do_xema_struct(data) do
+  defp do_dep_xema_struct(data) do
     data =
       data
       |> Enum.group_by(fn
@@ -458,7 +511,7 @@ defmodule Xema.Builder do
       iex> defmodule User do
       ...>   use Xema
       ...>
-      ...>   xema do
+      ...>   xema_struct do
       ...>     field :name, :string, min_length: 1
       ...>   end
       ...> end
@@ -558,7 +611,7 @@ defmodule Xema.Builder do
       iex> defmodule Person do
       ...>   use Xema
       ...>
-      ...>   xema do
+      ...>   xema_struct do
       ...>     field :name, :string, min_length: 1
       ...>     required [:name]
       ...>   end
@@ -575,4 +628,9 @@ defmodule Xema.Builder do
     do: {:struct, Keyword.put_new(keywords, :module, module)}
 
   def add_new_module(schema, _module), do: schema
+
+  defp warn(message, %{file: file, line: line}) do
+    IO.warn(IO.ANSI.format([IO.ANSI.yellow(), "#{message}\nat: #{file}:#{line}"]), [])
+    :ok
+  end
 end
