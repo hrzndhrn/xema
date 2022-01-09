@@ -30,6 +30,8 @@ defmodule Xema do
 
   The functions with arity 1 are also available for single schema modules.
 
+  The macro `xema_struct/1` creates a schema with the coresponding struct.
+
   ## Examples
 
   Single schema module:
@@ -108,7 +110,7 @@ defmodule Xema do
       iex> defmodule StructA do
       ...>   use Xema
       ...>
-      ...>   xema do
+      ...>   xema_struct do
       ...>     field :foo, :integer, minimum: 0
       ...>   end
       ...> end
@@ -116,7 +118,7 @@ defmodule Xema do
       ...> defmodule StructB do
       ...>   use Xema
       ...>
-      ...>   xema do
+      ...>   xema_struct do
       ...>     field :a, :string, min_length: 3
       ...>     field :b, StructA
       ...>     required [:a]

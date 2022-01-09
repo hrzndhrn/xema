@@ -73,7 +73,7 @@ defmodule Xema.UseTest do
     defmodule PersonSchema do
       use Xema
 
-      xema do
+      xema_struct do
         map(
           properties: %{
             name: string(min_length: 1),
@@ -278,7 +278,7 @@ defmodule Xema.UseTest do
     defmodule OneFieldWithoutKeywords do
       use Xema
 
-      xema do
+      xema_struct do
         field :age, :integer
       end
     end
@@ -292,7 +292,7 @@ defmodule Xema.UseTest do
     defmodule OneFieldWithKeywords do
       use Xema
 
-      xema do
+      xema_struct do
         field :age, :integer, minimum: 0
       end
     end
@@ -306,7 +306,7 @@ defmodule Xema.UseTest do
     defmodule UserStruct do
       use Xema
 
-      xema do
+      xema_struct do
         field :name, :string, min_length: 1
         field :age, [:integer, nil], minimum: 0
         required [:age]
@@ -420,7 +420,7 @@ defmodule Xema.UseTest do
           defmodule MultiRequired do
             use Xema
 
-            xema do
+            xema_struct do
               field :foo, :integer, minimum: 0
               required [:foo]
               required [:foo]
@@ -441,7 +441,7 @@ defmodule Xema.UseTest do
           defmodule MultiRequired do
             use Xema
 
-            xema do
+            xema_struct do
               field :foo, %{}, minimum: 0
             end
           end
@@ -460,7 +460,7 @@ defmodule Xema.UseTest do
           defmodule MultiRequired do
             use Xema
 
-            xema do
+            xema_struct do
               field :foo, "bar", minimum: 0
             end
           end
@@ -479,7 +479,7 @@ defmodule Xema.UseTest do
           defmodule MissingBehaviour do
             use Xema
 
-            xema do
+            xema_struct do
               field :foo, Foo
             end
           end
@@ -502,7 +502,7 @@ defmodule Xema.UseTest do
           defmodule BadBehaviour do
             use Xema
 
-            xema do
+            xema_struct do
               field :grants, :list, items: Bad, default: []
             end
           end
@@ -520,7 +520,7 @@ defmodule Xema.UseTest do
     defmodule AllowFoo do
       use Xema
 
-      xema do
+      xema_struct do
         field :a, :integer, allow: nil
       end
     end
@@ -528,7 +528,7 @@ defmodule Xema.UseTest do
     defmodule AllowBar do
       use Xema
 
-      xema do
+      xema_struct do
         field :foo, AllowFoo, allow: nil
       end
     end
@@ -550,7 +550,7 @@ defmodule Xema.UseTest do
     defmodule AllowMultiFoo do
       use Xema
 
-      xema do
+      xema_struct do
         field :a, :integer
       end
     end
@@ -558,7 +558,7 @@ defmodule Xema.UseTest do
     defmodule AllowMultiBar do
       use Xema
 
-      xema do
+      xema_struct do
         field :foo, AllowMultiFoo, allow: [:integer, nil]
       end
     end
@@ -584,7 +584,7 @@ defmodule Xema.UseTest do
     defmodule AllowMulti do
       use Xema
 
-      xema do
+      xema_struct do
         field :a, :integer, allow: [:string, :boolean]
       end
     end
@@ -610,7 +610,7 @@ defmodule Xema.UseTest do
     defmodule AllowToMulti do
       use Xema
 
-      xema do
+      xema_struct do
         field :a, [:integer, :boolean], allow: :string
       end
     end
@@ -636,7 +636,7 @@ defmodule Xema.UseTest do
     defmodule AllowMultiMulti do
       use Xema
 
-      xema do
+      xema_struct do
         field :a, [:integer], allow: [:string, :boolean]
       end
     end

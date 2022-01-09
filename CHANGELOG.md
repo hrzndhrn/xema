@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.15.0 - 2022/01/09
+
++ Deprecate macro `Xema.Builder.xema/1` in combination with
+  `Xema.Builder.field/3`. Use `Xema.Builde.xema_struct/1` instead.
+
+  This change makes it clearer in which case a struct is created.
+  The functionality of `Xema.Builder.xema/1` and `Xema.Builder.xema/2` to create
+  simple schemas stays the same.
+
+  ### Example:
+
+  before 0.15.0:
+  ```elixir
+  defmoudle MyApp.User do
+    use Xema
+
+    xema do
+      field :name, :string
+    end
+  end
+  ```
+  since 0.15.0:
+  ```elixir
+  defmoudle MyApp.User do
+    use Xema
+
+    xema_struct do
+      field :name, :string
+    end
+  end
+  ```
+
 ## 0.14.3 - 2021/12/19
 
 + `Xeam.from_json_schema/2` sets now `keys: :strings` for any

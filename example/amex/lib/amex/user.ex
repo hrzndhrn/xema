@@ -5,7 +5,7 @@ defmodule Amex.User do
 
   @regex_uuid ~r/^[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}$/
 
-  xema do
+  xema_struct do
     field :id, :string, default: {UUID, :uuid4}, pattern: @regex_uuid
     field :name, :string, min_length: 1
     field :age, [:integer, nil], minimum: 0

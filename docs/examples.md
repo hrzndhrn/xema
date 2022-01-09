@@ -323,7 +323,7 @@ The next schema is a simple struct schema.
 defmodule ExApp.Location do
   use Xema
 
-  xema do
+  xema_struct do
     field :city, [:string, nil]
     field :country, [:string, nil], min_length: 1
   end
@@ -345,7 +345,7 @@ defmodule ExApp.Grant do
   @ops [:foo, :bar, :baz]
   @permissions [:create, :read, :update, :delete]
 
-  xema do
+  xema_struct do
     field :op, :atom, enum: @ops
     field :permissions, :list, items: {:atom, enum: @permissions}
     required [:op, :permissions]
@@ -378,7 +378,7 @@ defmodule ExApp.User do
 
   @regex_uuid ~r/^[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}$/
 
-  xema do
+  xema_struct do
     field :id, :string, default: {UUID, :uuid4}, pattern: @regex_uuid
     field :name, :string, min_length: 1
     field :age, [:integer, nil], minimum: 0
