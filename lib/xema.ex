@@ -61,12 +61,11 @@ defmodule Xema do
   Multi schema module:
 
       iex> defmodule Schema do
-      ...>   use Xema, multi: true
+      ...>   use Xema, multi: true, default: :user
       ...>
       ...>   @pos integer(minimum: 0)
       ...>   @neg integer(maximum: 0)
       ...>
-      ...>   @default true
       ...>   xema :user do
       ...>     map(
       ...>       properties: %{

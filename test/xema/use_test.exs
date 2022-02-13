@@ -94,7 +94,7 @@ defmodule Xema.UseTest do
 
   describe "module with multiple schemas" do
     defmodule Schema do
-      use Xema, multi: true
+      use Xema, multi: true, default: :person
 
       @pos integer(minimum: 0)
       @neg integer(maximum: 0)
@@ -108,7 +108,6 @@ defmodule Xema.UseTest do
         )
       end
 
-      @default true
       xema :person do
         keyword(
           properties: %{

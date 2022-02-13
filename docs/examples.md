@@ -8,7 +8,7 @@ A minimal example.
 
 ```elixir
 iex> defmodule Example.Basic do
-...>   use Xema, multi: true
+...>   use Xema, multi: true, default: :foo
 ...>
 ...>   xema :person do
 ...>     map(
@@ -20,7 +20,6 @@ iex> defmodule Example.Basic do
 ...>     )
 ...>   end
 ...>
-...>   @default true
 ...>   xema :foo, do: :string
 ...> end
 iex>
