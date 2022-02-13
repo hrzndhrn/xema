@@ -156,11 +156,12 @@ defmodule Xema do
   @doc false
   defmacro __using__(opts) do
     multi = Keyword.get(opts, :multi, false)
+    default = Keyword.get(opts, :default)
 
     quote do
       import Xema.Builder
       @xemas []
-      @default false
+      @__xema_default__ unquote(default)
       @multi unquote(multi)
     end
   end

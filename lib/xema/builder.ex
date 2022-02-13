@@ -214,7 +214,7 @@ defmodule Xema.Builder do
 
   defp do_xema(schema) do
     quote do
-      xema :__xema_default__ do
+      xema :__xema_default_schema__ do
         unquote(schema)
       end
     end
@@ -224,7 +224,7 @@ defmodule Xema.Builder do
   Creates a `schema` with the given name.
   """
   defmacro xema(name, do: {:filed, _context, _args} = schema) do
-    unless name == :__xema_default__, do: warn(@xema_deprecated_message, __CALLER__)
+    unless name == :__xema_default_schema__, do: warn(@xema_deprecated_message, __CALLER__)
     do_xema(name, schema)
   end
 
@@ -232,7 +232,7 @@ defmodule Xema.Builder do
              name,
              do: {:__block__, _context_1, [{:field, _context_2, _args} | _ast]} = schema
            ) do
-    unless name == :__xema_default__, do: warn(@xema_deprecated_message, __CALLER__)
+    unless name == :__xema_default_schema__, do: warn(@xema_deprecated_message, __CALLER__)
     do_xema(name, schema)
   end
 
@@ -248,8 +248,32 @@ defmodule Xema.Builder do
 
       multi = Module.get_attribute(__MODULE__, :multi)
 
-      default = Module.get_attribute(__MODULE__, :default)
-      Module.put_attribute(__MODULE__, :default, false)
+      # default = Module.get_attribute(__MODULE__, :default)
+      # Module.put_attribute(__MODULE__, :default, false)
+      if Module.get_attribute(__MODULE__, :default) == true do
+        message = """
+        The attribute `@default true` to mark a schema as default is deprecated.
+        To set a default add the option `:default` to `use Xema`.any()
+
+        Example:
+
+        defmoudle MyApp.Schemas do
+          use Xemae, multi: true, default: :s1
+
+          xema :s1 do
+            ...
+          end
+
+          xema :s2 do
+            ...
+          end
+        end
+        """
+
+        IO.warn(IO.ANSI.format([IO.ANSI.yellow(), "#{message}"]), [])
+      end
+
+      default = Module.get_attribute(__MODULE__, :__xema_default__)
 
       if multi == nil do
         raise "Use `use Xema` to use the `xema/2` macro."
@@ -267,19 +291,23 @@ defmodule Xema.Builder do
 
       if multi do
         if length(@xemas) == 1 do
-          unquote(xema_funs(:header))
+          if default == nil do
+            unquote(xema_funs(:header_without_default))
+          else
+            unquote(xema_funs(:header_with_default))
+          end
         end
 
-        if default do
+        if unquote(name) == default do
           unquote(xema_funs(:default, name))
         end
 
         unquote(xema_funs(:by_name, name))
       else
-        if unquote(name) == :__xema_default__ do
+        if unquote(name) == :__xema_default_schema__ do
           unquote(xema_funs(:single, name))
         else
-          unquote(xema_funs(:header))
+          unquote(xema_funs(:header_with_default))
           unquote(xema_funs(:default, name))
           unquote(xema_funs(:by_name, name))
         end
@@ -294,7 +322,7 @@ defmodule Xema.Builder do
     do_xema(schema)
   end
 
-  defp xema_funs(:header) do
+  defp xema_funs(:header_with_default) do
     quote do
       @doc """
       Returns true if the specified `data` is valid against the schema
@@ -341,6 +369,56 @@ defmodule Xema.Builder do
 
       @doc false
       def xema(name \\ :default)
+    end
+  end
+
+  defp xema_funs(:header_without_default) do
+    quote do
+      @doc """
+      Returns true if the specified `data` is valid against the schema
+      defined under `name`, otherwise false.
+      """
+      @spec valid?(atom, term) :: boolean
+      def valid?(name, data)
+
+      @doc """
+      Validates the given `data` against the schema defined under `name`.
+
+      Returns `:ok` for valid data, otherwise an `:error` tuple.
+      """
+      @spec validate(atom, term) :: :ok | {:error, ValidationError.t()}
+      def validate(name, data)
+
+      @doc """
+      Validates the given `data` against the schema defined under `name`.
+
+      Returns `:ok` for valid data, otherwise a `Xema.ValidationError` is
+      raised.
+      """
+      @spec validate!(atom, term) :: :ok
+      def validate!(name, data)
+
+      @doc """
+      Converts the given `data` according to the schema defined under `name`.
+
+      Returns an `:ok` tuple with the converted data for valid `data`, otherwise
+      an `:error` tuple is returned.
+      """
+      @spec cast(atom, term) ::
+              {:ok, term} | {:error, ValidationError.t() | CastError.t()}
+      def cast(name, data)
+
+      @doc """
+      Converts the given `data` according to the schema defined under `name`.
+
+      Returns converted data for valid `data`, otherwise a `Xema.CastError` or
+      `Xema.ValidationError` is raised.
+      """
+      @spec cast!(atom, term) :: {:ok, term}
+      def cast!(name, data)
+
+      @doc false
+      def xema(name)
     end
   end
 
