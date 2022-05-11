@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.16.0 -
+
++ Deprecated `@default true` to mark a schema as default.
+  To set a default add the option `:default` to `use Xema`.
+
+  Example:
+
+  ```elixir
+  defmoudle MyApp.Schemas do
+    use Xemae, multi: true, default: :s1
+
+    xema :s1 do
+      ...
+    end
+
+    xema :s2 do
+      ...
+    end
+  end
+  ```
+
 ## 0.15.0 - 2022/01/09
 
 + Deprecate macro `Xema.Builder.xema/1` in combination with

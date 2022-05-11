@@ -248,12 +248,10 @@ defmodule Xema.Builder do
 
       multi = Module.get_attribute(__MODULE__, :multi)
 
-      # default = Module.get_attribute(__MODULE__, :default)
-      # Module.put_attribute(__MODULE__, :default, false)
       if Module.get_attribute(__MODULE__, :default) == true do
         message = """
         The attribute `@default true` to mark a schema as default is deprecated.
-        To set a default add the option `:default` to `use Xema`.any()
+        To set a default add the option `:default` to `use Xema`.
 
         Example:
 

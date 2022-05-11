@@ -19,8 +19,8 @@ defmodule Xema do
   The macro `xema/2` supports the construction of a schema. After that
   the schema is available via the functions above.
 
-  In a multi schema module a schema can be tagged with `@default true` and
-  then called by
+  In a multi schema module a schema can be tagged with the option
+  `default: :schema_name` and then called by
   + `__MODULE__.valid?/1`
   + `__MODULE__.validate/1`
   + `__MODULE__.validate!/1`
