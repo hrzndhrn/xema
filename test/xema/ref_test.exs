@@ -1101,7 +1101,7 @@ defmodule Xema.RefTest do
         |> Jason.decode!()
         |> Xema.from_json_schema()
 
-        %{schema: schema}
+      %{schema: schema}
     end
 
     test "with valid data", %{schema: schema} do
