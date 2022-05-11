@@ -20,6 +20,7 @@
     end
   end
   ```
++ Fix `$ref` applicator to accept none-keywords in the path.
 
 ## 0.15.0 - 2022/01/09
 
