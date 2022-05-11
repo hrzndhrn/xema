@@ -251,6 +251,7 @@ defmodule Xema.Builder do
       if Module.get_attribute(__MODULE__, :default) == true do
         message = """
         The attribute `@default true` to mark a schema as default is deprecated.
+        Found in module #{inspect(__MODULE__)} for xema #{inspect(unquote(name))}.
         To set a default add the option `:default` to `use Xema`.
 
         Example:
@@ -269,6 +270,7 @@ defmodule Xema.Builder do
         """
 
         IO.warn(IO.ANSI.format([IO.ANSI.yellow(), "#{message}"]), [])
+        Module.delete_attribute(__MODULE__, :default)
       end
 
       default = Module.get_attribute(__MODULE__, :__xema_default__)
