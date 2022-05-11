@@ -1074,4 +1074,38 @@ defmodule Xema.RefTest do
       assert valid?(schema, %{commands: %{"foo_cmd" => %{os: "mac"}}})
     end
   end
+
+  describe "refs nested definitions" do
+    setup do
+      schema =
+        """
+        {
+          "definitions": {
+            "common": {
+              "foo": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          },
+          "user": {
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/common/foo"
+              }
+            }
+          }
+        }
+        """
+        |> Jason.decode!()
+        |> Xema.from_json_schema()
+
+        %{schema: schema}
+    end
+
+    test "with valid data", %{schema: schema} do
+      assert valid?(schema, %{"user" => %{"id" => 555}})
+    end
+  end
 end

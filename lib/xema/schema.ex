@@ -266,10 +266,7 @@ defmodule Xema.Schema do
   def fetch(%Schema{} = schema, pointer) do
     keys = pointer |> String.trim("/") |> String.split("/")
 
-    case do_fetch(schema, keys) do
-      :error -> schema |> Map.get(:data, :error) |> do_fetch(keys)
-      schema -> schema
-    end
+    do_fetch(schema, keys)
   end
 
   defp do_fetch(nil, _), do: :error
@@ -289,18 +286,21 @@ defmodule Xema.Schema do
     end
   end
 
-  defp do_fetch(schema, [key | keys]) do
+  defp do_fetch(schema, [key | keys] = pointer) do
     key = decode(key)
     atom_key = Utils.to_existing_atom(key)
 
-    schema =
-      case {Map.get(schema, key), Map.get(schema, atom_key)} do
-        {nil, nil} -> :error
-        {value, nil} -> value
-        {nil, value} -> value
-      end
+    case {Map.get(schema, key), Map.get(schema, atom_key)} do
+      {nil, nil} ->
+        with {:ok, data} <- Map.fetch(schema, :data),
+             do: do_fetch(data, pointer)
 
-    do_fetch(schema, keys)
+      {value, nil} ->
+        do_fetch(value, keys)
+
+      {nil, value} ->
+        do_fetch(value, keys)
+    end
   end
 
   @doc """
