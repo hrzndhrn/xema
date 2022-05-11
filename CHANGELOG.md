@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.16.0 -
+## 0.16.0 - 2022/05/11
 
 + Deprecated `@default true` to mark a schema as default.
   To set a default add the option `:default` to `use Xema`.
