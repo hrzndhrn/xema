@@ -82,6 +82,7 @@ defmodule Xema.ValidationError do
     "Error at [:int]",
     "Error at []"
   ]
+  ```
   """
   @spec travers_errors({:error, map} | map, acc, (map, path, acc -> acc), opts) :: acc
         when acc: any
