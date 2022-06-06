@@ -477,6 +477,8 @@ defmodule Xema do
     end
   end
 
+  defp maybe_schema(boolean) when is_boolean(boolean), do: boolean
+
   defp maybe_schema(atom) when is_atom(atom) do
     case atom in Schema.types() do
       true -> schema(atom)
