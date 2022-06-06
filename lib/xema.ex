@@ -477,6 +477,7 @@ defmodule Xema do
     end
   end
 
+  defp maybe_schema(nil), do: nil
   defp maybe_schema(boolean) when is_boolean(boolean), do: boolean
 
   defp maybe_schema(atom) when is_atom(atom) do

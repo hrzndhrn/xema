@@ -7,6 +7,9 @@ defmodule Xema.DataTest do
 
   describe "custom data: " do
     test "additional data goes to the data map" do
+      schema = Xema.new({:map, foo: nil})
+      assert schema.schema.data == %{foo: nil}
+
       schema = Xema.new({:map, foo: true})
       assert schema.schema.data == %{foo: true}
 
