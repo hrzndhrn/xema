@@ -6,7 +6,7 @@ defmodule Xema.Cast.ListTest do
 
   alias Xema.{CastError, ValidationError}
 
-  @set [:atom, "str", 1.1, 1, %{}]
+  @set [:atom, "str", 1.1, 1]
 
   #
   # Xema.cast/2
@@ -339,6 +339,68 @@ defmodule Xema.Cast.ListTest do
 
     test "return ok tuple for atoms", %{schema: schema} do
       assert Xema.cast(schema, [:a, :b]) == {:ok, ["a", "b"]}
+    end
+  end
+
+  describe "cast/2 with list of maps (Xema)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:list,
+             items: {:map, keys: :strings, properties: %{"a" => :integer, "b" => :integer}}}
+          )
+      }
+    end
+
+    test "return ok tuple for list of maps", %{schema: schema} do
+      assert cast(schema, [%{"a" => "1", "b" => "2"}, %{"a" => "3", "b" => "4"}]) ==
+               {:ok, [%{"a" => 1, "b" => 2}, %{"a" => 3, "b" => 4}]}
+    end
+
+    test "return ok tuple for list of maps with atom keys", %{schema: schema} do
+      assert cast(schema, [%{a: "1", b: "2"}, %{a: "3", b: "4"}]) ==
+               {:ok, [%{"a" => 1, "b" => 2}, %{"a" => 3, "b" => 4}]}
+    end
+
+    test "return ok tuple for list encoded as map with correct inner types", %{schema: schema} do
+      assert cast(schema, %{"0" => %{"a" => 1, "b" => 2}, "1" => %{"a" => 3, "b" => 4}}) ==
+               {:ok, [%{"a" => 1, "b" => 2}, %{"a" => 3, "b" => 4}]}
+    end
+
+    test "return ok tuple for list encoded as map with incorrect inner types", %{schema: schema} do
+      assert cast(schema, %{"0" => %{"a" => "1", "b" => "2"}, "1" => %{"a" => "3", "b" => "4"}}) ==
+               {:ok, [%{"a" => 1, "b" => 2}, %{"a" => 3, "b" => 4}]}
+    end
+
+    test "sorts the list based on key integer values", %{schema: schema} do
+      params_list = for i <- 0..50, do: {i, %{"a" => i + 1, "b" => i + 2}}
+      expected_sorted_value = Enum.map(params_list, fn {_k, v} -> v end)
+      params_map = params_list |> Enum.shuffle() |> Map.new(fn {k, v} -> {to_string(k), v} end)
+
+      assert {:ok, ^expected_sorted_value} = cast(schema, params_map)
+    end
+
+    test "sorts the list based on key mixed values", %{schema: schema} do
+      params_list = %{
+        "0" => %{"a" => 1, "b" => 1},
+        "1" => %{"a" => 2, "b" => 2},
+        "abc" => %{"a" => 3, "b" => 3},
+        ~D[2000-01-01] => %{"a" => 4, "b" => 4},
+        "5" => %{"a" => 5, "b" => 5}
+      }
+
+      expected_sorted_value = [
+        %{"a" => 1, "b" => 1},
+        %{"a" => 2, "b" => 2},
+        %{"a" => 5, "b" => 5},
+        %{"a" => 4, "b" => 4},
+        %{"a" => 3, "b" => 3}
+      ]
+
+      params_map = params_list |> Enum.shuffle() |> Map.new(fn {k, v} -> {to_string(k), v} end)
+
+      assert {:ok, ^expected_sorted_value} = cast(schema, params_map)
     end
   end
 end

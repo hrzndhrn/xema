@@ -302,8 +302,38 @@ defimpl Xema.Castable, for: Map do
     end)
   end
 
+  def cast(map, :list, _module, _schema) do
+    sorted_keys = Map.keys(map) |> sort_keys()
+
+    {:ok, Enum.map(sorted_keys, fn k -> Map.get(map, k) end)}
+  end
+
   def cast(map, type, _module, _schema),
     do: {:error, %{to: type, value: map}}
+
+  # The idea is to use the integer based keys, to preserve the intended sorting.
+  # This is useful for dealing with parameters coming from a Phoenix nested form,
+  # where lists are encoded as maps, for example:
+  #
+  #  params = %{
+  #    "quiz" => %{
+  #      "questions" => %{
+  #        "0" => %{"question" => "1 + 1 = ?", "answer" => "2"},
+  #        "1" => %{"question" => "2 + 2 = ?", "answer" => "4"}
+  #      }
+  #    }
+  #  }
+  defp sort_keys(keys) do
+    keys
+    |> Enum.sort(&(to_integer_or_self(&1) <= to_integer_or_self(&2)))
+  end
+
+  defp to_integer_or_self(value) do
+    case Integer.parse(value) do
+      {integer, ""} -> integer
+      _ -> value
+    end
+  end
 end
 
 defimpl Xema.Castable, for: NaiveDateTime do
