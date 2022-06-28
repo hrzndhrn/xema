@@ -816,6 +816,27 @@ defmodule Xema do
     end
   end
 
+  defp cast_values(%Schema{items: items} = _schema, data, opts, path)
+       when not is_nil(items) and is_map(data) do
+    case items do
+      %Schema{} = schema ->
+        data
+        |> Enum.reduce_while([], fn {index, item}, acc ->
+          case do_cast(schema, item, opts, [index | path]) do
+            {:ok, cast} -> {:cont, [{index, cast} | acc]}
+            {:error, _} = error -> {:halt, error}
+          end
+        end)
+        |> case do
+          {:error, _} = error -> error
+          values -> {:ok, Map.new(values)}
+        end
+
+      _items ->
+        raise "coming soon"
+    end
+  end
+
   defp cast_values(
          %Schema{
            type: type,
