@@ -136,7 +136,7 @@ defmodule Xema do
   use Xema.Behaviour
 
   import Xema.Castable.Helper, only: [cast_key: 2]
-  import Xema.Utils, only: [to_existing_atom: 1]
+  import Xema.Utils, only: [to_existing_atom: 1, to_sorted_list: 1]
 
   alias Xema.{
     Castable,
@@ -816,24 +816,34 @@ defmodule Xema do
     end
   end
 
-  defp cast_values(%Schema{items: items} = _schema, data, opts, path)
-       when not is_nil(items) and is_map(data) do
+  defp cast_values(%Schema{type: :list, items: items} = schema, data, opts, path)
+       when is_map(data) do
     case items do
+      nil ->
+        {:ok, data}
+
       %Schema{} = schema ->
-        data
-        |> Enum.reduce_while([], fn {index, item}, acc ->
-          case do_cast(schema, item, opts, [index | path]) do
-            {:ok, cast} -> {:cont, [{index, cast} | acc]}
-            {:error, _} = error -> {:halt, error}
-          end
-        end)
-        |> case do
+        result =
+          Enum.reduce_while(data, [], fn {index, item}, acc ->
+            case do_cast(schema, item, opts, [index | path]) do
+              {:ok, cast} -> {:cont, [{index, cast} | acc]}
+              {:error, _} = error -> {:halt, error}
+            end
+          end)
+
+        case result do
           {:error, _} = error -> error
           values -> {:ok, Map.new(values)}
         end
 
-      _items ->
-        raise "coming soon"
+      [_ | _] ->
+        case to_sorted_list(data) do
+          :error ->
+            {:error, %{to: :list, path: path, value: data}}
+
+          {:ok, list} ->
+            cast_values_map(schema, list, opts, path)
+        end
     end
   end
 
@@ -879,6 +889,29 @@ defmodule Xema do
            |> Enum.into(%{})
            |> add_defaults(schema, opts)}
       end
+    end
+  end
+
+  @spec cast_values_map(Schema.t(), list(), keyword(), list()) :: {:error, term} | {:ok, map}
+  defp cast_values_map(%Schema{type: :list, items: items} = schema, list, opts, path)
+       when is_list(items) do
+    additional_items = Map.get(schema, :additional_items)
+
+    result =
+      list
+      |> Enum.with_index()
+      |> Enum.reduce_while([], fn {{key, item}, index}, acc ->
+        schema = Enum.at(items, index, additional_items)
+
+        case do_cast(schema, item, opts, [key | path]) do
+          {:ok, cast} -> {:cont, [{index, cast} | acc]}
+          error -> {:halt, error}
+        end
+      end)
+
+    case result do
+      {:error, _} = error -> error
+      values -> {:ok, Map.new(values)}
     end
   end
 

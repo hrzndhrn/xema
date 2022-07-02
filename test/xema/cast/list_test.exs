@@ -150,10 +150,25 @@ defmodule Xema.Cast.ListTest do
     end
 
     test "from a tuple with invalid value", %{schema: schema} do
-      data = {"foo", 2}
-      expected = {:error, CastError.exception(path: [0], to: :integer, value: "foo")}
+      assert cast(schema, {"foo", 2}) ==
+               {:error, CastError.exception(path: [0], to: :integer, value: "foo")}
+    end
 
-      assert cast(schema, data) == expected
+    test "from a map with integer keys", %{schema: schema} do
+      assert cast(schema, %{0 => "1", 1 => 2, 4 => :add}) == {:ok, [1, "2", :add]}
+    end
+
+    test "from a map with string keys", %{schema: schema} do
+      assert cast(schema, %{"0" => "1", "1" => 2, "4" => :add}) == {:ok, [1, "2", :add]}
+    end
+
+    test "from a map with non-continuous keys", %{schema: schema} do
+      assert cast(schema, %{"10" => "1", "1" => 2, "4" => :add}) == {:ok, [2, "add", "1"]}
+    end
+
+    test "from an invalid value", %{schema: schema} do
+      assert cast(schema, :foo) ==
+               {:error, CastError.exception(to: :list, path: [], value: :foo)}
     end
   end
 
@@ -303,6 +318,16 @@ defmodule Xema.Cast.ListTest do
     test "from a tuple with invalid value", %{schema: schema} do
       msg = ~s|cannot cast "foo" to :integer at [0]|
       assert_blame CastError, msg, fn -> cast!(schema, {"foo", 2}) end
+    end
+
+    test "from an invalid value", %{schema: schema} do
+      msg = ~s|cannot cast "foo" to :list|
+      assert_blame CastError, msg, fn -> cast!(schema, "foo") end
+    end
+
+    test "from an invalid map", %{schema: schema} do
+      msg = ~s|cannot cast %{0 => 2, :x => 5} to :list|
+      assert_blame CastError, msg, fn -> cast!(schema, %{0 => 2, :x => 5}) end
     end
   end
 

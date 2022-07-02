@@ -328,6 +328,8 @@ defimpl Xema.Castable, for: Map do
     |> Enum.sort(&(to_integer_or_self(&1) <= to_integer_or_self(&2)))
   end
 
+  defp to_integer_or_self(value) when is_integer(value), do: value
+
   defp to_integer_or_self(value) do
     case Integer.parse(value) do
       {integer, ""} -> integer

@@ -34,8 +34,7 @@ defmodule Xema.Utils do
   * `value` is a keyword and contains `key` as a key.
   * `value` is a list of tuples with `key`as the first element.
 
-  ## Example
-
+  ## Examples
         iex> alias Xema.Utils
         iex> Utils.has_key?(%{foo: 5}, :foo)
         true
@@ -82,4 +81,68 @@ defmodule Xema.Utils do
   def size(list) when is_list(list), do: length(list)
 
   def size(tuple) when is_tuple(tuple), do: tuple_size(tuple)
+
+  @doc """
+  Converts a `map` with integer keys or integer keys represented as strings to
+  a sorted list.
+
+  Returns an ok tuple with the list or an `:error` atom.
+
+  ## Options:
+    * `keys` - if `true` the resulting list has `{key, value}` items, with false
+               the list contains the values. Defaults to `[keys: true]`.
+
+  ## Examples
+
+        iex> alias Xema.Utils
+        iex> Utils.to_sorted_list(%{2 => "b", 3 => "c", 1 => "a"})
+        {:ok, [{1, "a"}, {2, "b"}, {3, "c"}]}
+        iex> Utils.to_sorted_list(%{"2" => "b", "3" => "c", "1" => "a"})
+        {:ok, [{"1", "a"}, {"2", "b"}, {"3", "c"}]}
+        iex> Utils.to_sorted_list(%{"2" => "b", "x" => "c", "1" => "a"})
+        :error
+        iex> Utils.to_sorted_list(%{"2" => "b", "3" => "c", "1" => "a"}, keys: true)
+        {:ok, [{"1", "a"}, {"2", "b"}, {"3", "c"}]}
+        iex> Utils.to_sorted_list(%{"2" => "b", "3" => "c", "1" => "a"}, keys: false)
+        {:ok, ["a", "b", "c"]}
+
+  """
+  @spec to_sorted_list(map(), keys: boolean()) :: {:ok, list()} | :error
+  def to_sorted_list(map, opts \\ [keys: true]) do
+    result =
+      Enum.reduce_while(map, [], fn {key, _value} = item, acc ->
+        case to_integer(key) do
+          {:ok, integer} -> {:cont, [{integer, item(item, opts)} | acc]}
+          :error -> {:halt, nil}
+        end
+      end)
+
+    case result do
+      nil ->
+        :error
+
+      list ->
+        list =
+          list
+          |> Enum.sort_by(fn {index, _value} -> index end)
+          |> Enum.map(fn {_index, value} -> value end)
+
+        {:ok, list}
+    end
+  end
+
+  defp item(item, keys: true), do: item
+
+  defp item({_key, value}, keys: false), do: value
+
+  defp to_integer(value) when is_integer(value), do: {:ok, value}
+
+  defp to_integer(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {integer, ""} -> {:ok, integer}
+      _error -> :error
+    end
+  end
+
+  defp to_integer(_value), do: :error
 end
