@@ -22,7 +22,9 @@ defmodule Xema.Schema do
   * `content_encoding` annotation for the encoding.
   * `content_media_type` annotation for the media type.
   * `contains` validates a list whether any item is valid for the given schema.
-  * `data` none schema data.
+  * `data` none schema data. Values in `data` will be interpreted as schemas
+    when possible. It is not recommended to put any data or schemas under this
+    key. The `data` property is mainly for compatibility with JsonSchema.
   * `default` this keyword can be used to supply a default value for JSON and
     `defstruct`.
   * `definitions` contains schemas for reuse.
