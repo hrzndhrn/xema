@@ -303,7 +303,7 @@ defimpl Xema.Castable, for: Map do
   end
 
   def cast(map, :list, _module, _schema) do
-    sorted_keys = Map.keys(map) |> sort_keys()
+    sorted_keys = map |> Map.keys() |> sort_keys()
 
     {:ok, Enum.map(sorted_keys, fn k -> Map.get(map, k) end)}
   end
