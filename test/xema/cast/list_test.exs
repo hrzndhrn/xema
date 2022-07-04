@@ -406,26 +406,24 @@ defmodule Xema.Cast.ListTest do
       assert {:ok, ^expected_sorted_value} = cast(schema, params_map)
     end
 
-    test "sorts the list based on key mixed values", %{schema: schema} do
-      params_list = %{
+    test "returns an error for map non-integer keys", %{schema: schema} do
+      params_map = %{
         "0" => %{"a" => 1, "b" => 1},
         "1" => %{"a" => 2, "b" => 2},
         "abc" => %{"a" => 3, "b" => 3},
-        ~D[2000-01-01] => %{"a" => 4, "b" => 4},
-        "5" => %{"a" => 5, "b" => 5}
+        ~D[2000-01-01] => %{"a" => 4, "b" => 4}
       }
 
-      expected_sorted_value = [
-        %{"a" => 1, "b" => 1},
-        %{"a" => 2, "b" => 2},
-        %{"a" => 5, "b" => 5},
-        %{"a" => 4, "b" => 4},
-        %{"a" => 3, "b" => 3}
-      ]
-
-      params_map = params_list |> Enum.shuffle() |> Map.new(fn {k, v} -> {to_string(k), v} end)
-
-      assert {:ok, ^expected_sorted_value} = cast(schema, params_map)
+      assert {:error,
+              %Xema.CastError{
+                error: nil,
+                key: nil,
+                message: nil,
+                path: [],
+                required: nil,
+                to: :map,
+                value: ^params_map
+              }} = cast(schema, params_map)
     end
   end
 end
