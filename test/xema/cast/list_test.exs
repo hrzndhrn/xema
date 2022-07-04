@@ -6,7 +6,7 @@ defmodule Xema.Cast.ListTest do
 
   alias Xema.{CastError, ValidationError}
 
-  @set [:atom, "str", 1.1, 1, %{}]
+  @set [:atom, "str", 1.1, 1]
 
   #
   # Xema.cast/2
@@ -150,10 +150,25 @@ defmodule Xema.Cast.ListTest do
     end
 
     test "from a tuple with invalid value", %{schema: schema} do
-      data = {"foo", 2}
-      expected = {:error, CastError.exception(path: [0], to: :integer, value: "foo")}
+      assert cast(schema, {"foo", 2}) ==
+               {:error, CastError.exception(path: [0], to: :integer, value: "foo")}
+    end
 
-      assert cast(schema, data) == expected
+    test "from a map with integer keys", %{schema: schema} do
+      assert cast(schema, %{0 => "1", 1 => 2, 4 => :add}) == {:ok, [1, "2", :add]}
+    end
+
+    test "from a map with string keys", %{schema: schema} do
+      assert cast(schema, %{"0" => "1", "1" => 2, "4" => :add}) == {:ok, [1, "2", :add]}
+    end
+
+    test "from a map with non-continuous keys", %{schema: schema} do
+      assert cast(schema, %{"10" => "1", "1" => 2, "4" => :add}) == {:ok, [2, "add", "1"]}
+    end
+
+    test "from an invalid value", %{schema: schema} do
+      assert cast(schema, :foo) ==
+               {:error, CastError.exception(to: :list, path: [], value: :foo)}
     end
   end
 
@@ -304,6 +319,16 @@ defmodule Xema.Cast.ListTest do
       msg = ~s|cannot cast "foo" to :integer at [0]|
       assert_blame CastError, msg, fn -> cast!(schema, {"foo", 2}) end
     end
+
+    test "from an invalid value", %{schema: schema} do
+      msg = ~s|cannot cast "foo" to :list|
+      assert_blame CastError, msg, fn -> cast!(schema, "foo") end
+    end
+
+    test "from an invalid map", %{schema: schema} do
+      msg = ~s|cannot cast %{0 => 2, :x => 5} to :list|
+      assert_blame CastError, msg, fn -> cast!(schema, %{0 => 2, :x => 5}) end
+    end
   end
 
   describe "cast!/2 with nested schema" do
@@ -339,6 +364,66 @@ defmodule Xema.Cast.ListTest do
 
     test "return ok tuple for atoms", %{schema: schema} do
       assert Xema.cast(schema, [:a, :b]) == {:ok, ["a", "b"]}
+    end
+  end
+
+  describe "cast/2 with list of maps (Xema)" do
+    setup do
+      %{
+        schema:
+          Xema.new(
+            {:list,
+             items: {:map, keys: :strings, properties: %{"a" => :integer, "b" => :integer}}}
+          )
+      }
+    end
+
+    test "return ok tuple for list of maps", %{schema: schema} do
+      assert cast(schema, [%{"a" => "1", "b" => "2"}, %{"a" => "3", "b" => "4"}]) ==
+               {:ok, [%{"a" => 1, "b" => 2}, %{"a" => 3, "b" => 4}]}
+    end
+
+    test "return ok tuple for list of maps with atom keys", %{schema: schema} do
+      assert cast(schema, [%{a: "1", b: "2"}, %{a: "3", b: "4"}]) ==
+               {:ok, [%{"a" => 1, "b" => 2}, %{"a" => 3, "b" => 4}]}
+    end
+
+    test "return ok tuple for list encoded as map with correct inner types", %{schema: schema} do
+      assert cast(schema, %{"0" => %{"a" => 1, "b" => 2}, "1" => %{"a" => 3, "b" => 4}}) ==
+               {:ok, [%{"a" => 1, "b" => 2}, %{"a" => 3, "b" => 4}]}
+    end
+
+    test "return ok tuple for list encoded as map with incorrect inner types", %{schema: schema} do
+      assert cast(schema, %{"0" => %{"a" => "1", "b" => "2"}, "1" => %{"a" => "3", "b" => "4"}}) ==
+               {:ok, [%{"a" => 1, "b" => 2}, %{"a" => 3, "b" => 4}]}
+    end
+
+    test "sorts the list based on key integer values", %{schema: schema} do
+      params_list = for i <- 0..50, do: {i, %{"a" => i + 1, "b" => i + 2}}
+      expected_sorted_value = Enum.map(params_list, fn {_k, v} -> v end)
+      params_map = params_list |> Enum.shuffle() |> Map.new(fn {k, v} -> {to_string(k), v} end)
+
+      assert {:ok, ^expected_sorted_value} = cast(schema, params_map)
+    end
+
+    test "returns an error for map non-integer keys", %{schema: schema} do
+      params_map = %{
+        "0" => %{"a" => 1, "b" => 1},
+        "1" => %{"a" => 2, "b" => 2},
+        "abc" => %{"a" => 3, "b" => 3},
+        ~D[2000-01-01] => %{"a" => 4, "b" => 4}
+      }
+
+      assert {:error,
+              %Xema.CastError{
+                error: nil,
+                key: nil,
+                message: nil,
+                path: [],
+                required: nil,
+                to: :map,
+                value: ^params_map
+              }} = cast(schema, params_map)
     end
   end
 end

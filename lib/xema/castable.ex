@@ -259,6 +259,8 @@ end
 defimpl Xema.Castable, for: Map do
   use Xema.Castable.Helper
 
+  import Xema.Utils, only: [to_sorted_list: 2]
+
   def cast(map, :struct, nil, _schema), do: {:ok, map}
 
   def cast(map, :struct, module, _schema) do
@@ -300,6 +302,12 @@ defimpl Xema.Castable, for: Map do
           {:halt, {:error, %{to: :map, key: key}}}
       end
     end)
+  end
+
+  def cast(map, :list, _module, _schema) do
+    with :error <- to_sorted_list(map, keys: false) do
+      {:error, %{to: :map, value: map}}
+    end
   end
 
   def cast(map, type, _module, _schema),
