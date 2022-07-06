@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.16.1 - 2022/07/06
+
++ Add implementation to cast maps with integer keys to lists. Thanks to @egze.
+
 ## 0.16.0 - 2022/05/11
 
 + Deprecated `@default true` to mark a schema as default.
