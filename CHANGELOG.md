@@ -13,7 +13,7 @@
 
   ```elixir
   defmoudle MyApp.Schemas do
-    use Xemae, multi: true, default: :s1
+    use Xema, multi: true, default: :s1
 
     xema :s1 do
       ...
