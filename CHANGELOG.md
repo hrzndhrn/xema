@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.17.0
+
++ Require Elixir 1.8.0
++ Update inspect implementations for `Xema.Ref` and `Xema.Schema`.
+
 ## 0.16.1 - 2022/07/06
 
 + Add implementation to cast maps with integer keys to lists. Thanks to @egze.
