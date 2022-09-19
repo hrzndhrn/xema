@@ -16,6 +16,7 @@ defmodule Xema.Ref do
           uri: URI.t() | nil
         }
 
+  @derive {Inspect, optional: [:pointer, :uri]}
   defstruct pointer: nil,
             uri: nil
 
@@ -118,17 +119,5 @@ defmodule Xema.Ref do
       nil -> {Map.fetch!(master.refs, key), master}
       schema -> {schema, root}
     end
-  end
-end
-
-defimpl Inspect, for: Xema.Ref do
-  def inspect(schema, opts) do
-    map =
-      schema
-      |> Map.from_struct()
-      |> Enum.filter(fn {_, val} -> !is_nil(val) end)
-      |> Enum.into(%{})
-
-    Inspect.Map.inspect(map, "Xema.Ref", opts)
   end
 end

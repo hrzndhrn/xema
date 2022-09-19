@@ -8,9 +8,7 @@ defmodule Xema.SchemaTest do
 
   describe "new/1" do
     test "raises an error for an invalid keyword" do
-      message = "key :foo not found in: %Xema.Schema{}"
-
-      assert_raise(KeyError, message, fn ->
+      assert_raise(KeyError, fn ->
         Schema.new(type: :any, foo: :foo)
       end)
     end
@@ -38,28 +36,47 @@ defmodule Xema.SchemaTest do
     test "list schema" do
       xema = Xema.new({:list, items: [:integer]})
 
-      assert inspect(xema) ==
-               "%Xema{refs: %{}, schema: " <>
-                 "%Xema.Schema{items: " <>
-                 "[%Xema.Schema{type: :integer}], " <> "type: :list}}"
+      assert output = inspect(xema)
+
+      if Version.match?(System.version(), "~> 1.14") do
+        assert output ==
+                 "%Xema{" <>
+                   "schema: %Xema.Schema{items: [%Xema.Schema{type: :integer}], " <>
+                   "type: :list}, refs: %{}}"
+      else
+        assert Regex.match?(~r/.*Xema.Schema.*/, output)
+      end
     end
 
     test "any schema" do
       xema = Xema.new(items: [:integer])
 
-      assert inspect(xema) ==
-               "%Xema{refs: %{}, schema: " <>
-                 "%Xema.Schema{items: " <> "[%Xema.Schema{type: :integer}]}}"
+      assert output = inspect(xema)
+
+      if Version.match?(System.version(), "~> 1.14") do
+        assert output ==
+                 "%Xema{schema: %Xema.Schema{items: [%Xema.Schema{type: :integer}], " <>
+                   "type: :any}, refs: %{}}"
+      else
+        assert Regex.match?(~r/.*Xema.Schema.*/, output)
+      end
     end
 
     test "schema with ref" do
       xema = Xema.new({:map, properties: %{num: {:ref, "#"}}})
 
-      assert inspect(xema) ==
-               "%Xema{refs: %{}, schema: " <>
-                 "%Xema.Schema{properties: " <>
-                 "%{num: %Xema.Schema{ref: " <>
-                 "%Xema.Ref{pointer: \"#\"}}}, " <> "type: :map}}"
+      assert output = inspect(xema)
+
+      if Version.match?(System.version(), "~> 1.14") do
+        assert output ==
+                 """
+                 %Xema{schema: %Xema.Schema{properties: \
+                 %{num: %Xema.Schema{ref: %Xema.Ref{pointer: \"#\"}, \
+                 type: :any}}, type: :map}, refs: %{}}\
+                 """
+      else
+        assert Regex.match?(~r/.*Xema.Schema.*/, output)
+      end
     end
   end
 

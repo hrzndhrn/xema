@@ -12,7 +12,6 @@ jobs:
     strategy:
       matrix:
         elixir:
-          - '1.7.4'
           - '1.8.2'
           - '1.9.4'
           - '1.10.4'
@@ -28,12 +27,6 @@ jobs:
           - '24.3'
           - '25.0'
         exclude:
-          - elixir: '1.7.4'
-            otp: '23.3'
-          - elixir: '1.7.4'
-            otp: '24.3'
-          - elixir: '1.7.4'
-            otp: '25.0'
           - elixir: '1.8.2'
             otp: '23.3'
           - elixir: '1.8.2'

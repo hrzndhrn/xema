@@ -125,7 +125,7 @@ defmodule Xema.Schema do
           validator: function | module | {module, atom} | {module, atom, arity} | list | nil
         }
 
-  defstruct [
+  @fields [
     :additional_items,
     :additional_properties,
     :all_of,
@@ -173,9 +173,10 @@ defmodule Xema.Schema do
     :then,
     :title,
     :unique_items,
-    :validator,
-    type: :any
+    :validator
   ]
+  @derive {Inspect, optional: @fields}
+  defstruct @fields ++ [type: :any]
 
   @typedoc """
   The `type` for the schema.
@@ -408,24 +409,5 @@ defmodule Xema.Schema do
     |> String.replace("~0", "~")
     |> String.replace("~1", "/")
     |> URI.decode()
-  end
-end
-
-defimpl Inspect, for: Xema.Schema do
-  def inspect(schema, opts) do
-    map =
-      schema
-      |> Map.from_struct()
-      |> Map.update!(
-        :type,
-        fn
-          :any -> nil
-          val -> val
-        end
-      )
-      |> Enum.filter(fn {_, val} -> !is_nil(val) end)
-      |> Enum.into(%{})
-
-    Inspect.Map.inspect(map, "Xema.Schema", opts)
   end
 end
