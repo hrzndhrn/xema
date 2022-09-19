@@ -123,12 +123,13 @@ end
 
 defimpl Inspect, for: Xema.Ref do
   def inspect(schema, opts) do
-    map =
+    fields =
       schema
       |> Map.from_struct()
       |> Enum.filter(fn {_, val} -> !is_nil(val) end)
-      |> Enum.into(%{})
 
-    Inspect.Map.inspect(map, "Xema.Ref", opts)
+    infos = for {field, _value} <- fields, do: %{field: field}
+
+    Inspect.Map.inspect(Enum.into(fields, %{}), "Xema.Ref", infos, opts)
   end
 end

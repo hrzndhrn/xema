@@ -413,7 +413,7 @@ end
 
 defimpl Inspect, for: Xema.Schema do
   def inspect(schema, opts) do
-    map =
+    fields =
       schema
       |> Map.from_struct()
       |> Map.update!(
@@ -426,6 +426,8 @@ defimpl Inspect, for: Xema.Schema do
       |> Enum.filter(fn {_, val} -> !is_nil(val) end)
       |> Enum.into(%{})
 
-    Inspect.Map.inspect(map, "Xema.Schema", opts)
+    infos = for {field, _value} <- fields, do: %{field: field}
+
+    Inspect.Map.inspect(Enum.into(fields, %{}), "Xema.Schema", infos, opts)
   end
 end

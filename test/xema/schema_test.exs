@@ -8,7 +8,7 @@ defmodule Xema.SchemaTest do
 
   describe "new/1" do
     test "raises an error for an invalid keyword" do
-      message = "key :foo not found in: %Xema.Schema{}"
+      message = ~r/^key :foo not found/
 
       assert_raise(KeyError, message, fn ->
         Schema.new(type: :any, foo: :foo)
@@ -39,27 +39,27 @@ defmodule Xema.SchemaTest do
       xema = Xema.new({:list, items: [:integer]})
 
       assert inspect(xema) ==
-               "%Xema{refs: %{}, schema: " <>
+               "%Xema{schema: " <>
                  "%Xema.Schema{items: " <>
-                 "[%Xema.Schema{type: :integer}], " <> "type: :list}}"
+                 "[%Xema.Schema{type: :integer}], " <> "type: :list}, refs: %{}}"
     end
 
     test "any schema" do
       xema = Xema.new(items: [:integer])
 
       assert inspect(xema) ==
-               "%Xema{refs: %{}, schema: " <>
-                 "%Xema.Schema{items: " <> "[%Xema.Schema{type: :integer}]}}"
+               "%Xema{schema: " <>
+                 "%Xema.Schema{items: " <> "[%Xema.Schema{type: :integer}]}, refs: %{}}"
     end
 
     test "schema with ref" do
       xema = Xema.new({:map, properties: %{num: {:ref, "#"}}})
 
       assert inspect(xema) ==
-               "%Xema{refs: %{}, schema: " <>
+               "%Xema{schema: " <>
                  "%Xema.Schema{properties: " <>
                  "%{num: %Xema.Schema{ref: " <>
-                 "%Xema.Ref{pointer: \"#\"}}}, " <> "type: :map}}"
+                 "%Xema.Ref{pointer: \"#\"}}}, " <> "type: :map}, refs: %{}}"
     end
   end
 
