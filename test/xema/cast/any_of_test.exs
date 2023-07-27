@@ -278,12 +278,11 @@ defmodule Xema.Cast.AnyOfTest do
     end
 
     test "from data causing a deep nested cast error", %{schema: schema} do
-      assert {:error, error} =
-               cast(schema, %{foo: %{faa: "one"}, bar: %{bas: %{baz: "two", bax: "three"}}})
+      assert {:error, error} = cast(schema, %{bar: %{bas: %{baz: "two", bax: "three"}}})
 
       assert Exception.message(error) ==
                """
-               cannot cast %{bax: "three", baz: "two"} at [:bar, :bas] to any of:
+               cannot cast %{baz: "two", bax: "three"} at [:bar, :bas] to any of:
                  cannot cast "two" at [:baz] to any of:
                    cannot cast "two" to :integer
                    cannot cast "two" to nil

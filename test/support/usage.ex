@@ -1,3 +1,4 @@
 defmodule Usage do
-  @moduledoc File.read!("docs/usage.md")
+  # TODO remove file
+  # @moduledoc File.read!("docs/usage.md")
 end

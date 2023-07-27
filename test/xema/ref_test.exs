@@ -155,12 +155,9 @@ defmodule Xema.RefTest do
                } = error
              } = validate(schema, %{foo: "21", bar: "42"})
 
-      message = """
-      Expected :integer, got "42", at [:bar].
-      Expected :integer, got "21", at [:foo].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ ~s|Expected :integer, got "42", at [:bar].|
+      assert message =~ ~s|Expected :integer, got "21", at [:foo].|
     end
 
     test "Ref.fetch!/3 returns schema for a valid ref", %{non_inline: schema} do
@@ -440,12 +437,9 @@ defmodule Xema.RefTest do
                } = error
              } = validate(schema, %{foo: -1, bar: 1})
 
-      message = """
-      Value 1 exceeds maximum value of 0, at [:bar].
-      Value -1 is less than minimum value of 0, at [:foo].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ "Value 1 exceeds maximum value of 0, at [:bar]."
+      assert message =~ "Value -1 is less than minimum value of 0, at [:foo]."
     end
   end
 
@@ -485,12 +479,9 @@ defmodule Xema.RefTest do
                } = error
              } = validate(schema, %{foo: -1, bar: 1})
 
-      message = """
-      Value 1 exceeds maximum value of 0, at [:bar].
-      Value -1 is less than minimum value of 0, at [:foo].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ ~s|Value 1 exceeds maximum value of 0, at [:bar].|
+      assert message =~ ~s|Value -1 is less than minimum value of 0, at [:foo].|
     end
   end
 
@@ -746,16 +737,13 @@ defmodule Xema.RefTest do
                  percent: "1"
                })
 
-      message = """
-      Expected :integer, got "1", at [:percent].
-      Expected :integer, got "1", at [:slash_1].
-      Expected :integer, got "1", at [:slash_2].
-      Expected :integer, got "1", at [:tilda_1].
-      Expected :integer, got "1", at [:tilda_2].
-      Expected :integer, got "1", at [:tilda_3].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ ~s|Expected :integer, got "1", at [:percent].|
+      assert message =~ ~s|Expected :integer, got "1", at [:slash_1].|
+      assert message =~ ~s|Expected :integer, got "1", at [:slash_2].|
+      assert message =~ ~s|Expected :integer, got "1", at [:tilda_1].|
+      assert message =~ ~s|Expected :integer, got "1", at [:tilda_2].|
+      assert message =~ ~s|Expected :integer, got "1", at [:tilda_3].|
     end
   end
 

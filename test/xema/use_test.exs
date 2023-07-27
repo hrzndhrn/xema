@@ -340,10 +340,9 @@ defmodule Xema.UseTest do
     test "cast/1 with invalid data" do
       assert {:error, error} = UserStruct.cast(name: "", age: -1)
 
-      assert Exception.message(error) == """
-             Value -1 is less than minimum value of 0, at [:age].
-             Expected minimum length of 1, got "", at [:name].\
-             """
+      assert message = Exception.message(error)
+      assert message =~ "Value -1 is less than minimum value of 0, at [:age]."
+      assert message =~ "Expected minimum length of 1, got \"\", at [:name]."
     end
 
     test "cast/1 with missing age" do

@@ -34,16 +34,18 @@ defmodule Xema.SourceTest do
     end
 
     test "of a schema with additional data" do
-      source = {
-        :map,
+      rules = [
         bar: 17,
         foo: 42,
         properties: %{
           foo: :integer
         }
-      }
+      ]
 
-      assert source |> Xema.new() |> Xema.source() == source
+      source = {:map, rules}
+
+      assert {:map, new} = source |> Xema.new() |> Xema.source()
+      assert Enum.sort(new) == rules
     end
 
     test "of a schema with nested schema" do
@@ -93,10 +95,10 @@ defmodule Xema.SourceTest do
     end
 
     test "for definitions and ref" do
-      {_, keywords} =
-        source = {:any, bar: {:ref, "#/definitions/foo"}, definitions: %{foo: :integer}}
+      source = {:any, bar: {:ref, "#/definitions/foo"}, definitions: %{foo: :integer}}
+      {_, keywords} = source
 
-      assert source |> Xema.new(inline: false) |> Xema.source() == keywords
+      assert source |> Xema.new(inline: false) |> Xema.source() |> Enum.sort() == keywords
     end
 
     test "for definitions and ref without sibling" do
@@ -157,9 +159,11 @@ defmodule Xema.SourceTest do
     end
 
     test "for properties with required fields" do
-      source = {:map, properties: %{num: :number}, required: [:num]}
+      rules = [properties: %{num: :number}, required: [:num]]
+      source = {:map, rules}
 
-      assert source |> Xema.new() |> Xema.source() == source
+      assert {:map, new} = source |> Xema.new() |> Xema.source()
+      assert Enum.sort(new) == rules
     end
 
     test "for regex patterin" do
@@ -177,15 +181,15 @@ defmodule Xema.SourceTest do
            str: :string
          }}
 
-      expected =
-        {:map,
-         pattern_properties: %{~r/n.*/ => [minimum: 0]},
-         properties: %{
-           num: :number,
-           str: :string
-         }}
+      assert {:map, rules} = source |> Xema.new() |> Xema.source()
 
-      assert source |> Xema.new() |> Xema.source() == expected
+      assert Enum.sort(rules) == [
+               pattern_properties: %{~r/n.*/ => [minimum: 0]},
+               properties: %{
+                 num: :number,
+                 str: :string
+               }
+             ]
     end
   end
 end

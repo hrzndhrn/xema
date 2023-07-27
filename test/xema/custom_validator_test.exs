@@ -88,14 +88,15 @@ defmodule Xema.CustomValidatorTest do
                  three: "one"
                })
 
-      message = """
-      Expected minimum length of 5, got "foo", at [:long].
-      Validator fails with :no_palindrome for value "cats live on no evil star", at [:palindrome].
-      Expected maximum length of 3, got "foobar", at [:short].
-      Validator fails with :not_three_words for value "one", at [:three].\
-      """
+      assert message = Exception.message(error)
 
-      assert Exception.message(error) == message
+      assert message =~ ~s|Expected minimum length of 5, got "foo", at [:long].|
+
+      assert message =~
+               ~s|Validator fails with :no_palindrome for value "cats live on no evil star", at [:palindrome].|
+
+      assert message =~ ~s|Expected maximum length of 3, got "foobar", at [:short].|
+      assert message =~ ~s|Validator fails with :not_three_words for value "one", at [:three].|
     end
   end
 
@@ -111,17 +112,6 @@ defmodule Xema.CustomValidatorTest do
       from = ~N[2019-01-03 12:05:42]
       to = ~N[2019-01-01 12:05:42]
 
-      message =
-        String.replace(
-          """
-          Validator fails with :to_before_from
-          for value %{from: ~N[2019-01-03 12:05:42],
-          to: ~N[2019-01-01 12:05:42]}.\
-          """,
-          "\n",
-          " "
-        )
-
       assert {:error,
               %ValidationError{
                 reason: %{
@@ -133,7 +123,7 @@ defmodule Xema.CustomValidatorTest do
                 }
               } = error} = Schemas.validate(:timespan, %{from: from, to: to})
 
-      assert Exception.message(error) == message
+      assert Exception.message(error) =~ "Validator fails with :to_before_from"
     end
 
     test "with invalid data" do

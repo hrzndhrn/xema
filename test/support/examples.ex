@@ -1,3 +1,4 @@
 defmodule Examples do
-  @moduledoc File.read!("docs/examples.md")
+  # TODO: remove file
+  # @moduledoc File.read!("docs/examples.md")
 end

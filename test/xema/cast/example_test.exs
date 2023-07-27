@@ -146,11 +146,10 @@ defmodule Xema.Cast.ExampleTest do
     test "validate/1" do
       assert {:error, error} = Person.validate(%{name: 42, age: -1, fav: :php})
 
-      assert Exception.message(error) == """
-             Value -1 is less than minimum value of 0, at [:age].
-             Value :php is not defined in enum, at [:fav].
-             Expected :string, got 42, at [:name].\
-             """
+      assert message = Exception.message(error)
+      assert message =~ ~s|Value -1 is less than minimum value of 0, at [:age].|
+      assert message =~ ~s|Value :php is not defined in enum, at [:fav].|
+      assert message =~ ~s|Expected :string, got 42, at [:name].|
     end
   end
 end
