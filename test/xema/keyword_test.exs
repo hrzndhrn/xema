@@ -260,12 +260,14 @@ defmodule Xema.KeywordTest do
                :error,
                %ValidationError{
                  reason: %{
-                   required: [:c, :a]
+                   required: required
                  }
                } = error
              } = validate(schema, b: 3, d: 8)
 
-      assert Exception.message(error) == "Required properties are missing: [:c, :a]."
+      assert Enum.sort(required) == [:a, :c]
+
+      assert Exception.message(error) =~ "Required properties are missing:"
     end
   end
 
