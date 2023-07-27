@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.17.0
+## 0.17.1 - 2023/07/28
+
++ Fix the ref inliner.
+
+## 0.17.0 - 2022/09/19
 
 + Require Elixir 1.8.0
 + Update inspect implementations for `Xema.Ref` and `Xema.Schema`.
