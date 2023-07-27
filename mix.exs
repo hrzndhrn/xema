@@ -35,7 +35,7 @@ defmodule Xema.Mixfile do
       coveralls: :test,
       "coveralls.detail": :test,
       "coveralls.post": :test,
-      "coveralls.travis": :test,
+      "coveralls.github": :test,
       "coveralls.html": :test,
       "gen.test_suite": :test
     ]
