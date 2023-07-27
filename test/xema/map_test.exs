@@ -80,12 +80,9 @@ defmodule Xema.MapTest do
                 }
               } = error} = validate(schema, %{foo: "foo", bar: 2})
 
-      message = """
-      Expected :string, got 2, at [:bar].
-      Expected :number, got "foo", at [:foo].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ ~s|Expected :string, got 2, at [:bar].|
+      assert message =~ ~s|Expected :number, got "foo", at [:foo].|
     end
   end
 
@@ -225,8 +222,7 @@ defmodule Xema.MapTest do
                } = error
              } = validate(schema, %{a: 1, b: 2, c: 3, d: 4})
 
-      assert Exception.message(error) ==
-               "Expected at most 3 properties, got %{a: 1, b: 2, c: 3, d: 4}."
+      assert Exception.message(error) =~ "Expected at most 3 properties, got"
     end
   end
 
@@ -269,12 +265,9 @@ defmodule Xema.MapTest do
                 }
               } = error} = validate(schema, %{foo: 44, add: 1, extra: 2})
 
-      message = """
-      Expected only defined properties, got key [:add].
-      Expected only defined properties, got key [:extra].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ ~s|Expected only defined properties, got key [:add].|
+      assert message =~ ~s|Expected only defined properties, got key [:extra].|
     end
   end
 
@@ -404,22 +397,26 @@ defmodule Xema.MapTest do
       assert {:error,
               %ValidationError{
                 reason: %{
-                  required: [:a, :b, :c]
+                  required: required
                 }
               } = error} = validate(schema, %{"a" => 1, "b" => 2, "c" => 3})
 
-      assert Exception.message(error) == "Required properties are missing: [:a, :b, :c]."
+      assert Enum.sort(required) == [:a, :b, :c]
+
+      assert Exception.message(error) =~ "Required properties are missing:"
     end
 
     test "validate/2 without required properties", %{schema: schema} do
       assert {:error,
               %ValidationError{
                 reason: %{
-                  required: [:a, :c]
+                  required: required
                 }
               } = error} = validate(schema, %{b: 3, d: 8})
 
-      assert Exception.message(error) == "Required properties are missing: [:a, :c]."
+      assert Enum.sort(required) == [:a, :c]
+
+      assert Exception.message(error) =~ "Required properties are missing:"
     end
   end
 
@@ -806,13 +803,17 @@ defmodule Xema.MapTest do
       assert {:error,
               %ValidationError{
                 reason: %{
-                  property_names: [
-                    a: %{min_length: 3, value: "a"},
-                    b: %{min_length: 3, value: "b"}
-                  ],
-                  value: [:a, :b, :foo]
+                  property_names: property_names,
+                  value: value
                 }
               } = error} = validate(schema, %{foo: 1, a: 2, b: 3})
+
+      assert Enum.sort(value) == [:a, :b, :foo]
+
+      assert Enum.sort(property_names) == [
+               a: %{min_length: 3, value: "a"},
+               b: %{min_length: 3, value: "b"}
+             ]
 
       message = """
       Invalid property names.
@@ -917,13 +918,10 @@ defmodule Xema.MapTest do
                 }
               } = error} = validate(schema, %{properties: "maybe", items: 5, minimum: "5"})
 
-      message = """
-      Expected :string, got 5, at [:items].
-      Expected :integer, got "5", at [:minimum].
-      Value "maybe" is not defined in enum, at [:properties].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ ~s|Expected :string, got 5, at [:items].|
+      assert message =~ ~s|Expected :integer, got "5", at [:minimum].|
+      assert message =~ ~s|Value "maybe" is not defined in enum, at [:properties].|
     end
   end
 

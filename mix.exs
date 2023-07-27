@@ -4,7 +4,7 @@ defmodule Xema.Mixfile do
   def project do
     [
       app: :xema,
-      version: "0.17.0",
+      version: "0.17.1",
       elixir: "~> 1.8",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -35,7 +35,7 @@ defmodule Xema.Mixfile do
       coveralls: :test,
       "coveralls.detail": :test,
       "coveralls.post": :test,
-      "coveralls.travis": :test,
+      "coveralls.github": :test,
       "coveralls.html": :test,
       "gen.test_suite": :test
     ]

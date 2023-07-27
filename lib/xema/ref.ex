@@ -111,12 +111,13 @@ defmodule Xema.Ref do
 
   defp fetch_by_key!("#", _master, root), do: {root, root}
 
-  defp fetch_by_key!(key, master, nil),
-    do: {Map.fetch!(master.refs, key), master}
+  defp fetch_by_key!(key, master, nil) do
+    {Map.fetch!(master.refs, key), master}
+  end
 
   defp fetch_by_key!(key, master, root) do
     case Map.get(root.refs, key) do
-      nil -> {Map.fetch!(master.refs, key), master}
+      nil -> {Map.fetch!(master.refs, key), root}
       schema -> {schema, root}
     end
   end

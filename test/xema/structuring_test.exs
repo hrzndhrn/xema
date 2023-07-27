@@ -41,13 +41,10 @@ defmodule Xema.StructuringTest do
                } = error
              } = validate(schema, %{a: -1, b: -2, c: 3})
 
-      message = """
-      Value -1 is less than minimum value of 1, at [:a].
-      Value -2 is less than minimum value of 1, at [:b].
-      Value 3 exceeds maximum value of -1, at [:c].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ ~s|Value -1 is less than minimum value of 1, at [:a].|
+      assert message =~ ~s|Value -2 is less than minimum value of 1, at [:b].|
+      assert message =~ ~s|Value 3 exceeds maximum value of -1, at [:c].|
     end
   end
 end

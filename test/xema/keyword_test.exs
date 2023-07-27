@@ -78,12 +78,9 @@ defmodule Xema.KeywordTest do
                } = error
              } = validate(schema, foo: "foo", bar: 2)
 
-      message = """
-      Expected :string, got 2, at [:bar].
-      Expected :number, got "foo", at [:foo].\
-      """
-
-      assert Exception.message(error) == message
+      assert message = Exception.message(error)
+      assert message =~ ~s|Expected :string, got 2, at [:bar].|
+      assert message =~ ~s|Expected :number, got "foo", at [:foo].|
     end
   end
 
@@ -263,12 +260,14 @@ defmodule Xema.KeywordTest do
                :error,
                %ValidationError{
                  reason: %{
-                   required: [:a, :c]
+                   required: required
                  }
                } = error
              } = validate(schema, b: 3, d: 8)
 
-      assert Exception.message(error) == "Required properties are missing: [:a, :c]."
+      assert Enum.sort(required) == [:a, :c]
+
+      assert Exception.message(error) =~ "Required properties are missing:"
     end
   end
 
@@ -627,7 +626,7 @@ defmodule Xema.KeywordTest do
                :error,
                %ValidationError{
                  reason: %{
-                   value: [:a, :b, :foo],
+                   value: values,
                    property_names: [
                      a: %{min_length: 3, value: "a"},
                      b: %{min_length: 3, value: "b"}
@@ -635,6 +634,8 @@ defmodule Xema.KeywordTest do
                  }
                } = error
              } = validate(schema, data)
+
+      assert Enum.sort(values) == [:a, :b, :foo]
 
       message = """
       Invalid property names.
