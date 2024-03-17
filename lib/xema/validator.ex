@@ -555,9 +555,10 @@ defmodule Xema.Validator do
   defp multiple_of(%{multiple_of: multiple_of}, value) when is_number(value) do
     x = value / multiple_of
 
-    case x - Float.floor(x) do
-      0.0 -> :ok
-      _ -> {:error, %{value: value, multiple_of: multiple_of}}
+    if x - Float.floor(x) == 0.0 do
+      :ok
+    else
+      {:error, %{value: value, multiple_of: multiple_of}}
     end
   end
 
