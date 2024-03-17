@@ -1,4 +1,4 @@
-# Created with GitHubActions version 0.2.14
+# Created with GitHubActions version 0.2.22
 name: CI
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -19,7 +19,8 @@ jobs:
           - '1.12.3'
           - '1.13.4'
           - '1.14.5'
-          - '1.15.4'
+          - '1.15.7'
+          - '1.16.2'
         otp:
           - '20.3'
           - '21.3'
@@ -27,7 +28,7 @@ jobs:
           - '23.3'
           - '24.3'
           - '25.3'
-          - '26.0'
+          - '26.2'
         exclude:
           - elixir: '1.8.2'
             otp: '23.3'
@@ -36,7 +37,7 @@ jobs:
           - elixir: '1.8.2'
             otp: '25.3'
           - elixir: '1.8.2'
-            otp: '26.0'
+            otp: '26.2'
           - elixir: '1.9.4'
             otp: '23.3'
           - elixir: '1.9.4'
@@ -44,7 +45,7 @@ jobs:
           - elixir: '1.9.4'
             otp: '25.3'
           - elixir: '1.9.4'
-            otp: '26.0'
+            otp: '26.2'
           - elixir: '1.10.4'
             otp: '20.3'
           - elixir: '1.10.4'
@@ -52,13 +53,13 @@ jobs:
           - elixir: '1.10.4'
             otp: '25.3'
           - elixir: '1.10.4'
-            otp: '26.0'
+            otp: '26.2'
           - elixir: '1.11.4'
             otp: '20.3'
           - elixir: '1.11.4'
             otp: '25.3'
           - elixir: '1.11.4'
-            otp: '26.0'
+            otp: '26.2'
           - elixir: '1.12.3'
             otp: '20.3'
           - elixir: '1.12.3'
@@ -66,53 +67,59 @@ jobs:
           - elixir: '1.12.3'
             otp: '25.3'
           - elixir: '1.12.3'
-            otp: '26.0'
+            otp: '26.2'
           - elixir: '1.13.4'
             otp: '20.3'
           - elixir: '1.13.4'
             otp: '21.3'
           - elixir: '1.13.4'
-            otp: '26.0'
+            otp: '26.2'
           - elixir: '1.14.5'
             otp: '20.3'
           - elixir: '1.14.5'
             otp: '21.3'
           - elixir: '1.14.5'
             otp: '22.3'
-          - elixir: '1.14.5'
-            otp: '26.0'
-          - elixir: '1.15.4'
+          - elixir: '1.15.7'
             otp: '20.3'
-          - elixir: '1.15.4'
+          - elixir: '1.15.7'
             otp: '21.3'
-          - elixir: '1.15.4'
+          - elixir: '1.15.7'
             otp: '22.3'
-          - elixir: '1.15.4'
+          - elixir: '1.15.7'
+            otp: '23.3'
+          - elixir: '1.16.2'
+            otp: '20.3'
+          - elixir: '1.16.2'
+            otp: '21.3'
+          - elixir: '1.16.2'
+            otp: '22.3'
+          - elixir: '1.16.2'
             otp: '23.3'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Elixir
         uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
       - name: Restore deps
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: deps
           key: deps-${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
       - name: Restore _build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: _build
           key: _build-${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
       - name: Restore test/support/plts
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: test/support/plts
           key: test/support/plts-${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-        if: ${{ contains(matrix.elixir, '1.15.4') && contains(matrix.otp, '26.0') }}
+        if: ${{ contains(matrix.elixir, '1.16.2') && contains(matrix.otp, '26.2') }}
       - name: Get dependencies
         run: mix deps.get
       - name: Compile dependencies
@@ -120,20 +127,20 @@ jobs:
       - name: Compile project
         run: MIX_ENV=test mix compile --warnings-as-errors
       - name: Check unused dependencies
-        if: ${{ contains(matrix.elixir, '1.15.4') && contains(matrix.otp, '26.0') }}
+        if: ${{ contains(matrix.elixir, '1.16.2') && contains(matrix.otp, '26.2') }}
         run: mix deps.unlock --check-unused
       - name: Check code format
-        if: ${{ contains(matrix.elixir, '1.15.4') && contains(matrix.otp, '26.0') }}
+        if: ${{ contains(matrix.elixir, '1.16.2') && contains(matrix.otp, '26.2') }}
         run: mix format --check-formatted
       - name: Lint code
-        if: ${{ contains(matrix.elixir, '1.15.4') && contains(matrix.otp, '26.0') }}
+        if: ${{ contains(matrix.elixir, '1.16.2') && contains(matrix.otp, '26.2') }}
         run: mix credo --strict
       - name: Run tests
         run: mix test
-        if: ${{ !(contains(matrix.elixir, '1.15.4') && contains(matrix.otp, '26.0')) }}
+        if: ${{ !(contains(matrix.elixir, '1.16.2') && contains(matrix.otp, '26.2')) }}
       - name: Run tests with coverage
         run: mix coveralls.github
-        if: ${{ contains(matrix.elixir, '1.15.4') && contains(matrix.otp, '26.0') }}
+        if: ${{ contains(matrix.elixir, '1.16.2') && contains(matrix.otp, '26.2') }}
       - name: Static code analysis
-        run: mix dialyzer
-        if: ${{ contains(matrix.elixir, '1.15.4') && contains(matrix.otp, '26.0') }}
+        run: mix dialyzer --format github --force-check
+        if: ${{ contains(matrix.elixir, '1.16.2') && contains(matrix.otp, '26.2') }}
