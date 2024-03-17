@@ -158,12 +158,15 @@ defmodule Xema.Format do
   ## Examples
 
       iex> import Xema.Format
-      iex>
-      iex> email?("marin.musterman@germany.net")
+      ...> email?("marin.musterman@germany.net")
       true
-      iex> email?("Otto.Normalverbraucher")
+      ...> email?("Otto.Normalverbraucher")
       false
-      iex> email?("Otto.Normal@Verbraucher.NET")
+      ...> email?("Otto.Normal@Verbraucher.NET")
+      true
+      ...> email?("müller.aßa@foo.de")
+      true
+      ...> email?("réñe@foo.de")
       true
   """
   # credo:disable-for-previous-line
