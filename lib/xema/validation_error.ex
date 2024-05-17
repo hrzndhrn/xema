@@ -35,21 +35,27 @@ defmodule Xema.ValidationError do
 
   ```elixir
   iex> schema = Xema.new(:integer)
-  iex> schema
+  ...> schema
   ...>   |> Xema.Validator.validate(1.1)
+  ...>   |> Xema.ValidationError.format_error()
+  "Expected :integer, got 1.1."
+  iex> schema
+  ...>   |> Xema.validate(1.1)
   ...>   |> Xema.ValidationError.format_error()
   "Expected :integer, got 1.1."
   ```
   """
-  @spec format_error({:error, map} | map) :: String.t()
-  def format_error({:error, error}), do: format_error(error)
+  @spec format_error({:error, error} | error) :: String.t()
+        when error: map() | ValidationError.t()
+  def format_error(%ValidationError{} = error), do: format_error(error.reason)
+  def format_error({:error, %ValidationError{} = error}), do: format_error(error.reason)
 
-  def format_error(error),
-    do:
-      error
-      |> travers_errors([], &format_error/3)
-      |> Enum.reverse()
-      |> Enum.join("\n")
+  def format_error(error) do
+    error
+    |> travers_errors([], &format_error/3)
+    |> Enum.reverse()
+    |> Enum.join("\n")
+  end
 
   @doc """
   Traverse the error tree and invokes the given function.
