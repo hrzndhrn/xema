@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.2 - 2024/05/17
+
++ Update `Xema.ValidationError.format_error/1`.
+
 ## 0.17.1 - 2023/07/28
 
 + Fix the ref inliner.
