@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.17.3 - 2024/07/03
+
++ Fix typo in doc for `Xema.from_json_schema/2`.
++ Fix spec for opts in `Xema.JsonSchema`.
++ Remove all entries in `.dialyzer_ignore.exs`.
++ Update test scripts to remove warnings when running with Elixir 1.17.
+
 ## 0.17.2 - 2024/05/17
 
 + Update `Xema.ValidationError.format_error/1`.
