@@ -622,28 +622,26 @@ defmodule Xema.KeywordTest do
     test "with invalid atom keys", %{schema: schema} do
       data = [foo: 1, a: 2, b: 3]
 
-      assert {
-               :error,
-               %ValidationError{
-                 reason: %{
-                   value: values,
-                   property_names: [
-                     a: %{min_length: 3, value: "a"},
-                     b: %{min_length: 3, value: "b"}
-                   ]
-                 }
-               } = error
-             } = validate(schema, data)
+      assert {:error,
+              %ValidationError{
+                reason: %{
+                  value: values,
+                  property_names: property_names
+                }
+              } = error} = validate(schema, data)
 
       assert Enum.sort(values) == [:a, :b, :foo]
 
-      message = """
-      Invalid property names.
-        :a : Expected minimum length of 3, got "a".
-        :b : Expected minimum length of 3, got "b".\
-      """
+      assert Enum.sort(property_names) == [
+               a: %{min_length: 3, value: "a"},
+               b: %{min_length: 3, value: "b"}
+             ]
 
-      assert Exception.message(error) == message
+      message = Exception.message(error)
+
+      assert message =~ ~s|Invalid property names.|
+      assert message =~ ~s|  :a : Expected minimum length of 3, got "a".|
+      assert message =~ ~s|  :b : Expected minimum length of 3, got "b".|
     end
   end
 
