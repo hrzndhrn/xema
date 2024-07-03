@@ -10,7 +10,7 @@ defmodule Xema.JsonSchema do
   }
 
   @type json_schema :: true | false | map
-  @type opts :: [draft: String.t()]
+  @type opts :: [draft: String.t(), atom: :force]
 
   @drafts ~w(draft4 draft6 draft7)
 

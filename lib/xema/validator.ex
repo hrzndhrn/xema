@@ -428,7 +428,6 @@ defmodule Xema.Validator do
     end
   end
 
-  @spec do_all_of(list, any, keyword, [map]) :: result
   defp do_all_of(schemas, value, opts, errors \\ [])
 
   defp do_all_of([], _value, _opts, []), do: :ok

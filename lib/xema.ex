@@ -256,7 +256,7 @@ defmodule Xema do
     are `"draft4"`, `"draft6"`, and `"draft7"`, default is `"draft7"`. If
     `:draft` not set and the schema contains `$schema` then the value for
     `$schema` is used for this option.
-  * `:atoms` creates atoms for unknown atoms when set to `:force`. This is just
+  * `:atom` creates atoms for unknown atoms when set to `:force`. This is just
     needed for additional JSON Schema keywords.
 
   ## Examples
