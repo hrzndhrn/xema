@@ -16,9 +16,9 @@ defmodule Xema.ValidationErrorTest do
     rescue
       error ->
         assert %ValidationError{} = error
-        assert error.message == nil
+        assert Map.fetch!(error, :message) == nil
         assert Exception.message(error) == ~s|Expected :integer, got "foo".|
-        assert error.reason == %{type: :integer, value: "foo"}
+        assert Map.fetch!(error, :reason) == %{type: :integer, value: "foo"}
     end
   end
 

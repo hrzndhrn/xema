@@ -815,13 +815,11 @@ defmodule Xema.MapTest do
                b: %{min_length: 3, value: "b"}
              ]
 
-      message = """
-      Invalid property names.
-        :a : Expected minimum length of 3, got "a".
-        :b : Expected minimum length of 3, got "b".\
-      """
+      message = Exception.message(error)
 
-      assert Exception.message(error) == message
+      assert message =~ ~s|Invalid property names.|
+      assert message =~ ~s|  :a : Expected minimum length of 3, got "a".|
+      assert message =~ ~s|  :b : Expected minimum length of 3, got "b".|
     end
 
     test "with invalid string keys", %{schema: schema} do

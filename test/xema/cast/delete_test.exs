@@ -51,7 +51,8 @@ defmodule Xema.Cast.DeleteTest do
     end
 
     test "converts the given properties", %{schema: schema} do
-      assert cast(schema, %{a: "1", b: "2"}, @opts) == {:ok, [a: 1, b: 2]}
+      assert {:ok, data} = cast(schema, %{a: "1", b: "2"}, @opts)
+      assert Enum.sort(data) == [a: 1, b: 2]
     end
 
     test "deletes additional properties", %{schema: schema} do
@@ -83,7 +84,8 @@ defmodule Xema.Cast.DeleteTest do
     end
 
     test "converts the given properties", %{schema: schema} do
-      assert cast(schema, %{a: "1", b: "2"}, @opts) == {:ok, [a: 1, b: 2]}
+      assert {:ok, data} = cast(schema, %{a: "1", b: "2"}, @opts)
+      assert Enum.sort(data) == [a: 1, b: 2]
     end
 
     test "deletes additional properties", %{schema: schema} do

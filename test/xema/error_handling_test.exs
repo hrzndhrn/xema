@@ -67,7 +67,7 @@ defmodule Xema.ErrorHandlingTest do
       }
 
       assert %SchemaError{} = error
-      assert error.reason == reason
-      assert error.message == message
+      assert Map.fetch!(error, :reason) == reason
+      assert Map.fetch!(error, :message) == message
   end
 end
