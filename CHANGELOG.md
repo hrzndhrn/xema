@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.4 - 2024/07/04
+
++ Mark `Decimal` dep as optional again.
+
 ## 0.17.3 - 2024/07/03
 
 + Fix typo in doc for `Xema.from_json_schema/2`.

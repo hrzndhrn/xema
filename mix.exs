@@ -4,7 +4,7 @@ defmodule Xema.Mixfile do
   def project do
     [
       app: :xema,
-      version: "0.17.3",
+      version: "0.17.4",
       elixir: "~> 1.12",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -78,11 +78,11 @@ defmodule Xema.Mixfile do
   defp deps do
     [
       {:conv_case, "~> 0.2.2"},
-      {:decimal, "~> 1.0 or ~> 2.0"},
       # dev/test
       {:benchee, "~> 1.0", only: :dev, runtime: false},
       {:cowboy, "~> 2.12", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
+      {:decimal, "~> 1.0 or ~> 2.0", optional: true},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:elixir_uuid, "~> 1.2", only: [:dev, :test]},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
