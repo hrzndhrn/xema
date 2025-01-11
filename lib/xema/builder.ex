@@ -224,7 +224,7 @@ defmodule Xema.Builder do
   Creates a `schema` with the given name.
   """
   defmacro xema(name, do: {:filed, _context, _args} = schema) do
-    unless name == :__xema_default_schema__, do: warn(@xema_deprecated_message, __CALLER__)
+    if name != :__xema_default_schema__, do: warn(@xema_deprecated_message, __CALLER__)
     do_xema(name, schema)
   end
 
@@ -232,7 +232,7 @@ defmodule Xema.Builder do
              name,
              do: {:__block__, _context_1, [{:field, _context_2, _args} | _ast]} = schema
            ) do
-    unless name == :__xema_default_schema__, do: warn(@xema_deprecated_message, __CALLER__)
+    if name != :__xema_default_schema__, do: warn(@xema_deprecated_message, __CALLER__)
     do_xema(name, schema)
   end
 
