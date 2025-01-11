@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.5 - 2025/01/11
+
++ Fix warnings by conditionally compiling Decimal support.
+
 ## 0.17.4 - 2024/07/04
 
 + Mark `Decimal` dep as optional again.
