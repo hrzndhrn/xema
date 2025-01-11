@@ -67,7 +67,7 @@ defmodule Xema.RefTest do
 
     test "Ref.fetch!/3 returns nil for an invalid ref", %{schema: schema} do
       ref = Ref.new("#/foo")
-      assert_raise KeyError, fn -> Ref.fetch!(ref, schema, nil) == nil end
+      assert_raise KeyError, fn -> Ref.fetch!(ref, schema, nil) end
     end
   end
 
@@ -97,7 +97,7 @@ defmodule Xema.RefTest do
 
     test "Ref.fetch!/3 returns nil for an invalid ref", %{schema: schema} do
       ref = Ref.new("#/foo")
-      assert_raise KeyError, fn -> Ref.fetch!(ref, schema, nil) == nil end
+      assert_raise KeyError, fn -> Ref.fetch!(ref, schema, nil) end
     end
   end
 
