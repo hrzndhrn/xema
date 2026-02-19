@@ -2,6 +2,7 @@
 
 ## 0.17.6 - 2026/02/19
 
++ Require Elixir 1.15.
 + Fix warnings by conditionally compiling Decimal support.
 
 ## 0.17.5 - 2025/01/11
