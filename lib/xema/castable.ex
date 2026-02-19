@@ -116,14 +116,17 @@ defimpl Xema.Castable, for: DateTime do
   def cast(date_time, type, _module, _schema), do: {:error, %{to: type, value: date_time}}
 end
 
-defimpl Xema.Castable, for: Decimal do
-  use Xema.Castable.Helper
+if Code.ensure_loaded?(Decimal) do
+  defimpl Xema.Castable, for: Decimal do
+    use Xema.Castable.Helper
 
-  def cast(decimal, :struct, Decimal, _schema), do: {:ok, decimal}
+    def cast(decimal, :struct, Decimal, _schema), do: {:ok, decimal}
 
-  def cast(decimal, :struct, module, _schema), do: {:error, %{to: module(module), value: decimal}}
+    def cast(decimal, :struct, module, _schema),
+      do: {:error, %{to: module(module), value: decimal}}
 
-  def cast(decimal, type, _module, _schema), do: {:error, %{to: type, value: decimal}}
+    def cast(decimal, type, _module, _schema), do: {:error, %{to: type, value: decimal}}
+  end
 end
 
 defimpl Xema.Castable, for: Float do

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.6 - 2026/02/19
+
++ Fix warnings by conditionally compiling Decimal support.
+
 ## 0.17.5 - 2025/01/11
 
 + Fix warnings by conditionally compiling Decimal support.
