@@ -279,7 +279,7 @@ defmodule Xema.Builder do
         raise "Use `use Xema` to use the `xema/2` macro."
       end
 
-      if !multi && length(@xemas) > 0 do
+      if !multi && !Enum.empty?(@xemas) do
         raise "Use `use Xema, multi: true` to setup multiple schema in a module."
       end
 
