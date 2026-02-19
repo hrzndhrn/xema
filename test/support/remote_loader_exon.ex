@@ -28,6 +28,6 @@ defmodule Test.RemoteLoaderExon do
     {data, _} = Code.eval_string(str)
     {:ok, data}
   rescue
-    error -> {:error, %{error | file: URI.to_string(uri)}}
+    error -> {:error, Map.put(error, :file, URI.to_string(uri))}
   end
 end

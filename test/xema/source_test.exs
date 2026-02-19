@@ -183,13 +183,13 @@ defmodule Xema.SourceTest do
 
       assert {:map, rules} = source |> Xema.new() |> Xema.source()
 
-      assert Enum.sort(rules) == [
-               pattern_properties: %{~r/n.*/ => [minimum: 0]},
-               properties: %{
-                 num: :number,
-                 str: :string
-               }
-             ]
+      assert [
+               pattern_properties: pattern_properties,
+               properties: %{num: :number, str: :string}
+             ] = Enum.sort(rules)
+
+      assert pattern_properties |> Map.keys() |> hd() |> Regex.source() == "n.*"
+      assert Map.values(pattern_properties) == [[minimum: 0]]
     end
   end
 end

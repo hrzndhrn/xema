@@ -4,17 +4,17 @@ defmodule Test.FileLoader do
   @behaviour Xema.Loader
 
   @spec fetch(binary) :: {:ok, map} | {:error, any}
-  def fetch(uri),
-    do:
-      "test/fixtures/remote"
-      |> Path.join(uri.path)
-      |> File.read!()
-      |> eval(uri)
+  def fetch(uri) do
+    "test/fixtures/remote"
+    |> Path.join(uri.path)
+    |> File.read!()
+    |> eval(uri)
+  end
 
   defp eval(str, uri) do
     {data, _} = Code.eval_string(str)
     {:ok, data}
   rescue
-    error -> {:error, %{error | file: URI.to_string(uri)}}
+    error -> {:error, Map.put(error, :file, URI.to_string(uri))}
   end
 end

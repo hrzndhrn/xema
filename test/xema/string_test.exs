@@ -90,9 +90,11 @@ defmodule Xema.StringTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{value: "a to a", pattern: ~r/^.+match.+$/}
+                 reason: %{value: "a to a", pattern: pattern}
                } = error
              } = validate(schema, "a to a")
+
+      assert Regex.source(pattern) == "^.+match.+$"
 
       assert Exception.message(error) ==
                ~s|Pattern ~r/^.+match.+$/ does not match value "a to a".|
@@ -112,9 +114,11 @@ defmodule Xema.StringTest do
       assert {
                :error,
                %ValidationError{
-                 reason: %{value: "a to a", pattern: ~r/^.+match.+$/}
+                 reason: %{value: "a to a", pattern: pattern}
                } = error
              } = validate(schema, "a to a")
+
+      assert Regex.source(pattern) == "^.+match.+$"
 
       assert Exception.message(error) ==
                ~s|Pattern ~r/^.+match.+$/ does not match value "a to a".|

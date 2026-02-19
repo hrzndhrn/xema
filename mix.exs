@@ -5,7 +5,7 @@ defmodule Xema.Mixfile do
     [
       app: :xema,
       version: "0.17.6",
-      elixir: "~> 1.13",
+      elixir: "~> 1.15",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -16,8 +16,7 @@ defmodule Xema.Mixfile do
       docs: docs(),
       aliases: aliases(),
       dialyzer: dialyzer(),
-      test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: preferred_cli_env()
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -29,15 +28,17 @@ defmodule Xema.Mixfile do
     [extra_applications: [:logger], env: [loader: Xema.NoLoader]]
   end
 
-  def preferred_cli_env do
+  def cli do
     [
-      carp: :test,
-      coveralls: :test,
-      "coveralls.detail": :test,
-      "coveralls.post": :test,
-      "coveralls.github": :test,
-      "coveralls.html": :test,
-      "gen.test_suite": :test
+      preferred_envs: [
+        carp: :test,
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.github": :test,
+        "coveralls.html": :test,
+        "gen.test_suite": :test
+      ]
     ]
   end
 
