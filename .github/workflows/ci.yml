@@ -1,4 +1,4 @@
-# Created with GitHubActions version 0.3.17
+# Created with GitHubActions version 0.4.0
 name: CI
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -13,7 +13,7 @@ jobs:
       matrix:
         include:
           - elixir: '1.19.5'
-            otp: '28.3'
+            otp: '28.4'
             coverage: true
             lint: true
           - elixir: '1.19.5'

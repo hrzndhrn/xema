@@ -385,7 +385,7 @@ defmodule Xema.Schema do
   # Compiling with the :export option produces a portable representation.
   # We strip :export from opts after compilation so the "E" modifier doesn't
   # leak into inspect output, error messages, or Xema.source/0.
-  if :erlang.system_info(:otp_release) >= ~c"28" do
+  if String.to_integer(System.otp_release()) >= 28 do
     @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
     defp pattern(string) when is_binary(string), do: compile_exportable!(string, [])
 
