@@ -169,7 +169,9 @@ defmodule Xema.SourceTest do
     test "for regex patterin" do
       source = [pattern: ~r/foo/]
 
-      assert source |> Xema.new() |> Xema.source() == source
+      [pattern: result] = source |> Xema.new() |> Xema.source()
+      assert result.source == "foo"
+      assert result.opts in [[], ""]
     end
 
     test "for pattern_properties" do
