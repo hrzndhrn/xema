@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
++ Fix regex pattern serialization on OTP 28+. Compiled patterns now use the
+  `:export` option to produce portable representations that survive
+  `:erlang.term_to_binary`/`:erlang.binary_to_term` across VM restarts. This
+  fixes `ArgumentError` ("neither an iodata term nor a compiled regular
+  expression") when schemas with `pattern` or `pattern_properties` are cached
+  in ETS or on disk.
+
 ## 0.17.6 - 2026/02/19
 
 + Require Elixir 1.15.

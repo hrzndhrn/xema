@@ -380,10 +380,40 @@ defmodule Xema.Schema do
 
   defp mark_nil(value), do: value
 
-  @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
-  defp pattern(string) when is_binary(string), do: Regex.compile!(string)
+  # On OTP 28+, compiled regex patterns use node-local references that cannot
+  # survive serialization via :erlang.term_to_binary/:erlang.binary_to_term.
+  # Compiling with the :export option produces a portable representation.
+  # We strip :export from opts after compilation so the "E" modifier doesn't
+  # leak into inspect output, error messages, or Xema.source/0.
+  if :erlang.system_info(:otp_release) >= ~c"28" do
+    @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
+    defp pattern(string) when is_binary(string), do: compile_exportable!(string, [])
 
-  defp pattern(regex), do: regex
+    defp pattern(%Regex{source: source, opts: opts} = regex) do
+      if :export in opts do
+        # Already exported — just strip :export from display opts
+        %{regex | opts: Enum.reject(opts, &(&1 == :export))}
+      else
+        compile_exportable!(source, opts)
+      end
+    end
+
+    defp pattern(regex), do: regex
+
+    defp compile_pattern!(string), do: compile_exportable!(string, [])
+
+    defp compile_exportable!(source, opts) do
+      regex = Regex.compile!(source, [:export | opts])
+      %{regex | opts: Enum.reject(regex.opts, &(&1 == :export))}
+    end
+  else
+    @spec pattern(Regex.t() | String.t() | atom) :: Regex.t()
+    defp pattern(string) when is_binary(string), do: Regex.compile!(string)
+
+    defp pattern(regex), do: regex
+
+    defp compile_pattern!(string), do: Regex.compile!(string)
+  end
 
   @spec pattern_properties(map | nil) :: map | nil
   defp pattern_properties(nil), do: nil
@@ -392,7 +422,10 @@ defmodule Xema.Schema do
     do: for(key_value <- map, into: %{}, do: pattern_property(key_value))
 
   defp pattern_property({pattern, property}) when is_binary(pattern),
-    do: {Regex.compile!(pattern), property}
+    do: {compile_pattern!(pattern), property}
+
+  defp pattern_property({%Regex{} = regex, property}),
+    do: {pattern(regex), property}
 
   defp pattern_property({pattern, property}) when is_atom(pattern),
     do: pattern_property({Atom.to_string(pattern), property})
