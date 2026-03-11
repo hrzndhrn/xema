@@ -4,7 +4,7 @@ defmodule Xema.Mixfile do
   def project do
     [
       app: :xema,
-      version: "0.17.6",
+      version: "0.17.7",
       elixir: "~> 1.15",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
