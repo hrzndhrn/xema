@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.8 - 2026/03/11
+
++ Update decimal package dependency.
+ 
 ## 0.17.7 - 2026/03/11
 
 + Fix regex pattern serialization on OTP 28+. Compiled patterns now use the
