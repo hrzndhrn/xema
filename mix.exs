@@ -83,7 +83,7 @@ defmodule Xema.Mixfile do
       {:benchee, "~> 1.0", only: :dev, runtime: false},
       {:cowboy, "~> 2.12", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:decimal, "~> 1.0 or ~> 2.0", optional: true},
+      {:decimal, "~> 1.0 or ~> 2.0 or ~> 3.0", optional: true},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:elixir_uuid, "~> 1.2", only: [:dev, :test]},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
