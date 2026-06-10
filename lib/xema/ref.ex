@@ -6,8 +6,6 @@ defmodule Xema.Ref do
 
   alias Xema.{Ref, Schema, Utils, Validator}
 
-  require Logger
-
   @typedoc """
   A reference contains a `pointer` and an optional `uri`.
   """

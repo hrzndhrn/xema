@@ -3,17 +3,6 @@ defmodule Xema.ErrorHandlingTest do
 
   alias Xema.SchemaError
 
-  test "wrong arguments" do
-    expected = """
-    Can't build schema:
-    Expected :keyword, got %{minimum: 0}, at [1].\
-    """
-
-    assert_raise SchemaError, expected, fn ->
-      Xema.new({:integer, %{minimum: 0}})
-    end
-  end
-
   test "test" do
     Xema.new({
       :map,

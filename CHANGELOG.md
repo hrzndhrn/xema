@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.9 - 2026/06/10
+
++ Fix warning.
+
 ## 0.17.8 - 2026/03/11
 
 + Update decimal package dependency.
