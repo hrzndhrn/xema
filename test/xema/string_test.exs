@@ -111,14 +111,11 @@ defmodule Xema.StringTest do
 
   describe "string schema length with malformed utf8:" do
     setup do
-      %{schema: Xema.new({:string, max_length: 4})}
+      %{schema: Xema.new({:string, min_length: 2, max_length: 2})}
     end
 
-    # these all agree with String.length/1, which is what the keywords used before
-
-    test "validate/2 counts a byte that is not valid utf8 as one", %{schema: schema} do
-      assert validate(schema, <<"ab", 0xFF>>) == :ok
-    end
+    # exact bounds, so :ok pins the count at 2 rather than just under a maximum.
+    # all of these agree with String.length/1, which is what the keywords used before
 
     test "validate/2 counts each byte of a truncated sequence", %{schema: schema} do
       assert validate(schema, <<0xE2, 0x82>>) == :ok
@@ -132,9 +129,14 @@ defmodule Xema.StringTest do
       assert validate(schema, <<0xC0, 0xAF>>) == :ok
     end
 
-    test "validate/2 with malformed bytes over the maximum", %{schema: schema} do
-      assert {:error, %ValidationError{reason: %{max_length: 4}}} =
-               validate(schema, <<0xFF, 0xFF, 0xFF, 0xFF, 0xFF>>)
+    test "validate/2 counts a two byte scalar as one", %{schema: schema} do
+      assert {:error, %ValidationError{reason: %{min_length: 2}}} =
+               validate(schema, <<0xC3, 0xA9>>)
+    end
+
+    test "validate/2 counts a bad byte alongside valid ones", %{schema: schema} do
+      assert {:error, %ValidationError{reason: %{max_length: 2}}} =
+               validate(schema, <<"ab", 0xFF>>)
     end
   end
 
