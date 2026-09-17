@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
++ Count `min_length` and `max_length` in code points rather than graphemes.
+
 ## 0.17.9 - 2026/06/10
 
 + Fix warning.

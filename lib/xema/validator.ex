@@ -565,7 +565,7 @@ defmodule Xema.Validator do
   defp min_length(%{min_length: nil}, _), do: :ok
 
   defp min_length(%{min_length: min}, value) do
-    len = String.length(value)
+    len = codepoint_length(value)
 
     case len >= min do
       true -> :ok
@@ -577,13 +577,27 @@ defmodule Xema.Validator do
   defp max_length(%{max_length: nil}, _), do: :ok
 
   defp max_length(%{max_length: max}, value) do
-    len = String.length(value)
+    len = codepoint_length(value)
 
     case len <= max do
       true -> :ok
       false -> {:error, %{value: value, max_length: max}}
     end
   end
+
+  # draft-07 defines string length as the number of characters per RFC 7159,
+  # which are code points, where String.length/1 counts graphemes
+  @spec codepoint_length(String.t()) :: non_neg_integer
+  defp codepoint_length(string), do: codepoint_length(string, 0)
+
+  @spec codepoint_length(String.t(), non_neg_integer) :: non_neg_integer
+  defp codepoint_length(<<>>, len), do: len
+
+  defp codepoint_length(<<_codepoint::utf8, rest::binary>>, len),
+    do: codepoint_length(rest, len + 1)
+
+  # a byte that is not valid utf8 counts as one, the same as String.codepoints/1
+  defp codepoint_length(<<_byte, rest::binary>>, len), do: codepoint_length(rest, len + 1)
 
   @spec pattern(Schema.t(), String.t()) :: result
   defp pattern(%{pattern: nil}, _string), do: :ok
