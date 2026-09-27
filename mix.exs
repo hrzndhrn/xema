@@ -81,15 +81,18 @@ defmodule Xema.Mixfile do
       {:conv_case, "~> 0.2.2"},
       # dev/test
       {:benchee, "~> 1.0", only: :dev, runtime: false},
-      {:cowboy, "~> 2.12", only: :test},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:decimal, "~> 1.0 or ~> 2.0 or ~> 3.0", optional: true},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:elixir_uuid, "~> 1.2", only: [:dev, :test]},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
+      {:httpoison, "~> 3.0", only: :test},
       {:jason, "~> 1.1", only: [:dev, :test]},
-      {:httpoison, "~> 3.0", only: :test}
+      # cowboy
+      {:cowboy, "~> 2.12.0", only: [:dev, :test]},
+      {:cowlib, "~> 2.13.0", only: [:dev, :test]},
+      {:plug_cowboy, "~> 2.8", only: [:dev, :test]}
     ]
   end
 
