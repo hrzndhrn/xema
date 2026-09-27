@@ -89,7 +89,7 @@ defmodule Xema.Mixfile do
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
       {:httpoison, "~> 3.0", only: :test},
-      {:jason, "~> 1.1", only: [:dev, :test]},
+      {:jason, "~> 1.1", only: [:dev, :test]}
     ]
   end
 
