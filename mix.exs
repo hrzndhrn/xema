@@ -82,6 +82,7 @@ defmodule Xema.Mixfile do
       # dev/test
       {:benchee, "~> 1.0", only: :dev, runtime: false},
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
+      {:cowboy, "~> 2.0", only: [:dev, :test]},
       {:decimal, "~> 1.0 or ~> 2.0 or ~> 3.0", optional: true},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:elixir_uuid, "~> 1.2", only: [:dev, :test]},
@@ -89,9 +90,6 @@ defmodule Xema.Mixfile do
       {:excoveralls, "~> 0.10", only: :test},
       {:httpoison, "~> 3.0", only: :test},
       {:jason, "~> 1.1", only: [:dev, :test]},
-      # cowboy
-      {:cowboy, "~> 2.16.0", only: [:dev, :test]},
-      {:cowlib, "~> 2.17.0", only: [:dev, :test]}
     ]
   end
 
