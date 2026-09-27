@@ -91,8 +91,7 @@ defmodule Xema.Mixfile do
       {:jason, "~> 1.1", only: [:dev, :test]},
       # cowboy
       {:cowboy, "~> 2.12.0", only: [:dev, :test]},
-      {:cowlib, "~> 2.13.0", only: [:dev, :test]},
-      {:plug_cowboy, "~> 2.8", only: [:dev, :test]}
+      {:cowlib, "~> 2.13.0", only: [:dev, :test]}
     ]
   end
 
