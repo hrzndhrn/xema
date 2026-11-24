@@ -910,11 +910,14 @@ defmodule Xema.RefTest do
              %{
                percent: {:ref, "#/percent%25field"},
                slash: {:ref, "#/slash~1field"},
-               tilda: {:ref, "#/tilda~0field"}
+               tilda: {:ref, "#/tilda~0field"},
+               tilda_one: {:ref, "#/tilda~01field"}
              }},
             "percent%field": :integer,
             "slash/field": :integer,
-            "tilda~field": :integer
+            "tilda~field": :integer,
+            "tilda~1field": :integer,
+            "tilda/field": :string
           ])
       }
     end
@@ -922,6 +925,16 @@ defmodule Xema.RefTest do
     test "slash invalid", %{schema: schema} do
       data = %{slash: "aoeu"}
       refute valid?(schema, data)
+    end
+
+    test "tilda_one invalid", %{schema: schema} do
+      data = %{tilda_one: "aoeu"}
+      refute valid?(schema, data)
+    end
+
+    test "tilda_one valid", %{schema: schema} do
+      data = %{tilda_one: 123}
+      assert valid?(schema, data)
     end
 
     test "tilda invalid", %{schema: schema} do

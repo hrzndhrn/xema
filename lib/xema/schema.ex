@@ -439,8 +439,8 @@ defmodule Xema.Schema do
   @spec decode(String.t()) :: String.t()
   defp decode(str) do
     str
-    |> String.replace("~0", "~")
-    |> String.replace("~1", "/")
     |> URI.decode()
+    |> String.replace("~1", "/")
+    |> String.replace("~0", "~")
   end
 end
